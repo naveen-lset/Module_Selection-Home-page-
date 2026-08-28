@@ -179,11 +179,15 @@ styling, not a full red background", and "do not make every Mortality card red"
 being recognisable, and a grid where four cards are red trains everyone to stop
 seeing red.
 
-So an attention card keeps its module's own fill and gets two small things: a
-warm hairline ring, and a warning glyph in its label row. Enough to pick out of
-a grid at arm's length; not enough to shout. Mortality's fill is its own coral
-throughout, and only its *review queue* — the one card actually waiting on
-someone — takes the accent.
+So an attention card keeps its module's own fill and says so with a warning
+glyph in its label row and the warm accent on its note. Mortality's fill is its
+own coral throughout, and only its *review queue* — the one card actually
+waiting on someone — takes the accent.
+
+It carried a hairline ring as well, and that is gone. On a grid where only one
+or two cards are ever in this state, a ring reads as a card that has been
+*selected* rather than one that needs attention — and the glyph was already
+doing the work.
 
 ### The default home page is a balance
 
@@ -194,10 +198,15 @@ answer before anyone has typed anything —
 
 | | |
 |---|---|
-| Navigate | Medical · Pharmacy · Lab · Mortality · Eggs · Administer · Users · Security · Reports · Parivesh |
-| Understand | Hospital Live Status · Species Statistics |
-| Attention | Pending Approvals · Follow Up Task Queue |
-| Monitor | Today's Diet Preparation |
+| Navigate | Medical · Hospital · Pharmacy · Diet & Kitchen · Lab · Mortality · Eggs · Administer · Users · Security · Reports · Parivesh |
+| Understand | Species Statistics |
+| Attention | Pending Approvals |
+| Monitor | Follow Up Task Queue |
+
+Hospital and Diet & Kitchen are their **photographs** rather than their figures
+— the artboard's own two photographic module cards, back on the page they were
+drawn for. Their statistics, Live Status and Today's Preparation, are one click
+away in the gallery.
 
 `priority: 'primary'` in the catalogue means **exactly** "one of these fifteen".
 There is no third state and no exception list, so the rule can be checked rather
