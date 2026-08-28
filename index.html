@@ -3062,16 +3062,29 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
          keyboard, all for nothing. A <button> with a click handler has to
          re-implement each of those and never does.
 
-         Same tab, so no target="_blank": the Command Centre is the product
-         this dashboard belongs to rather than a reference to read alongside
-         it, and the home page restores itself from localStorage on the way
-         back. (With a _blank there would need to be a rel="noopener" here.) -->
-    <a class="hero" href="https://antz-command-centre-v5.vercel.app/">
+         A NEW TAB, so the dashboard is still there to come back to.
+
+         `rel="noopener"` comes with it. Without it the opened page gets a live
+         `window.opener` handle back to this one and can redirect it — current
+         browsers imply noopener for `target="_blank"`, but the ones that do not
+         are exactly the ones that matter here, so it is written down.
+
+         `noreferrer` is deliberately NOT added: it would strip the Referer, and
+         the Command Centre is this dashboard's own sibling rather than a third
+         party we are hiding from.
+
+         The new tab is also announced. A link that behaves differently from
+         every other link should say so, and the only readers who cannot see it
+         happen are the ones being told here — the span is visually hidden, so
+         the banner is unchanged to the eye. -->
+    <a class="hero" href="https://antz-command-centre-v5.vercel.app/"
+       target="_blank" rel="noopener">
       <span class="hero__media" aria-hidden="true"></span>
       <span class="hero__scrim" aria-hidden="true"></span>
       <span class="hero__row">
         <span class="hero__mark" aria-hidden="true"><img src="assets/icon/hero-logo.svg" alt=""></span>
         <span class="hero__title">Antz Command Centre</span>
+        <span class="sr-only"> (opens in a new tab)</span>
       </span>
       <span class="hero__dots" aria-hidden="true"><img src="assets/icon/dots.svg" alt=""></span>
     </a>
