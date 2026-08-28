@@ -279,10 +279,26 @@ card with Medical's meant two navigations and a memory test.
 settled on, and for the same reason. Every module is listed down the left,
 grouped under its category, **always**. Choosing one swaps the pane beside it
 rather than navigating, so moving between modules costs nothing and no module is
-ever more than a scroll from being seen. Below 1024px there is not room for both
-panes, so the rail *is* the sheet and the widgets slide over it — which is
-exactly what iOS does at that width. Same two panes, same code, one
+ever more than a scroll from being seen. Below **768px** — a phone — there is
+no room for two columns, so the rail *is* the sheet and the widgets slide over
+it, which is exactly what iOS does at that width. Same two panes, same code, one
 `grid-template-areas` swap.
+
+**Two independent things change across the breakpoints, and for a while this was
+written as though they were one.** The *layout* splits into two panes at 768px;
+the *presentation* changes at 1024px, where the bottom sheet lifts off the edge
+and becomes a centred panel. Both lived in a single `min-width: 1024px` block,
+which meant every iPad in portrait — 768, 810, 820 and 834pt — was handed the
+phone's stacked arrangement despite having ample room for the rail. Only the
+12.9" is 1024pt in portrait, so it was the one tablet the old breakpoint got
+right. They are two decisions and they are now two blocks.
+
+The script needs to know which arrangement is live, and it asks the cascade
+rather than keeping its own copy of the number: the stylesheet sets
+`--picker-split` and `isSplit()` reads it, the same arrangement as
+`currentColumns()` and for the same reason — there used to be a hard-coded
+`innerWidth >= 1024` in the component that would have gone on believing every
+portrait iPad was stacked after the CSS moved.
 
 A module's widgets are **one shelf of previews with a name under each** — no
 group headings, no descriptions, no size counts, and no card count beside the
@@ -553,6 +569,7 @@ in edit mode.
 | Packer | 2 / 4 / 5 / 8 / 12 columns · **0 cell overlaps, 0 spans exceeding the grid** |
 | Drag | mouse, touch long-press and keyboard · live reflow, correct commit, clean teardown |
 | Gallery | 17 modules in the rail, always · module → widget → size → add, end to end |
+| Rail anchored | **768 / 834 / 1024 / 1440px** · both panes live, back button hidden, rail still visible after choosing a module · add flow end-to-end at 768 and 834 |
 | Palette | **16 gradients, all from the Figma file** · 0 invented |
 | Header planting | 1440 / 834 / 500px · masked fade, no hard edge, no gradient block · **0 horizontal scroll** |
 | Planting vs readability | greeting measured before/after · mean **2.65:1 → 2.65:1** and 10.16 → 10.15; worst pixel 2.62 → 2.48 and 10.04 → 8.91 |

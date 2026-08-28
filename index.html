@@ -2341,13 +2341,23 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 /* ══════════════════════════════════════════════════════════════════════════
    THE WIDGET GALLERY
    ──────────────────────────────────────────────────────────────────────────
-   One markup tree, two shapes, and the difference between them is a single
-   `grid-template-areas` swap:
+   One markup tree, and TWO INDEPENDENT THINGS change across it — which is the
+   mistake this file made for a while, by writing them as one 1024px block:
 
-     ≥1024   a panel with the module rail down the left and the selected
-             module's widgets on the right. Both panes visible at all times.
-     <1024   a sheet from the bottom holding the SAME two panes stacked, one
-             on screen at a time: the rail, then the widgets sliding over it.
+     the LAYOUT, at 768px
+       ≥768   the module rail is anchored to the left and the selected
+              module's widgets sit beside it. Both panes on screen, always.
+       <768   the same two panes stacked, one at a time: the rail, then the
+              widgets sliding over it. A phone has no room for two columns.
+
+     the PRESENTATION, at 1024px
+       ≥1024  the sheet lifts off the bottom edge and becomes a centred panel.
+       <1024  a sheet from the bottom of the screen.
+
+   Tying the layout to 1024 put every iPad in portrait — 768, 810, 820, 834pt —
+   into the phone's stacked arrangement, when all of them have room for the
+   rail. Only the 12.9" is 1024 in portrait, so it was the one tablet the old
+   breakpoint got right.
 
    The rail is the point. Every module is in it, always, grouped under its
    category, and clicking one swaps the pane beside it rather than navigating.
@@ -2359,6 +2369,12 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
    ModulePreview.js). It is the only way "the preview looks like what you get"
    survives contact with a changing design.
    ══════════════════════════════════════════════════════════════════════════ */
+
+/* Below the split breakpoint the two panes are stacked and only one is on
+   screen at a time; from 768px up they sit side by side. The picker's script
+   needs to know which, so the stylesheet states it here and the script reads
+   it — see the note on the media query at the foot of this file. */
+:root { --picker-split: 0; }
 
 /* `hidden` sets `display:none` at the UA level, which any class selector that
    sets `display` beats. Both of these do. Without this the sheet is on the page
@@ -2595,8 +2611,16 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 .mod-row__chev { flex: none; width: 16px; height: 16px; color: var(--ink-4); }
 
 /* ── the widget pane ──────────────────────────────────────────────────────*/
+/* The gallery pane takes focus when the sheet opens, so that Escape reaches
+   the dialog and the arrow keys scroll the right thing. It is a scroll
+   container, not a control, so it does not draw a focus ring — the global
+   :focus-visible rule was painting a cyan rectangle around the whole gallery
+   on every open. Everything a keyboard actually lands on inside here — the
+   search field, the rail rows, the widget tiles — keeps its own. */
+.sheet__body:focus, .sheet__body:focus-visible { outline: none; }
+
 .sheet__body {
-  grid-area: side;                 /* stacked over the rail below 1024 */
+  grid-area: side;                 /* stacked over the rail below the split */
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
@@ -2842,16 +2866,59 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 .btn-primary:hover { background: var(--petrol-800); }
 .btn-primary:active { transform: scale(.97); }
 
-/* ══ tablet ══════════════════════════════════════════════════════════════ */
+/* ══ SPLIT PANES · 768px AND UP ══════════════════════════════════════════
+   The rail is anchored to the left and the gallery sits beside it. Both are
+   on screen at once and neither ever hides the other, which is the whole
+   reason this screen was rebuilt.
+
+   768, NOT 1024. This used to start at 1024 and it put every iPad in portrait
+   into the stacked arrangement — the rail filling the sheet, then sliding away
+   to reveal the widgets. A 768, 810, 820 or 834pt portrait tablet has ample
+   room for two columns; it was being given a phone's layout because the
+   breakpoint was set by the OTHER thing that changes at 1024 (the sheet
+   becoming a floating panel), and the two were written as one block. They are
+   two separate decisions and they are now two separate blocks.
+
+   Only the 12.9" iPad is 1024pt in portrait, so at the old breakpoint it was
+   the single tablet that got this right. */
 @media (min-width: 768px) {
-  .sheet { height: 86dvh; }
-  .widget__meta { max-width: 260px; }
+  /* The flag the picker's JS reads to know which arrangement is live. Same
+     idea as --grid-cols: the stylesheet decides, and the script asks the
+     cascade rather than keeping its own copy of the breakpoint. */
+  :root { --picker-split: 1; }
+
+  .sheet {
+    height: 86dvh;
+    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-areas:
+      'head    head'
+      'side    body';
+  }
+
+  .sheet__head { border-bottom: 1px solid var(--line); }
+
+  .sheet__side {
+    padding: var(--s4) var(--s4) var(--s4) var(--pad-page);
+    border-right: 1px solid var(--line);
+  }
+
+  /* both panes are live, so neither of the stacking rules applies */
+  .sheet__body { grid-area: body; display: block; padding: 0 var(--s5) var(--s8); }
+  .sheet:not(.is-detail) .sheet__body { display: block; }
+  .sheet.is-detail .sheet__side { display: flex; }
+  .detail-back { display: none; }
+  .detail-head { padding-top: var(--s5); }
+
+  /* the bar starts at the gallery's left edge, so the rail stays usable while
+     it is up — you can keep browsing modules with a widget already chosen */
+  .sheet__foot { left: 240px; }
+  .widget__meta { max-width: 250px; }
 }
 
-/* ══ desktop · both panes at once ════════════════════════════════════════
-   The one place the layout genuinely changes. Above 1024px the rail and the
-   widgets each get their own column and neither ever hides the other — which
-   is the whole reason this screen was rebuilt. */
+/* ══ DESKTOP · the sheet becomes a centred panel · 1024px and up ═════════
+   A presentation change, not a layout one: the panes were already side by side
+   at 768. Above 1024 there is room to browse without covering the page, so the
+   bottom sheet lifts off the edge and becomes a floating card. */
 @media (min-width: 1024px) {
   .sheet {
     top: 50%;
@@ -2864,31 +2931,16 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
     translate: -50% -50%;
     transform: translateY(24px) scale(.985);
     grid-template-columns: 316px minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
-    grid-template-areas:
-      'head    head'
-      'side    body';
   }
   .sheet.is-open { transform: translateY(0) scale(1); }
   .sheet__handle { display: none; }
 
-  .sheet__head { padding: var(--s6) var(--s8) var(--s5); border-bottom: 1px solid var(--line); }
-
-  .sheet__side {
-    padding: var(--s5) var(--s5) var(--s5) var(--s8);
-    border-right: 1px solid var(--line);
-  }
+  .sheet__head { padding: var(--s6) var(--s8) var(--s5); }
+  .sheet__side { padding: var(--s5) var(--s5) var(--s5) var(--s8); }
   .sheet-search input { height: 44px; }
-
-  /* both panes are live, so neither of the stacking rules applies */
-  .sheet__body { grid-area: body; display: block; padding: 0 var(--s8) var(--s8); }
-  .sheet:not(.is-detail) .sheet__body { display: block; }
-  .sheet.is-detail .sheet__side { display: flex; }
-  .detail-back { display: none; }
+  .sheet__body { padding: 0 var(--s8) var(--s8); }
   .detail-head { padding-top: var(--s6); }
 
-  /* left edge of the gallery column, so the rail stays usable while the bar
-     is up — you can keep browsing modules with a widget already chosen */
   .sheet__foot { left: 316px; padding: var(--s4) var(--s8); border-radius: 0 0 24px 0; }
   .widget__meta { max-width: 280px; }
 }
@@ -6884,6 +6936,21 @@ function createModulePicker({ onAdd }) {
     body.append(row)
   }
 
+  /**
+   * Are the rail and the gallery side by side, or stacked one over the other?
+   *
+   * THE STYLESHEET DECIDES AND THIS ASKS. It is the same arrangement as
+   * `currentColumns()` in sizes.js, and for the same reason: there was a
+   * hard-coded `innerWidth >= 1024` here and a `@media (min-width: 1024px)`
+   * there, and when the CSS breakpoint moved to 768 this would have gone on
+   * believing every iPad in portrait was stacked. One definition, in the place
+   * that owns it.
+   */
+  function isSplit() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue('--picker-split').trim() === '1'
+  }
+
   /* Wider viewports afford larger previews; these keep a Full Width card
      readable beside a Small one rather than shrinking it to a smear. */
   function previewBounds() {
@@ -7037,10 +7104,11 @@ function createModulePicker({ onAdd }) {
     searchInput.value = ''
     searchWrap.classList.remove('has-value')
     activeId = MODULES[0].id
-    /* Desktop opens with the first module already showing, so the pane is never
-       empty. A phone opens on the rail, because the rail IS the gallery there
-       and landing inside one module would hide the other sixteen. */
-    detailOpen = window.innerWidth >= 1024
+    /* Where the panes are side by side, open with the first module already
+       showing so the gallery is never empty. Where they are stacked — a phone —
+       open on the rail, because there the rail IS the gallery and landing
+       inside one module would hide the other sixteen. */
+    detailOpen = isSplit()
     sheet.classList.toggle('is-detail', detailOpen)
     clearSelection()
     renderRail()
@@ -7088,7 +7156,10 @@ function createModulePicker({ onAdd }) {
      panes are side by side or stacked, so the detail flag is re-derived. */
   window.addEventListener('resize', () => {
     if (!open) return
-    if (window.innerWidth >= 1024) { detailOpen = true; sheet.classList.add('is-detail') }
+    /* Rotating an iPad into landscape crosses into the split arrangement, where
+       both panes are live whatever this flag says. Setting it keeps the state
+       honest for the rotation back. */
+    if (isSplit()) { detailOpen = true; sheet.classList.add('is-detail') }
     renderDetail()
   })
 
