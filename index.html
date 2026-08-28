@@ -422,7 +422,11 @@
   --grid-row:  164px;
   --pad-page:  32px;
   --pad-card:  16px;
-  --max-content: 1440px;
+  /* 960, THE ARTBOARD'S CONTENT WIDTH — so the page frame is 960 + 2×32 =
+     1024px, and the product renders at its native size on any monitor.
+     It was 1440, which let the page fill a desktop and stretch a design that
+     was drawn for a tablet. */
+  --max-content: 960px;
 
   /* ── 10 · UI chrome ────────────────────────────────────────────────────
      Edit mode and the Add-to-Home sheet are product surfaces the artboard does
@@ -509,8 +513,19 @@
   }
 }
 
-/* ── Tablet landscape · 900–1199px · 5 columns · THE FIGMA REFERENCE ─────*/
-@media (min-width: 900px) and (max-width: 1199px) {
+/* ── 900px and up · 5 columns · THE FIGMA REFERENCE, AND THE LAST BAND ───
+   There used to be an 8-column band at 1200 and a 12-column one at 1600. They
+   are gone, because the page is now capped at 1024px on every screen and a
+   column count is only meaningful against the width it has to divide.
+
+   THIS IS THE TRAP THAT MAKES A CAPPED PAGE GO WRONG. `--grid-cols` is set by
+   media queries, which measure the VIEWPORT, while the grid divides the PAGE.
+   While those two were the same thing the arrangement was sound; the moment the
+   page stops growing they diverge, and a 1920px monitor would have asked for
+   twelve columns inside 960px of content — 57px cards, on a design whose
+   smallest card is 179. Above 1024 the page is always the artboard, so the
+   artboard's five columns are always the answer. */
+@media (min-width: 900px) {
   :root {
     --grid-cols: 5;
     --grid-gap:  16px;
@@ -519,25 +534,35 @@
   }
 }
 
-/* ── Desktop · 1200–1599px · 8 columns ───────────────────────────────────*/
-@media (min-width: 1200px) and (max-width: 1599px) {
-  :root {
-    --grid-cols: 8;
-    --grid-gap:  18px;
-    --grid-row:  172px;
-    --pad-page:  40px;
-    --pad-card:  20px;
-  }
-}
+/* ── 1024px and up · the page has stopped growing, so the type stops too ──
+   Every --fs- token is a clamp on `vw`, tuned so it lands exactly on Figma's
+   value at the 1024pt reference and keeps growing past it. That was right when
+   the page grew too. Now the page is pinned at 1024 and the type has to be
+   pinned with it, or a 1920px monitor renders artboard-width cards carrying
+   desktop-width text.
 
-/* ── Large desktop · ≥ 1600px · 12 columns ───────────────────────────────*/
-@media (min-width: 1600px) {
+   These ARE the values the clamps produce at 1024 — the Figma-referenced ones
+   land on round numbers because they were derived to, which is the clearest
+   possible confirmation that the two definitions agree. Nothing jumps at the
+   breakpoint; the curve simply stops. */
+@media (min-width: 1024px) {
   :root {
-    --grid-cols: 12;
-    --grid-gap:  20px;
-    --grid-row:  180px;
-    --pad-page:  48px;
-    --pad-card:  22px;
+    --fs-greet:     24px;      /* Figma 24 */
+    --fs-name:      32px;      /* Figma 32 */
+    --fs-hero:      36px;      /* Figma 36 */
+    --fs-search:    20px;      /* Figma 20 */
+    --fs-card:      20px;      /* Figma 20 */
+    --fs-card-lg:   24px;      /* Figma 24 · Diet */
+    --fs-stat:      44px;      /* Figma 44 */
+    --fs-body:      16px;      /* Figma 16 */
+    --fs-label:     14px;      /* Figma 14 */
+    --fs-micro:     12px;      /* Figma 12 */
+    /* no Figma reference — the artboard has no card that shows these */
+    --fs-stat-sm:   30.69px;
+    --fs-count:     31.49px;
+    --fs-count-sm:  26.62px;
+    --fs-metric:    25.2px;
+    --fs-metric-sm: 21.17px;
   }
 }
 
@@ -594,7 +619,13 @@ button { font: inherit; color: inherit; }
 /* ── 1 · iPad status bar ──────────────────────────────────────────────────
    26px / 12px padding, white ground. Present because the artboard has it; it
    is chrome, not product, so it is the one block using the system font stack. */
+/* Capped with the page. The bar is the iPad's chrome, and an iPad is 1024pt
+   wide — left full-bleed it became a white band running off both sides of a
+   centred app, which reads as a broken page rather than as a device. */
 .status-bar {
+  width: 100%;
+  max-width: calc(var(--max-content) + var(--pad-page) * 2);
+  margin-inline: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2925,7 +2956,9 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
     left: 50%;
     right: auto;
     bottom: auto;
-    width: min(1180px, calc(100vw - 64px));
+    /* the same 1024 the page is capped at, so the gallery never overhangs the
+       product it is adding to */
+    width: min(1024px, calc(100vw - 64px));
     height: min(860px, calc(100dvh - 64px));
     border-radius: 24px;
     translate: -50% -50%;
@@ -3256,7 +3289,15 @@ __def('js/lib/sizes.js', function (__x, __req) {
  * and a third of it on a desktop, and that is a judgement, not arithmetic.
  */
 
-/** Column counts, smallest band first. Must match the breakpoints in tokens.css. */
+/**
+ * Column counts, smallest band first. Must match the breakpoints in tokens.css.
+ *
+ * 8 AND 12 ARE CURRENTLY UNREACHABLE, and deliberately kept. The page is capped
+ * at the artboard's 1024px on every screen, so `--grid-cols` never rises above
+ * five — see the note on the 900px band in tokens.css. They stay because this
+ * table is the size contract, not a cache of it: delete the rows and lifting
+ * the cap later would resolve every span to 1×1 with nothing to say why.
+ */
 const COLUMN_STEPS = [2, 4, 5, 8, 12]
 
 /**

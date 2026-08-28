@@ -233,6 +233,43 @@ The **5-column row is measured, not chosen** — every small card in the artboar
 is 179.2px, and (960 − 4×16) ÷ 5 = 179.2 exactly. An earlier requirements note
 said six columns at this width; the Figma is the more specific instruction.
 
+The **8 and 12 columns are currently unreachable** — the page is capped at 1024
+(below), so `--grid-cols` never rises above five. They are kept because the
+table is the size contract rather than a cache of it: delete the rows and
+lifting the cap later resolves every span to 1×1 with nothing to say why.
+
+### The page is the artboard, on every screen
+
+`.page` is capped at **1024px** — 960 of content inside 32px margins, which is
+exactly the Figma frame. Above that it centres, and nothing reaches past it:
+not the grid, not the hero banner, not the header planting, not the status bar,
+not the Add Widget panel. Measured at 1024 / 1280 / 1440 / 1920 / 2560, the page
+is 1024px and the banner 960px at every one of them.
+
+It was capped at 1440 before, which let a desktop stretch a design drawn for a
+tablet.
+
+**Two things had to be pinned with it, and missing either breaks the page.**
+
+*The column count.* `--grid-cols` is set by media queries, which measure the
+**viewport**, while the grid divides the **page**. While those grew together the
+arrangement was sound; the moment the page stops growing they diverge, and a
+1920px monitor asks for twelve columns inside 960px of content — 57px cards, on
+a design whose smallest card is 179. The 8- and 12-column bands are therefore
+gone and five is terminal: above 1024 the page is always the artboard, so the
+artboard's five columns are always the answer.
+
+*The type.* Every `--fs-` token is a `clamp()` on `vw`, tuned to land exactly on
+Figma's value at 1024 and keep growing past it. Pinned page, unpinned type, and
+a 1920px monitor renders artboard-width cards carrying desktop-width text. Above
+1024 they are frozen at the values those clamps already produce there — and the
+Figma-referenced ones land on round numbers (24, 32, 36, 20, 44, 16, 14, 12)
+because they were derived to, which is as clear a confirmation as you get that
+the two definitions agree. Nothing jumps at the breakpoint; the curve stops.
+
+Below 1024 nothing changed: the page still fills the viewport, the columns still
+step 2 → 4 → 5, and the type is still fluid.
+
 ### Three things the exported values got wrong
 
 Each of these was found by measuring the render, not by reading the export.
@@ -564,9 +601,10 @@ in edit mode.
 | Layout vs artboard | 5 rows, 15 cards, same footprints in the same order; page height unchanged |
 | Catalogue | **17 modules, 71 cards** · 3–6 per module, no two modules alike |
 | Catalogue ↔ default page | `antz.checkDefaults()` · **0 disagreements**, both directions |
-| Every variant at every size | **71 cards, every declared size, at 1440 / 1280 / 1024 / 834 / 640 / 390px** · measured, not eyeballed: `scrollHeight` vs `clientHeight` on every block stack and `scrollWidth` vs `clientWidth` on every label · **0 overflowing, 0 clipped** |
+| Every variant at every size | **71 cards, every declared size, at 1920 / 1440 / 1024 / 900 / 834 / 768 / 640 / 500px** · measured, not eyeballed: `scrollHeight` vs `clientHeight` on every block stack and `scrollWidth` vs `clientWidth` on every label · **0 overflowing, 0 clipped** |
 | Responsive | 390 / 834 / 1024 / 1194 / 1440 / 1728px · **0 overlaps, 0 horizontal scroll** |
-| Packer | 2 / 4 / 5 / 8 / 12 columns · **0 cell overlaps, 0 spans exceeding the grid** |
+| Content cap | 1024 / 1280 / 1440 / 1920 / 2560px · page **1024px** and banner **960px** at every one · 5 columns, type frozen at the Figma values, **0 elements outside the page box** |
+| Packer | 2 / 4 / 5 columns · **0 cell overlaps, 0 spans exceeding the grid** |
 | Drag | mouse, touch long-press and keyboard · live reflow, correct commit, clean teardown |
 | Gallery | 17 modules in the rail, always · module → widget → size → add, end to end |
 | Rail anchored | **768 / 834 / 1024 / 1440px** · both panes live, back button hidden, rail still visible after choosing a module · add flow end-to-end at 768 and 834 |
