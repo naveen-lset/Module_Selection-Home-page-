@@ -1,0 +1,7 @@
+# Kept in the repository, not needed to serve the page.
+# References/ is 7MB of design screenshots; tools/ is the header-artwork
+# generator and its 1MB source PNG. The built asset it produces —
+# assets/img/foliage.png — IS deployed.
+References
+tools
+customizable_modules_responsive_prompt.md
