@@ -1283,6 +1283,15 @@ body.is-editing .section-head {
   cursor: pointer;
   background: transparent;
   -webkit-tap-highlight-color: transparent;
+  /* A card may be an anchor (see ModuleCard.js). The reset hands `button` its
+     font and colour; a link needs telling, and needs the underline taken off.
+     `touch-callout` is the one that matters on the target device: without it an
+     iPad long-press on a linked card raises Safari's link preview instead of
+     entering edit mode, which is the gesture this product is arranged by. */
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  -webkit-touch-callout: none;
   transition: box-shadow var(--t-base) var(--ease), transform var(--t-base) var(--ease-out);
 }
 
@@ -4990,6 +4999,12 @@ const MODULES = [
     gradient: '--g-species',
     name: 'Species Management',
     category: 'animal',
+    /* ON THE MODULE, NOT ON ONE CARD. A module's destination is a property of
+       the place, the same as its name and its fill — so every Species widget
+       is a door to the same list, and adding a sixth tomorrow does not mean
+       remembering to wire it up. Cards without an `href` stay buttons; see
+       ModuleCard.js. */
+    href: 'https://species-management-iota.vercel.app/species-management/ipad-2/list/',
     keywords: ['population', 'collection', 'animals', 'taxonomy', 'census', 'stock'],
     blurb: 'The living collection — species, population and holdings.',
   },
@@ -5237,9 +5252,35 @@ function renderCard(variant, opts = {}) {
   const data = variant.data || {}
   const blocks = data.blocks || []
 
-  const el = document.createElement(isStatic ? 'div' : 'button')
+  /**
+   * A CARD WITH A DESTINATION IS AN ANCHOR, and one without is a button.
+   *
+   * Same reasoning as the hero banner: a link that navigates should be a link,
+   * so cmd-click, middle-click, "Open in New Tab" and the destination in the
+   * status bar all work without anyone implementing them. Modules with no
+   * `href` have nowhere to go yet and stay buttons — a link to nothing is
+   * worse than a button that announces itself.
+   *
+   * A PREVIEW IS NEITHER. Inside the picker the card is `static` and renders
+   * as a div: it is a picture of a card, and a picture of a card must not be
+   * focusable, clickable, or a second copy of the same link in the tab order.
+   */
+  const isLink = !isStatic && !!mod?.href
+  const el = document.createElement(isStatic ? 'div' : isLink ? 'a' : 'button')
   el.className = 'card'
-  if (!isStatic) el.type = 'button'
+  if (isLink) {
+    el.href = mod.href
+    el.target = '_blank'
+    /* the opened page must not get a window.opener handle back to this one */
+    el.rel = 'noopener'
+    /* NATIVE LINK DRAGGING WOULD FIGHT THE GRID. Chrome starts its own
+       drag-and-drop on a mouse-drag from an anchor, complete with a ghost
+       image, which lands on top of the pointer-driven reordering this grid
+       uses. The card is dragged by the drag controller or not at all. */
+    el.draggable = false
+  } else if (!isStatic) {
+    el.type = 'button'
+  }
 
   el.dataset.treatment = variant.treatment
   el.dataset.kind = blocks.length ? 'panel' : 'door'
@@ -5260,7 +5301,8 @@ function renderCard(variant, opts = {}) {
   const iconSize = variant.iconSize || mod?.iconSize
   if (iconSize) el.style.setProperty('--icon-size', `${iconSize}px`)
 
-  el.setAttribute('aria-label', spokenName(mod, variant, data))
+  el.setAttribute('aria-label',
+    spokenName(mod, variant, data) + (isLink ? '. Opens in a new tab' : ''))
   if (isStatic) el.setAttribute('aria-hidden', 'true')
 
   el.innerHTML = mediaFor(variant) + bodyFor(variant, mod, data) + bandFor(variant, mod, blocks)

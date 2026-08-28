@@ -616,6 +616,7 @@ in edit mode.
 | Persistence | `localStorage` **v2** with versioning and repair · survives reload |
 | Edit entry | profile menu, plus 8 gesture cases: long-press (mouse + touch), right-click, <kbd>E</kbd>, and the four that must NOT trigger — short click, press-and-scroll, typing in search, resting state |
 | Banner link | `<a href target="_blank" rel="noopener">` to the Command Centre · clicked: this tab stays put, so the new tab is doing the work · name reads "Antz Command Centre (opens in a new tab)" · no underline, no link colour, box unchanged at 1920 / 1024 / 500 |
+| Card links | Species Management is an `<a target="_blank" rel="noopener">`, every other card still a `<button>`, every picker preview still an inert `<div>` (0 hrefs, 0 focusable) · click at rest does not navigate this tab; click in edit mode is prevented; keyboard reorder of the linked card still commits |
 | Errors | **none** — no console errors, page errors or failed requests |
 
 Two high-severity defects found by an adversarial review of the previous pass
