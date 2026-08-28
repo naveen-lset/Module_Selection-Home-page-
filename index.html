@@ -970,6 +970,12 @@ button { font: inherit; color: inherit; }
   text-align: left;
   cursor: pointer;
   isolation: isolate;
+  /* The reset hands `button` its font and colour; an anchor needs telling, and
+     needs the underline taken off. Without these the banner renders in the UA's
+     link blue at the UA's default size. */
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
 }
 .hero__media {
   position: absolute;
@@ -3048,8 +3054,19 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 
     <!-- ══ hero banner ═════════════════════════════════════════════════
          Figma "Egg Module": the leopard photograph under a flat 40% black,
-         the mark rotated −45°, the title at 36px, carousel dots at the foot. -->
-    <button type="button" class="hero" aria-label="Antz Command Centre">
+         the mark rotated −45°, the title at 36px, carousel dots at the foot.
+
+         AN ANCHOR, NOT A BUTTON. It navigates, so it is a link — which is not
+         pedantry: an <a href> gets cmd-click, middle-click, "Open in New Tab",
+         the destination in the status bar on hover, and Enter from the
+         keyboard, all for nothing. A <button> with a click handler has to
+         re-implement each of those and never does.
+
+         Same tab, so no target="_blank": the Command Centre is the product
+         this dashboard belongs to rather than a reference to read alongside
+         it, and the home page restores itself from localStorage on the way
+         back. (With a _blank there would need to be a rel="noopener" here.) -->
+    <a class="hero" href="https://antz-command-centre-v5.vercel.app/">
       <span class="hero__media" aria-hidden="true"></span>
       <span class="hero__scrim" aria-hidden="true"></span>
       <span class="hero__row">
@@ -3057,7 +3074,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
         <span class="hero__title">Antz Command Centre</span>
       </span>
       <span class="hero__dots" aria-hidden="true"><img src="assets/icon/dots.svg" alt=""></span>
-    </button>
+    </a>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
          The section head is the one element not on the artboard: the resting

@@ -615,6 +615,7 @@ in edit mode.
 | Search | names, keywords, purposes **and card content** — "low stock", "overdue", "population", "hatching", "all systems", "communication" |
 | Persistence | `localStorage` **v2** with versioning and repair · survives reload |
 | Edit entry | profile menu, plus 8 gesture cases: long-press (mouse + touch), right-click, <kbd>E</kbd>, and the four that must NOT trigger — short click, press-and-scroll, typing in search, resting state |
+| Banner link | `<a href>` to the Command Centre · clicked and followed, lands on the destination · no underline, no link colour, unchanged at 1920 / 1024 / 500 |
 | Errors | **none** — no console errors, page errors or failed requests |
 
 Two high-severity defects found by an adversarial review of the previous pass
