@@ -1313,17 +1313,12 @@ body.is-editing .section-head {
    worst news stops being recognisable, and a grid where four cards are red
    trains everyone to stop seeing red.
 
-   So an attention card keeps its module's own fill and gets two small things:
-   a warm hairline ring, and a warning glyph in the label row. That is enough to
-   pick it out of a grid at arm's length and not enough to shout. */
-.card[data-tone='attention'] {
-  box-shadow: inset 0 0 0 1.5px rgba(255, 213, 148, .5);
-}
-@media (hover: hover) {
-  .card[data-tone='attention']:hover {
-    box-shadow: inset 0 0 0 1.5px rgba(255, 213, 148, .72), var(--shadow-card);
-  }
-}
+   So an attention card keeps its module's own fill and says so with a warning
+   glyph in its label row and the warm accent on its note. It used to carry a
+   hairline ring as well; that is gone. On a grid where only one or two cards
+   are ever in this state the ring read as a card that had been selected rather
+   than one that needed attention, and the glyph was already doing the work.
+   The card now takes the same hover shadow as every other. */
 .card__flag {
   flex: none;
   display: grid;
@@ -1372,6 +1367,14 @@ body.is-editing .section-head {
 
 /* A panel is a label row of fixed height and then everything else. */
 .card__body--panel { justify-content: flex-start; gap: var(--s3); }
+
+/* A TALL CARD PUTS AIR UNDER ITS TITLE. Twelve pixels is right on a one-row
+   card, where the whole content box is 132px and every pixel is spoken for; on
+   a two-row card it leaves the heading sitting on top of its own content. This
+   is deliberately scoped to `data-h='2'` rather than raised everywhere — the
+   one-row budget is tight enough that four more pixels of gap was the
+   difference between a bar caption showing and being clipped. */
+.card[data-h='2'] .card__body--panel { gap: var(--s5); }
 
 /**
  * THE BLOCK STACK IS `space-between`, AND THAT IS THE LAYOUT ENGINE.
@@ -1860,14 +1863,21 @@ body.is-editing .section-head {
 .card[data-h='1'] .blk-delta { flex-direction: row; align-items: center; gap: var(--s2); }
 .card[data-h='1'] .blk-delta__caption { min-width: 0; }
 
-/* A LONE BLOCK SINKS TO THE BOTTOM.
+/* A LONE BLOCK SINKS TO THE BOTTOM — UNLESS IT IS A LIST.
    `space-between` leaves a single child at the top, which is right on a Small
-   card and wrong on a Large one — Hospital's Live Status at 4×2 had its four
+   card and wrong on a Large one: Hospital's Live Status at 4×2 had its four
    figures stuck under the label row with three hundred pixels of empty fill
-   beneath them. Dropping it to the foot restores the artboard's own rhythm:
-   the glyph at the top of the card, the content at the bottom, the space in
-   between doing the work. */
-.card__blocks > :only-child { margin-top: auto; }
+   beneath them. Dropping it to the foot restores the artboard's own rhythm —
+   the glyph at the top, the content at the bottom, the space between doing the
+   work.
+
+   A list is the exception, and Follow Up is why. Figures read as a block you
+   can hang off the bottom edge; a list of tasks reads as something that starts
+   under its heading, and pushed to the foot it leaves a hole where the eye
+   expects the first row. It only became a lone child when "View All" was
+   removed from it, which is exactly the sort of thing a general rule does not
+   see coming. */
+.card__blocks > :only-child:not(.blk-rows) { margin-top: auto; }
 
 /* THREE BLOCKS DO NOT FIT IN 92px.
    A queue card is count → breakdown → link, which is three things where there
@@ -3867,14 +3877,14 @@ const VARIANTS = [
     id: 'hospital.photo', moduleId: 'hospital', name: 'Photograph',
     description: 'The ward, with the module name over the photograph.',
     purpose: 'NAVIGATE', treatment: 'image', image: 'hospital.jpg',
-    supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'secondary',
+    supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'primary',
     data: {},
   },
   {
     id: 'hospital.status', moduleId: 'hospital', name: 'Live Status',
     description: 'Everyone in care right now, and how they are doing.',
     purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'primary',
+    priority: 'secondary',
     data: {
       blocks: [metrics(
         { value: '241', label: 'Animals in Care' },
@@ -4064,7 +4074,7 @@ const VARIANTS = [
     description: "Today's produce, with the module name over it.",
     purpose: 'NAVIGATE', treatment: 'image', image: 'diet-kitchen.jpg',
     wash: 'rgba(0, 0, 0, .2)',
-    supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'secondary',
+    supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'primary',
     /* Figma sets this one label at 24px inside a 20px band pad, where every
        other band label is 20px inside 16px */
     data: { bandSize: 'lg' },
@@ -4073,7 +4083,7 @@ const VARIANTS = [
     id: 'diet.progress', moduleId: 'diet', name: "Today's Preparation",
     description: 'How much of today’s feed is out of the kitchen.',
     purpose: 'MONITOR', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'primary',
+    priority: 'secondary',
     data: {
       title: "Today's Diet",
       blocks: [count('124 / 144', 'Diet Plans'), bar(0.86, '86% Completed')],
@@ -4135,7 +4145,6 @@ const VARIANTS = [
           { lead: 'Due Today', text: 'Enclosure Inspection' },
           { lead: 'Tomorrow',  text: 'Post-treatment Check' },
         ]),
-        link('View All'),
       ],
     },
   },
@@ -4637,14 +4646,21 @@ const { normalise } = __req('js/lib/pack.js');
 const KEY = 'antz.home.layout'
 
 /**
+ * VERSION 3 — the seeded page changed: Hospital and Diet & Kitchen are now
+ * their photographs rather than their figures.
+ *
  * VERSION 2 — the catalogue grew from 21 cards to 71 and every module gained
- * purpose-specific widgets. A version-1 layout is still READABLE (repair()
- * would drop the handful of retired ids and keep the rest) but it is not
- * WANTED: it would leave anyone who opened the old prototype looking at the old
- * home page, wondering where the new modules went. A schema bump is the honest
- * way to say "this document is from a different product".
+ * purpose-specific widgets.
+ *
+ * In both cases the older layout is still READABLE — repair() would drop the
+ * handful of retired ids and keep the rest — but it is not WANTED: it leaves
+ * anyone who has opened this before looking at the previous home page and
+ * wondering why nothing changed. A bump is the honest way to say "this document
+ * is from a different product". Anyone who has arranged their own page loses
+ * that arrangement, which is the cost of the bump and the reason not to make
+ * one lightly.
  */
-const VERSION = 2
+const VERSION = 3
 
 /**
  * The cards a fresh install starts with.
@@ -4667,11 +4683,12 @@ const DEFAULT_LAYOUT = [
      So this is one working morning, and it deliberately covers all four things
      a command centre has to answer before anyone has typed anything:
 
-       NAVIGATE   Medical · Pharmacy · Lab · Mortality · Eggs · Administer ·
-                  Users · Security · Reports · Parivesh
-       UNDERSTAND Hospital Live Status · Species Statistics
-       ATTENTION  Pending Approvals · Follow Up Overdue
-       MONITOR    Today's Diet Preparation · Follow Up Task Queue
+       NAVIGATE   Medical · Hospital · Pharmacy · Diet & Kitchen · Lab ·
+                  Mortality · Eggs · Administer · Users · Security ·
+                  Reports · Parivesh
+       UNDERSTAND Species Statistics
+       ATTENTION  Pending Approvals
+       MONITOR    Follow Up Task Queue
 
      `priority: 'primary'` in the catalogue means EXACTLY "one of these fifteen"
      — there is no third state and no exception list, so the rule can be checked
@@ -4683,8 +4700,8 @@ const DEFAULT_LAYOUT = [
      THE ARRANGEMENT IS THE ARTBOARD'S. Figma node 55476:32828 lays its cards
      across five columns, and these fall into the same five rows with no gaps:
 
-       row 0   Medical(1×1)   Hospital Live Status(2×1)  Species(2×2)
-       row 1   Pharmacy(1×1)  Today's Diet(2×1)             ↑ continues
+       row 0   Medical(1×1)   Hospital photograph(2×1)   Species(2×2)
+       row 1   Pharmacy(1×1)  Diet & Kitchen photo(2×1)     ↑ continues
        row 2   Follow Up Queue(2×2)  Lab(1×1)  Pending Approvals(2×1)
        row 3     ↑ continues         Mortality  Eggs  Administer
        row 4   Users  Security  Reports  Parivesh(2×1)
@@ -4694,10 +4711,10 @@ const DEFAULT_LAYOUT = [
      because a page of nothing but tinted rectangles is not the product that
      was drawn. */
   { variantId: 'medical.default',     size: 'small'  },   /* NAVIGATE  */
-  { variantId: 'hospital.status',     size: 'medium' },   /* UNDERSTAND */
+  { variantId: 'hospital.photo',      size: 'medium' },   /* NAVIGATE  */
   { variantId: 'species.stats',       size: 'large'  },   /* UNDERSTAND */
   { variantId: 'pharmacy.default',    size: 'small'  },   /* NAVIGATE  */
-  { variantId: 'diet.progress',       size: 'medium' },   /* MONITOR   */
+  { variantId: 'diet.photo',          size: 'medium' },   /* NAVIGATE  */
   { variantId: 'followup.queue',      size: 'tall'   },   /* MONITOR   */
   { variantId: 'lab.default',         size: 'small'  },   /* NAVIGATE  */
   { variantId: 'approvals.pending',   size: 'medium' },   /* ATTENTION */
