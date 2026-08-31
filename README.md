@@ -216,6 +216,50 @@ for a header that never wrapped, which put the actions 4px inside the hint's
 first line. Measured at 1440 / 1024 / 768 / 500: header 44px (94 when wrapped),
 zero overlap with the hint or the grid.
 
+### The jiggle, and why it is this small
+
+An earlier version of this file argued for **no jiggle at all**: the page has a
+header that changes to read *Edit Modules*, a Done button and a remove control
+on every card, so the state is already legible without vibrating at anybody.
+That was true and it missed the point. Those all say *the page is in edit mode*.
+The jiggle is the only one that says **this card is the thing you can move** —
+it is the affordance, not the announcement, and a card that does not move is a
+card you have to be told about.
+
+The amplitude is the whole argument. Nothing exceeds **0.75° of rotation or
+0.6px of travel** — measured across a live edit session, the worst values seen
+were 0.69° and 0.30px. That is under what the eye resolves as motion on a
+stationary object and over what it resolves as life. The naive version of this
+effect uses 3° and 5px, and at that size a command centre does not look
+editable, it looks broken.
+
+**Three keyframe sets, and a phase per card hashed from its uid.** Fourteen
+cards on one synchronised animation is not fourteen jiggling cards, it is one
+jiggling grid. The phase comes from the uid rather than the index — the index
+changes on every reorder, so the whole page would visibly re-synchronise on each
+drop — and rather than from `Math.random()`, because the grid reconciles instead
+of rebuilding, so a surviving card would keep an old value while a new
+neighbour got a fresh one. Hashed from the uid it is a property *of the card*:
+it survives reordering, resizing, re-rendering and a reload.
+
+The hash is FNV-1a, not the usual `h * 31 + c`. Uids differ in one or two
+characters and a weak hash leaves that difference in the low bits; the first
+attempt took its duration from bits 5–7 and produced **two distinct durations
+across fifteen cards**, so the grid still drifted into step. Durations matter
+more than delays here: two cards sharing a duration drift back into phase no
+matter how they were offset, two on different durations never do.
+
+**The battery objection is answered rather than dismissed.** Only `transform` is
+animated, so the whole thing lives on the compositor and never touches layout or
+paint; it runs only inside edit mode; `prefers-reduced-motion` stops it through
+the global block; and it is paused outright when the tab is hidden.
+
+**Jiggle and drag never share a transform.** The animation runs on the `.card`,
+the FLIP reflow runs on the `.slot`, and the dragged card is a clone in a fixed
+layer — three different elements, so nothing has to arbitrate. The source slot's
+animation is switched off for the duration of the gesture and comes back on the
+drop.
+
 ### Attention is not a red card
 
 The brief says it twice — Hospital's critical card must use "subtle attention
@@ -403,6 +447,51 @@ Search matches module names, keywords, purposes, widget names **and every figure
 and label the card shows** — "overdue", "population", "hatching", "low stock",
 "all systems" each find the right card and narrow the rail to the modules that
 have one.
+
+### The selection is a basket, not a cursor
+
+The gallery used to hold **one** chosen widget. Adding three cards therefore
+meant open → pick → **Add to Home** → reopen → pick → **Add** → reopen → pick →
+**Add**: the sheet threw away everything you had learned about it twice, and the
+module you were comparing against was two navigations behind you each time.
+
+It now holds a selection you build up. Clicking a preview adds it; clicking it
+again takes it out, because the way out of a selection should be the gesture
+that made it. The count and the action say what will happen — **3 Selected**,
+**Add 3 Modules** — and the whole batch is added in a single store write, so the
+packer places the group at once and the grid runs one FLIP pass rather than
+three fighting each other.
+
+**It is a `Map`, keyed by variant id.** Insertion order is the one thing a Map
+guarantees, and the order a curator picks widgets in is the order they should
+arrive on the page — appended in that order, which is what lands them in the
+first free positions the packer can find instead of scattering them.
+
+**The basket survives browsing.** Changing module and typing a search both used
+to clear it, which would have made multi-select useless the moment a curator
+wanted two Medical cards and a Pharmacy one. Only opening the sheet clears it.
+
+**Sizes are per card, and the tray is what makes that reachable.** The footer's
+size control has to have exactly one subject and the basket has many, so it
+follows the most recently touched card and names it — *Size for Care Overview*.
+That alone would be a trap: clicking a selected preview deselects it, so there
+would be no way back to re-size something picked three tiles ago. Hence the
+tray — a chip per selected card, showing its chosen size; the chip body hands
+the size control to that card, the × drops it from the basket.
+
+The tray scrolls sideways rather than wrapping, because a wrapping tray changes
+the height of a fixed bar as cards are added and moves the Add button out from
+under the thumb aiming at it. Two details came out of testing it: the active
+chip is scrolled into view, **aligned to its leading edge rather than centred**
+— centring cut the previous chip after its name, so the tray showed a pill
+reading just "Medium" — and the edge fades are set from the scroll position, so
+an edge is only soft when there is genuinely something past it.
+
+**The bar is stacked below 1024px, not just on phones.** Side by side, the
+actions take about 250px of it, and on a split layout the rail has already taken
+240 off the left: an iPad in portrait gave the chips 128px to hold three chips
+totalling 562, and the active one could not be scrolled into view because there
+was no view to scroll it into.
 
 ### Three defects the gallery exposed
 
@@ -598,49 +687,155 @@ so movement is played back with FLIP.
 
 ## Accessibility — measured, and honest
 
-Every text run **on the previous, fifteen-card page** was screenshotted with the
-glyphs made transparent, the true painted ground sampled underneath, and the
-ratio computed.
+Re-run **31 August 2026** against the full catalogue, replacing an audit of the
+old fifteen-card page that had been left in this file marked stale. The earlier
+figure — *23 of 30 text runs below AA* — is withdrawn; it measured a page that
+no longer exists.
 
-> **23 of 30 text runs fell below WCAG AA on the Figma palette.**
+It was measured twice, by two methods that do not share an assumption. Every
+stop of all sixteen gradients was walked analytically and every ink the layouts
+put on them composited against it; and then the whole catalogue was rendered and
+the painted pixels sampled directly. The two agree.
 
-**That audit has not been re-run against the new catalogue and the number should
-not be quoted as if it had.** What can be said without re-measuring:
+**The gradient cards were fixed in this pass. The photographs were not** — see
+*Still outstanding* at the end.
 
-- The finding is *structural*, not incidental — it is white text on the light end
-  of a gradient — so it applies to every new card on those same fills, and the
-  seventy-one-card catalogue has many more text runs than thirty.
-- Three fills got **better**: Species, Diet & Kitchen and Hospital were
-  translucent and are now opaque (see *Three defects the gallery exposed*), which
-  raises white-on-fill contrast on every card that uses them.
-- **No new fills were introduced.** Approvals wears Administer's gradient and
-  Communication wears Users', so both inherit whatever those two measured.
-- The new secondary type — metric labels, notes, link rows — is *smaller* than
-  the labels that were measured, so it sits below the same threshold on the same
-  grounds.
-- The header planting **was** measured, before and after. It does not move the
-  greeting on average — 2.65:1 → 2.65:1 — and costs 0.14 on the worst pixel
-  (2.62 → 2.48). See *The header planting* above for the method and for what it
-  cost before the thinning layer was added.
+### Before — white text cleared AA on none of the sixteen fills
 
-A fresh audit is a screenshot-and-sample pass over `antz.allVariants()` and is
-worth running before this ships to anyone.
+At its lightest stop, the best fill in the set reaches 3.78:1 and the worst
+1.49:1, against the 4.5:1 that AA asks of body text.
 
-From that audit: white labels on the light end of the module gradients measured
-1.79:1 (Lab), 1.82:1 (Eggs), 2.27:1 (Mortality), 2.49:1 (Fetal Death), 2.83:1
-(Medical) — all on fills that are unchanged.
-Text over the pale top of the Follow Up photograph runs 1.01:1 to 4.43:1. The
-Species figure captions are 3.05:1. The greeting, at Figma's own `#00ABAB` on
-the mint canvas, is 2.53:1 against a 3.0:1 requirement for text that size.
+| | fill | light end | of the card below AA | below 3:1 |
+|---|---|---|---|---|
+| worst | Parivesh · Reports | **1.49:1** | all of it | all of it |
+| | Eggs | 1.62:1 | all of it | all of it |
+| | Lab | 1.65:1 | all of it | all of it |
+| | Administer · Approvals | 1.79:1 | all of it | all of it |
+| | Medical | 2.09:1 | all of it | 42% |
+| | Mortality | 2.10:1 | all of it | all of it |
+| | Diet & Kitchen | 2.17:1 | all of it | 69% |
+| | Fetal Death | 2.20:1 | all of it | all of it |
+| | Security | 2.76:1 | first 67% | first 17% |
+| | Pharmacy · Follow Up | 3.01:1 | first 56% | none |
+| | Users · Communication | 3.22:1 | first 45% | none |
+| | Species | 3.29:1 | first 38% | none |
+| best | Hospital | 3.78:1 | first 21% | none |
 
-**None of this was changed.** The instruction was to build the Figma exactly,
-and silently re-colouring a designer's palette is not implementing it. The
-numbers are here so the decision is yours.
+**Ten of the sixteen clear AA at no point on the card.** That is the load-bearing
+sentence: this is not a defect a layout can move text away from, because on
+those ten there is nowhere to move it to.
 
-The fix, when you want it, is small and does not alter the design's character:
-darken the light end of each gradient until white clears 4.5:1, and extend the
-Follow Up card's scrim upward behind its list. That was done in an earlier pass
-and took every run to AA while remaining visually near-identical.
+### The three semantic tones are worse, everywhere
+
+`--c-ok`, `--c-warn` and `--c-alert` are tinted, and on a dark ground white is
+the best possible ink — so a tint can only measure worse. On the worst fill they
+run 1.12:1 to 1.21:1, and they fail AA on **all sixteen**, at every point.
+
+This matters more than it looks. On a ground where white *exactly* clears 4.5:1,
+no tint clears it at all: the tone would need a relative luminance of 0.989,
+where white's is 1.0. Any ground dark enough for the tones is meaningfully
+darker than one merely dark enough for white.
+
+### The dominant defect is opacity, not the palette
+
+The data layouts express hierarchy by fading white, and that — not the gradients
+— is what puts most runs furthest below the line:
+
+| | |
+|---|---|
+| `.l-stat__label` | .78 |
+| `.l-queue__text` | .74 |
+| `.l-status__text` | .72 |
+| `.l-chart__delta` · `.l-progress__caption` | .70 |
+| `.metric__label` | .68 |
+| `.l-stat__sub` · `.l-progress__of` · `.l-timeline__meta` · `.l-recent__kind` | .60–.62 |
+| `.l-recent__when` | **.55** |
+
+A 55%-opacity white is a far weaker ink than white, and it is used on the same
+fills. Sizing any fix to full-opacity white — the obvious move — leaves every one
+of these runs still failing.
+
+### What it cost, and what was done
+
+The remedy is a flat black veil composited over each fill as a second
+background layer, one alpha per module, each sized so that module's *lightest*
+stop — its worst point — clears 4.55:1 against every ink the cards use. The
+margin is there so that rounding to three places cannot land under 4.5.
+
+Three decisions inside that, each measured rather than chosen:
+
+**Black, not the `--scrim-band` grey.** Both reach 4.5:1, but multiplying toward
+black scales chroma while mixing toward grey collapses it. At equal contrast the
+grey needs .60 and keeps 38% of the palette's saturation; black needs .44 and
+keeps 59%.
+
+**Per module, not one shared value.** A single veil would have to satisfy
+Parivesh and would then spend that same darkening on Hospital, which needs half
+of it. Per module, the five quietest fills are barely touched.
+
+**Sized to the semantic tones, not to white.** Sizing to white alone would
+average .30 and leave every toned run failing.
+
+| | mean veil | worst fill |
+|---|---|---|
+| sized to white alone — *insufficient* | .30 | Parivesh .44 |
+| **sized to the tones — what shipped** | **.42** | Parivesh .535 |
+| had the .55 opacity floor been kept | .78 | Parivesh .83 |
+
+Two things had to change before the veil could work at all:
+
+- **The opacity hierarchy is gone.** Eleven rules faded white to carry
+  hierarchy; every one of them now runs at full opacity and leans on the size
+  and weight difference that was already there beside it. Nothing else was
+  needed — in all eleven cases the primary sibling was already larger, heavier,
+  or both.
+- **The Quick Actions chip is a dark plate.** It was 18% white, which lightened
+  the ground under its own white label and undid the veil exactly where a
+  control needs contrast most — 4.03:1 at rest, 3.55:1 on hover, failing on all
+  sixteen fills. The same tint of black instead reads about 8:1. Hover deepens
+  the plate rather than lightening it.
+
+### After — measured from the pixels, not modelled
+
+`antz.allVariants()` at 1024px, every card rendered twice: once normally and
+once with every glyph made transparent, so the second pass is the true painted
+ground. Each text run's box was sampled against the ground beneath it.
+
+| | runs | worst single pixel | below AA |
+|---|---|---|---|
+| **Gradient cards** | **530** | **4.79:1** | **0** |
+| Photographs | 16 | 2.67:1 | 10 |
+
+The tightest runs are the alert tone — *"Overdue"* at 4.79:1, *"4 overdue"* and
+*"6 important"* at 4.95:1 — which is the veil doing exactly what it was sized to
+do. Checked independently against the palette itself: 64,064 ink × point
+combinations across all sixteen gradients, none below 4.5:1.
+
+### The cost nobody asks about — modules look more alike
+
+Holding every fill to the same contrast ceiling means holding them to roughly
+the same luminance, and what is left to tell them apart is hue alone. Measured
+at the gradient midpoint, pairs closer than dE 10 went from **5 to 12**.
+
+One pair matters: **Administer and Security were dE 20.2 apart and are now
+4.9** — they took different veils (.492 and .369) onto different base colours
+and landed on nearly the same grey-green. Two of the other close pairs are not
+new: Follow Up and Pharmacy share a gradient outright, as do Parivesh and
+Reports, so those were already identical.
+
+This is worth knowing because the premise of the page is that a module is
+recognisable by its fill. If Administer and Security need separating again, the
+lever is hue rather than lightness — the veil has spent the lightness.
+
+### Still outstanding — the photographs
+
+**The seven photographic cards were not fixed and still fail.** Ten of their
+sixteen text runs are below AA, worst 2.67:1 on the Species figures. They are a
+different problem with a different fix — the ground is an image, so it needs the
+`--scrim-band` extended behind the text rather than a flat veil, and the right
+alpha can only be found by sampling each photograph. The greeting, at Figma's
+own `#00ABAB` on the mint canvas, is also still 2.53:1 against a 3.0:1
+requirement.
 
 The **Edit** control is the exception — it is not in the artboard, so its cyan
 was darkened from `#00AFD6` (2.40:1) to `#007A95` (4.61:1). It is only visible
@@ -653,13 +848,13 @@ in edit mode.
 | | |
 |---|---|
 | Layout vs artboard | 5 rows, 15 cards, same footprints in the same order; page height unchanged |
-| Catalogue | **17 modules, 71 cards** · 3–6 per module, no two modules alike |
+| Catalogue | **17 modules, 74 variations, 150 variant × size combinations** · 3–6 per module, no two modules alike |
 | Catalogue ↔ default page | `antz.checkDefaults()` · **0 disagreements**, both directions |
-| Every variant at every size | **71 cards, every declared size, at 1920 / 1440 / 1024 / 900 / 834 / 768 / 640 / 500px** · measured, not eyeballed: `scrollHeight` vs `clientHeight` on every block stack and `scrollWidth` vs `clientWidth` on every label · **0 overflowing, 0 clipped** |
+| Every variant at every size | **150 combinations, at 1920 / 1440 / 1280 / 1024 / 900 / 834 / 768 / 640 / 500px** · measured, not eyeballed: `scrollHeight` vs `clientHeight` on every composition root and `scrollWidth` vs `clientWidth` on every label · **0 overflowing, 0 clipped** |
 | Responsive | 390 / 834 / 1024 / 1194 / 1440 / 1728px · **0 overlaps, 0 horizontal scroll** |
 | Content cap | 1024 / 1280 / 1440 / 1920 / 2560px · page **1024px** and banner **960px** at every one · 5 columns, type frozen at the Figma values, **0 elements outside the page box** |
 | Packer | 2 / 4 / 5 columns · **0 cell overlaps, 0 spans exceeding the grid** |
-| Drag | mouse, touch long-press and keyboard · live reflow, correct commit, clean teardown |
+| Drag | mouse, touch long-press and keyboard · live reflow, correct commit, clean teardown. Driven over **CDP `Input.dispatch*`**, not synthetic events — a synthesised `PointerEvent` cannot hold pointer capture, so it lifts a card and then never reorders it, which is why an earlier pass recorded drag as unverifiable |
 | Gallery | 17 modules in the rail, always · module → widget → size → add, end to end |
 | Rail anchored | **768 / 834 / 1024 / 1440px** · both panes live, back button hidden, rail still visible after choosing a module · add flow end-to-end at 768 and 834 |
 | Palette | **16 gradients, all from the Figma file** · 0 invented |
@@ -667,10 +862,14 @@ in edit mode.
 | Planting vs readability | greeting measured before/after · mean **2.65:1 → 2.65:1** and 10.16 → 10.15; worst pixel 2.62 → 2.48 and 10.04 → 8.91 |
 | Planting stacking | hero banner paints **over** the 440px band at 1440 / 834 / 500 · hit-tested, not eyeballed |
 | Search | names, keywords, purposes **and card content** — "low stock", "overdue", "population", "hatching", "all systems", "communication" |
-| Persistence | `localStorage` **v2** with versioning and repair · survives reload |
+| Persistence | `localStorage` **v4** with versioning and repair · survives reload, verified by round-tripping the arrangement through `Page.reload` |
 | Edit entry | profile menu, plus 8 gesture cases: long-press (mouse + touch), right-click, <kbd>E</kbd>, and the four that must NOT trigger — short click, press-and-scroll, typing in search, resting state |
 | Banner link | `<a href target="_blank" rel="noopener">` to the Command Centre · clicked: this tab stays put, so the new tab is doing the work · name reads "Antz Command Centre (opens in a new tab)" · no underline, no link colour, box unchanged at 1920 / 1024 / 500 |
 | Card links | Species Management is an `<a target="_blank" rel="noopener">`, every other card still a `<button>`, every picker preview still an inert `<div>` (0 hrefs, 0 focusable) · click at rest does not navigate this tab; click in edit mode is prevented; keyboard reorder of the linked card still commits |
+| Multi-select | select one / several / deselect by tile / deselect by chip · count and action label track the basket · basket survives changing module **and** searching · per-card sizes committed as picked · batch added in one write, all cards land, picker closes, edit mode persists |
+| Selection tray | active chip scrolled into view and fully visible at **390 / 768 / 1024 / 1280 / 1600px** · 0 horizontal overflow at any of them |
+| Jiggle | all cards animating, **15/15 transforms changing** over a live sample · not in lockstep · measured amplitude **0.69° rotation, 0.30px translation** · stops on the dragged card, resumes on drop · stops on Done · absent at rest |
+| Jiggle phase | stable across removal, keyboard reorder and re-render — hashed from uid, so a card keeps its phase |
 | Errors | **none** — no console errors, page errors or failed requests |
 
 Two high-severity defects found by an adversarial review of the previous pass
@@ -690,7 +889,7 @@ layout took the whole page down at module-evaluation time.
 | Reorder, keyboard | focus a card · <kbd>Space</kbd> · arrows · <kbd>Space</kbd> — <kbd>Esc</kbd> cancels |
 | Remove | the **−** at a card's top-left · core cards show a lock |
 | Resize | the **⤢** at a card's bottom-right |
-| Add | **avatar → Add Widget**, or the **Add Widget** tile at the end of the grid |
+| Add | **avatar → Add Module**, or **＋ Add Module** in the edit-mode header |
 | Reset | **avatar → Reset Home Page** |
 | Save | **Done** |
 
@@ -704,3 +903,30 @@ antz.reset()           // back to the default home page
 antz.allVariants()     // every card at every size it declares, on the grid
 antz.checkDefaults()   // assert the catalogue and the default page agree
 ```
+
+> **⚠ Testing trap — under `--virtual-time-budget` the grid appears to leak
+> card nodes.** Replace the whole set of cards at once in headless Chrome and
+> the DOM keeps the previous set as well:
+>
+> ```
+> load                 DOM  15    store  15
+> antz.reset()         DOM  30    store  15   ← 15 stale nodes
+> antz.allVariants()   DOM 180    store 150
+> ```
+>
+> **This is not a product bug.** `dismiss()` in ModuleGrid.js removes a slot
+> when the Web Animations `finished` promise settles, and under virtual time
+> that promise never settles — so the removal never runs. Add
+> `--force-prefers-reduced-motion` and the count is correct at every step,
+> because `animate()` then returns an already-resolved promise. It does not
+> reproduce in a real browser.
+>
+> It matters because it silently corrupts measurement: a sweep over
+> `antz.allVariants()` walks 165 nodes of which 15 are stale copies sitting at
+> their *old* coordinates, so anything read from a node's position — a contrast
+> sample, a screenshot comparison — reads the wrong ground for those fifteen.
+> Either pass `--force-prefers-reduced-motion`, or filter on `dataset.uid`
+> starting `x`.
+>
+> The catalogue is **74 variations over 150 variant × size combinations**; the
+> "165 cards" in an earlier note was the inflated DOM count, not the real one.

@@ -319,6 +319,54 @@
                   rgb(31, 81, 91) 84.2%,
                   rgb(31, 81, 91) 94.0%);
 
+  /* ── 3b · the legibility veil ───────────────────────────────────────────
+     NO INK IN THIS PRODUCT CLEARS AA ON ANY OF THE SIXTEEN FILLS ABOVE.
+     Measured over the whole palette: at its lightest stop the best of them
+     (Hospital) reaches 3.78:1 against white and the worst (Parivesh, Reports)
+     1.49:1, where AA asks 4.5:1 of body text. Ten of the sixteen clear it at
+     NO point on the card, so it is not a defect a layout can move text away
+     from. See the accessibility section of the README for the full table.
+
+     Each fill therefore carries a flat black veil, one alpha per module, each
+     the least darkening that brings that module's LIGHTEST stop to 4.55:1 —
+     the margin is so that rounding to three places cannot land under 4.5. The
+     lightest stop is the card's worst point, so if it passes, every point does.
+
+     BLACK, NOT THE --scrim-band GREY. Both can reach 4.5:1, but multiplying
+     toward black scales chroma while mixing toward grey collapses it: at equal
+     contrast the grey needs .60 and keeps 38% of the palette's saturation,
+     black needs .44 and keeps 59%.
+
+     PER MODULE, NOT ONE SHARED VALUE. A single veil would have to satisfy
+     Parivesh and would then spend that same darkening on Hospital, which needs
+     half of it. This way the five quietest fills are barely touched.
+
+     SIZED TO THE SEMANTIC TONES, NOT TO WHITE. --c-ok, --c-warn and --c-alert
+     are tinted, and on a dark ground white is the lightest possible ink — so a
+     tint can only measure worse. Sizing to white would leave every toned run
+     failing. That is what these alphas cost: sized to white alone they would
+     average .30 rather than .42.
+
+     These are computed, not chosen. Changing a gradient, or adding a fourth
+     tone lighter than these three, means recomputing here — or the card
+     silently stops conforming. */
+  --k-hospital:      0.250;
+  --k-species:       0.305;
+  --k-users:         0.314;
+  --k-pharmacy:      0.338;
+  --k-followup:      0.338;
+  --k-security:      0.369;
+  --k-fetal:         0.437;
+  --k-diet:          0.440;
+  --k-mortality:     0.449;
+  --k-medical:       0.452;
+  --k-administer:    0.492;
+  --k-parivesh-wide: 0.495;
+  --k-lab:           0.511;
+  --k-eggs:          0.515;
+  --k-parivesh:      0.535;
+  --k-reports:       0.535;
+
 
   /* The scrim under a label on a photographic card. Figma draws it as a fixed
      113px band across the bottom with a 2px backdrop blur — not a full-height
@@ -1386,7 +1434,18 @@ body.is-editing .section-head {
 }
 
 /* ── the two fills ───────────────────────────────────────────────────────*/
-.card[data-fill='solid'] { background: var(--card-bg, var(--g-users)); }
+/* The veil is a second BACKGROUND LAYER, not an ::before. A pseudo-element
+   would have to be positioned to cover the card, and a positioned z-index:0
+   box paints above the in-flow content it is meant to sit under — every one of
+   the twelve layout roots would then need its own z-index to climb back over
+   it. Two background layers on one element cannot get that wrong: both are
+   behind all content, always. The alphas are the --k-* set in the palette. */
+.card[data-fill='solid'] {
+  background:
+    linear-gradient(rgba(0, 0, 0, var(--card-scrim, .535)),
+                    rgba(0, 0, 0, var(--card-scrim, .535))),
+    var(--card-bg, var(--g-users));
+}
 
 /* ── the photograph ──────────────────────────────────────────────────────*/
 .card__media {
@@ -1554,9 +1613,9 @@ body.is-editing .section-head {
   font-variant-numeric: tabular-nums;
   font-variation-settings: 'opsz' 14;
 }
-.l-stat__label { font-size: var(--fs-body); font-weight: 500; opacity: .78; }
-.l-stat__sub { flex: none; margin-top: var(--s3); font-size: var(--fs-label); opacity: .62; }
-.l-stat__sub[data-tone='alert'] { color: var(--c-alert); opacity: 1; font-weight: 550; }
+.l-stat__label { font-size: var(--fs-body); font-weight: 500; }
+.l-stat__sub { flex: none; margin-top: var(--s3); font-size: var(--fs-label); }
+.l-stat__sub[data-tone='alert'] { color: var(--c-alert); font-weight: 550; }
 
 /* ══ LAYOUT · metrics ═════════════════════════════════════════════════════
    Two to four figures side by side, separated by whitespace alone. No boxes,
@@ -1580,7 +1639,7 @@ body.is-editing .section-head {
   font-variant-numeric: tabular-nums;
   font-variation-settings: 'opsz' 14;
 }
-.metric__label { font-size: var(--fs-label); opacity: .68; line-height: 1.2; }
+.metric__label { font-size: var(--fs-label); line-height: 1.2; }
 .metric[data-tone='alert'] .metric__value { color: var(--c-alert); }
 
 /* ══ LAYOUT · chart ═══════════════════════════════════════════════════════ */
@@ -1591,7 +1650,7 @@ body.is-editing .section-head {
 .l-chart__area { fill: currentColor; opacity: .10; }
 .l-chart__foot { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); margin-top: var(--s3); }
 .l-chart__summary { font-size: var(--fs-body); font-weight: 600; }
-.l-chart__delta { font-size: var(--fs-label); font-weight: 600; opacity: .7; font-variant-numeric: tabular-nums; }
+.l-chart__delta { font-size: var(--fs-label); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ══ LAYOUT · queue ═══════════════════════════════════════════════════════
    A total beside the title, then rows on a common right edge. ══════════════ */
@@ -1609,7 +1668,7 @@ body.is-editing .section-head {
 }
 .l-queue__rows { display: flex; flex-direction: column; gap: var(--s3); flex: 0 1 auto; min-height: 0; overflow: hidden; }
 .l-queue__row { display: flex; align-items: baseline; gap: var(--s3); }
-.l-queue__text { flex: 1 1 auto; font-size: var(--fs-body); opacity: .74; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-queue__text { flex: 1 1 auto; font-size: var(--fs-body); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .l-queue__value { flex: none; font-family: var(--font-num); font-weight: 650; font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
 
 /* ══ LAYOUT · status ══════════════════════════════════════════════════════
@@ -1622,7 +1681,7 @@ body.is-editing .section-head {
 .l-status__row[data-tone='warn'] .l-status__dot { background: var(--c-warn); }
 .l-status__row[data-tone='alert'] .l-status__dot { background: var(--c-alert); }
 .l-status__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
-.l-status__text { font-size: var(--fs-body); opacity: .72; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-status__text { font-size: var(--fs-body); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ══ LAYOUT · progress ════════════════════════════════════════════════════ */
 .l-progress { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; min-height: 0; }
@@ -1636,7 +1695,7 @@ body.is-editing .section-head {
   font-variant-numeric: tabular-nums;
   font-variation-settings: 'opsz' 14;
 }
-.l-progress__of { font-family: var(--font-num); font-weight: 500; font-size: var(--fs-body); opacity: .6; }
+.l-progress__of { font-family: var(--font-num); font-weight: 500; font-size: var(--fs-body); }
 .l-progress__track {
   display: block;
   width: 100%;
@@ -1647,7 +1706,7 @@ body.is-editing .section-head {
   overflow: hidden;
 }
 .l-progress__track i { display: block; height: 100%; border-radius: var(--r-pill); background: #FFFFFF; }
-.l-progress__caption { margin-top: var(--s2); font-size: var(--fs-label); font-weight: 550; opacity: .7; }
+.l-progress__caption { margin-top: var(--s2); font-size: var(--fs-label); font-weight: 550; }
 
 /* ══ LAYOUT · timeline ════════════════════════════════════════════════════
    Entries down a hairline rule. The rule is what makes it read as a sequence
@@ -1677,8 +1736,8 @@ body.is-editing .section-head {
 }
 .l-timeline__item[data-tone='alert'] .l-timeline__dot { background: var(--c-alert); opacity: 1; }
 .l-timeline__text { font-size: var(--fs-body); font-weight: 550; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; }
-.l-timeline__meta { font-size: var(--fs-label); opacity: .6; line-height: 1.2; }
-.l-timeline__item[data-tone='alert'] .l-timeline__meta { color: var(--c-alert); opacity: 1; font-weight: 550; }
+.l-timeline__meta { font-size: var(--fs-label); line-height: 1.2; }
+.l-timeline__item[data-tone='alert'] .l-timeline__meta { color: var(--c-alert); font-weight: 550; }
 
 /* ══ LAYOUT · recent ══════════════════════════════════════════════════════ */
 .l-recent { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
@@ -1686,8 +1745,8 @@ body.is-editing .section-head {
 .l-recent__item { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
 .l-recent__main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .l-recent__name { font-size: var(--fs-body); font-weight: 600; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.l-recent__kind { font-size: var(--fs-label); opacity: .6; }
-.l-recent__when { flex: none; font-size: var(--fs-label); opacity: .55; white-space: nowrap; }
+.l-recent__kind { font-size: var(--fs-label); }
+.l-recent__when { flex: none; font-size: var(--fs-label); white-space: nowrap; }
 
 /* ══ LAYOUT · actions ═════════════════════════════════════════════════════
    The controls ARE the content. They sit on the module's colour, translucent,
@@ -1700,7 +1759,13 @@ body.is-editing .section-head {
   min-height: 36px;
   padding: var(--s2) var(--s3);
   border-radius: 10px;
-  background: rgba(255, 255, 255, .18);
+  /* A DARK PLATE, NOT A LIGHT ONE. This chip used to be 18% white, which
+     lightened the ground under its own white label and undid the veil exactly
+     where a control needs contrast most: 4.03:1 at rest and 3.55:1 on hover,
+     failing on all sixteen fills. Tinting the same amount of black instead
+     takes it to about 8:1 everywhere. The hairline stays white and reads
+     better against the darker plate than it did against the lighter one. */
+  background: rgba(0, 0, 0, .18);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .24);
   font-size: var(--fs-label);
   font-weight: 600;
@@ -1709,7 +1774,8 @@ body.is-editing .section-head {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.card:hover .l-action { background: rgba(255, 255, 255, .24); }
+/* hover deepens the plate rather than lightening it, for the same reason */
+.card:hover .l-action { background: rgba(0, 0, 0, .26); }
 
 /* ══════════════════════════════════════════════════════════════════════════
    FITTING THE COMPOSITIONS TO THE SPACE
@@ -1806,18 +1872,35 @@ body.is-editing .section-head {
    ──────────────────────────────────────────────────────────────────────────
    "Do not overuse borders. Keep the editing controls subtle and clean."
 
-   So edit mode is announced by three things and no chrome: the page desaturates
-   very slightly so the cards read as objects rather than destinations, each
-   removable card grows a remove control, and Add Module appears in the header at the
-   end of the grid. There is no outline around the grid, no toolbar, no banner.
+   So edit mode is announced by four things and no chrome: the page desaturates
+   very slightly so the cards read as objects rather than destinations, the
+   cards take up a continuous jiggle, each removable card grows a remove
+   control, and Add Module appears in the header. There is no outline around the
+   grid, no toolbar, no banner.
 
-   NO JIGGLE. iOS wiggles its icons because a phone home screen has no other way
-   to say "these are movable now" — there is no cursor, no hover, no room for a
-   caption. This product has a section header that literally changes to read
-   "Edit Modules", a Done button, and remove controls on every card. A command
-   centre that vibrates at a curator is a command centre that looks broken, and
-   a continuous animation on fourteen cards is also the one thing on this page
-   that would drain an iPad. A single settle on entry says the same thing once.
+   THE JIGGLE, AND WHY IT IS THIS SMALL. An earlier pass argued against having
+   one at all: this product has a header that changes to read "Edit Modules", a
+   Done button and remove controls, so the state is already legible. That was
+   true and still missed the point — those all say "the PAGE is in edit mode",
+   and the jiggle is the only one that says "THIS CARD is the thing you can
+   move". It is the affordance, not the announcement.
+
+   The amplitude is the whole argument. Nothing here exceeds 0.75° of rotation
+   or 0.6px of travel, which is under what the eye resolves as motion on a
+   stationary object and over what it resolves as life. Push it to the 3° and
+   5px that a naive "shake" keyframe uses and a command centre looks broken —
+   the cards read as malfunctioning rather than as editable.
+
+   Three keyframe sets, not one, and a per-card delay computed from the card's
+   uid in ModuleGrid.js. Fourteen cards on one synchronised animation is not
+   fourteen jiggling cards, it is one jiggling grid, and it looks like the page
+   is vibrating.
+
+   THE BATTERY OBJECTION IS REAL and is answered rather than dismissed: only
+   `transform` is animated, so the whole thing lives on the compositor and never
+   touches layout or paint; it runs only inside edit mode, which is transient;
+   `prefers-reduced-motion` stops it via the global block; and it is paused
+   outright when the tab is hidden — see `body.is-hidden`.
    ══════════════════════════════════════════════════════════════════════════ */
 
 body.is-editing .updates,
@@ -1832,24 +1915,56 @@ body.is-editing .search {
   transition: opacity var(--t-base) var(--ease), filter var(--t-base) var(--ease);
 }
 
-/* The one-shot settle, staggered by index so the grid acknowledges the mode
-   left-to-right rather than flashing at once.
-
-   TWO THINGS HERE ARE LOAD-BEARING. It runs on the CARD, not the slot, because
-   the slot's transform belongs to the FLIP reflow — an animation on the same
-   property would win the cascade and cards would stop animating to their new
-   positions. And it has NO fill mode: `both` or `forwards` would leave the
-   final keyframe latched on forever, permanently overriding any transform set
-   later from script. */
+/* TWO THINGS HERE ARE LOAD-BEARING, and were load-bearing for the one-shot
+   settle this replaced. It runs on the CARD, not the slot, because the slot's
+   transform belongs to the FLIP reflow — an animation on the same property
+   would win the cascade and cards would stop animating to their new positions.
+   And it has NO fill mode: `both` or `forwards` would latch the final keyframe
+   on forever, permanently overriding any transform set later from script. */
 body.is-editing .slot > .card {
-  animation: settle var(--t-slow) var(--ease-out);
-  animation-delay: calc(var(--i, 0) * 22ms);
+  animation: jiggle-a var(--jiggle-dur, 1.9s) ease-in-out infinite;
+  animation-delay: var(--jiggle-delay, 0ms);
+  will-change: transform;
 }
-@keyframes settle {
-  0%   { transform: scale(1) rotate(0deg); }
-  42%  { transform: scale(.972) rotate(-.55deg); }
-  72%  { transform: scale(1.004) rotate(.2deg); }
-  100% { transform: scale(1) rotate(0deg); }
+body.is-editing .slot[data-jiggle='b'] > .card { animation-name: jiggle-b; }
+body.is-editing .slot[data-jiggle='c'] > .card { animation-name: jiggle-c; }
+
+/* The card being dragged must not jiggle — the proxy follows the pointer and a
+   second transform underneath it would fight the drag. The source slot is
+   invisible during a drag anyway, but stopping it here means the transform is
+   released cleanly rather than being overridden. */
+body.is-editing .slot.is-source > .card,
+body.is-editing .slot.is-grabbed > .card { animation: none; }
+
+/* Paused rather than stopped when the tab goes away: `paused` keeps the
+   compositor from doing any work at all, and resuming picks up mid-cycle so
+   coming back to the tab does not re-synchronise every card into one beat. */
+body.is-hidden .slot > .card { animation-play-state: paused; }
+
+/* Three phases of the same tiny idea, offset from each other so no two cards
+   are ever at the same point in the same shape. Rotation does most of the work
+   — a pure translate reads as sliding, and a pure rotate as pivoting; together
+   at this amplitude they read as "held loosely". */
+@keyframes jiggle-a {
+  0%   { transform: rotate(-.62deg) translate(0, .18px); }
+  25%  { transform: rotate(.34deg)  translate(.22px, -.30px); }
+  50%  { transform: rotate(.60deg)  translate(0, .26px); }
+  75%  { transform: rotate(-.30deg) translate(-.22px, -.18px); }
+  100% { transform: rotate(-.62deg) translate(0, .18px); }
+}
+@keyframes jiggle-b {
+  0%   { transform: rotate(.55deg)  translate(.18px, -.22px); }
+  25%  { transform: rotate(-.40deg) translate(0, .30px); }
+  50%  { transform: rotate(-.70deg) translate(-.20px, -.14px); }
+  75%  { transform: rotate(.36deg)  translate(.16px, .24px); }
+  100% { transform: rotate(.55deg)  translate(.18px, -.22px); }
+}
+@keyframes jiggle-c {
+  0%   { transform: rotate(-.44deg) translate(.20px, .24px); }
+  25%  { transform: rotate(.58deg)  translate(-.16px, -.20px); }
+  50%  { transform: rotate(.30deg)  translate(.14px, .28px); }
+  75%  { transform: rotate(-.66deg) translate(-.18px, -.12px); }
+  100% { transform: rotate(-.44deg) translate(.20px, .24px); }
 }
 
 body.is-editing .card { cursor: grab; }
@@ -2499,10 +2614,60 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   transition: background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
 }
 .widget:hover { background: color-mix(in srgb, var(--petrol-400) 7%, transparent); }
-.widget[aria-pressed='true'] {
-  background: color-mix(in srgb, var(--sig) 9%, transparent);
-  box-shadow: inset 0 0 0 2px var(--sig);
+
+/* ── the selected state ───────────────────────────────────────────────────
+   "Do not make the selected state overly colorful." So it is an outline, a
+   tick and about a millimetre of lift — no flooded tint over the top of a
+   preview whose whole job is to show the card's own colour. The ring is on the
+   STAGE rather than the tile, so it traces the card's rounded rectangle
+   instead of a larger invisible box around it. */
+.widget[aria-pressed='true'] { background: color-mix(in srgb, var(--sig) 6%, transparent); }
+.widget[aria-pressed='true'] .variant__stage {
+  box-shadow: 0 0 0 2px var(--sig),
+              0 2px 4px rgba(31, 65, 91, .10),
+              0 14px 30px -16px rgba(31, 65, 91, .38);
+  transform: translateY(-2px);
 }
+.widget[aria-pressed='true'] .widget__name { color: var(--petrol-800); }
+
+/* The one the size control is currently pointed at. A second, quieter ring —
+   it has to be distinguishable from plain selection without competing with it,
+   because every sizing card is also a selected one. */
+.widget.is-sizing .variant__stage {
+  box-shadow: 0 0 0 2px var(--sig),
+              0 0 0 5px color-mix(in srgb, var(--sig) 26%, transparent),
+              0 2px 4px rgba(31, 65, 91, .10),
+              0 14px 30px -16px rgba(31, 65, 91, .38);
+}
+
+.variant__stage { transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease); }
+
+/* The tick. Sits over the card's own top-right corner; the ring around it is
+   the sheet's surface colour so it reads on a photograph as well as a fill. */
+.widget__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  /* --ui-link, not --sig. The tick is a meaningful graphic, so WCAG 1.4.11
+     wants 3:1 both for the glyph against its disc and for the disc against the
+     surface behind it — and the signal cyan gives 2.59:1 on both counts. The
+     same darker cyan the Edit control already uses gives 4.61:1 on both. */
+  background: var(--ui-link);
+  color: #fff;
+  opacity: 0;
+  transform: scale(.6);
+  transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease-out);
+  pointer-events: none;
+}
+.widget__check .icon { width: 13px; height: 13px; stroke-width: 3; }
+.widget[aria-pressed='true'] .widget__check { opacity: 1; transform: scale(1); }
 
 .variant__stage {
   position: relative;
@@ -2584,8 +2749,107 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 }
 .sheet.has-selection .sheet__foot { transform: translateY(0); }
 .sheet:not(.has-selection) .sheet__foot { pointer-events: none; }
-/* room to scroll the last widget clear of the bar that just appeared */
-.sheet.has-selection .sheet__body { padding-bottom: 148px; }
+/* room to scroll the last widget clear of the bar that just appeared. Taller
+   than it was: the bar now carries a tray of chips above the size control. */
+.sheet.has-selection .sheet__body { padding-bottom: 210px; }
+
+.sheet__foot-main { display: flex; flex-direction: column; gap: var(--s3); min-width: 0; }
+
+/* ── the selection tray ───────────────────────────────────────────────────
+   The count and the basket, above the size control and below nothing. It
+   scrolls sideways rather than wrapping: a wrapping tray changes the height of
+   a fixed bar as cards are added, which moves the Add button out from under
+   the thumb that is aiming at it. */
+.sel-tray { display: flex; align-items: center; gap: var(--s3); min-width: 0; }
+.sel-tray__count {
+  flex: none;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.sel-tray__chips {
+  display: flex;
+  gap: var(--s2);
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 2px;
+  scroll-behavior: smooth;
+  /* A hard cut reads as a clipping bug; a fade reads as "there is more this
+     way". Masked rather than covered with a painted gradient, because the bar
+     behind it is translucent and a painted fade would show as a pale block
+     over the blur.
+
+     Both edges, and only when there is actually something past them — a fixed
+     right-hand fade left the tray looking cut on the left the moment it
+     scrolled to bring the active chip into view, which turned the first chip
+     into a nameless pill reading just "Medium". The two widths are set from
+     script on scroll; see renderTray(). */
+  --fade-l: 0px;
+  --fade-r: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l),
+                      #000 calc(100% - var(--fade-r)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l),
+              #000 calc(100% - var(--fade-r)), transparent 100%);
+}
+.sel-tray__chips::-webkit-scrollbar { display: none; }
+
+.sel-chip {
+  display: inline-flex;
+  align-items: stretch;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+.sel-chip.is-active {
+  border-color: var(--sig);
+  background: color-mix(in srgb, var(--sig) 10%, transparent);
+}
+.sel-chip__pick {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px var(--s2) 6px var(--s3);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+.sel-chip__name { font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.sel-chip__size { font-size: var(--fs-micro); color: var(--ink-3); }
+.sel-chip.is-active .sel-chip__size { color: var(--petrol-800); }
+.sel-chip__drop {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  padding: 0;
+  border: none;
+  border-left: 1px solid var(--line);
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.sel-chip__drop:hover { background: var(--petrol-050); color: var(--ink); }
+.sel-chip__drop .icon { width: 13px; height: 13px; }
+
+.btn-primary[disabled] { opacity: .45; pointer-events: none; }
+
+/* THE TRAY GETS THE FULL WIDTH OF THE BAR WHENEVER THE BAR IS NARROW.
+   Side by side, the actions take about 250px of it — and on a split layout the
+   rail has already taken 240 off the left, which on an iPad in portrait left
+   the chips 128px to hold three chips totalling 562. The active chip could not
+   be scrolled into view because there was no view to scroll it into. Below
+   1024 the actions go on their own row and the tray gets the lot. */
+@media (max-width: 1023px) {
+  .sheet__foot { grid-template-columns: minmax(0, 1fr); }
+  .sheet__actions { justify-content: flex-end; }
+  .sheet.has-selection .sheet__body { padding-bottom: 268px; }
+}
 
 .size-picker { min-width: 0; }
 .size-picker__label {
@@ -4350,16 +4614,34 @@ function setCards(cards, meta = {}) {
   save(cards)
 }
 
-function addCard(variantId, size) {
-  const variant = getVariant(variantId)
-  if (!variant) return null
-  const card = {
-    uid: newUid(),
-    variantId,
-    size: variant.supportedSizes.includes(size) ? size : variant.defaultSize,
+/**
+ * Add several cards in ONE write.
+ *
+ * The picker lets a curator build a selection and add it in a single action.
+ * This replaced a single-card add() that the caller would have had to run in a
+ * loop, which would have been a different thing wearing the same name: n writes
+ * to localStorage, n store notifications, n renders, and n separate FLIP passes
+ * fighting each other while the grid reflowed underneath the last card's
+ * arrival animation. One commit means the packer sees the whole batch at once
+ * and every new card animates in together. A single add is addCards([one]).
+ *
+ * Appended in the order they were picked, which is what puts them in the first
+ * free positions the packer can find rather than scattering them.
+ */
+function addCards(list) {
+  const made = []
+  for (const item of list || []) {
+    const variant = getVariant(item && item.variantId)
+    if (!variant) continue
+    made.push({
+      uid: newUid(),
+      variantId: variant.id,
+      size: variant.supportedSizes.includes(item.size) ? item.size : variant.defaultSize,
+    })
   }
-  setCards([...layoutStore.get().cards, card], { reason: 'add', uid: card.uid })
-  return card
+  if (!made.length) return []
+  setCards([...layoutStore.get().cards, ...made], { reason: 'add-many', uids: made.map((c) => c.uid) })
+  return made
 }
 
 function removeCard(uid) {
@@ -4407,8 +4689,8 @@ function resetLayout() {
   __x.save = save;
   __x.clear = clear;
   __x.layoutStore = layoutStore;
+  __x.addCards = addCards;
   __x.setCards = setCards;
-  __x.addCard = addCard;
   __x.removeCard = removeCard;
   __x.resizeCard = resizeCard;
   __x.reorder = reorder;
@@ -4770,7 +5052,14 @@ function renderCard(variant, opts = {}) {
   /* The module's Figma fill and glyph size. A variation may override either —
      the wide Parivesh card is drawn at a different gradient angle. */
   const gradient = variant.gradient || mod?.gradient
-  if (gradient) el.style.setProperty('--card-bg', `var(${gradient})`)
+  if (gradient) {
+    el.style.setProperty('--card-bg', `var(${gradient})`)
+    /* Every fill carries a legibility veil sized to its own lightest stop, so
+       `--g-lab` is darkened by `--k-lab`. The fallback is the heaviest alpha in
+       the set: a fill added without its partner is over-veiled rather than
+       silently illegible. */
+    el.style.setProperty('--card-scrim', `var(${gradient.replace('--g-', '--k-')}, .535)`)
+  }
   const iconSize = variant.iconSize || mod?.iconSize
   if (iconSize) el.style.setProperty('--icon-size', `${iconSize}px`)
 
@@ -5143,12 +5432,58 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
 
   /* ── slot construction ──────────────────────────────────────────────── */
 
+  /**
+   * The jiggle's per-card variation.
+   *
+   * FROM THE UID, NOT FROM THE INDEX AND NOT FROM Math.random().
+   *
+   * The index is wrong because it changes: reorder the grid and every card
+   * would be re-assigned a new phase, so the whole page would visibly
+   * re-synchronise on every drop. Random is wrong because the grid reconciles
+   * rather than rebuilds — a card that survives a render keeps its element and
+   * would keep its old value, while a new neighbour would get a fresh one, and
+   * the two would drift apart for no reason a user could see.
+   *
+   * Hashed from the uid, the phase is a property OF THE CARD. It survives
+   * reordering, resizing and re-rendering, and it is stable across a reload,
+   * which is what makes the effect read as fourteen objects rather than
+   * fourteen animations.
+   */
+  function jiggleFor(uid) {
+    /* FNV-1a, not the usual `h * 31 + c`. The uids differ in one or two
+       characters, and a weak hash leaves that difference sitting in the low
+       bits — the first version of this took its duration from bits 5-7 and
+       produced two distinct durations across fifteen cards, so the grid still
+       drifted into step. FNV avalanches, so every slice is usable. */
+    let h = 2166136261
+    for (let i = 0; i < uid.length; i++) {
+      h ^= uid.charCodeAt(i)
+      h = Math.imul(h, 16777619)
+    }
+    const bits = (n, shift) => ((h >>> shift) & 0xffff) % n
+
+    return {
+      variant: ['a', 'b', 'c'][bits(3, 0)],
+      /* Under one cycle, so no card ever sits visibly still waiting to start. */
+      delay: bits(700, 7),
+      /* 1.7–2.2s. Different durations matter more than different delays: two
+         cards sharing a duration drift back into step no matter how they were
+         offset, two on different durations never do. */
+      duration: 1700 + bits(6, 15) * 100,
+    }
+  }
+
   function buildSlot(item) {
     const slot = document.createElement('div')
     slot.className = 'slot'
     slot.dataset.uid = item.uid
     slot.dataset.variant = item.variantId
     slot.dataset.size = item.size
+
+    const j = jiggleFor(item.uid)
+    slot.dataset.jiggle = j.variant
+    slot.style.setProperty('--jiggle-delay', `${j.delay}ms`)
+    slot.style.setProperty('--jiggle-dur', `${j.duration}ms`)
 
     const variant = getVariant(item.variantId)
     if (variant) {
@@ -6169,6 +6504,12 @@ function createSizeSelector({ onChange }) {
   return {
     root,
     render,
+
+    /* With a basket of cards rather than one, "Choose Size" no longer says
+       enough — the control has to name which card it is about, or a curator
+       who picked four widgets has no way to know what they are resizing. */
+    setLabel(text) { label.textContent = text || 'Choose Size' },
+
     get value() { return value },
   }
 }
@@ -6221,7 +6562,7 @@ __def('js/components/ModulePickerBottomSheet.js', function (__x, __req) {
  */
 
 const { MODULES, CATEGORIES, getModule } = __req('js/data/modules.js');
-const { CARD_VARIANTS, variantsForModule, PURPOSES } = __req('js/data/cardVariants.js');
+const { CARD_VARIANTS, variantsForModule, PURPOSES, SIZE_LABELS } = __req('js/data/cardVariants.js');
 const { icon } = __req('js/icons.js');
 const { renderPreview } = __req('js/components/ModulePreview.js');
 const { createSizeSelector } = __req('js/components/ModuleSizeSelector.js');
@@ -6231,7 +6572,28 @@ function createModulePicker({ onAdd }) {
   let open = false
   let query = ''
   let activeId = MODULES[0].id      // the module the detail pane is showing
-  let selected = null               // { variantId, size } — the chosen widget
+
+  /**
+   * THE SELECTION IS A BASKET, NOT A CURSOR.
+   *
+   * This used to be a single `{ variantId, size }`, so adding three cards meant
+   * open → pick → Add → reopen → pick → Add → reopen → pick → Add: the gallery
+   * threw away everything you had learned about it twice, and the module you
+   * were comparing against was two navigations behind you.
+   *
+   * A Map, because the order a curator picks things in is the order they should
+   * arrive on the page, and insertion order is the one thing a Map guarantees.
+   * Keyed by variant id, holding the size chosen for that variant — so the sizes
+   * genuinely are per-card and not one setting shared across the basket.
+   */
+  const selected = new Map()        // variantId → size, in the order picked
+
+  /* Which selected card the footer's size control is currently editing. The
+     control needs exactly one subject and the basket has many, so the most
+     recently touched one owns it — and the tray below lets you hand it to
+     another without disturbing the selection. */
+  let sizing = null
+
   let restoreFocusTo = null
   /* Only meaningful under the phone breakpoint, where the two panes are
      stacked: false = looking at the rail, true = looking at the widgets. */
@@ -6282,11 +6644,32 @@ function createModulePicker({ onAdd }) {
      and the whole point of this gallery is that you do not have to. */
   const sizeSelector = createSizeSelector({
     onChange(size) {
-      if (!selected) return
-      selected.size = size
-      repaintSelectedPreview()
+      if (!sizing || !selected.has(sizing)) return
+      selected.set(sizing, size)
+      repaintPreview(sizing)
+      renderTray()
     },
   })
+
+  /**
+   * THE TRAY — what is in the basket, and which one the size control is on.
+   *
+   * Without it, multi-select has a hole in it: clicking a selected tile
+   * deselects (it has to — the way out of a selection should be the gesture
+   * that made it), so there would be no way to go back and re-size a card you
+   * picked three tiles ago short of removing and re-adding it. Each chip is
+   * that way back. It also keeps the basket visible while you scroll a long
+   * gallery, which is the actual reason iOS shows one.
+   */
+  const tray = document.createElement('div')
+  tray.className = 'sel-tray'
+
+  const trayCount = document.createElement('span')
+  trayCount.className = 'sel-tray__count'
+
+  const trayChips = document.createElement('div')
+  trayChips.className = 'sel-tray__chips'
+  tray.append(trayCount, trayChips)
 
   const actions = document.createElement('div')
   actions.className = 'sheet__actions'
@@ -6299,7 +6682,11 @@ function createModulePicker({ onAdd }) {
   addBtn.className = 'btn-primary'
   addBtn.textContent = 'Add to Home'
   actions.append(cancelBtn, addBtn)
-  foot.append(sizeSelector.root, actions)
+
+  const footMain = document.createElement('div')
+  footMain.className = 'sheet__foot-main'
+  footMain.append(tray, sizeSelector.root)
+  foot.append(footMain, actions)
 
   document.body.append(scrim, sheet)
 
@@ -6359,7 +6746,7 @@ function createModulePicker({ onAdd }) {
       const first = MODULES.find((m) => hits(m.id).length)
       if (first) activeId = first.id
     }
-    clearSelection()
+    /* The basket deliberately survives the search — see clearSelection(). */
     renderRail()
     renderDetail()
   })
@@ -6412,7 +6799,7 @@ function createModulePicker({ onAdd }) {
 
   function selectModule(id) {
     activeId = id
-    clearSelection()
+    /* and it survives moving between modules, which is the whole point */
     detailOpen = true
     sheet.classList.add('is-detail')
     for (const row of rail.querySelectorAll('.mod-row')) {
@@ -6515,11 +6902,26 @@ function createModulePicker({ onAdd }) {
     btn.type = 'button'
     btn.className = 'widget'
     btn.dataset.variant = v.id
-    btn.setAttribute('aria-pressed', String(selected?.variantId === v.id))
+    const isOn = selected.has(v.id)
+    btn.setAttribute('aria-pressed', String(isOn))
+    if (isOn && v.id === sizing) btn.classList.add('is-sizing')
 
-    const size = selected?.variantId === v.id ? selected.size : v.defaultSize
+    /* The size the basket is holding for this card, so scrolling away and back
+       shows the choice rather than resetting it. */
+    const size = isOn ? selected.get(v.id) : v.defaultSize
     const stage = renderPreview(v, size, previewBounds())
     stage.classList.add('widget__stage-wrap')
+
+    /* The tick lives on the stage, not the button, so it pins to the corner of
+       the CARD rather than to the corner of the tile's padding box — which is
+       where the eye expects it and where a Full Width preview's very different
+       proportions would otherwise leave it stranded. */
+    const check = document.createElement('span')
+    check.className = 'widget__check'
+    check.setAttribute('aria-hidden', 'true')
+    check.innerHTML = icon('check')
+    stage.append(check)
+
     btn.append(stage)
 
     /* The name, and nothing else. The description and the size count were
@@ -6531,7 +6933,7 @@ function createModulePicker({ onAdd }) {
     meta.className = 'widget__meta'
     meta.innerHTML = `<span class="widget__name">${esc(v.name)}</span>`
     btn.append(meta)
-    btn.addEventListener('click', () => selectVariant(v))
+    btn.addEventListener('click', () => toggleVariant(v))
     return btn
   }
 
@@ -6548,40 +6950,165 @@ function createModulePicker({ onAdd }) {
 
   /* ── selection ──────────────────────────────────────────────────────── */
 
-  function selectVariant(v) {
-    /* Tapping the chosen widget again clears it — the way out of a selection
-       should be the same gesture that made it. */
-    if (selected?.variantId === v.id) { clearSelection(); return }
-
-    selected = { variantId: v.id, size: v.defaultSize }
-    sheet.classList.add('has-selection')
-    sizeSelector.render(v.supportedSizes, v.defaultSize)
-
-    for (const btn of body.querySelectorAll('.widget')) {
-      btn.setAttribute('aria-pressed', String(btn.dataset.variant === v.id))
-    }
+  function variantById(id) {
+    return CARD_VARIANTS.find((v) => v.id === id) || null
   }
 
-  /** Redraw just the chosen widget's preview at the size the footer now says. */
-  function repaintSelectedPreview() {
-    if (!selected) return
-    const btn = body.querySelector(`.widget[data-variant="${cssEsc(selected.variantId)}"]`)
-    const variant = CARD_VARIANTS.find((v) => v.id === selected.variantId)
+  /** Toggle a widget in and out of the basket. */
+  function toggleVariant(v) {
+    if (selected.has(v.id)) {
+      selected.delete(v.id)
+      /* The size control cannot go on editing a card that is no longer in the
+         basket — hand it to whatever is still there, newest first. */
+      if (sizing === v.id) sizing = lastKey()
+    } else {
+      selected.set(v.id, v.defaultSize)
+      sizing = v.id
+    }
+    syncSelectionUI()
+  }
+
+  /** The most recently added key, or null — Maps have no `last()`. */
+  function lastKey() {
+    let out = null
+    for (const k of selected.keys()) out = k
+    return out
+  }
+
+  /** Point the footer's size control at one card in the basket. */
+  function focusSizing(variantId) {
+    if (!selected.has(variantId)) return
+    sizing = variantId
+    syncSelectionUI()
+  }
+
+  /**
+   * One function for every path that can change the basket, so the tile states,
+   * the tray, the size control and the Add button can never disagree about what
+   * is selected. Cheap enough to call on every toggle — the gallery is at most
+   * six tiles.
+   */
+  function syncSelectionUI() {
+    const n = selected.size
+    sheet.classList.toggle('has-selection', n > 0)
+
+    for (const btn of body.querySelectorAll('.widget')) {
+      const on = selected.has(btn.dataset.variant)
+      btn.setAttribute('aria-pressed', String(on))
+      btn.classList.toggle('is-sizing', on && btn.dataset.variant === sizing)
+    }
+
+    renderTray()
+
+    const v = sizing ? variantById(sizing) : null
+    if (v) {
+      sizeSelector.render(v.supportedSizes, selected.get(sizing))
+      sizeSelector.setLabel(`Size for ${v.name}`)
+      sizeSelector.root.hidden = v.supportedSizes.length < 2
+    } else {
+      sizeSelector.root.hidden = true
+    }
+
+    addBtn.textContent = n > 1 ? `Add ${n} Modules` : 'Add to Home'
+    addBtn.disabled = n === 0
+  }
+
+  function renderTray() {
+    const n = selected.size
+    trayCount.textContent = n === 1 ? '1 Selected' : `${n} Selected`
+    trayChips.replaceChildren()
+
+    for (const [id, size] of selected) {
+      const v = variantById(id)
+      if (!v) continue
+
+      const chip = document.createElement('span')
+      chip.className = 'sel-chip'
+      if (id === sizing) chip.classList.add('is-active')
+
+      /* The chip body picks the card up for sizing; the × takes it out. Two
+         targets in one chip, so neither gesture can be mistaken for the other. */
+      const pick = document.createElement('button')
+      pick.type = 'button'
+      pick.className = 'sel-chip__pick'
+      pick.innerHTML =
+        `<span class="sel-chip__name">${esc(v.name)}</span>` +
+        `<span class="sel-chip__size">${esc(SIZE_LABELS[size] || size)}</span>`
+      pick.setAttribute('aria-label', `${v.name}, ${SIZE_LABELS[size] || size}. Choose a size for this card`)
+      pick.addEventListener('click', () => focusSizing(id))
+
+      const drop = document.createElement('button')
+      drop.type = 'button'
+      drop.className = 'sel-chip__drop'
+      drop.innerHTML = icon('close')
+      drop.setAttribute('aria-label', `Remove ${v.name} from the selection`)
+      drop.addEventListener('click', () => {
+        selected.delete(id)
+        if (sizing === id) sizing = lastKey()
+        syncSelectionUI()
+      })
+
+      chip.append(pick, drop)
+      trayChips.append(chip)
+    }
+
+    /* Keep the card being sized where it can be seen. The tray scrolls
+       sideways, so picking a fourth widget puts its chip past the right edge —
+       and the size control below would then be labelled with a card the user
+       cannot see. */
+    const active = trayChips.querySelector('.sel-chip.is-active')
+    if (active) {
+      const box = trayChips.getBoundingClientRect()
+      const it = active.getBoundingClientRect()
+      if (it.right > box.right - 4 || it.left < box.left + 4) {
+        /* FLUSH LEFT, NOT CENTRED. Centring leaves the previous chip cut down
+           the middle at the left edge, and a chip cut after its name reads as a
+           chip that has no name — the tray showed a pill saying just "Medium".
+           Aligned to the leading edge, a chip is either wholly there or wholly
+           gone, and only the trailing edge is ever partial, which is the one
+           the fade is for. */
+        trayChips.scrollLeft += it.left - box.left
+      }
+    }
+    syncTrayFade()
+  }
+
+  /** Fade an edge only when there is something past it to scroll to. */
+  function syncTrayFade() {
+    const max = trayChips.scrollWidth - trayChips.clientWidth
+    const x = trayChips.scrollLeft
+    trayChips.style.setProperty('--fade-l', x > 2 ? '22px' : '0px')
+    trayChips.style.setProperty('--fade-r', x < max - 2 ? '22px' : '0px')
+  }
+  trayChips.addEventListener('scroll', syncTrayFade, { passive: true })
+
+  /** Redraw one widget's preview at the size the footer now says. */
+  function repaintPreview(variantId) {
+    const btn = body.querySelector(`.widget[data-variant="${cssEsc(variantId)}"]`)
+    const variant = variantById(variantId)
     if (!btn || !variant) return
-    const stage = renderPreview(variant, selected.size, previewBounds())
+    const stage = renderPreview(variant, selected.get(variantId), previewBounds())
     stage.classList.add('widget__stage-wrap')
     btn.querySelector('.variant__stage')?.replaceWith(stage)
   }
 
+  /**
+   * Empty the basket.
+   *
+   * NOT called when the query changes or the module does. The whole point of a
+   * basket is that it survives browsing — picking two Medical cards, searching
+   * "overdue" and picking a Pharmacy one should give you three, not one.
+   */
   function clearSelection() {
-    selected = null
-    sheet.classList.remove('has-selection')
-    for (const btn of body.querySelectorAll('.widget')) btn.setAttribute('aria-pressed', 'false')
+    selected.clear()
+    sizing = null
+    syncSelectionUI()
   }
 
   addBtn.addEventListener('click', () => {
-    if (!selected) return
-    onAdd?.(selected.variantId, sizeSelector.value || selected.size)
+    if (!selected.size) return
+    const batch = [...selected].map(([variantId, size]) => ({ variantId, size }))
+    onAdd?.(batch)
     close()
   })
   /* Beside "Add to Home" in a footer, "Cancel" means abandon the whole thing —
@@ -7052,11 +7579,19 @@ const { createEditMode } = __req('js/components/EditModulesMode.js');
 const { createModulePicker } = __req('js/components/ModulePickerBottomSheet.js');
 const { createSizePopover } = __req('js/components/ModuleSizePopover.js');
 const { createProfileMenu } = __req('js/components/ProfileMenu.js');
-const { layoutStore, reorder, addCard, removeCard, resizeCard, setEditing, resetLayout } = __req('js/state/layoutStore.js');
+const { layoutStore, reorder, addCards, removeCard, resizeCard, setEditing, resetLayout } = __req('js/state/layoutStore.js');
 const { currentColumns } = __req('js/lib/sizes.js');
 const { animate, prefersReducedMotion } = __req('js/lib/motion.js');
 
 mountIconSprite()
+
+/* A continuous animation on a page nobody is looking at is pure cost. The
+   jiggle is paused in CSS off this class rather than being torn down, so
+   returning to the tab resumes mid-cycle instead of snapping every card back
+   into one synchronised beat. */
+document.addEventListener('visibilitychange', () => {
+  document.body.classList.toggle('is-hidden', document.hidden)
+})
 
 /* ── greeting ───────────────────────────────────────────────────────────
    Left exactly as the artboard has it. A time-of-day greeting was the obvious
@@ -7102,23 +7637,41 @@ const sizePopover = createSizePopover({
 })
 
 const picker = createModulePicker({
-  onAdd(variantId, size) {
-    const card = addCard(variantId, size)
-    if (!card) return
-    /* Put the new card in front of the user rather than leaving them to find
-       it — it lands at the end of a grid that may be below the fold. */
+  /**
+   * A BATCH, NOT A CARD. The picker hands over everything in its basket in the
+   * order it was picked, and it arrives in one store write — see addCards() —
+   * so the packer places the whole group at once and the grid runs a single
+   * FLIP pass instead of one per card fighting the next.
+   */
+  onAdd(batch) {
+    const made = addCards(batch)
+    if (!made.length) return
+
     requestAnimationFrame(() => {
-      const slot = grid.slotFor(card.uid)
-      slot?.scrollIntoView({
+      /* Scroll to the FIRST of the new cards, not the last. They pack in order,
+         so the first is the top-left of the group — scrolling to the last would
+         put the arrival off the top of the screen on a batch that wraps a row. */
+      grid.slotFor(made[0].uid)?.scrollIntoView({
         behavior: prefersReducedMotion() ? 'auto' : 'smooth',
         block: 'center',
       })
-      animate(
-        slot,
-        [{ transform: 'scale(.86)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }],
-        { duration: 320, easing: 'cubic-bezier(.16,1,.3,1)' },
-      )
-      edit.announce('Module added to your home page.')
+
+      /* Staggered so a batch reads as several things arriving rather than one
+         block appearing. 45ms is under the threshold where it starts to feel
+         like a queue being processed. */
+      made.forEach((card, i) => {
+        const slot = grid.slotFor(card.uid)
+        if (!slot) return
+        animate(
+          slot,
+          [{ transform: 'scale(.86)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }],
+          { duration: 320, delay: i * 45, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' },
+        )
+      })
+
+      edit.announce(made.length === 1
+        ? 'Module added to your home page.'
+        : `${made.length} modules added to your home page.`)
     })
   },
 })
