@@ -449,12 +449,19 @@
   --sig:        var(--c-add-primary);    /* #00AFD6                           */
 
   /* ── semantic tones ────────────────────────────────────────────────────
-     Three states, defined once for the pale data surfaces and re-declared
-     inside a solid card where the ground is dark. A card is never repainted
-     by its worst line; only the figure or the dot takes the colour. */
-  --c-ok:    #2E9E6B;
-  --c-warn:  #B5761A;
-  --c-alert: #C4443A;
+     Three states, for text and dots sitting on a module's gradient. A card is
+     never repainted by its worst line; only the figure or the dot takes the
+     colour.
+
+     They are pitched to measure no worse than the white text they sit beside:
+     on Follow Up's petrol the alert tone reads 2.4:1 against white's 2.56:1.
+     Both are under AA, which is the documented condition of this palette
+     rather than anything these introduce — see the accessibility section of
+     the README, and the standing fix there (darken the light end of each
+     gradient) would lift these with everything else. */
+  --c-ok:    #B6F3D6;
+  --c-warn:  #FFE4BC;
+  --c-alert: #FFD6CE;
 
   /* The two figure sizes the layouts ask for, named for what they are rather
      than for the card they came from. Aliases, so the fluid definitions and
@@ -1326,14 +1333,14 @@ body.is-editing .section-head {
      entries down a rule. Each has its own section below and shares nothing
      with the others but the tokens above.
 
-   ═══ THE TWO FILLS ═════════════════════════════════════════════════════════
+   ═══ COLOUR IS THE ONE THING THAT DOES NOT VARY ════════════════════════════
 
-   solid   the module's full gradient, white text. Cards you go THROUGH.
-   soft    the SAME gradient under a white veil, dark text. Cards you READ.
-
-   The veil is a white layer composited over the gradient rather than a second
-   palette, so all seventeen modules get a correct pale surface in their own
-   hue from one rule, and adding a module needs no new colour.
+   Every card is its module's own gradient, white text; a photograph is the
+   only other fill. An earlier pass gave data cards a white-veiled version of
+   the gradient with dark text, and it went wrong exactly where a module's
+   colour is weakest — Follow Up's petrol and Approvals' slate came out grey.
+   A module is recognised by its fill, so the fill is the wrong place to look
+   for variety. The compositions provide it.
    ══════════════════════════════════════════════════════════════════════════ */
 
 .card {
@@ -1379,30 +1386,7 @@ body.is-editing .section-head {
 }
 
 /* ── the two fills ───────────────────────────────────────────────────────*/
-.card[data-fill='solid'] {
-  background: var(--card-bg, var(--g-users));
-  /* the same three states, lifted for a dark ground */
-  --c-ok:    #9BE8C3;
-  --c-warn:  #FFD9A0;
-  --c-alert: #FFC2B8;
-}
-
-/* The veil. 88% white over the module gradient leaves a surface that is
-   unmistakably the module's hue and quiet enough to carry dark text at full
-   contrast — which is what makes a data card legible where a saturated one
-   never is. */
-.card[data-fill='soft'] {
-  color: var(--ink);
-  background:
-    linear-gradient(rgba(255, 255, 255, .84), rgba(255, 255, 255, .84)),
-    var(--card-bg, var(--g-users));
-  box-shadow: inset 0 0 0 1px rgba(31, 65, 91, .07);
-}
-@media (hover: hover) {
-  .card[data-fill='soft']:hover {
-    box-shadow: inset 0 0 0 1px rgba(31, 65, 91, .07), var(--shadow-card);
-  }
-}
+.card[data-fill='solid'] { background: var(--card-bg, var(--g-users)); }
 
 /* ── the photograph ──────────────────────────────────────────────────────*/
 .card__media {
@@ -1462,9 +1446,6 @@ body.is-editing .section-head {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* on a soft card the glyph would be white on near-white, so it takes the ink */
-.card[data-fill='soft'] .c-head__icon img { filter: brightness(0) saturate(100%) opacity(.62); }
-
 /* ══ LAYOUT · door ════════════════════════════════════════════════════════
    Glyph at the top, name at the foot, the space between doing the work. The
    artboard's own module tile. ══════════════════════════════════════════════ */
@@ -1662,12 +1643,10 @@ body.is-editing .section-head {
   height: 10px;
   margin-top: var(--s4);
   border-radius: var(--r-pill);
-  background: rgba(31, 65, 91, .1);
+  background: rgba(255, 255, 255, .26);
   overflow: hidden;
 }
-.card[data-fill='solid'] .l-progress__track { background: rgba(255, 255, 255, .26); }
-.l-progress__track i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--card-bg); }
-.card[data-fill='solid'] .l-progress__track i { background: #FFFFFF; }
+.l-progress__track i { display: block; height: 100%; border-radius: var(--r-pill); background: #FFFFFF; }
 .l-progress__caption { margin-top: var(--s2); font-size: var(--fs-label); font-weight: 550; opacity: .7; }
 
 /* ══ LAYOUT · timeline ════════════════════════════════════════════════════
@@ -3464,12 +3443,28 @@ const PURPOSES = {
 
 const PRIORITY_RANK = { primary: 0, secondary: 1, optional: 2 }
 
-/** Which fill family a layout belongs to. See the note above. */
+/**
+ * Which fill a layout gets. Every card is its module's own gradient; only a
+ * photographic card is anything else.
+ *
+ * THERE WAS A THIRD, AND IT WAS A MISTAKE. Data cards were given a `soft`
+ * fill — the same gradient under a white veil, with dark text — on the reading
+ * that a statistics card wants a calm surface. On a vivid module it worked. On
+ * Follow Up's petrol and Approvals' slate, which are desaturated to begin
+ * with, the veil did not soften the colour, it removed it: two grey cards on a
+ * page whose whole point is that a module is recognisable by its fill.
+ *
+ * The variety was never supposed to come from the fill. It comes from the
+ * composition — a queue looks nothing like a timeline whatever colour they
+ * are — and the fill's job is the opposite one, holding a module's cards
+ * together. So there are two fills now, and colour is not one of the things
+ * that varies.
+ */
 const LAYOUT_FILL = {
-  door: 'solid', compact: 'solid', actions: 'solid',
   photo: 'image',
-  stat: 'soft', metrics: 'soft', chart: 'soft', queue: 'soft',
-  status: 'soft', progress: 'soft', timeline: 'soft', recent: 'soft',
+  door: 'solid', compact: 'solid', actions: 'solid', stat: 'solid',
+  metrics: 'solid', chart: 'solid', queue: 'solid', status: 'solid',
+  progress: 'solid', timeline: 'solid', recent: 'solid',
 }
 
 /* Every module's plain door, at the module's own gradient. */

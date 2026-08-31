@@ -170,14 +170,18 @@ its own markup, its own hierarchy and its own fill:
 | `recent` | the objects you were last working on |
 | `actions` | two to four controls, and the controls are the content |
 
-**Fill is part of the composition, not decoration.** `solid` is the module's
-gradient with white text — cards you go *through*. `soft` is the same gradient
-under an 84% white veil with dark text — cards you *read*. One module therefore
-has bold tiles and quiet data surfaces in the same hue, which is where most of
-the visible variety comes from. The veil is a white layer composited over the
-gradient rather than a second palette, so all seventeen modules get a correct
-pale surface in their own hue from one rule and a new module needs no new
-colour.
+**Colour is the one thing that does not vary.** Every card is its module's own
+gradient with white text; a photograph is the only other fill.
+
+There was a third, briefly, and it was a mistake worth recording. Data cards
+were given a `soft` fill — the same gradient under a white veil, dark text — on
+the reading that a statistics card wants a calm surface. On a vivid module it
+worked. On Follow Up's petrol and Approvals' slate, which are desaturated to
+begin with, the veil did not soften the colour, it **removed** it: two grey
+cards on a page whose whole premise is that a module is recognisable by its
+fill. The variety was never supposed to come from the fill — a queue looks
+nothing like a timeline whatever colour they are — and the fill's job is the
+opposite one, holding a module's cards together.
 
 What every card still shares: Inter, one type scale, 16px radius, the 4px
 spacing scale, the exported Figma glyphs, one hover lift, one press, and the
