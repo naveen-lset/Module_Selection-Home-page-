@@ -319,54 +319,6 @@
                   rgb(31, 81, 91) 84.2%,
                   rgb(31, 81, 91) 94.0%);
 
-  /* ── 3b · the legibility veil ───────────────────────────────────────────
-     NO INK IN THIS PRODUCT CLEARS AA ON ANY OF THE SIXTEEN FILLS ABOVE.
-     Measured over the whole palette: at its lightest stop the best of them
-     (Hospital) reaches 3.78:1 against white and the worst (Parivesh, Reports)
-     1.49:1, where AA asks 4.5:1 of body text. Ten of the sixteen clear it at
-     NO point on the card, so it is not a defect a layout can move text away
-     from. See the accessibility section of the README for the full table.
-
-     Each fill therefore carries a flat black veil, one alpha per module, each
-     the least darkening that brings that module's LIGHTEST stop to 4.55:1 —
-     the margin is so that rounding to three places cannot land under 4.5. The
-     lightest stop is the card's worst point, so if it passes, every point does.
-
-     BLACK, NOT THE --scrim-band GREY. Both can reach 4.5:1, but multiplying
-     toward black scales chroma while mixing toward grey collapses it: at equal
-     contrast the grey needs .60 and keeps 38% of the palette's saturation,
-     black needs .44 and keeps 59%.
-
-     PER MODULE, NOT ONE SHARED VALUE. A single veil would have to satisfy
-     Parivesh and would then spend that same darkening on Hospital, which needs
-     half of it. This way the five quietest fills are barely touched.
-
-     SIZED TO THE SEMANTIC TONES, NOT TO WHITE. --c-ok, --c-warn and --c-alert
-     are tinted, and on a dark ground white is the lightest possible ink — so a
-     tint can only measure worse. Sizing to white would leave every toned run
-     failing. That is what these alphas cost: sized to white alone they would
-     average .30 rather than .42.
-
-     These are computed, not chosen. Changing a gradient, or adding a fourth
-     tone lighter than these three, means recomputing here — or the card
-     silently stops conforming. */
-  --k-hospital:      0.250;
-  --k-species:       0.305;
-  --k-users:         0.314;
-  --k-pharmacy:      0.338;
-  --k-followup:      0.338;
-  --k-security:      0.369;
-  --k-fetal:         0.437;
-  --k-diet:          0.440;
-  --k-mortality:     0.449;
-  --k-medical:       0.452;
-  --k-administer:    0.492;
-  --k-parivesh-wide: 0.495;
-  --k-lab:           0.511;
-  --k-eggs:          0.515;
-  --k-parivesh:      0.535;
-  --k-reports:       0.535;
-
 
   /* The scrim under a label on a photographic card. Figma draws it as a fixed
      113px band across the bottom with a 2px backdrop blur — not a full-height
@@ -1434,18 +1386,7 @@ body.is-editing .section-head {
 }
 
 /* ── the two fills ───────────────────────────────────────────────────────*/
-/* The veil is a second BACKGROUND LAYER, not an ::before. A pseudo-element
-   would have to be positioned to cover the card, and a positioned z-index:0
-   box paints above the in-flow content it is meant to sit under — every one of
-   the twelve layout roots would then need its own z-index to climb back over
-   it. Two background layers on one element cannot get that wrong: both are
-   behind all content, always. The alphas are the --k-* set in the palette. */
-.card[data-fill='solid'] {
-  background:
-    linear-gradient(rgba(0, 0, 0, var(--card-scrim, .535)),
-                    rgba(0, 0, 0, var(--card-scrim, .535))),
-    var(--card-bg, var(--g-users));
-}
+.card[data-fill='solid'] { background: var(--card-bg, var(--g-users)); }
 
 /* ── the photograph ──────────────────────────────────────────────────────*/
 .card__media {
@@ -5052,14 +4993,7 @@ function renderCard(variant, opts = {}) {
   /* The module's Figma fill and glyph size. A variation may override either —
      the wide Parivesh card is drawn at a different gradient angle. */
   const gradient = variant.gradient || mod?.gradient
-  if (gradient) {
-    el.style.setProperty('--card-bg', `var(${gradient})`)
-    /* Every fill carries a legibility veil sized to its own lightest stop, so
-       `--g-lab` is darkened by `--k-lab`. The fallback is the heaviest alpha in
-       the set: a fill added without its partner is over-veiled rather than
-       silently illegible. */
-    el.style.setProperty('--card-scrim', `var(${gradient.replace('--g-', '--k-')}, .535)`)
-  }
+  if (gradient) el.style.setProperty('--card-bg', `var(${gradient})`)
   const iconSize = variant.iconSize || mod?.iconSize
   if (iconSize) el.style.setProperty('--icon-size', `${iconSize}px`)
 

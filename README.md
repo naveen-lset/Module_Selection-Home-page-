@@ -697,8 +697,9 @@ stop of all sixteen gradients was walked analytically and every ink the layouts
 put on them composited against it; and then the whole catalogue was rendered and
 the painted pixels sampled directly. The two agree.
 
-**The gradient cards were fixed in this pass. The photographs were not** — see
-*Still outstanding* at the end.
+**Nothing here is fixed.** A remedy was built and reverted — see *The remedy
+was built, measured, and taken back out*. The gradients render exactly as Figma
+drew them.
 
 ### Before — white text cleared AA on none of the sixteen fills
 
@@ -755,77 +756,67 @@ A 55%-opacity white is a far weaker ink than white, and it is used on the same
 fills. Sizing any fix to full-opacity white — the obvious move — leaves every one
 of these runs still failing.
 
-### What it cost, and what was done
+### The remedy was built, measured, and taken back out
 
-The remedy is a flat black veil composited over each fill as a second
-background layer, one alpha per module, each sized so that module's *lightest*
-stop — its worst point — clears 4.55:1 against every ink the cards use. The
-margin is there so that rounding to three places cannot land under 4.5.
+A full fix was implemented and then reverted on the project owner's
+instruction. It is written up here because the measurements are the useful
+part and because the next person will otherwise propose it again.
 
-Three decisions inside that, each measured rather than chosen:
+**What it was.** A flat black veil composited over each fill as a second
+background layer, one alpha per module, each sized so that module's lightest
+stop — its worst point — cleared 4.55:1 against every ink the cards use. Black
+rather than a grey scrim: both reach 4.5:1, but multiplying toward black scales
+chroma while mixing toward grey collapses it, so at equal contrast the grey
+needs .60 and keeps 38% of the palette's saturation where black needs .44 and
+keeps 59%. Per module rather than one shared value, because a single veil has to
+satisfy Parivesh and would then spend that same darkening on Hospital, which
+needs half of it. Sized to the semantic tones rather than to white, because the
+tones are tinted and on a dark ground white is the lightest possible ink — a
+tint can only measure worse, so sizing to white leaves every toned run failing.
 
-**Black, not the `--scrim-band` grey.** Both reach 4.5:1, but multiplying toward
-black scales chroma while mixing toward grey collapses it. At equal contrast the
-grey needs .60 and keeps 38% of the palette's saturation; black needs .44 and
-keeps 59%.
+**It worked.** 530 gradient-card text runs, worst pixel 4.79:1, none below AA,
+cross-checked against 64,064 ink × point combinations across the palette.
 
-**Per module, not one shared value.** A single veil would have to satisfy
-Parivesh and would then spend that same darkening on Hospital, which needs half
-of it. Per module, the five quietest fills are barely touched.
+**And it was the wrong trade.** The mean darkening was .42 and the brightest
+fills took more than half: Lab went from gold to olive, Mortality from coral to
+brick, Eggs from bright cyan to dark teal, Administer from sage to grey. Pairs
+of modules closer than dE 10 went from 5 to 12 — Administer and Security were
+20.2 apart and became 4.9. Holding every fill to the same contrast ceiling means
+holding them to the same luminance, and what is left to tell modules apart is
+hue alone. On a page whose entire premise is that a module is recognisable by
+its colour, that is not a tuned design, it is a different and worse one.
 
-**Sized to the semantic tones, not to white.** Sizing to white alone would
-average .30 and leave every toned run failing.
+This is exactly the trap *The palette is closed* warns about, and it was walked
+into anyway. **The instruction on this project is to build the Figma artboard
+exactly. Contrast conformance does not override it.** If the fills are ever to
+change, that decision belongs in the Figma file, not in a CSS overlay applied
+after the fact.
 
-| | mean veil | worst fill |
-|---|---|---|
-| sized to white alone — *insufficient* | .30 | Parivesh .44 |
-| **sized to the tones — what shipped** | **.42** | Parivesh .535 |
-| had the .55 opacity floor been kept | .78 | Parivesh .83 |
+### What was kept, and what it bought
 
-Two things had to change before the veil could work at all:
+Two things survived the revert, both of which leave every gradient untouched:
 
-- **The opacity hierarchy is gone.** Eleven rules faded white to carry
-  hierarchy; every one of them now runs at full opacity and leans on the size
-  and weight difference that was already there beside it. Nothing else was
-  needed — in all eleven cases the primary sibling was already larger, heavier,
-  or both.
-- **The Quick Actions chip is a dark plate.** It was 18% white, which lightened
-  the ground under its own white label and undid the veil exactly where a
-  control needs contrast most — 4.03:1 at rest, 3.55:1 on hover, failing on all
-  sixteen fills. The same tint of black instead reads about 8:1. Hover deepens
-  the plate rather than lightening it.
+- **The opacity hierarchy is gone.** Eleven rules faded white text to between
+  55% and 78% to express hierarchy — `.l-recent__when` at .55 was the worst —
+  which is a weaker ink on the same fills, and it was the larger half of the
+  defect. All eleven now run at full opacity and lean on the size and weight
+  difference already sitting beside them.
+- **The Quick Actions chip is a dark plate**, not 18% white. The light plate was
+  lightening the ground beneath its own white label: 2.38:1, worse than the bare
+  card at 2.99:1. The same tint of black reads 4.26:1.
 
-### After — measured from the pixels, not modelled
+Measured over the whole catalogue, before and after, sampling the true painted
+ground beneath every run:
 
-`antz.allVariants()` at 1024px, every card rendered twice: once normally and
-once with every glyph made transparent, so the second pass is the true painted
-ground. Each text run's box was sampled against the ground beneath it.
-
-| | runs | worst single pixel | below AA |
+| | runs below AA | below 3:1 | worst run |
 |---|---|---|---|
-| **Gradient cards** | **530** | **4.79:1** | **0** |
-| Photographs | 16 | 2.67:1 | 10 |
+| before | 483 of 530 | 305 | 1.43:1 |
+| **now** | **472 of 530** | **291** | **1.49:1** |
 
-The tightest runs are the alert tone — *"Overdue"* at 4.79:1, *"4 overdue"* and
-*"6 important"* at 4.95:1 — which is the veil doing exactly what it was sized to
-do. Checked independently against the palette itself: 64,064 ink × point
-combinations across all sixteen gradients, none below 4.5:1.
-
-### The cost nobody asks about — modules look more alike
-
-Holding every fill to the same contrast ceiling means holding them to roughly
-the same luminance, and what is left to tell them apart is hue alone. Measured
-at the gradient midpoint, pairs closer than dE 10 went from **5 to 12**.
-
-One pair matters: **Administer and Security were dE 20.2 apart and are now
-4.9** — they took different veils (.492 and .369) onto different base colours
-and landed on nearly the same grey-green. Two of the other close pairs are not
-new: Follow Up and Pharmacy share a gradient outright, as do Parivesh and
-Reports, so those were already identical.
-
-This is worth knowing because the premise of the page is that a module is
-recognisable by its fill. If Administer and Security need separating again, the
-lever is hue rather than lightness — the veil has spent the lightness.
+**That is a marginal improvement and it is not presented as more.** The page
+does not meet AA on its card fills and will not while the palette is the
+artboard's. The finding stands as documented, not fixed — which is what it has
+been for this project's whole life, now with numbers behind it.
 
 ### Still outstanding — the photographs
 
@@ -858,6 +849,7 @@ in edit mode.
 | Gallery | 17 modules in the rail, always · module → widget → size → add, end to end |
 | Rail anchored | **768 / 834 / 1024 / 1440px** · both panes live, back button hidden, rail still visible after choosing a module · add flow end-to-end at 768 and 834 |
 | Palette | **16 gradients, all from the Figma file** · 0 invented |
+| Palette untouched | **0 `rgb()` stops changed** in the whole history of the contrast work — the veil was an overlay, never an edit to a gradient. After the revert, every card fill renders **pixel-identical** to the pre-contrast build; the only pixels that differ across the whole page are the secondary text runs that are no longer faded |
 | Header planting | 1440 / 834 / 500px · masked fade, no hard edge, no gradient block · **0 horizontal scroll** |
 | Planting vs readability | greeting measured before/after · mean **2.65:1 → 2.65:1** and 10.16 → 10.15; worst pixel 2.62 → 2.48 and 10.04 → 8.91 |
 | Planting stacking | hero banner paints **over** the 440px band at 1440 / 834 / 500 · hit-tested, not eyeballed |
