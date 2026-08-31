@@ -145,31 +145,72 @@ can do, then what just happened. Medical is the only module that earns all five.
 
 They stay searchable: typing "attention" or "monitor" finds the right widgets.
 
-### A card is a composition, not a design
+### Twelve layouts, two fills, one design language
 
-There is no `switch` with seventy-one arms. A card is a **fill** — the module's
-gradient, or a photograph — carrying a **head** and then a list of **blocks**:
+The previous version of this file gave every card the same skeleton — a label
+row, then a stack of content blocks — and varied only what went in the stack.
+It read well as data and it failed as design: Medical's five cards came out as
+five green rectangles with different words in them, and no preview in the
+picker told you anything its caption did not.
 
-```
-Species Statistics    head · hero · hero
-Hospital Capacity     head · count · bar
-Medical Requests      head · count · rows(breakdown) · link
-Medical Activity      head · rows(timeline) · link
-Mortality Overview    head · count · delta
-Pharmacy Actions      head · actions
-```
+A variation now declares a **layout**, and a layout is a whole composition with
+its own markup, its own hierarchy and its own fill:
 
-Eleven blocks — `hero · metrics · count · note · status · rows · bar · trend ·
-delta · actions · link` — and two treatments cover all seventy-one. A card looks
-different from its neighbour because it holds different blocks, not because it
-has its own stylesheet. A card with **no** blocks is a door; nothing declares
-that, having nothing to say is what makes it one.
+| | |
+|---|---|
+| `door` · `compact` | a glyph and the module name — the bold coloured tile, upright or on its side |
+| `photo` | a photograph with the name in a scrim band |
+| `stat` | one number, as large as the card allows |
+| `metrics` | two to four figures side by side, separated by space alone |
+| `chart` | a trend line that owns the card, summary beneath |
+| `queue` | a total, then named rows with figures on a common right edge |
+| `status` | dotted rows — a state, not a measurement |
+| `progress` | a ratio, a full-width track, a caption |
+| `timeline` | dated entries down a hairline rule |
+| `recent` | the objects you were last working on |
+| `actions` | two to four controls, and the controls are the content |
 
-The vertical rhythm is one rule: the block stack is `justify-content:
-space-between`. That is why Species' two figures spread to the top and bottom of
-the card exactly as the artboard draws them, Hospital's capacity figure sits
-above its bar, and a queue card puts its count at the top and *View Requests →*
-on the bottom edge. No card declares its own spacing. The space does it.
+**Fill is part of the composition, not decoration.** `solid` is the module's
+gradient with white text — cards you go *through*. `soft` is the same gradient
+under an 84% white veil with dark text — cards you *read*. One module therefore
+has bold tiles and quiet data surfaces in the same hue, which is where most of
+the visible variety comes from. The veil is a white layer composited over the
+gradient rather than a second palette, so all seventeen modules get a correct
+pale surface in their own hue from one rule and a new module needs no new
+colour.
+
+What every card still shares: Inter, one type scale, 16px radius, the 4px
+spacing scale, the exported Figma glyphs, one hover lift, one press, and the
+whole card as the target. **Same design language, different information
+composition.**
+
+### No "View →" anywhere
+
+The whole card is the link. Every informational card used to end in a
+"View Requests →" that repeated what clicking anywhere already did, cost a line
+of vertical space, and competed with the data above it. They are gone. Quick
+Actions is the exception, and its controls are the content rather than an
+afterthought at the foot.
+
+### Add Module is at the top
+
+It was a tile packed after the last card, on the theory that it lands in the
+first free slot rather than in a bar you go looking for. On a fifteen-card page
+that theory is wrong: the tile sits below the fold, and the one action a person
+opens Edit Modules to perform is the one they have to scroll to find.
+
+It is now a header action — `Edit Modules · ＋ Add Module · Done` — and on a
+phone, where those three do not share a line, the row wraps and Add Module takes
+the full width underneath, still above the grid. It is dressed as an action,
+not as a module: an outlined control sized like Done beside it, because a filled
+or card-shaped button there competes with the things it adds.
+
+Two bugs came out of that move, both only visible once the header could wrap.
+The header had a hard-coded `height: 44px` in edit mode, so the wrapped row
+painted outside its own box; and `.edit-hint` carries `margin-top: -12px`, tuned
+for a header that never wrapped, which put the actions 4px inside the hint's
+first line. Measured at 1440 / 1024 / 768 / 500: header 44px (94 when wrapped),
+zero overlap with the hint or the grid.
 
 ### Attention is not a red card
 

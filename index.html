@@ -399,11 +399,12 @@
      Both are derived from the Figma step rather than picked: count is 44 × 0.7
      and metric is 44 × 0.61, which keeps the same 1.15 ratio the rest of the
      scale walks on. The `-sm` pair is the same figure on a one-row card. */
-  --fs-count:     clamp(24px, 1.36rem + .95vw, 34px);
-  --fs-count-sm:  clamp(21px, 1.19rem + .74vw, 29px);
   --fs-metric:    clamp(20px, 1.14rem + .68vw, 27px);
   --fs-metric-sm: clamp(17px, .99rem + .52vw, 23px);
 
+  /* The title line on a data card. Smaller than a module name on a door —
+     that is a label for the whole card, this is a heading over content. */
+  --fs-card-title: clamp(14px, .8398rem + .27vw, 19px);
   --fs-body:    clamp(14px, .8848rem + .18vw, 17px);   /* Figma 16 @1024 */
   --fs-label:   clamp(12.5px, .779rem + .15vw, 15px);   /* Figma 14 @1024 */
   --fs-micro:   clamp(11px, .6732rem + .12vw, 13px);   /* Figma 12 @1024 */
@@ -446,6 +447,20 @@
   --ink-4:      #9AAAB4;                 /* decorative glyphs only, never text */
 
   --sig:        var(--c-add-primary);    /* #00AFD6                           */
+
+  /* ── semantic tones ────────────────────────────────────────────────────
+     Three states, defined once for the pale data surfaces and re-declared
+     inside a solid card where the ground is dark. A card is never repainted
+     by its worst line; only the figure or the dot takes the colour. */
+  --c-ok:    #2E9E6B;
+  --c-warn:  #B5761A;
+  --c-alert: #C4443A;
+
+  /* The two figure sizes the layouts ask for, named for what they are rather
+     than for the card they came from. Aliases, so the fluid definitions and
+     the 1024 freeze below stay in one place. */
+  --fs-hero-num:    var(--fs-stat);
+  --fs-hero-num-sm: var(--fs-stat-sm);
   /* The Edit affordance is the one element on this page that is NOT in the
      artboard, so it is the one place I am free to fix contrast without altering
      the design. Figma's #00AFD6 measures 2.40:1 on the mint canvas; this is the
@@ -558,11 +573,10 @@
     --fs-label:     14px;      /* Figma 14 */
     --fs-micro:     12px;      /* Figma 12 */
     /* no Figma reference — the artboard has no card that shows these */
-    --fs-stat-sm:   30.69px;
-    --fs-count:     31.49px;
-    --fs-count-sm:  26.62px;
-    --fs-metric:    25.2px;
-    --fs-metric-sm: 21.17px;
+    --fs-card-title: 17px;
+    --fs-stat-sm:    30.69px;
+    --fs-metric:     25.2px;
+    --fs-metric-sm:  21.17px;
   }
 }
 
@@ -814,6 +828,66 @@ button { font: inherit; color: inherit; }
 @supports not ((-webkit-mask-image: linear-gradient(#000, transparent)) or
                (mask-image: linear-gradient(#000, transparent))) {
   .foliage { display: none; }
+}
+
+/* ── ADD MODULE · the primary action of Edit Modules ─────────────────────
+   Beside the section title, where it is the first thing in the mode after the
+   mode's own name. It was a tile at the end of the grid, which on a fifteen-
+   card page put it below the fold.
+
+   Dressed as an ACTION, not as a module: an outlined control, sized like Done
+   beside it. A filled or coloured button here would compete with the cards it
+   adds, and a card-shaped one would be mistaken for a module. */
+.add-module-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 var(--s4) 0 var(--s3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--petrol-800);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+              transform var(--t-fast) var(--ease);
+}
+.add-module-btn .icon { width: 17px; height: 17px; }
+.add-module-btn:hover { background: var(--petrol-050); border-color: var(--petrol-200); }
+.add-module-btn:active { transform: scale(.97); }
+
+/* On a phone the title, the action and Done do not share a line. The row wraps
+   and Add Module takes the full width underneath — still above the grid, which
+   is the point. */
+@media (max-width: 599px) {
+  .section-head { flex-wrap: wrap; }
+  .section-head--editing .section-head__actions { width: 100%; order: 3; margin-top: var(--s3); }
+  .section-head--editing .add-module-btn { flex: 1 1 auto; justify-content: center; height: 44px; }
+
+  /* THE HEADER HAS TO GROW WHEN THE ROW WRAPS.
+     At rest it is `height: 0`, so the grid sits exactly where Figma puts it,
+     and editing animates it to a fixed 44px. That fixed height is wrong the
+     moment the actions take a second line: the box stays 44px, `overflow:
+     visible` lets the buttons paint outside it, and they land on top of the
+     drag hint.
+
+     The `--editing` class is on the selector to win on specificity rather than
+     on order — this block sits in the home-chrome stylesheet and the 44px rule
+     is in the edit-mode one, several hundred lines later, so an equally
+     specific override here would lose. Height `auto` costs the open/close
+     animation on phones, which is a fair price: a control drawn over a line of
+     text is a bug, a header that snaps open is not. */
+  body.is-editing .section-head.section-head--editing {
+    height: auto;
+    min-height: 44px;
+  }
+  /* The hint is pulled up 12px to sit tight under a single-line header. Once
+     the header wraps and grows, that negative margin is 12px of collision
+     instead — measured, the actions ended 4px inside the hint's first line. */
+  body.is-editing .section-head--editing + .edit-hint { margin-top: 0; }
 }
 
 /* ── 3 · greeting ────────────────────────────────────────────────────────
@@ -1235,34 +1309,31 @@ body.is-editing .section-head {
 /* ══════════════════════════════════════════════════════════════════════════
    MODULE CARDS
    ──────────────────────────────────────────────────────────────────────────
-   Two treatments and one composition rule.
+   Twelve layouts, two fills, one design language.
 
-     gradient   a tinted card, at the module's own Figma fill
-     image      a photograph
+   WHAT IS SHARED — and this is the whole of the family resemblance:
+     type          Inter, one scale, one set of weights
+     radius        16px, everywhere
+     spacing       the 4px scale, and only values from it
+     icon          the exported Figma glyph, one style
+     colour        the module's own gradient, in one of two treatments
+     elevation     one hover lift, one press
+     interaction   the whole card is the target
 
-   and on top of either, a card is a DOOR (icon at the top, name at the foot)
-   or a PANEL (a label row, then a stack of blocks). Figma draws every card at
-   16px padding inside a 16px radius, with the icon and the label pushed to
-   opposite ends by a single `justify-between` column. That one rule is most of
-   the card system; the rest is which blocks go inside.
+   WHAT IS NOT — and this is where the variety comes from:
+     the composition. A queue is a total and right-aligned rows; a stat is one
+     number under a title; a chart is a plot that owns the card; a timeline is
+     entries down a rule. Each has its own section below and shares nothing
+     with the others but the tokens above.
 
-   THE BLOCK VOCABULARY, which is the whole of the visual system:
+   ═══ THE TWO FILLS ═════════════════════════════════════════════════════════
 
-     stat / hero      a large figure and its caption
-     blk-metrics      two to four medium figures
-     blk-count        a headline that reads as a sentence — "24 Pending"
-     blk-note         a quiet second line
-     blk-status       a dot and a phrase
-     blk-rows         named rows: breakdown · list · timeline · schedule
-     blk-bar          a filled track and its caption
-     blk-trend        a small column chart and its figures
-     blk-delta        a movement chip against the previous period
-     blk-actions      up to three pills
-     blk-link         the way into the module
+   solid   the module's full gradient, white text. Cards you go THROUGH.
+   soft    the SAME gradient under a white veil, dark text. Cards you READ.
 
-   Seventy-one cards are built from these eleven. Nothing here is per-module and
-   nothing here is per-variant: a card looks different from its neighbour
-   because it holds different blocks, not because it has its own stylesheet.
+   The veil is a white layer composited over the gradient rather than a second
+   palette, so all seventeen modules get a correct pale surface in their own
+   hue from one rule, and adding a module needs no new colour.
    ══════════════════════════════════════════════════════════════════════════ */
 
 .card {
@@ -1271,7 +1342,6 @@ body.is-editing .section-head {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   width: 100%;
   height: 100%;
   padding: var(--pad-card);
@@ -1283,13 +1353,9 @@ body.is-editing .section-head {
   cursor: pointer;
   background: transparent;
   -webkit-tap-highlight-color: transparent;
-  /* A card may be an anchor (see ModuleCard.js). The reset hands `button` its
-     font and colour; a link needs telling, and needs the underline taken off.
-     `touch-callout` is the one that matters on the target device: without it an
-     iPad long-press on a linked card raises Safari's link preview instead of
-     entering edit mode, which is the gesture this product is arranged by. */
+  /* a card may be an anchor; the reset only dresses `button` */
   font: inherit;
-  color: inherit;
+  color: var(--on-dark);
   text-decoration: none;
   -webkit-touch-callout: none;
   transition: box-shadow var(--t-base) var(--ease), transform var(--t-base) var(--ease-out);
@@ -1300,36 +1366,43 @@ body.is-editing .section-head {
 }
 .card:active { transform: translateY(0) scale(.985); }
 
-/* ── the fill ─────────────────────────────────────────────────────────────
-   Each module writes its Figma gradient into --card-bg (see modules.js), and
-   this is the only place it is consumed. Both a door and a panel take it; only
-   a photographic card does not, because it has a photograph instead. */
-.card[data-treatment='gradient'] { background: var(--card-bg, var(--g-users)); }
-
-/* ── ATTENTION, WITHOUT A RED CARD ────────────────────────────────────────
-   The brief is firm about this twice: Hospital's critical card must use
-   "subtle attention styling, not a full red background", and "do not make every
-   Mortality card red". Both are the same mistake — a module repainted by its
-   worst news stops being recognisable, and a grid where four cards are red
-   trains everyone to stop seeing red.
-
-   So an attention card keeps its module's own fill and says so with a warning
-   glyph in its label row and the warm accent on its note. It used to carry a
-   hairline ring as well; that is gone. On a grid where only one or two cards
-   are ever in this state the ring read as a card that had been selected rather
-   than one that needed attention, and the glyph was already doing the work.
-   The card now takes the same hover shadow as every other. */
-.card__flag {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .18);
-  color: #FFE3B4;
+/* ── PADDING BY SIZE, not by breakpoint ──────────────────────────────────
+   A small card and a full-width one are different objects and want different
+   air. 16 / 20 / 24 off the spacing scale. */
+.card[data-size='medium'] { padding: var(--s5); }
+.card[data-size='large'],
+.card[data-size='tall'],
+.card[data-size='full'] { padding: var(--s6); }
+@media (max-width: 767px) {
+  .card, .card[data-size='medium'] { padding: var(--s4); }
+  .card[data-size='large'], .card[data-size='tall'], .card[data-size='full'] { padding: var(--s5); }
 }
-.card__flag-icon { width: 13px; height: 13px; }
+
+/* ── the two fills ───────────────────────────────────────────────────────*/
+.card[data-fill='solid'] {
+  background: var(--card-bg, var(--g-users));
+  /* the same three states, lifted for a dark ground */
+  --c-ok:    #9BE8C3;
+  --c-warn:  #FFD9A0;
+  --c-alert: #FFC2B8;
+}
+
+/* The veil. 88% white over the module gradient leaves a surface that is
+   unmistakably the module's hue and quiet enough to carry dark text at full
+   contrast — which is what makes a data card legible where a saturated one
+   never is. */
+.card[data-fill='soft'] {
+  color: var(--ink);
+  background:
+    linear-gradient(rgba(255, 255, 255, .84), rgba(255, 255, 255, .84)),
+    var(--card-bg, var(--g-users));
+  box-shadow: inset 0 0 0 1px rgba(31, 65, 91, .07);
+}
+@media (hover: hover) {
+  .card[data-fill='soft']:hover {
+    box-shadow: inset 0 0 0 1px rgba(31, 65, 91, .07), var(--shadow-card);
+  }
+}
 
 /* ── the photograph ──────────────────────────────────────────────────────*/
 .card__media {
@@ -1343,17 +1416,59 @@ body.is-editing .section-head {
   display: block;
   transition: transform var(--t-slow) var(--ease-out);
 }
-@media (hover: hover) {
-  .card[data-treatment='image']:hover .card__media { transform: scale(1.035); }
-}
-
-/* Figma lays a flat wash over some photographs — 0.4 on the hero, 0.2 on Diet
-   & Kitchen and Follow Up, none on Hospital or Species. It is a separate layer
-   from the label scrim below, and both can be present. */
+@media (hover: hover) { .card[data-fill='image']:hover .card__media { transform: scale(1.035); } }
 .card__wash { position: absolute; inset: 0; z-index: 1; border-radius: var(--r-card); }
 
-/* ── the body ────────────────────────────────────────────────────────────*/
-.card__body {
+/* ── the glyph ───────────────────────────────────────────────────────────
+   Figma sizes these per module — 44 for most, 38 Hospital, 34 Users, 32
+   Security, 28 Species, 24 Follow Up. The size travels with the module. */
+.card__icon { position: relative; flex: none; display: block; width: var(--icon-size, 44px); height: var(--icon-size, 44px); }
+.card__icon img { display: block; width: 100%; height: 100%; }
+
+/* Mortality and Fetal Death reuse one dead-fish glyph, rotated a quarter turn
+   and flipped inside a 44px box at a 4.162px offset. Figma's transform kept
+   rather than re-drawn, so both cards match the artboard. */
+.card__icon--fish { width: 44px; height: 44px; }
+.card__icon--fish img {
+  width: 39.838px; height: 39.838px; margin: 4.162px 0 0 4.162px;
+  transform: rotate(-90deg) scaleY(-1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE TITLE LINE
+   Every data card opens with the same small glyph and title. It is the one
+   thing the twelve compositions have in common, and it is what makes them
+   read as one family before anything else does.
+   ══════════════════════════════════════════════════════════════════════════ */
+.c-head {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex: none;
+  min-width: 0;
+  margin-bottom: var(--s3);
+}
+.c-head__icon { flex: none; width: 22px; height: 22px; display: block; }
+.c-head__icon img { width: 100%; height: 100%; display: block; }
+.c-head__text {
+  font-size: var(--fs-card-title);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* on a soft card the glyph would be white on near-white, so it takes the ink */
+.card[data-fill='soft'] .c-head__icon img { filter: brightness(0) saturate(100%) opacity(.62); }
+
+/* ══ LAYOUT · door ════════════════════════════════════════════════════════
+   Glyph at the top, name at the foot, the space between doing the work. The
+   artboard's own module tile. ══════════════════════════════════════════════ */
+.l-door {
   position: relative;
   z-index: 2;
   display: flex;
@@ -1361,89 +1476,47 @@ body.is-editing .section-head {
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  min-height: 0;
-  width: 100%;
-}
-
-/* A panel is a label row of fixed height and then everything else. */
-.card__body--panel { justify-content: flex-start; gap: var(--s3); }
-
-/* A TALL CARD PUTS AIR UNDER ITS TITLE. Twelve pixels is right on a one-row
-   card, where the whole content box is 132px and every pixel is spoken for; on
-   a two-row card it leaves the heading sitting on top of its own content. This
-   is deliberately scoped to `data-h='2'` rather than raised everywhere — the
-   one-row budget is tight enough that four more pixels of gap was the
-   difference between a bar caption showing and being clipped. */
-.card[data-h='2'] .card__body--panel { gap: var(--s5); }
-
-/**
- * THE BLOCK STACK IS `space-between`, AND THAT IS THE LAYOUT ENGINE.
- *
- * It is why one rule dresses six different cards correctly. Species' two heroes
- * spread to the top and bottom of the space, exactly as the artboard draws
- * them. Hospital's capacity card puts the figure at the top and the bar at the
- * foot. Medical's request queue puts the count at the top, the breakdown in the
- * middle and "View Requests →" on the bottom edge. A card with a single block
- * leaves it at the top, because `space-between` with one child is `flex-start`.
- *
- * No card declares its own vertical rhythm. The space does it.
- */
-.card__blocks {
-  display: flex;
-  flex: 1 0 0;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--s3);
   width: 100%;
   min-height: 0;
-  overflow: hidden;
 }
-
-/* ── icon ────────────────────────────────────────────────────────────────
-   Figma gives each module its own icon size — 44 for most, 38 for Hospital,
-   34 for Users, 32 for Security and small Parivesh, 28 for Species, 24 for
-   Follow Up. The size travels with the module, not with the card. */
-.card__icon {
-  position: relative;
-  flex: none;
-  display: block;
-  width: var(--icon-size, 44px);
-  height: var(--icon-size, 44px);
-}
-.card__icon img { display: block; width: 100%; height: 100%; }
-
-/* Mortality and Fetal Death reuse one dead-fish glyph, rotated a quarter turn
-   and flipped, inside a 44px box at a 4.162px offset. Figma's transform, kept
-   rather than re-drawn, so both cards match the artboard. */
-.card__icon--fish { width: 44px; height: 44px; }
-.card__icon--fish img {
-  width: 39.838px;
-  height: 39.838px;
-  margin: 4.162px 0 0 4.162px;
-  transform: rotate(-90deg) scaleY(-1);
-}
-
-/* ── label ───────────────────────────────────────────────────────────────*/
-.card__name {
+.l-door__name {
   font-size: var(--fs-card);
   font-weight: 500;
-  line-height: normal;
-  color: var(--on-dark);
+  line-height: 1.18;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* ══ LAYOUT · compact ═════════════════════════════════════════════════════ */
+.l-compact {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex: 1 0 0;
   min-width: 0;
-  max-width: 100%;
+}
+.l-compact__icon { flex: none; width: 34px; height: 34px; display: block; }
+.l-compact__icon img { width: 100%; height: 100%; display: block; }
+.l-compact__name {
+  font-size: var(--fs-card);
+  font-weight: 500;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ── the scrim band on a photographic door ───────────────────────────────
-   Figma's own construction: a 113px band pinned to the bottom edge, wider than
-   the card so its blur has no visible seam, with a 2px backdrop blur and a
-   gradient that is transparent at 5.68% and 70% black by 64.48%. The label
-   sits inside the band, not over the card.
-
-   A full-height overlay would have been simpler and would have muddied the top
-   of every photograph — which is the part Figma is showing off. */
+/* ══ LAYOUT · photo ═══════════════════════════════════════════════════════
+   Figma's construction: a 113px band pinned to the bottom edge, wider than the
+   card so its blur has no seam, transparent at 5.68% and 70% black by 64.48%.
+   A full-height overlay would be simpler and would muddy the top of every
+   photograph, which is the part the design is showing off. */
+.l-photo { position: relative; z-index: 2; display: flex; flex: 1 0 0; align-items: flex-start; }
 .card__band {
   position: absolute;
   bottom: 0;
@@ -1460,563 +1533,291 @@ body.is-editing .section-head {
   backdrop-filter: blur(2px);
   pointer-events: none;
 }
-.card__band .card__name { flex: 1 0 0; }
 .card[data-band-size='lg'] .card__band { padding: 61px var(--s5) var(--s5); }
-.card[data-band-size='lg'] .card__name { font-size: var(--fs-card-lg); }
+.card[data-band-size='lg'] .l-door__name { font-size: var(--fs-card-lg); }
 
-/* ── the label row on a panel ────────────────────────────────────────────
-   28px glyph, the title, and the attention flag if there is one. Figma's
-   Species card is the reference; every panel in the product now wears it, which
-   is what makes a Pharmacy queue card and the artboard's own statistics card
-   recognisable as the same object. */
-.card__label-row {
+/* the Species card: the two figures of the whole collection, over foliage */
+.l-photo-stat {
+  position: relative;
+  z-index: 2;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-  flex: none;
-}
-.card__label-row .card__icon { --icon-size: 28px; }
-.card__label-row .card__icon--fish { width: 28px; height: 28px; }
-.card__label-row .card__icon--fish img { width: 26px; height: 26px; margin: 2px 0 0 2px; }
-.card__label-row .card__name { flex: 1 0 0; }
-
-/* Panels sit on a photograph often enough that every one of them needs to stay
-   legible over one. A one-pixel shadow costs nothing on a gradient and saves
-   the Follow Up and Species cards. */
-.card[data-treatment='image'] .card__body--panel { text-shadow: 0 1px 8px rgba(0, 0, 0, .34); }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   BLOCK · hero  — the large figure
-   Figma's Species card: DM Sans Bold at 44px over a 16px caption. Every other
-   single-figure card in the product now uses it, at the same size, which is the
-   difference between a design system and a pile of cards.
-   ══════════════════════════════════════════════════════════════════════════ */
-.stat { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; color: var(--on-dark); width: 100%; }
-.stat__value {
-  font-family: var(--font-num);
-  font-weight: 700;
-  font-size: var(--fs-stat);
-  line-height: normal;
-  letter-spacing: -.02em;                   /* Figma −0.88px at 44px */
-  font-variant-numeric: tabular-nums;
-  font-variation-settings: 'opsz' 14;
-  white-space: nowrap;
-}
-.stat__label { font-size: var(--fs-body); font-weight: 400; line-height: normal; white-space: nowrap; }
-
-/* ══ BLOCK · metrics ══════════════════════════════════════════════════════
-   Two to four figures at a third the hero's weight. Laid out as a row that
-   wraps: on a 2×1 card four metrics come out as four narrow columns, on a 2×2
-   they fall into a 2×2 block, and neither arrangement is written down anywhere
-   — `flex-wrap` and a `min-width` do it, so a fifth metric would work too. */
-.blk-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s3) var(--s5);
-  width: 100%;
-  min-width: 0;
-}
-.metric {
-  display: flex;
+  flex: 1 0 0;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1 1 auto;
-  color: var(--on-dark);
+  min-height: 0;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .3);
 }
-.metric__value {
+.l-photo-stat__figures { display: flex; flex: 1 0 0; flex-direction: column; justify-content: space-between; }
+.figure { display: flex; flex-direction: column; gap: var(--s1); }
+.figure__value {
   font-family: var(--font-num);
   font-weight: 700;
-  font-size: var(--fs-metric);
-  line-height: 1.05;
-  letter-spacing: -.02em;
-  font-variant-numeric: tabular-nums;
-  font-variation-settings: 'opsz' 14;
-  white-space: nowrap;
-}
-.metric__label {
-  font-size: var(--fs-micro);
-  font-weight: 450;
-  line-height: 1.25;
-  opacity: .85;
-}
-/* A figure that is the bad news gets the warm accent — Hospital's 12 critical,
-   Parivesh's 2 returned. One figure per card, never the whole card. */
-.metric[data-tone='alert'] .metric__value { color: #FFE0AE; }
-
-/* ══ BLOCK · count ════════════════════════════════════════════════════════
-   "24 Pending". A statistic is a figure with a caption under it; this is a
-   sentence with a figure in it, and the difference matters — a queue length is
-   read as a state, not as a measurement. */
-.blk-count { display: flex; align-items: baseline; gap: 8px; color: var(--on-dark); min-width: 0; }
-.blk-count__value {
-  font-family: var(--font-num);
-  font-weight: 700;
-  font-size: var(--fs-count);
+  font-size: var(--fs-hero-num);
   line-height: 1;
   letter-spacing: -.02em;
   font-variant-numeric: tabular-nums;
   font-variation-settings: 'opsz' 14;
 }
-.blk-count__label {
-  font-size: var(--fs-body);
-  font-weight: 500;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.figure__label { font-size: var(--fs-body); font-weight: 400; }
 
-/* ══ BLOCK · note ═════════════════════════════════════════════════════════ */
-.blk-note {
-  font-size: var(--fs-label);
-  font-weight: 500;
-  line-height: 1.3;
-  color: rgba(255, 255, 255, .82);
+/* ══ LAYOUT · stat ════════════════════════════════════════════════════════
+   One number, its caption, and a quiet supporting line. Primary, secondary,
+   tertiary — and nothing given equal weight to anything else. ═══════════════ */
+.l-stat { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-stat__body { display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; gap: var(--s1); min-height: 0; }
+.l-stat__value {
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: var(--fs-hero-num);
+  line-height: 1;
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'opsz' 14;
 }
-.card[data-tone='attention'] .blk-note { color: #FFE3B4; }
+.l-stat__label { font-size: var(--fs-body); font-weight: 500; opacity: .78; }
+.l-stat__sub { flex: none; margin-top: var(--s3); font-size: var(--fs-label); opacity: .62; }
+.l-stat__sub[data-tone='alert'] { color: var(--c-alert); opacity: 1; font-weight: 550; }
 
-/* ══ BLOCK · status ═══════════════════════════════════════════════════════ */
-.blk-status {
+/* ══ LAYOUT · metrics ═════════════════════════════════════════════════════
+   Two to four figures side by side, separated by whitespace alone. No boxes,
+   no dividers, no card inside a card. ══════════════════════════════════════ */
+.l-metrics { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-metrics__row {
   display: flex;
+  flex: 1 0 0;
   align-items: center;
-  gap: 8px;
-  font-size: var(--fs-body);
-  font-weight: 500;
-  color: var(--on-dark);
-  min-width: 0;
+  flex-wrap: wrap;
+  gap: var(--s3) var(--s6);
+  min-height: 0;
 }
-.blk-status__dot {
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: var(--r-pill);
-  background: #8FE3B0;
-  box-shadow: 0 0 0 3px rgba(143, 227, 176, .26);
+.metric { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+.metric__value {
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: var(--fs-metric);
+  line-height: 1;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'opsz' 14;
 }
-.blk-status[data-tone='alert'] .blk-status__dot {
-  background: #FFD08A;
-  box-shadow: 0 0 0 3px rgba(255, 208, 138, .26);
-}
+.metric__label { font-size: var(--fs-label); opacity: .68; line-height: 1.2; }
+.metric[data-tone='alert'] .metric__value { color: var(--c-alert); }
 
-/* ══ BLOCK · rows ═════════════════════════════════════════════════════════
-   Four dresses, one row element. The breakdown carries a proportional track,
-   the list carries a tone-coloured figure, the timeline carries a dot and a
-   timestamp, the schedule carries a lead line. Sharing the element is what
-   stops the Approvals breakdown and the Security log from looking like two
-   different products on the same screen. */
-.blk-rows {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s3);
-  width: 100%;
-  min-width: 0;
-  flex: 0 1 auto;
-  overflow: hidden;
-  color: var(--on-dark);
-}
-.blk-rows[data-style='timeline'] { gap: var(--s4); }
-.blk-rows[data-style='schedule'] { gap: var(--s4); }
+/* ══ LAYOUT · chart ═══════════════════════════════════════════════════════ */
+.l-chart { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-chart__plot { flex: 1 1 auto; min-height: 34px; display: block; }
+.l-chart__plot svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.l-chart__line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+.l-chart__area { fill: currentColor; opacity: .10; }
+.l-chart__foot { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); margin-top: var(--s3); }
+.l-chart__summary { font-size: var(--fs-body); font-weight: 600; }
+.l-chart__delta { font-size: var(--fs-label); font-weight: 600; opacity: .7; font-variant-numeric: tabular-nums; }
 
-.blk-row { display: flex; flex-direction: column; gap: 6px; min-width: 0; width: 100%; }
-.blk-row__line { display: flex; align-items: center; gap: var(--s2); min-width: 0; width: 100%; }
-.blk-row__title {
-  flex: 1 1 auto;
-  font-size: var(--fs-label);
-  font-weight: 500;
-  line-height: 1.25;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.blk-row__value {
+/* ══ LAYOUT · queue ═══════════════════════════════════════════════════════
+   A total beside the title, then rows on a common right edge. ══════════════ */
+.l-queue { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-queue__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); flex: none; }
+.l-queue__head .c-head { margin-bottom: var(--s3); flex: 1 1 auto; }
+.l-queue__total {
   flex: none;
   font-family: var(--font-num);
   font-weight: 700;
-  font-size: var(--fs-label);
+  font-size: var(--fs-metric);
+  line-height: 1;
+  letter-spacing: -.02em;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.01em;
 }
-.blk-row[data-tone='alert'] .blk-row__value { color: #FFE0AE; }
-.blk-row[data-tone='up']    .blk-row__value { color: #B6EFC9; }
-.blk-row[data-tone='down']  .blk-row__value { color: #FFCFC2; }
+.l-queue__rows { display: flex; flex-direction: column; gap: var(--s3); flex: 0 1 auto; min-height: 0; overflow: hidden; }
+.l-queue__row { display: flex; align-items: baseline; gap: var(--s3); }
+.l-queue__text { flex: 1 1 auto; font-size: var(--fs-body); opacity: .74; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-queue__value { flex: none; font-family: var(--font-num); font-weight: 650; font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
 
-/* the proportional track under a breakdown row */
-.blk-row__track {
+/* ══ LAYOUT · status ══════════════════════════════════════════════════════
+   A state, not a measurement. The dot carries the meaning, so the card is
+   never repainted by its worst line. ══════════════════════════════════════ */
+.l-status { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-status__rows { display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; gap: var(--s3); min-height: 0; }
+.l-status__row { display: flex; align-items: baseline; gap: var(--s2); }
+.l-status__dot { flex: none; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--c-ok); translate: 0 -2px; }
+.l-status__row[data-tone='warn'] .l-status__dot { background: var(--c-warn); }
+.l-status__row[data-tone='alert'] .l-status__dot { background: var(--c-alert); }
+.l-status__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.l-status__text { font-size: var(--fs-body); opacity: .72; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ══ LAYOUT · progress ════════════════════════════════════════════════════ */
+.l-progress { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; min-height: 0; }
+.l-progress__ratio { display: flex; align-items: baseline; gap: var(--s2); }
+.l-progress__value {
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: var(--fs-hero-num);
+  line-height: 1;
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'opsz' 14;
+}
+.l-progress__of { font-family: var(--font-num); font-weight: 500; font-size: var(--fs-body); opacity: .6; }
+.l-progress__track {
   display: block;
   width: 100%;
-  height: 4px;
+  height: 10px;
+  margin-top: var(--s4);
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .22);
+  background: rgba(31, 65, 91, .1);
   overflow: hidden;
 }
-.blk-row__track i {
-  display: block;
-  height: 100%;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .9);
-}
+.card[data-fill='solid'] .l-progress__track { background: rgba(255, 255, 255, .26); }
+.l-progress__track i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--card-bg); }
+.card[data-fill='solid'] .l-progress__track i { background: #FFFFFF; }
+.l-progress__caption { margin-top: var(--s2); font-size: var(--fs-label); font-weight: 550; opacity: .7; }
 
-/* timeline */
-.blk-rows[data-style='timeline'] .blk-row { flex-direction: row; align-items: flex-start; gap: var(--s3); }
-.blk-row__dot {
-  flex: none;
+/* ══ LAYOUT · timeline ════════════════════════════════════════════════════
+   Entries down a hairline rule. The rule is what makes it read as a sequence
+   rather than as a list. ═══════════════════════════════════════════════════ */
+.l-timeline { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-timeline__items { position: relative; display: flex; flex-direction: column; gap: var(--s4); flex: 0 1 auto; min-height: 0; overflow: hidden; padding-left: var(--s4); }
+.l-timeline__items::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: currentColor;
+  opacity: .16;
+}
+.l-timeline__item { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.l-timeline__dot {
+  position: absolute;
+  left: calc(var(--s4) * -1 + 1px);
+  top: 5px;
   width: 7px;
   height: 7px;
-  margin-top: 6px;
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .85);
+  background: currentColor;
+  opacity: .5;
 }
-.blk-row__stack { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1 1 auto; }
-.blk-row__stack .blk-row__title { font-size: var(--fs-body); }
-.blk-row__meta {
-  font-size: var(--fs-label);
-  font-weight: 400;
-  line-height: 1.2;
-  opacity: .82;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.l-timeline__item[data-tone='alert'] .l-timeline__dot { background: var(--c-alert); opacity: 1; }
+.l-timeline__text { font-size: var(--fs-body); font-weight: 550; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; }
+.l-timeline__meta { font-size: var(--fs-label); opacity: .6; line-height: 1.2; }
+.l-timeline__item[data-tone='alert'] .l-timeline__meta { color: var(--c-alert); opacity: 1; font-weight: 550; }
 
-/* schedule — a lead line, then the item */
-.blk-row--sched { gap: 3px; }
-.blk-row__lead {
-  font-size: var(--fs-micro);
-  font-weight: 650;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  opacity: .72;
-}
-.blk-row--sched[data-tone='alert'] .blk-row__lead { color: #FFE3B4; opacity: 1; }
-.blk-row--sched[data-tone='alert'] .blk-row__dot { background: #FFD08A; }
-.blk-row--sched .blk-row__title { font-size: var(--fs-body); }
+/* ══ LAYOUT · recent ══════════════════════════════════════════════════════ */
+.l-recent { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-recent__items { display: flex; flex-direction: column; gap: var(--s3); flex: 0 1 auto; min-height: 0; overflow: hidden; }
+.l-recent__item { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.l-recent__main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.l-recent__name { font-size: var(--fs-body); font-weight: 600; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-recent__kind { font-size: var(--fs-label); opacity: .6; }
+.l-recent__when { flex: none; font-size: var(--fs-label); opacity: .55; white-space: nowrap; }
 
-/* ══ BLOCK · bar ══════════════════════════════════════════════════════════ */
-.blk-bar { display: flex; flex-direction: column; gap: var(--s2); width: 100%; color: var(--on-dark); }
-.blk-bar__track {
-  display: block;
-  width: 100%;
-  height: 8px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .24);
-  overflow: hidden;
-}
-.blk-bar__track i {
-  display: block;
-  height: 100%;
-  border-radius: var(--r-pill);
-  background: #FFFFFF;
-}
-.blk-bar__caption { font-size: var(--fs-label); font-weight: 600; }
-
-/* ══ BLOCK · trend ════════════════════════════════════════════════════════
-   Columns scaled from zero — see the note in ModuleCard.js. The current period
-   is the solid one; the history behind it is deliberately quieter, because the
-   card's job is "is this getting better", not "here are three bars". */
-.blk-trend { display: flex; flex-direction: column; gap: var(--s4); width: 100%; flex: 1 1 auto; min-height: 0; }
-.blk-trend__chart {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--s3);
-  width: 100%;
-  flex: 1 1 auto;
-  min-height: 34px;
-}
-.blk-trend__col {
-  flex: 1 1 0;
-  display: block;
-  min-width: 10px;
-  border-radius: 5px 5px 2px 2px;
-  background: rgba(255, 255, 255, .34);
-}
-.blk-trend__col.is-current { background: #FFFFFF; }
-.blk-trend .blk-row--fig.is-current .blk-row__title,
-.blk-trend .blk-row--fig.is-current .blk-row__value { font-weight: 700; }
-
-/* ══ BLOCK · delta ════════════════════════════════════════════════════════ */
-.blk-delta { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; color: var(--on-dark); }
-.blk-delta__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px 4px 8px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .18);
-  font-size: var(--fs-label);
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-}
-/* A fall in mortality is good news and a rise in egg collection is good news,
-   so the chip does NOT colour by direction — it colours by nothing, and the
-   caption underneath says what the movement means. Green-for-up would be wrong
-   on half the cards that use it. */
-.blk-delta__arrow { font-size: 1.05em; line-height: 1; }
-.blk-delta__caption { font-size: var(--fs-micro); opacity: .82; line-height: 1.3; }
-
-/* ══ BLOCK · actions ══════════════════════════════════════════════════════
-   Pills, not buttons — see the note in ModuleCard.js. Three is the cap the
-   brief sets and the cap the layout enforces: a fourth would wrap onto a second
-   line and turn a card into a menu. */
-.blk-actions { display: flex; flex-direction: column; gap: var(--s2); width: 100%; }
-.blk-action {
+/* ══ LAYOUT · actions ═════════════════════════════════════════════════════
+   The controls ARE the content. They sit on the module's colour, translucent,
+   so they read as controls without out-shouting the card. ══════════════════ */
+.l-actions { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-actions__set { display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; gap: var(--s2); }
+.l-action {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 34px;
-  padding: 7px var(--s3);
+  min-height: 36px;
+  padding: var(--s2) var(--s3);
   border-radius: 10px;
-  background: rgba(255, 255, 255, .17);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22);
-  color: var(--on-dark);
+  background: rgba(255, 255, 255, .18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .24);
   font-size: var(--fs-label);
   font-weight: 600;
   line-height: 1.2;
-  text-align: center;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.card:hover .blk-action { background: rgba(255, 255, 255, .23); }
-
-/* ══ BLOCK · link ═════════════════════════════════════════════════════════ */
-.blk-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: none;
-  font-size: var(--fs-label);
-  font-weight: 650;
-  color: var(--on-dark);
-  opacity: .92;
-}
-.blk-link__arrow { transition: transform var(--t-fast) var(--ease); }
-.card:hover .blk-link__arrow { transform: translateX(3px); }
+.card:hover .l-action { background: rgba(255, 255, 255, .24); }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   FITTING THE BLOCKS TO THE SPACE
-   ──────────────────────────────────────────────────────────────────────────
-   A variant declares which sizes it supports, so no card is ever asked to draw
-   itself somewhere absurd. What it IS asked to do is draw itself at 179px on a
-   phone and 500px on a desktop, and these are the rules that make one set of
-   blocks survive both. Everything below is a response to the card's own width
-   or its own row count — never to the viewport, which the card cannot see.
+   FITTING THE COMPOSITIONS TO THE SPACE
+   A variation declares the sizes it supports, so no card is asked to draw
+   itself somewhere absurd. These handle the widths inside that range.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── one row tall ────────────────────────────────────────────────────────
-   132px of content box under the label row. The Species card's stacked
-   layout — two figures 44px apart — needs 164, so on a one-row card the figures
-   sit side by side at the smaller size instead. */
-.card[data-h='1'] .card__blocks { gap: var(--s2); }
-.card[data-h='1'] .stat__value { font-size: var(--fs-stat-sm); }
-.card[data-h='1'] .stat { min-width: 0; }
-.card[data-h='1'] .stat__label { overflow: hidden; text-overflow: ellipsis; }
-/* two heroes on a one-row card go side by side rather than stacking off the
-   bottom edge — Species Overview at Medium, Diet's plans-and-kilograms card */
-.card[data-h='1'] .card__blocks:has(.stat + .stat) { flex-direction: row; align-items: flex-end; gap: var(--s5); }
-.card[data-h='1'] .blk-count__value { font-size: var(--fs-count-sm); }
-.card[data-h='1'] .blk-rows { gap: var(--s2); }
-.card[data-h='1'] .blk-rows[data-style='timeline'] { gap: var(--s3); }
-
-/* THE 132px BUDGET.
-   A one-row card is 164px tall, less 32px of padding, less a 28px label row and
-   its 12px gap: 92px for everything else. That is not much, and three of these
-   cards were over it by two or three pixels — enough for `overflow: hidden` to
-   eat the last line, which is how "86% Completed" and "Review →" went missing
-   from cards that otherwise looked finished.
-
-   Rather than tune each card, the secondary type on a one-row card steps down
-   one notch across the board. The figure stays big — it is the thing the card
-   is for — and its caption, its bar label and its link get out of the way. */
-.card[data-h='1'] .stat__label      { font-size: var(--fs-label); }
-.card[data-h='1'] .blk-note         { font-size: var(--fs-micro); line-height: 1.25; }
-.card[data-h='1'] .blk-link         { font-size: var(--fs-micro); }
-.card[data-h='1'] .blk-bar__caption { font-size: var(--fs-micro); }
-.card[data-h='1'] .blk-bar__track   { height: 7px; }
-.card[data-h='1'] .blk-bar          { gap: 6px; }
-
-/* Two or three metrics share a one-row card side by side, in equal columns
-   rather than content-sized ones — so "Animals in Care" wrapping to two lines
-   cannot steal the width from "Critical" beside it.
-
-   FOUR DO NOT FIT IN A ROW. On an eight-column desktop a 2×1 card is 266px of
-   content; four columns and three gaps leaves 54px each, and "Recovering",
-   "Submissions" and "Admitted" are all wider than that with nowhere to break.
-   So a four-up metric block folds into a 2×2 instead — 125px a column, two
-   rows of 36px inside the 92px budget, and every label complete. Hospital's
-   Live Status and Parivesh's Submission Status are the two cards this is for,
-   and they are better in a square than in a squeezed row. */
-.card[data-h='1'] .blk-metrics { gap: var(--s2) var(--s4); flex-wrap: nowrap; }
+/* one row tall — 132px of content box under a title line */
+.card[data-h='1'] .c-head { margin-bottom: var(--s2); }
+.card[data-h='1'] .l-stat__value,
+.card[data-h='1'] .l-progress__value { font-size: var(--fs-hero-num-sm); }
+.card[data-h='1'] .l-stat__sub { margin-top: var(--s2); }
+.card[data-h='1'] .l-metrics__row { gap: var(--s2) var(--s5); flex-wrap: nowrap; }
 .card[data-h='1'] .metric { flex: 1 1 0; }
-.card[data-h='1'] .blk-metrics[data-n='4'] { flex-wrap: wrap; gap: var(--s2) var(--s5); }
-.card[data-h='1'] .blk-metrics[data-n='4'] .metric { flex: 1 1 40%; }
 .card[data-h='1'] .metric__value { font-size: var(--fs-metric-sm); }
-.card[data-h='1'] .metric__label { line-height: 1.15; }
+.card[data-h='1'] .l-queue__rows,
+.card[data-h='1'] .l-timeline__items,
+.card[data-h='1'] .l-recent__items { gap: var(--s2); }
+.card[data-h='1'] .l-progress__track { margin-top: var(--s3); height: 8px; }
 
-/* A delta lies down on a one-row card: the chip and its caption side by side
-   instead of stacked, which is 26px rather than 48 and leaves the figure above
-   its full size. */
-.card[data-h='1'] .blk-delta { flex-direction: row; align-items: center; gap: var(--s2); }
-.card[data-h='1'] .blk-delta__caption { min-width: 0; }
+/* four metrics will not sit in one line on a 2×1 card — 266px of content less
+   three gaps leaves 54px a column, and "Recovering" is wider than that */
+.card[data-h='1'] .l-metrics__row[data-n='4'] { flex-wrap: wrap; }
+.card[data-h='1'] .l-metrics__row[data-n='4'] .metric { flex: 1 1 40%; }
 
-/* A LONE BLOCK SINKS TO THE BOTTOM — UNLESS IT IS A LIST.
-   `space-between` leaves a single child at the top, which is right on a Small
-   card and wrong on a Large one: Hospital's Live Status at 4×2 had its four
-   figures stuck under the label row with three hundred pixels of empty fill
-   beneath them. Dropping it to the foot restores the artboard's own rhythm —
-   the glyph at the top, the content at the bottom, the space between doing the
-   work.
-
-   A list is the exception, and Follow Up is why. Figures read as a block you
-   can hang off the bottom edge; a list of tasks reads as something that starts
-   under its heading, and pushed to the foot it leaves a hole where the eye
-   expects the first row. It only became a lone child when "View All" was
-   removed from it, which is exactly the sort of thing a general rule does not
-   see coming. */
-.card__blocks > :only-child:not(.blk-rows) { margin-top: auto; }
-
-/* THREE BLOCKS DO NOT FIT IN 92px.
-   A queue card is count → breakdown → link, which is three things where there
-   is room for two. Rather than refuse the size (the brief asks for these at
-   Medium) the card drops its least valuable part: the link, because the whole
-   card is already a link, and the third and later breakdown rows, because two
-   named figures and a total still says what the queue is made of.
-
-   Both rules are conditional on what the card actually holds, so a card that
-   fits is never trimmed — Species' Recent Updates keeps all three of its rows
-   at Medium, because it has no count above them. */
-.card[data-h='1'] .card__blocks:has(.blk-rows, .blk-metrics) .blk-link { display: none; }
-.card[data-h='1'] .card__blocks:has(.blk-count) .blk-rows > .blk-row:nth-child(n+3) { display: none; }
-
-/* Actions go side by side on a one-row card. Stacked, the third pill falls off
-   the bottom edge; in a row, three of them share 342px and each still holds
-   "Request Medicine". */
-.card[data-h='1'] .blk-actions { flex-direction: row; gap: 6px; }
-.card[data-h='1'] .blk-action {
+/* THREE STACKED CONTROLS DO NOT FIT 132px. Head plus three 36px pills and
+   their gaps comes to 158. Side by side they share the width instead, and the
+   label takes a second line rather than an ellipsis — a truncated verb is not
+   an action anyone can be sure of. */
+.card[data-h='1'] .l-actions__set { flex-direction: row; gap: var(--s2); }
+.card[data-h='1'] .l-action {
   flex: 1 1 0;
-  min-height: 34px;
-  padding-inline: 7px;
+  justify-content: center;
+  text-align: center;
+  min-height: 40px;
+  padding-inline: var(--s2);
   font-size: var(--fs-micro);
-  /* "Request Medicine" gets two lines rather than an ellipsis — a truncated
-     verb is not an action anyone can be sure of. */
   white-space: normal;
   line-height: 1.15;
 }
 
-/* A 1×1 card — Small — is 179px square on the artboard and 147px on a
-   twelve-column desktop. Only the compact blocks are offered there, which is
-   the supportedSizes list doing its job; these keep the ones that ARE offered
-   from crowding. */
-.card[data-w='1'][data-h='1'] .blk-count__value { font-size: var(--fs-count-sm); }
-.card[data-w='1'][data-h='1'] .card__blocks { gap: var(--s1); }
-.card[data-w='1'][data-h='1'] .blk-note { font-size: var(--fs-micro); }
-.card[data-w='1'][data-h='1'] .card__label-row .card__icon { --icon-size: 24px; }
-
-/* ── A MODULE NAME IS NOT ALLOWED TO BE TRUNCATED ────────────────────────
-   Eight of the seventeen doors came out as "Specie…", "Admini…", "Approv…",
-   "Comm…". A door whose only job is to say which module it is, and which
-   cannot finish saying it, has failed at the one thing it does.
-
-   Figma draws the label at 20px on a 179px card and that stands — the fix is
-   to let it use the second line it has always had room for, since the door's
-   `justify-between` column leaves eighty spare pixels under a 44px glyph.
-   Below 165px the card is narrower than anything the artboard drew, so there
-   the label also steps down to body size; that is not a deviation from Figma,
-   it is a width Figma never specified. */
-@container card (max-width: 300px) {
-  .card__body > .card__name {
-    white-space: normal;
-    line-height: 1.18;
-    width: 100%;
-    /* "Communication" is one word of 108px and the box is 94px, so wrapping
-       alone cannot save it — every other module name has a space to break at.
-       Hyphenation breaks it at a syllable ("Communi-cation") instead of at an
-       ellipsis. The break point itself is a soft hyphen in the module's name —
-       see modules.js — because `hyphens: auto` needs a dictionary the browser
-       may not have. */
-  }
+/* Four status rows stacked come to 146px against the same 132. Two columns
+   halves it and leaves the dots aligned, which is what the row is for. */
+.card[data-h='1'] .l-status__rows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2) var(--s4);
+  align-content: center;
 }
-/* The ladder below is measured against the card's OWN content box, not the
-   viewport, and each rung is a width the artboard does not contain:
 
-     ≥146px   Figma's 20px, unchanged. The artboard's 179px card is 147px of
-              content, so the design's own card is on this rung and stays there.
-     ≤145px   body size. An eight-column desktop makes a Small card 145px wide,
-              which is narrower than anything in the file.
-     ≤110px   label size. A twelve-column wall display, and a phone in portrait.
+/* two rows tall — room to breathe under the title */
+.card[data-h='2'] .c-head { margin-bottom: var(--s5); }
 
-   "Species Management" is the string that sets these numbers: it is the
-   longest module name, and at each rung its longer word clears the box. */
+/* narrow cards */
+@container card (max-width: 300px) {
+  .l-door__name { white-space: normal; line-height: 1.18; }
+  .c-head__text { font-size: var(--fs-label); }
+  .l-metrics__row { gap: var(--s2) var(--s4); }
+
+  /* A queue total set at figure size eats the title's width: "110,020" is
+     105px of a 166px line, which left 49px for "Population Overview". The
+     total steps down to body size on a narrow card — it is a count, and the
+     rows underneath are the content. */
+  .l-queue__total { font-size: var(--fs-body); }
+
+  /* A recent item is a name, a kind and a time competing for one line. On a
+     narrow card the time drops underneath instead of squeezing the name. */
+  .l-recent__item { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .l-recent__name { white-space: normal; }
+}
 @container card (max-width: 145px) {
-  .card__body > .card__name { font-size: var(--fs-body); }
+  .l-door__name { font-size: var(--fs-body); }
 }
 @container card (max-width: 110px) {
-  .card__body > .card__name { font-size: var(--fs-label); }
+  .l-door__name { font-size: var(--fs-label); }
 }
 
-/* A panel's head is a label, not a card name. At the artboard's own 374px
-   Species card it stays at Figma's 20px; on anything narrower it steps down,
-   because "Requires Attention" beside a warning chip does not fit a 298px card
-   at 20px and a truncated heading is worse than a smaller one. */
-@container card (max-width: 360px) {
-  .card__label-row .card__name { font-size: var(--fs-body); }
-}
-
-/* ── narrow cards ───────────────────────────────────────────────────────*/
-@container card (max-width: 200px) {
-  /* "12 Critical Cases" will not sit on one line in 115px, so the figure takes
-     its own line and the phrase follows underneath. */
-  .blk-count { flex-direction: column; align-items: flex-start; gap: 1px; }
-  .blk-count__label { white-space: normal; line-height: 1.2; }
-  /* the whole card is the link at this size */
-  .blk-link { display: none; }
-  /* The glyph goes. On a 115px card the icon, the title and the warning chip
-     are competing for one line, and the card's own fill already says which
-     module this is — the words do not. */
-  .card__label-row .card__icon { display: none; }
-  .card__label-row { align-items: flex-start; gap: 7px; }
-  .card__label-row .card__name { font-size: var(--fs-label); white-space: normal; line-height: 1.2; }
-  .card__flag { width: 18px; height: 18px; }
-  .card__flag-icon { width: 11px; height: 11px; }
-}
-
-@container card (max-width: 299px) {
-  .card__blocks { gap: var(--s2); }
-  /* "Access request approved" is 3px wider than a two-column phone card. A
-     timeline row already has a second line for its meta, so it can have one for
-     its title too — an ellipsis in an activity feed hides the verb. */
-  .blk-row__stack .blk-row__title { white-space: normal; line-height: 1.2; }
-  .blk-metrics { gap: var(--s2) var(--s3); }
-  .blk-rows { gap: var(--s2); }
-  .blk-rows[data-style='timeline'], .blk-rows[data-style='schedule'] { gap: var(--s3); }
-  .blk-actions { gap: 6px; }
-  .blk-action { min-height: 30px; font-size: var(--fs-micro); }
-  /* four metrics will not sit in a row at this width, so let them fall into
-     two columns rather than shrink to nothing */
-  .blk-metrics[data-n='4'] .metric, .blk-metrics[data-n='3'] .metric { flex: 1 1 44%; }
-}
-
-/* ── wide cards ─────────────────────────────────────────────────────────
-   At Large and Full there is room to let the metrics breathe and to put a
-   breakdown into two columns rather than leaving half the card empty. */
-@container card (min-width: 560px) {
-  .card__blocks { gap: var(--s4); }
-  .blk-metrics { gap: var(--s4) var(--s8); }
-  .blk-rows[data-style='breakdown'], .blk-rows[data-style='timeline'] {
+/* wide cards — room for the metrics to spread and the rows to pair up */
+@container card (min-width: 520px) {
+  .l-metrics__row { gap: var(--s4) var(--s10); }
+  .l-queue__rows, .l-timeline__items, .l-recent__items {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--s3) var(--s8);
   }
-  .blk-actions { flex-direction: row; }
-  .blk-action { flex: 1 1 0; }
-}
-
-@supports not (container-type: inline-size) {
-  .card__blocks { gap: var(--s3); }
+  .l-actions__set { flex-direction: row; }
+  .l-action { flex: 1 1 0; justify-content: center; }
 }
 </style>
 <style>
@@ -2028,7 +1829,7 @@ body.is-editing .section-head {
 
    So edit mode is announced by three things and no chrome: the page desaturates
    very slightly so the cards read as objects rather than destinations, each
-   removable card grows a remove control, and an Add Widget tile appears at the
+   removable card grows a remove control, and Add Module appears in the header at the
    end of the grid. There is no outline around the grid, no toolbar, no banner.
 
    NO JIGGLE. iOS wiggles its icons because a phone home screen has no other way
@@ -2161,47 +1962,6 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 /* ── the add tile ─────────────────────────────────────────────────────────
    Lives in the grid as the last item so it is always where the next card will
    land, rather than in a fixed bar the user has to look away to find. */
-.slot-add {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-
-.add-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s2);
-  width: 100%;
-  height: 100%;
-  padding: var(--s4);
-  border: 1.5px dashed color-mix(in srgb, var(--petrol-400) 34%, transparent);
-  border-radius: var(--r-card);
-  background: color-mix(in srgb, var(--surface) 45%, transparent);
-  color: var(--petrol-500);
-  font-size: var(--fs-label);
-  font-weight: 600;
-  cursor: pointer;
-  animation: pop-in var(--t-base) var(--ease-out) both;
-  transition: background var(--t-fast) var(--ease),
-              border-color var(--t-fast) var(--ease),
-              color var(--t-fast) var(--ease);
-}
-.add-tile:hover {
-  background: color-mix(in srgb, var(--surface) 85%, transparent);
-  border-color: var(--petrol-400);
-  color: var(--petrol-700);
-}
-.add-tile:active { transform: scale(.97); }
-.add-tile__ring {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--petrol-400) 12%, transparent);
-}
-.add-tile__ring .icon { width: 21px; height: 21px; }
 
 /* ── keyboard reordering ──────────────────────────────────────────────────
    A card picked up with the keyboard gets the same lift the pointer gives it,
@@ -3614,76 +3374,71 @@ function moveItem(cards, from, to) {
 
 __def('js/data/cardVariants.js', function (__x, __req) {
 /**
- * CARD VARIANT DEFINITIONS
+ * CARD VARIATIONS
  * ───────────────────────────────────────────────────────────────────────────
- * A module is a place in the product; a card variant is one way of putting that
- * place on the home page. Every card the product can draw is one entry here,
- * and nothing about a module is hard-coded in a component.
+ * A module is a place in the product; a card variation is one way of putting
+ * that place on the home page. Every card the product can draw is one entry
+ * here, and nothing about a module is hard-coded in a component.
  *
- * ═══ THE ONE RULE THIS FILE EXISTS TO ENFORCE ═══════════════════════════════
+ * ═══ WHAT CHANGED, AND WHY IT HAD TO ═══════════════════════════════════════
  *
- * NO TWO MODULES GET THE SAME SET OF WIDGETS. Giving all seventeen modules the
- * same five generic cards is the failure mode this whole system is built to
- * avoid: it produces a picker where every module looks identical and none of
- * the cards are worth adding. So each module here exposes only the card shapes
- * that its actual work has — Security has an alert card and no progress bar,
- * Diet & Kitchen has a progress bar and no alert card, Fetal Death has three
- * cards in total because it honestly only has three things to say.
+ * The previous version of this file gave every card the same skeleton — a
+ * label row, then a stack of content blocks — and varied only what went in the
+ * stack. It read well as data and it failed as design: Medical's five cards
+ * came out as five green rectangles with different words in them, and no
+ * preview in the picker told you anything the caption did not.
  *
- * What every module DOES have is one plain Default door. That is the floor.
+ * So a variation now declares a LAYOUT, and a layout is a whole composition
+ * with its own DOM, its own hierarchy and its own fill treatment:
  *
- * ═══ PURPOSE ═══════════════════════════════════════════════════════════════
+ *   door       a big glyph and the module name. The bold coloured tile.
+ *   compact    the same, laid on its side, one row high.
+ *   photo      a photograph with the name in a scrim band.
+ *   stat       one number, as large as the card allows.
+ *   metrics    two to four numbers side by side, separated by space alone.
+ *   chart      a trend line that owns the card, with a summary under it.
+ *   queue      a total, then named rows with their figures right-aligned.
+ *   status     dotted rows — a state, not a measurement.
+ *   progress   a ratio, a full-width track, a caption.
+ *   timeline   dated entries down a hairline rule.
+ *   recent     objects you were last working on, with when.
+ *   actions    two to four controls, and the controls are the content.
  *
- * Each variant declares one of five purposes, which is what the picker groups
- * and labels by. They are the reason the catalogue is legible at 71 cards:
+ * The test this has to pass is in the brief: looking at a module's five
+ * previews, you should know they are five different KINDS of card before you
+ * read a single label.
  *
- *   NAVIGATE    a door. Icon, name, nothing else.
- *   UNDERSTAND  a number, a set of numbers, a breakdown or a trend.
- *   ACT         two or three things you can start from the home page.
- *   ATTENTION   work that is waiting, overdue, low or unreviewed.
- *   MONITOR     what is happening — activity, schedule, progress.
+ * ═══ FILL IS PART OF THE COMPOSITION ═══════════════════════════════════════
  *
- * A module exposes only the purposes it has. Nothing is padded to five.
+ * Two families, and which one a layout gets is not decoration — it is what the
+ * card is for:
  *
- * ═══ CARD TYPES ARE A SHORT LIST, DELIBERATELY ═════════════════════════════
+ *   solid   the module's full gradient, white text. Cards you go THROUGH:
+ *           door, compact, and actions, whose controls sit on the colour.
+ *   soft    the same gradient under a white veil — a pale tinted surface with
+ *           dark text. Cards you READ: numbers, lists, charts, timelines.
  *
- * There are 71 variants and they are drawn by two treatments and ten content
- * blocks. That is the point: the brief asks for meaningful difference between
- * modules, not for 71 unrelated card designs, and the way to get one without
- * the other is to vary the CONTENT and its HIERARCHY over a fixed vocabulary.
+ * One module therefore has bold tiles and quiet data surfaces in the same hue,
+ * which is where most of the visible variety comes from. See cards.css.
  *
- *   treatments   gradient · image           (a fill, or a photograph)
- *   blocks       hero · metrics · count · note · status · rows ·
- *                bar · trend · delta · actions · link
+ * ═══ NO "VIEW →" ANYWHERE ══════════════════════════════════════════════════
  *
- * A "Quick Actions" card and a "Recent Activity" card are the same card with
- * different blocks in it. Add a block type only when a module genuinely says
- * something none of these can carry.
- *
- * ═══ PRIORITY ══════════════════════════════════════════════════════════════
- *
- *   primary     seeds the default home page (see layoutStore.js)
- *   secondary   offered prominently in the picker
- *   optional    there when the user goes looking for it
- *
- * Priority is NOT importance — Mortality's trend chart is a fine card that most
- * curators do not want on their home page every morning. It is the answer to
- * "should this be there before anyone asked for it".
+ * The whole card is the link. Every informational card used to end in a
+ * "View Requests →" that repeated what clicking anywhere already did, cost a
+ * line of vertical space and competed with the data above it. They are gone.
+ * Quick Actions is the one exception, and its buttons are the content rather
+ * than an afterthought at the foot.
  *
  * ═══ FIELDS ════════════════════════════════════════════════════════════════
  *   id             stable, persisted in the saved layout — never renumber
  *   moduleId       the module this card belongs to
- *   name           what the picker calls it
- *   purpose        one of the five above
- *   treatment      gradient | image
- *   tone           'attention' draws the subtle alert accent — see cards.css
- *   image/wash/…   photographic treatments only
- *   gradient       overrides the module's fill (the wide Parivesh card only)
- *   icon/iconSize  overrides the module's glyph (the compact Parivesh card)
+ *   name           what the picker calls it, in the user's language
+ *   layout         the composition, from the list above
+ *   purpose        internal only — orders a module's shelf, never shown
  *   supportedSizes ordered; the picker offers exactly these and nothing else
  *   defaultSize    what it is added at
- *   priority       primary | secondary | optional
- *   data           { title?, blocks: [...] } — the mock content
+ *   priority       'primary' means "seeds the default home page", exactly
+ *   data           the content, shaped to the layout
  */
 
 const SIZE_LABELS = {
@@ -3695,17 +3450,9 @@ const SIZE_LABELS = {
 }
 
 /**
- * The five purposes.
- *
- * They are no longer DRAWN — the gallery used to group each module's widgets
- * under a labelled heading and it put a taxonomy in front of the thing the user
- * came to look at. What they still do is ORDER the shelf, which is the more
- * valuable half: `rank` is why a module reads as a sentence from left to right
- * — the door first, then the figures, then what is waiting, then what you can
- * do, then what just happened.
- *
- * `label` survives because the search index reads it, so typing "attention" or
- * "monitor" still finds the right widgets.
+ * Purposes order a module's shelf and feed the search index. They are NEVER
+ * rendered — the brief is explicit that words like "purpose" and "priority"
+ * are ours, not the user's, and the preview should say what the card is.
  */
 const PURPOSES = {
   NAVIGATE:   { id: 'NAVIGATE',   label: 'Navigate',   rank: 0 },
@@ -3717,58 +3464,15 @@ const PURPOSES = {
 
 const PRIORITY_RANK = { primary: 0, secondary: 1, optional: 2 }
 
-/* ───────────────────────────────────────────────────────────────────────────
-   BLOCK CONSTRUCTORS
-   Tiny, on purpose. They exist so the catalogue below reads as content rather
-   than as object literals, and so a typo in a block name is a missing function
-   rather than a card that silently renders nothing.
-   ─────────────────────────────────────────────────────────────────────────── */
+/** Which fill family a layout belongs to. See the note above. */
+const LAYOUT_FILL = {
+  door: 'solid', compact: 'solid', actions: 'solid',
+  photo: 'image',
+  stat: 'soft', metrics: 'soft', chart: 'soft', queue: 'soft',
+  status: 'soft', progress: 'soft', timeline: 'soft', recent: 'soft',
+}
 
-/** One large figure with its caption. The Species card's construction. */
-const hero = (value, label) => ({ b: 'hero', value, label })
-
-/** Two to four medium figures in a row or a 2×2, depending on the space. */
-const metrics = (...items) => ({ b: 'metrics', items })
-
-/** A headline count that reads as a sentence — "24 Pending", "8 Medicines". */
-const count = (value, label) => ({ b: 'count', value, label })
-
-/** A quiet second line under a count — "4 High Priority". */
-const note = (text) => ({ b: 'note', text })
-
-/** A dot and a phrase — "All Systems Normal". Security's resting state. */
-const status = (text, tone = 'ok') => ({ b: 'status', text, tone })
-
-/** Named rows. `style` decides whether they carry a figure, a bar or a time. */
-const rows = (style, items) => ({ b: 'rows', style, items })
-
-/** A filled track. `value` is 0–1; the caption says what it means. */
-const bar = (value, caption) => ({ b: 'bar', value, caption })
-
-/** A small column chart plus its own figures. Three periods is the useful max. */
-const trend = (items) => ({ b: 'trend', items })
-
-/** A movement against the previous period. `dir` is 'up' or 'down'. */
-const delta = (dir, text, caption) => ({ b: 'delta', dir, text, caption })
-
-/**
- * Up to three things to start. THREE IS A CAP, NOT A TARGET — a home page card
- * offering six actions is a menu, and a menu is the thing the home page is
- * supposed to save you from opening.
- */
-const actions = (...items) => ({ b: 'actions', items: items.slice(0, 3) })
-
-/** The way out of the card, into the module. Always last. */
-const link = (text) => ({ b: 'link', text })
-
-/* ───────────────────────────────────────────────────────────────────────────
-   THE CATALOGUE
-   Written module by module in the brief's order. Every figure is mock data and
-   every one of them is plausible for a zoo of this size — a card showing
-   "Lorem 123" teaches nobody anything about whether the card is any good.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-/** Every module's plain door, at the module's own Figma fill. */
+/* Every module's plain door, at the module's own gradient. */
 const DOORS = [
   ['medical',       ['small', 'medium'], 'primary'],
   ['hospital',      ['small', 'medium'], 'secondary'],
@@ -3776,612 +3480,449 @@ const DOORS = [
   ['pharmacy',      ['small', 'medium'], 'primary'],
   ['lab',           ['small', 'medium'], 'primary'],
   ['diet',          ['small', 'medium'], 'secondary'],
-  ['followup',      ['small'],           'secondary'],
-  ['mortality',     ['small'],           'primary'],
-  ['fetal',         ['small'],           'secondary'],
+  ['followup',      ['small', 'medium'], 'secondary'],
+  ['mortality',     ['small', 'medium'], 'primary'],
+  ['fetal',         ['small', 'medium'], 'secondary'],
   ['eggs',          ['small', 'medium'], 'primary'],
-  ['administer',    ['small'],           'primary'],
-  ['users',         ['small'],           'primary'],
-  ['security',      ['small'],           'primary'],
-  ['parivesh',      ['small'],           'secondary'],
-  ['approvals',     ['small'],           'secondary'],
-  ['reports',       ['small'],           'primary'],
-  ['communication', ['small'],           'secondary'],
+  ['administer',    ['small', 'medium'], 'primary'],
+  ['users',         ['small', 'medium'], 'primary'],
+  ['security',      ['small', 'medium'], 'primary'],
+  ['parivesh',      ['small', 'medium'], 'secondary'],
+  ['approvals',     ['small', 'medium'], 'secondary'],
+  ['reports',       ['small', 'medium'], 'primary'],
+  ['communication', ['small', 'medium'], 'secondary'],
 ].map(([moduleId, supportedSizes, priority]) => ({
   id: `${moduleId}.default`,
   moduleId,
   name: 'Default',
-  description: 'A plain door into the module.',
+  layout: 'door',
   purpose: 'NAVIGATE',
-  treatment: 'gradient',
   supportedSizes,
-  defaultSize: supportedSizes[0],
+  defaultSize: 'small',
   priority,
   data: {},
 }))
 
-/**
- * Everything that is not a plain door.
- *
- * Read down one module's block and you should be able to tell what that module
- * does for a living without opening it. That is the test each of these was
- * written against.
- */
+/* The compact door — the same entry point on its side, for a page that wants
+   many modules visible at once. Offered on the modules people keep. */
+const COMPACT = [
+  'medical', 'hospital', 'species', 'pharmacy', 'lab', 'diet',
+  'followup', 'eggs', 'administer', 'users', 'approvals', 'reports',
+].map((moduleId) => ({
+  id: `${moduleId}.compact`,
+  moduleId,
+  name: 'Compact',
+  layout: 'compact',
+  purpose: 'NAVIGATE',
+  supportedSizes: ['medium', 'large'],
+  defaultSize: 'medium',
+  priority: 'optional',
+  data: {},
+}))
+
 const VARIANTS = [
 
-  /* ══ 01 · MEDICAL ══════════════════════════════════════════════════════
-     The busiest clinical module: a caseload, a request queue, three things a
-     vet starts twenty times a day, and a running log. All five purposes, and
-     it is the only module that earns all five. */
+  /* ══ MEDICAL · THE REFERENCE MODULE ════════════════════════════════════
+     Five cards that must be recognisable as five different kinds before the
+     labels are read: a bold tile, a light multi-stat, a light work queue, a
+     coloured card of controls, and a light timeline. If Medical does not pass
+     that test, nothing else in the catalogue will. */
   {
     id: 'medical.care', moduleId: 'medical', name: 'Care Overview',
-    description: 'The whole clinical workload in three figures.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'secondary',
+    layout: 'metrics', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Medical Care',
-      blocks: [metrics(
+      items: [
         { value: '248', label: 'Active Cases' },
         { value: '32',  label: 'Under Treatment' },
         { value: '12',  label: 'Critical', tone: 'alert' },
-      )],
+      ],
     },
   },
   {
     id: 'medical.requests', moduleId: 'medical', name: 'Pending Requests',
-    description: 'What is waiting on a clinical decision, by kind.',
-    purpose: 'ATTENTION', tone: 'attention',
+    layout: 'queue', purpose: 'ATTENTION',
     supportedSizes: ['medium', 'tall'], defaultSize: 'tall', priority: 'secondary',
     data: {
-      title: 'Medical Requests',
-      blocks: [
-        count('24', 'Pending'),
-        rows('breakdown', [
-          { text: 'Treatment Approval', value: '8' },
-          { text: 'Medicine Request',   value: '10' },
-          { text: 'Lab Request',        value: '6' },
-        ]),
-        link('View Requests'),
+      title: 'Pending Requests', total: '24',
+      rows: [
+        { text: 'Treatment Approval', value: '8' },
+        { text: 'Medicine Request',   value: '10' },
+        { text: 'Lab Request',        value: '6' },
       ],
     },
   },
   {
     id: 'medical.actions', moduleId: 'medical', name: 'Quick Actions',
-    description: 'The three things a vet starts most often.',
-    purpose: 'ACT', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'optional',
-    data: { blocks: [actions('New Case', 'Administer', 'Request Medicine'), link('View Medical')] },
+    layout: 'actions', purpose: 'ACT',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { actions: ['New Case', 'Administer', 'Request Medicine'] },
   },
   {
-    id: 'medical.activity', moduleId: 'medical', name: 'Recent Activity',
-    description: 'The last few things to happen in the module.',
-    purpose: 'MONITOR', supportedSizes: ['tall', 'large'], defaultSize: 'tall',
-    priority: 'optional',
+    id: 'medical.activity', moduleId: 'medical', name: 'Activity Timeline',
+    layout: 'timeline', purpose: 'MONITOR',
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'optional',
     data: {
       title: 'Medical Activity',
-      blocks: [
-        rows('timeline', [
-          { text: 'Treatment completed',  meta: 'Tiger · 10 min ago' },
-          { text: 'New case registered',  meta: 'Elephant · 1 hr ago' },
-          { text: 'Lab report received',  meta: 'Lion · 2 hrs ago' },
-        ]),
-        link('View Activity'),
+      items: [
+        { text: 'Treatment completed', meta: 'Tiger · 10 min ago' },
+        { text: 'New case registered', meta: 'Elephant · 1 hr ago' },
+        { text: 'Lab result received', meta: 'Lion · 2 hrs ago' },
       ],
     },
   },
 
-  /* ══ 02 · HOSPITAL ═════════════════════════════════════════════════════
-     Current care and capacity — a ward is a place with a number of beds in it,
-     so this module's cards are all about how full it is and who is worrying. */
+  /* ══ HOSPITAL ══════════════════════════════════════════════════════════ */
   {
     id: 'hospital.photo', moduleId: 'hospital', name: 'Photograph',
-    description: 'The ward, with the module name over the photograph.',
-    purpose: 'NAVIGATE', treatment: 'image', image: 'hospital.jpg',
+    layout: 'photo', purpose: 'NAVIGATE', image: 'hospital.jpg',
     supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'primary',
     data: {},
   },
   {
-    id: 'hospital.status', moduleId: 'hospital', name: 'Live Status',
-    description: 'Everyone in care right now, and how they are doing.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'secondary',
+    id: 'hospital.status', moduleId: 'hospital', name: 'Hospital Status',
+    layout: 'status', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
-      blocks: [metrics(
-        { value: '241', label: 'Animals in Care' },
-        { value: '87',  label: 'Admitted' },
-        { value: '142', label: 'Recovering' },
-        { value: '12',  label: 'Critical', tone: 'alert' },
-      )],
-    },
-  },
-  {
-    id: 'hospital.critical', moduleId: 'hospital', name: 'Critical Cases',
-    description: 'The cases that need someone now.',
-    purpose: 'ATTENTION', tone: 'attention',
-    /* MEDIUM ONLY, against the brief's "Small, Medium".
-       This card carries three things — "Requires Attention", "12 Critical
-       Cases", "4 High Priority" — and a 1×1 card is 132px of content box. At
-       Small the last line was clipped in half, which is worse than not offering
-       the size: a card that renders wrong is a bug, a size that is not offered
-       is a decision. Every other attention card in the catalogue carries two
-       and keeps its Small. */
-    supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      title: 'Requires Attention',
-      blocks: [count('12', 'Critical Cases'), note('4 High Priority'), link('Review Cases')],
+      title: 'Hospital Status',
+      items: [
+        { text: 'In Care',    value: '241' },
+        { text: 'Admitted',   value: '87',  tone: 'ok' },
+        { text: 'Recovering', value: '142', tone: 'ok' },
+        { text: 'Critical',   value: '12',  tone: 'alert' },
+      ],
     },
   },
   {
     id: 'hospital.capacity', moduleId: 'hospital', name: 'Capacity',
-    description: 'Beds used against beds available.',
-    purpose: 'MONITOR', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'optional',
-    data: {
-      title: 'Hospital Capacity',
-      blocks: [count('241 / 320', 'Beds'), bar(0.75, '75% Occupied')],
-    },
+    layout: 'progress', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { title: 'Hospital Capacity', value: '241', of: '320', pct: 75, caption: '75% Occupied' },
   },
 
-  /* ══ 03 · SPECIES MANAGEMENT ═══════════════════════════════════════════
-     The data module. Its two figures are the largest numbers in the product
-     and the reason the artboard gives it the biggest card on the page. */
+  /* ══ SPECIES MANAGEMENT ════════════════════════════════════════════════ */
   {
-    id: 'species.stats', moduleId: 'species', name: 'Statistics',
-    description: 'The whole collection in two figures, over foliage.',
-    purpose: 'UNDERSTAND', treatment: 'image',
-    /* Figma stacks two exported layers here, a leaf plate and a tint pass */
+    id: 'species.stats', moduleId: 'species', name: 'Collection',
+    layout: 'photo', purpose: 'UNDERSTAND',
     image: 'species-a.png', imageOver: 'species-b.jpg',
     supportedSizes: ['large', 'full'], defaultSize: 'large', priority: 'primary',
     data: {
-      blocks: [
-        hero('2,411', 'Species'),
-        hero('110,020', 'Animal Population'),
-      ],
-    },
-  },
-  {
-    id: 'species.overview', moduleId: 'species', name: 'Overview',
-    description: 'The same two figures on the module fill, at half the size.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'secondary',
-    data: {
-      blocks: [metrics(
+      figures: [
         { value: '2,411',   label: 'Species' },
         { value: '110,020', label: 'Animal Population' },
-      )],
-    },
-  },
-  {
-    id: 'species.population', moduleId: 'species', name: 'Population Breakdown',
-    description: 'Where the hundred and ten thousand actually are.',
-    purpose: 'UNDERSTAND', supportedSizes: ['large'], defaultSize: 'large', priority: 'optional',
-    data: {
-      title: 'Population Overview',
-      blocks: [
-        rows('breakdown', [
-          { text: 'Mammals',  value: '42,810', share: 42810 },
-          { text: 'Birds',    value: '38,420', share: 38420 },
-          { text: 'Reptiles', value: '16,230', share: 16230 },
-          { text: 'Others',   value: '12,560', share: 12560 },
-        ]),
-        link('View Details'),
       ],
     },
   },
   {
-    id: 'species.changes', moduleId: 'species', name: 'Recent Changes',
-    description: 'What moved in the collection this month.',
-    purpose: 'MONITOR', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'optional',
+    id: 'species.count', moduleId: 'species', name: 'Species Count',
+    layout: 'stat', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'Species Management', value: '2,411', label: 'Species',
+            sub: '110,020 animal population' },
+  },
+  {
+    id: 'species.population', moduleId: 'species', name: 'Population Overview',
+    layout: 'queue', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'tall'], defaultSize: 'tall', priority: 'optional',
     data: {
-      title: 'Recent Updates',
-      blocks: [
-        rows('list', [
-          { text: 'New Records', value: '+12', tone: 'up' },
-          { text: 'Births',      value: '+28', tone: 'up' },
-          { text: 'Transfers',   value: '−4',  tone: 'down' },
-        ]),
-        link('This Month'),
+      title: 'Population', total: '110,020',
+      rows: [
+        { text: 'Mammals',  value: '42,810' },
+        { text: 'Birds',    value: '38,420' },
+        { text: 'Reptiles', value: '16,230' },
+        { text: 'Others',   value: '12,560' },
       ],
     },
   },
 
-  /* ══ 04 · PHARMACY ═════════════════════════════════════════════════════
-     Requests in, stock out. No trend card — a dispensary's question is never
-     "how did last month go", it is "what is waiting and what have we run out
-     of", which is exactly these three. */
+  /* ══ PHARMACY ══════════════════════════════════════════════════════════ */
   {
-    id: 'pharmacy.requests', moduleId: 'pharmacy', name: 'Requests',
-    description: 'Medicine requests, split by where they have got to.',
-    purpose: 'ATTENTION', tone: 'attention',
+    id: 'pharmacy.requests', moduleId: 'pharmacy', name: 'Medicine Requests',
+    layout: 'queue', purpose: 'ATTENTION',
     supportedSizes: ['medium', 'tall'], defaultSize: 'medium', priority: 'secondary',
     data: {
-      title: 'Medicine Requests',
-      blocks: [
-        count('42', 'Pending'),
-        metrics(
-          { value: '18', label: 'Awaiting Approval' },
-          { value: '24', label: 'In Processing' },
-        ),
-        link('View Requests'),
+      title: 'Medicine Requests', total: '42',
+      rows: [
+        { text: 'Awaiting Approval', value: '18' },
+        { text: 'In Processing',     value: '24' },
       ],
     },
   },
   {
-    id: 'pharmacy.stock', moduleId: 'pharmacy', name: 'Stock Alert',
-    description: 'What is about to run out.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['small', 'medium'], defaultSize: 'medium', priority: 'secondary',
+    id: 'pharmacy.stock', moduleId: 'pharmacy', name: 'Stock Levels',
+    layout: 'status', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
-      title: 'Low Stock',
-      blocks: [count('8', 'Medicines'), note('3 Critical'), link('Review Stock')],
+      title: 'Stock Levels',
+      items: [
+        { text: 'Low Stock', value: '8', tone: 'warn' },
+        { text: 'Critical',  value: '3', tone: 'alert' },
+      ],
     },
   },
   {
     id: 'pharmacy.actions', moduleId: 'pharmacy', name: 'Quick Actions',
-    description: 'Request, restock, or look something up.',
-    purpose: 'ACT', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'optional',
-    data: { blocks: [actions('Request Medicine', 'Add Stock', 'View Inventory')] },
+    layout: 'actions', purpose: 'ACT',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { actions: ['Request Medicine', 'Add Stock', 'View Inventory'] },
   },
 
-  /* ══ 05 · LAB ══════════════════════════════════════════════════════════
-     Samples in, results out. The Results Ready card is deliberately small:
-     it is a notification, and a notification the size of a poster is worse. */
+  /* ══ LAB ═══════════════════════════════════════════════════════════════ */
   {
     id: 'lab.samples', moduleId: 'lab', name: 'Sample Status',
-    description: 'Where every sample in the building has got to.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'secondary',
+    layout: 'metrics', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Laboratory',
-      blocks: [metrics(
+      items: [
         { value: '18', label: 'Pending Samples' },
         { value: '12', label: 'Results Ready' },
         { value: '6',  label: 'In Progress' },
-      )],
+      ],
     },
   },
   {
     id: 'lab.ready', moduleId: 'lab', name: 'Results Ready',
-    description: 'Reports back and waiting to be read.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
-    data: {
-      title: 'Results Ready',
-      blocks: [count('12', 'Reports'), link('View Results')],
-    },
+    layout: 'stat', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'Results Ready', value: '12', label: 'Reports', sub: '6 still in progress' },
   },
   {
     id: 'lab.recent', moduleId: 'lab', name: 'Recent Results',
-    description: 'The last reports to come back, and for whom.',
-    purpose: 'MONITOR', supportedSizes: ['tall'], defaultSize: 'tall', priority: 'optional',
+    layout: 'recent', purpose: 'MONITOR',
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'optional',
     data: {
       title: 'Recent Results',
-      blocks: [
-        rows('timeline', [
-          { text: 'Blood Test', meta: 'Tiger · Ready' },
-          { text: 'Pathology',  meta: 'Elephant · Ready' },
-          { text: 'Cytology',   meta: 'Macaw · Ready' },
-        ]),
-        link('View All'),
+      items: [
+        { name: 'Tiger',    kind: 'Blood Test', when: 'Ready' },
+        { name: 'Elephant', kind: 'Pathology',  when: 'Ready' },
+        { name: 'Macaw',    kind: 'Cytology',   when: '1 hr ago' },
       ],
     },
   },
 
-  /* ══ 06 · DIET & KITCHEN ═══════════════════════════════════════════════
-     A kitchen's day is a progress bar. This is the one module where the
-     headline card is a completion state rather than a count. */
+  /* ══ DIET & KITCHEN ════════════════════════════════════════════════════ */
   {
     id: 'diet.photo', moduleId: 'diet', name: 'Photograph',
-    description: "Today's produce, with the module name over it.",
-    purpose: 'NAVIGATE', treatment: 'image', image: 'diet-kitchen.jpg',
+    layout: 'photo', purpose: 'NAVIGATE', image: 'diet-kitchen.jpg',
     wash: 'rgba(0, 0, 0, .2)',
     supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'primary',
-    /* Figma sets this one label at 24px inside a 20px band pad, where every
-       other band label is 20px inside 16px */
     data: { bandSize: 'lg' },
   },
   {
-    id: 'diet.progress', moduleId: 'diet', name: "Today's Preparation",
-    description: 'How much of today’s feed is out of the kitchen.',
-    purpose: 'MONITOR', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'secondary',
-    data: {
-      title: "Today's Diet",
-      blocks: [count('124 / 144', 'Diet Plans'), bar(0.86, '86% Completed')],
-    },
+    id: 'diet.progress', moduleId: 'diet', name: "Today's Progress",
+    layout: 'progress', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: "Today's Diet", value: '124', of: '144', pct: 86, caption: '86% Completed' },
   },
   {
-    id: 'diet.pending', moduleId: 'diet', name: 'Pending Preparation',
-    description: 'What has not been made yet, and what cannot wait.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      title: 'Pending',
-      blocks: [count('20', 'Diet Plans'), note('8 High Priority'), link('View Tasks')],
-    },
-  },
-  {
-    id: 'diet.today', moduleId: 'diet', name: "Today's Overview",
-    description: 'The day in plans and kilograms.',
-    purpose: 'UNDERSTAND', supportedSizes: ['large'], defaultSize: 'large', priority: 'optional',
+    id: 'diet.today', moduleId: 'diet', name: 'Kitchen Output',
+    layout: 'metrics', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
     data: {
       title: "Today's Kitchen",
-      blocks: [
-        hero('144', 'Diet Plans'),
-        hero('18,420 kg', 'Food Prepared'),
+      items: [
+        { value: '144',    label: 'Diet Plans' },
+        { value: '18,420', label: 'kg Prepared' },
       ],
     },
   },
 
-  /* ══ 07 · FOLLOW UP ════════════════════════════════════════════════════
-     A task module. Everything here is a due date, so there is no statistics
-     card and no quick action — the action IS the list. */
-  {
-    id: 'followup.today', moduleId: 'followup', name: "Today's Tasks",
-    description: 'What falls due today, and what already fell.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      title: 'Follow Up',
-      blocks: [count('8', 'Due Today'), note('4 Overdue'), link('View Tasks')],
-    },
-  },
+  /* ══ FOLLOW UP ═════════════════════════════════════════════════════════ */
   {
     id: 'followup.queue', moduleId: 'followup', name: 'Task Queue',
-    description: 'The queue itself — overdue, today, tomorrow.',
-    purpose: 'MONITOR', treatment: 'image',
-    /* Figma's fill on this card shows the BOTTOM of the photograph, not its
-       middle — the image is 420×747 and the card crops to 374×344, so a plain
-       centred `cover` lands on the pale cloud band instead of the deep teal.
-       98% was solved by fitting the rendered card's own pixels: it drops the
-       mean channel error from 119 to 74. */
-    imagePosition: '50% 98%', image: 'followup.jpg', wash: 'rgba(0, 0, 0, .28)',
+    layout: 'timeline', purpose: 'MONITOR',
     supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'primary',
     data: {
       title: 'Follow Up Tasks',
-      blocks: [
-        rows('schedule', [
-          { lead: 'Overdue',   text: 'Treatment Review',      tone: 'alert' },
-          { lead: 'Due Today', text: 'Animal Health Review' },
-          { lead: 'Due Today', text: 'Enclosure Inspection' },
-          { lead: 'Tomorrow',  text: 'Post-treatment Check' },
-        ]),
+      items: [
+        { text: 'Treatment Review',      meta: 'Overdue', tone: 'alert' },
+        { text: 'Animal Health Review',  meta: 'Due today' },
+        { text: 'Enclosure Inspection',  meta: 'Due today' },
+        { text: 'Post-treatment Check',  meta: 'Tomorrow' },
       ],
     },
   },
   {
-    id: 'followup.attention', moduleId: 'followup', name: 'Overdue',
-    description: 'Only the ones that are already late.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['small', 'medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      blocks: [count('4', 'Overdue'), note('Requires Immediate Follow Up'), link('Review Now')],
-    },
+    id: 'followup.today', moduleId: 'followup', name: 'Due Today',
+    layout: 'stat', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'Follow Up', value: '8', label: 'Due Today', sub: '4 overdue', subTone: 'alert' },
   },
 
-  /* ══ 08 · MORTALITY ════════════════════════════════════════════════════
-     NOT A RED MODULE. Mortality in a well-run collection is a monthly figure
-     that ought to be going down, and drawing every one of its cards as an
-     emergency both misrepresents the work and trains people to ignore red.
-     The fill is the module's own coral; only the review queue takes the
-     attention accent, because only the review queue is actually waiting. */
+  /* ══ MORTALITY ═════════════════════════════════════════════════════════
+     Not a red module. The trend is the card that matters, and a trend going
+     down is good news drawn plainly. */
   {
-    id: 'mortality.month', moduleId: 'mortality', name: 'Monthly Overview',
-    description: 'This month, against last.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      blocks: [count('12', 'This Month'), delta('down', '18%', 'Compared to Last Month')],
-    },
-  },
-  {
-    id: 'mortality.trend', moduleId: 'mortality', name: 'Trend',
-    description: 'Three months, so the direction is visible.',
-    purpose: 'UNDERSTAND', supportedSizes: ['large'], defaultSize: 'large', priority: 'optional',
+    id: 'mortality.trend', moduleId: 'mortality', name: 'Mortality Trend',
+    layout: 'chart', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Mortality Trend',
-      blocks: [trend([
-        { label: 'Previous',   value: 18 },
-        { label: 'Last Month', value: 15 },
-        { label: 'This Month', value: 12, current: true },
-      ])],
+      series: [{ label: 'Apr', value: 18 }, { label: 'May', value: 15 }, { label: 'Jun', value: 12 }],
+      summary: '12 this month', delta: { dir: 'down', text: '18%' },
     },
   },
   {
     id: 'mortality.review', moduleId: 'mortality', name: 'Pending Review',
-    description: 'Cases recorded but not yet signed off.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
-    data: { blocks: [count('4', 'Cases'), note('Pending Review'), link('Review Cases')] },
+    layout: 'stat', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { title: 'Mortality', value: '4', label: 'Pending Review', sub: '12 recorded this month' },
   },
 
-  /* ══ 09 · FETAL DEATH ══════════════════════════════════════════════════
-     Three cards, and that is the honest total. A module with six records a
-     month does not have a quick-actions card or an activity feed, and adding
-     them to hit a quota would be padding the picker with cards nobody adds. */
+  /* ══ FETAL DEATH ═══════════════════════════════════════════════════════ */
   {
-    id: 'fetal.cases', moduleId: 'fetal', name: 'Cases Overview',
-    description: 'This month, and what is still to review.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
+    id: 'fetal.cases', moduleId: 'fetal', name: 'Cases This Month',
+    layout: 'metrics', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
-      blocks: [metrics(
+      title: 'Fetal Death',
+      items: [
         { value: '6', label: 'Cases This Month' },
         { value: '2', label: 'Pending Review' },
-      )],
+      ],
     },
   },
   {
     id: 'fetal.trend', moduleId: 'fetal', name: 'Monthly Trend',
-    description: 'This month against the last.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'optional',
+    layout: 'chart', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
     data: {
       title: 'Monthly Overview',
-      blocks: [trend([
-        { label: 'Previous Month', value: 4 },
-        { label: 'This Month',     value: 6, current: true },
-      ])],
+      series: [{ label: 'Apr', value: 3 }, { label: 'May', value: 4 }, { label: 'Jun', value: 6 }],
+      summary: '6 this month', delta: { dir: 'up', text: '50%' },
     },
   },
 
-  /* ══ 10 · EGGS ═════════════════════════════════════════════════════════
-     Collection, incubation, hatching — the module is a pipeline, so its cards
-     are a count at the front, a state in the middle and a progress bar at the
-     end. */
+  /* ══ EGGS ══════════════════════════════════════════════════════════════ */
   {
-    id: 'eggs.collection', moduleId: 'eggs', name: 'Collection Overview',
-    description: 'What has been collected this month.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      title: 'Egg Collection',
-      blocks: [count('1,248', 'Collected This Month'), delta('up', '8%', 'from last month')],
-    },
+    id: 'eggs.collection', moduleId: 'eggs', name: 'Collection',
+    layout: 'stat', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'Egg Collection', value: '1,248', label: 'Collected This Month',
+            sub: '842 under incubation' },
   },
   {
     id: 'eggs.incubation', moduleId: 'eggs', name: 'Incubation Status',
-    description: 'What is in the incubators, and what is nearly out.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'secondary',
+    layout: 'metrics', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Incubation',
-      blocks: [count('842', 'Active'), metrics({ value: '124', label: 'Hatching Soon' })],
+      items: [
+        { value: '842', label: 'Under Incubation' },
+        { value: '124', label: 'Hatching Soon' },
+      ],
     },
   },
   {
     id: 'eggs.progress', moduleId: 'eggs', name: 'Hatching Progress',
-    description: 'How far through incubation the current clutches are.',
-    purpose: 'MONITOR', supportedSizes: ['large'], defaultSize: 'large', priority: 'optional',
-    data: {
-      title: 'Hatching Progress',
-      blocks: [hero('842', 'Under Incubation'), bar(0.62, '62% Through Incubation')],
-    },
+    layout: 'progress', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { title: 'Hatching Progress', value: '842', of: '1,248', pct: 67,
+            caption: '67% Through Incubation' },
   },
 
-  /* ══ 11 · ADMINISTER ═══════════════════════════════════════════════════
-     Scheduled administration. The schedule card is the interesting one — it is
-     the only card in the product where the time is the primary axis. */
+  /* ══ ADMINISTER ════════════════════════════════════════════════════════ */
   {
     id: 'administer.due', moduleId: 'administer', name: 'Due Today',
-    description: 'Doses due, done and remaining.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
+    layout: 'metrics', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Administration',
-      blocks: [
-        count('18', 'Due Today'),
-        metrics({ value: '6', label: 'Completed' }, { value: '12', label: 'Remaining' }),
+      items: [
+        { value: '18', label: 'Due Today' },
+        { value: '6',  label: 'Completed' },
+        { value: '12', label: 'Remaining' },
       ],
     },
   },
   {
-    id: 'administer.actions', moduleId: 'administer', name: 'Quick Action',
-    description: 'Give a dose, or record one that was given.',
-    purpose: 'ACT', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'optional',
-    data: { blocks: [actions('Administer Medicine', 'Record Administration')] },
+    id: 'administer.actions', moduleId: 'administer', name: 'Quick Actions',
+    layout: 'actions', purpose: 'ACT',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { actions: ['Administer Medicine', 'Record Administration'] },
   },
   {
-    id: 'administer.schedule', moduleId: 'administer', name: 'Schedule',
-    description: "Today's rounds, in order.",
-    purpose: 'MONITOR', supportedSizes: ['tall'], defaultSize: 'tall', priority: 'optional',
+    id: 'administer.schedule', moduleId: 'administer', name: "Today's Schedule",
+    layout: 'timeline', purpose: 'MONITOR',
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'optional',
     data: {
       title: "Today's Schedule",
-      blocks: [
-        rows('schedule', [
-          { lead: '09:00', text: 'Medicine Administration' },
-          { lead: '11:30', text: 'Vaccination' },
-          { lead: '14:00', text: 'Treatment' },
-          { lead: '16:30', text: 'Evening Round' },
-        ]),
-        link('View Schedule'),
+      items: [
+        { text: 'Medicine Administration', meta: '09:00' },
+        { text: 'Vaccination',             meta: '11:30' },
+        { text: 'Treatment',               meta: '14:00' },
+        { text: 'Evening Round',           meta: '16:30' },
       ],
     },
   },
 
-  /* ══ 12 · USERS ════════════════════════════════════════════════════════ */
+  /* ══ USERS ═════════════════════════════════════════════════════════════ */
   {
-    id: 'users.overview', moduleId: 'users', name: 'Overview',
-    description: 'Accounts held, and who is on today.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
+    id: 'users.overview', moduleId: 'users', name: 'User Overview',
+    layout: 'metrics', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
-      blocks: [metrics(
+      title: 'Users',
+      items: [
         { value: '1,248', label: 'Total Users' },
         { value: '842',   label: 'Active Today' },
-      )],
+      ],
     },
   },
   {
     id: 'users.access', moduleId: 'users', name: 'Access Requests',
-    description: 'People waiting to be let in.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
-    data: {
-      title: 'Access Requests',
-      blocks: [count('8', 'Pending'), link('Review Requests')],
-    },
+    layout: 'stat', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'Access Requests', value: '8', label: 'Awaiting Review',
+            sub: '1,248 accounts in total' },
   },
   {
-    id: 'users.activity', moduleId: 'users', name: 'Activity',
-    description: 'The last few changes to accounts and roles.',
-    purpose: 'MONITOR', supportedSizes: ['tall'], defaultSize: 'tall', priority: 'optional',
+    id: 'users.recent', moduleId: 'users', name: 'Recent Activity',
+    layout: 'timeline', purpose: 'MONITOR',
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'optional',
     data: {
       title: 'Recent User Activity',
-      blocks: [
-        rows('timeline', [
-          { text: 'New user added',  meta: 'R. Menon · 20 min ago' },
-          { text: 'Role updated',    meta: 'A. Sharma · 1 hr ago' },
-          { text: 'Access approved', meta: 'K. Iyer · 3 hrs ago' },
-        ]),
-        link('View Activity'),
+      items: [
+        { text: 'New user added',  meta: 'R. Menon · 20 min ago' },
+        { text: 'Role updated',    meta: 'A. Sharma · 1 hr ago' },
+        { text: 'Access approved', meta: 'K. Iyer · 3 hrs ago' },
       ],
     },
   },
 
-  /* ══ 13 · SECURITY ═════════════════════════════════════════════════════
-     The only module whose headline card is a NON-EVENT. "All Systems Normal"
-     with a green dot is the state a security card is in almost all the time,
-     and a module that can only draw itself when something is wrong is a module
-     that tells you nothing on a good day. */
+  /* ══ SECURITY ══════════════════════════════════════════════════════════ */
   {
-    id: 'security.status', moduleId: 'security', name: 'Status',
-    description: 'The resting state, and who is signed in.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
+    id: 'security.status', moduleId: 'security', name: 'Site Status',
+    layout: 'status', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
-      blocks: [status('All Systems Normal'), metrics({ value: '124', label: 'Active Sessions' })],
-    },
-  },
-  {
-    id: 'security.alerts', moduleId: 'security', name: 'Alerts',
-    description: 'Anything the gate logged that a person should look at.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
-    data: {
-      title: 'Security Alerts',
-      blocks: [count('3', 'Require Review'), link('Review Alerts')],
+      title: 'Security',
+      items: [
+        { text: 'Active Sessions', value: '124', tone: 'ok' },
+        { text: 'Alerts',          value: '3',   tone: 'warn' },
+      ],
     },
   },
   {
     id: 'security.activity', moduleId: 'security', name: 'Recent Activity',
-    description: 'Logins, permissions and access, newest first.',
-    purpose: 'MONITOR', supportedSizes: ['tall'], defaultSize: 'tall', priority: 'optional',
+    layout: 'timeline', purpose: 'MONITOR',
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'optional',
     data: {
       title: 'Security Activity',
-      blocks: [
-        rows('timeline', [
-          { text: 'New login detected',    meta: 'Gate 2 · 4 min ago' },
-          { text: 'Permission updated',    meta: 'Night Shift · 1 hr ago' },
-          { text: 'Access request approved', meta: 'Contractor · 2 hrs ago' },
-        ]),
-        link('View Activity'),
+      items: [
+        { text: 'New login detected',     meta: 'Gate 2 · 4 min ago' },
+        { text: 'Permission updated',     meta: 'Night Shift · 1 hr ago' },
+        { text: 'Access request approved', meta: 'Contractor · 2 hrs ago' },
       ],
     },
   },
 
-  /* ══ 14 · PARIVESH ═════════════════════════════════════════════════════
-     A submission workflow: filed, approved, pending, returned. The two
-     artboard cards — the wide one at its own gradient angle and the compact one
-     with the smaller mark — are kept as they were drawn. */
+  /* ══ PARIVESH ══════════════════════════════════════════════════════════ */
   {
     id: 'parivesh.wide', moduleId: 'parivesh', name: 'Wide',
-    description: 'The regulatory door at double width.',
-    purpose: 'NAVIGATE',
+    layout: 'door', purpose: 'NAVIGATE',
     /* Figma redraws this fill at 143.78° because the gradient has twice the
        width to cross; at the small card's 123.17° the band would fall wrong. */
     gradient: '--g-parivesh-wide',
@@ -4389,152 +3930,103 @@ const VARIANTS = [
     data: {},
   },
   {
-    id: 'parivesh.compact', moduleId: 'parivesh', name: 'Compact',
-    description: 'The regulatory door with the smaller mark.',
-    purpose: 'NAVIGATE', icon: 'm-parivesh-alt.svg', iconSize: 32,
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
-    data: {},
-  },
-  {
-    id: 'parivesh.submissions', moduleId: 'parivesh', name: 'Submission Status',
-    description: 'Every filing, by where it stands with the authority.',
-    purpose: 'UNDERSTAND', supportedSizes: ['medium', 'large'], defaultSize: 'medium',
-    priority: 'secondary',
+    id: 'parivesh.submissions', moduleId: 'parivesh', name: 'Submissions',
+    layout: 'queue', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'tall'], defaultSize: 'medium', priority: 'secondary',
     data: {
-      blocks: [metrics(
-        { value: '18', label: 'Submissions' },
-        { value: '12', label: 'Approved' },
-        { value: '4',  label: 'Pending' },
-        { value: '2',  label: 'Returned', tone: 'alert' },
-      )],
-    },
-  },
-  {
-    id: 'parivesh.pending', moduleId: 'parivesh', name: 'Pending Action',
-    description: 'Filings the authority is waiting on us for.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['small', 'medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      title: 'Action Required',
-      blocks: [count('4', 'Pending Submissions'), link('Review')],
+      title: 'Submissions', total: '18',
+      rows: [
+        { text: 'Approved', value: '12' },
+        { text: 'Pending',  value: '4' },
+        { text: 'Returned', value: '2' },
+      ],
     },
   },
   {
     id: 'parivesh.activity', moduleId: 'parivesh', name: 'Recent Activity',
-    description: 'The last movements on the filing queue.',
-    purpose: 'MONITOR', supportedSizes: ['tall'], defaultSize: 'tall', priority: 'optional',
+    layout: 'timeline', purpose: 'MONITOR',
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'optional',
     data: {
       title: 'Recent Activity',
-      blocks: [
-        rows('timeline', [
-          { text: 'Submission approved',  meta: 'CZA · Today' },
-          { text: 'Document uploaded',    meta: 'Annexure III · Yesterday' },
-          { text: 'Application returned', meta: 'Form 4B · 2 days ago' },
-        ]),
-        link('View All'),
+      items: [
+        { text: 'Submission approved',  meta: 'CZA · Today' },
+        { text: 'Document uploaded',    meta: 'Annexure III · Yesterday' },
+        { text: 'Application returned', meta: 'Form 4B · 2 days ago' },
       ],
     },
   },
 
-  /* ══ 15 · APPROVALS ════════════════════════════════════════════════════
-     The centralised queue. Every other module's approvals land here, which is
-     why its breakdown card is by MODULE rather than by kind — that is the only
-     axis that tells you whose day is about to be interrupted. */
+  /* ══ APPROVALS ═════════════════════════════════════════════════════════ */
   {
-    id: 'approvals.pending', moduleId: 'approvals', name: 'Pending Overview',
-    description: 'Everything waiting on a decision, anywhere.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['medium'], defaultSize: 'medium', priority: 'primary',
-    data: {
-      title: 'Pending Approvals',
-      blocks: [count('32', 'Awaiting Decision'), note('12 High Priority'), link('Review')],
-    },
+    id: 'approvals.pending', moduleId: 'approvals', name: 'Pending Approvals',
+    layout: 'stat', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'primary',
+    data: { title: 'Pending Approvals', value: '32', label: 'Awaiting Decision',
+            sub: '12 high priority', subTone: 'alert' },
   },
   {
-    id: 'approvals.breakdown', moduleId: 'approvals', name: 'Approval Breakdown',
-    description: 'Which module the queue is actually coming from.',
-    purpose: 'UNDERSTAND', supportedSizes: ['large'], defaultSize: 'large', priority: 'optional',
+    id: 'approvals.breakdown', moduleId: 'approvals', name: 'By Module',
+    layout: 'queue', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'tall'], defaultSize: 'tall', priority: 'optional',
     data: {
-      title: 'Approvals',
-      blocks: [rows('breakdown', [
-        { text: 'Medical',  value: '10', share: 10 },
-        { text: 'Pharmacy', value: '8',  share: 8 },
-        { text: 'Admin',    value: '6',  share: 6 },
-        { text: 'Other',    value: '8',  share: 8 },
-      ])],
-    },
-  },
-  {
-    id: 'approvals.next', moduleId: 'approvals', name: 'Quick Review',
-    description: 'The next one in the queue, decidable from here.',
-    purpose: 'ACT', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      title: 'Next Approval',
-      blocks: [
-        rows('list', [{ text: 'Medical Request', value: 'High Priority', tone: 'alert' }]),
-        actions('Review', 'Approve'),
+      title: 'Approvals', total: '32',
+      rows: [
+        { text: 'Medical',  value: '10' },
+        { text: 'Pharmacy', value: '8' },
+        { text: 'Admin',    value: '6' },
+        { text: 'Other',    value: '8' },
       ],
     },
   },
 
-  /* ══ 16 · REPORTS ══════════════════════════════════════════════════════
-     Two cards and no statistics. A report module's numbers are inside the
-     reports; the module itself is a shelf and a button. */
+  /* ══ REPORTS ═══════════════════════════════════════════════════════════ */
   {
     id: 'reports.recent', moduleId: 'reports', name: 'Recent Reports',
-    description: 'What has been generated lately.',
-    purpose: 'MONITOR', supportedSizes: ['tall'], defaultSize: 'tall', priority: 'secondary',
+    layout: 'recent', purpose: 'MONITOR',
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'secondary',
     data: {
       title: 'Recent Reports',
-      blocks: [
-        rows('timeline', [
-          { text: 'Animal Population', meta: 'Generated Today' },
-          { text: 'Medical Summary',   meta: 'Generated Yesterday' },
-          { text: 'Mortality Return',  meta: 'Generated 3 days ago' },
-        ]),
-        link('View Reports'),
+      items: [
+        { name: 'Animal Population', kind: 'Census',    when: 'Today' },
+        { name: 'Medical Summary',   kind: 'Clinical',  when: 'Yesterday' },
+        { name: 'Mortality Return',  kind: 'Statutory', when: '3 days ago' },
       ],
     },
   },
   {
     id: 'reports.actions', moduleId: 'reports', name: 'Quick Actions',
-    description: 'Start a report, or check the scheduled ones.',
-    purpose: 'ACT', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'optional',
-    data: { blocks: [actions('Create Report', 'Scheduled Reports')] },
+    layout: 'actions', purpose: 'ACT',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { actions: ['Create Report', 'Scheduled Reports'] },
   },
 
-  /* ══ 17 · COMMUNICATION ════════════════════════════════════════════════ */
+  /* ══ COMMUNICATION ═════════════════════════════════════════════════════ */
   {
     id: 'communication.unread', moduleId: 'communication', name: 'Unread',
-    description: 'What has not been read, and what cannot wait.',
-    purpose: 'ATTENTION', tone: 'attention',
-    supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
-    data: {
-      blocks: [count('18', 'Unread'), note('6 Important'), link('View Messages')],
-    },
+    layout: 'stat', purpose: 'ATTENTION',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'Communication', value: '18', label: 'Unread', sub: '6 important',
+            subTone: 'alert' },
   },
   {
     id: 'communication.actions', moduleId: 'communication', name: 'Quick Actions',
-    description: 'Say something to everyone, or to one person.',
-    purpose: 'ACT', supportedSizes: ['medium'], defaultSize: 'medium', priority: 'optional',
-    data: { blocks: [actions('New Announcement', 'Send Message')] },
+    layout: 'actions', purpose: 'ACT',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { actions: ['New Announcement', 'Send Message'] },
   },
 ]
 
-/**
- * Fill in what every variant has in common so the catalogue above only has to
- * state what is unusual. A missing `treatment` is `gradient`; a missing
- * `priority` is `optional`; a missing `data.blocks` is an empty card.
- */
-const CARD_VARIANTS = [...DOORS, ...VARIANTS].map((v) => ({
-  treatment: 'gradient',
+/** Fill in what every variation has in common so the catalogue states only
+    what is unusual. `fill` is derived from the layout unless overridden. */
+const CARD_VARIANTS = [...DOORS, ...COMPACT, ...VARIANTS].map((v) => ({
   priority: 'optional',
   ...v,
-  data: { blocks: [], ...(v.data || {}) },
+  fill: v.fill || LAYOUT_FILL[v.layout] || 'solid',
+  data: v.data || {},
 }))
 
 /**
- * id → variant. The saved layout stores variant ids, so this is the hot path.
+ * id → variation. The saved layout stores ids, so this is the hot path.
  *
  * NULL PROTOTYPE, DELIBERATELY. A plain object inherits from Object.prototype,
  * so `VARIANT_BY_ID['toString']` would return a function rather than undefined,
@@ -4551,12 +4043,9 @@ function getVariant(id) {
   return (typeof id === 'string' && VARIANT_BY_ID[id]) || null
 }
 
-/**
- * A module's cards in the order the picker shows them: the door first, then by
- * purpose, then by priority. That ordering is the reason a module's shelf reads
- * as a sentence — here is the module, here is what it knows, here is what is
- * waiting, here is what you can do, here is what just happened.
- */
+/** A module's cards in the order the picker shows them: doors first, then what
+    the module knows, then what is waiting, then what you can do, then what
+    just happened. */
 function variantsForModule(moduleId) {
   return CARD_VARIANTS
     .filter((v) => v.moduleId === moduleId)
@@ -4646,6 +4135,9 @@ const { normalise } = __req('js/lib/pack.js');
 const KEY = 'antz.home.layout'
 
 /**
+ * VERSION 4 — every card is a composition now rather than a stack of blocks,
+ * and several variations were renamed or replaced as a result.
+ *
  * VERSION 3 — the seeded page changed: Hospital and Diet & Kitchen are now
  * their photographs rather than their figures.
  *
@@ -4660,7 +4152,7 @@ const KEY = 'antz.home.layout'
  * that arrangement, which is the cost of the bump and the reason not to make
  * one lightly.
  */
-const VERSION = 3
+const VERSION = 4
 
 /**
  * The cards a fresh install starts with.
@@ -5210,46 +4702,33 @@ __def('js/components/ModuleCard.js', function (__x, __req) {
 /**
  * MODULE CARD
  * ───────────────────────────────────────────────────────────────────────────
- * One renderer for every card in the product. It takes a variant definition and
- * a resolved span and returns an element; it does not know whether that element
- * is going on the home page, into a drag proxy, or into a preview frame in the
- * picker.
+ * One renderer for every card in the product. It takes a variation and a
+ * resolved span and returns an element; it does not know whether that element
+ * is going on the home page, into a drag proxy, or into a preview in the
+ * picker. That last one is why the file is worth its length — the picker's
+ * previews must look like the real thing, and the only way to keep that true
+ * is for the preview to BE the card. There is no second renderer here.
  *
- * That last one is why this file is worth its length. The picker's previews are
- * required to look like the real thing, and the only way to keep that true as
- * the design changes is for the preview to BE the card. There is no second
- * renderer here to drift out of step with the first.
+ * ═══ A FUNCTION PER LAYOUT, NOT A TEMPLATE WITH SLOTS ══════════════════════
  *
- * ═══ THE CARD IS A COMPOSITION, NOT A DESIGN ═══════════════════════════════
+ * The previous version had one skeleton — label row, then a stack of content
+ * blocks — and every card in the product went through it. It made the data
+ * tidy and the design uniform in the worst way: five Medical cards that were
+ * five green rectangles with different words in them.
  *
- * There are 71 card variants and there is no `switch` with 71 arms. A card is
- * a FILL — the module's gradient or a photograph — carrying a HEAD and then a
- * list of BLOCKS, and a variant is just which blocks in which order:
+ * So each layout below builds its own DOM. A queue is a total and right-
+ * aligned rows; a stat is one number with the title above it; a timeline is
+ * entries down a rule; a chart is an SVG that owns the card. They share
+ * tokens, type, radius, icon and fill family — and nothing else. That is the
+ * difference between cards that belong to a family and cards that are the
+ * same card.
  *
- *   Species Statistics    head · hero · hero
- *   Hospital Capacity     head · hero · bar
- *   Medical Requests      head · count · rows(breakdown) · link
- *   Medical Activity      head · rows(timeline) · link
- *   Mortality Overview    head · hero · delta
- *   Pharmacy Actions      head · actions
+ * ═══ TWO FILLS ════════════════════════════════════════════════════════════
  *
- * Every one of those is the same three CSS rules with different children. That
- * is what keeps seventeen modules visually one product while saying seventeen
- * different things, and it is why adding a card to the catalogue is a data
- * edit rather than a component.
- *
- * A card with no blocks is a DOOR — the icon-and-name card the artboard draws.
- * Nothing declares "I am a door"; having nothing to say is what makes it one.
- *
- * ═══ WHY THE ACTION PILLS ARE NOT BUTTONS ══════════════════════════════════
- *
- * The card itself is a `<button>`, and a button inside a button is invalid
- * markup that browsers resolve by dropping one of them — usually not the one
- * you wanted. The pills on a Quick Actions card are spans that LOOK like
- * controls and the whole card activates; wiring them individually means making
- * the card a `<div>` with its own click target, which is a change to the grid's
- * focus model rather than to this file, and worth doing the day the actions do
- * something.
+ * `solid` is the module's gradient with white text: cards you go through.
+ * `soft` is the same gradient under a white veil, dark text: cards you read.
+ * The veil is applied in CSS so one rule serves all seventeen modules and no
+ * second palette has to be maintained. See cards.css.
  */
 
 const { getModule } = __req('js/data/modules.js');
@@ -5267,52 +4746,34 @@ function renderCard(variant, opts = {}) {
   const { size = variant.defaultSize, w = 1, h = 1, uid = '', static: isStatic = false } = opts
   const mod = getModule(variant.moduleId)
   const data = variant.data || {}
-  const blocks = data.blocks || []
 
-  /**
-   * A CARD WITH A DESTINATION IS AN ANCHOR, and one without is a button.
-   *
-   * Same reasoning as the hero banner: a link that navigates should be a link,
-   * so cmd-click, middle-click, "Open in New Tab" and the destination in the
-   * status bar all work without anyone implementing them. Modules with no
-   * `href` have nowhere to go yet and stay buttons — a link to nothing is
-   * worse than a button that announces itself.
-   *
-   * A PREVIEW IS NEITHER. Inside the picker the card is `static` and renders
-   * as a div: it is a picture of a card, and a picture of a card must not be
-   * focusable, clickable, or a second copy of the same link in the tab order.
-   */
+  /* A card with a destination is a link, one without is a button, and a
+     preview is neither — see the note in the picker. */
   const isLink = !isStatic && !!mod?.href
   const el = document.createElement(isStatic ? 'div' : isLink ? 'a' : 'button')
   el.className = 'card'
   if (isLink) {
     el.href = mod.href
     el.target = '_blank'
-    /* the opened page must not get a window.opener handle back to this one */
     el.rel = 'noopener'
-    /* NATIVE LINK DRAGGING WOULD FIGHT THE GRID. Chrome starts its own
-       drag-and-drop on a mouse-drag from an anchor, complete with a ghost
-       image, which lands on top of the pointer-driven reordering this grid
-       uses. The card is dragged by the drag controller or not at all. */
+    /* Chrome starts its own drag from an anchor, which would land on top of
+       the pointer-driven reordering the grid uses. */
     el.draggable = false
   } else if (!isStatic) {
     el.type = 'button'
   }
 
-  el.dataset.treatment = variant.treatment
-  el.dataset.kind = blocks.length ? 'panel' : 'door'
+  el.dataset.layout = variant.layout
+  el.dataset.fill = variant.fill
   el.dataset.size = size
   el.dataset.w = String(w)
   el.dataset.h = String(h)
   el.dataset.variant = variant.id
-  if (variant.purpose) el.dataset.purpose = variant.purpose
-  if (variant.tone) el.dataset.tone = variant.tone
   if (uid) el.dataset.uid = uid
   if (data.bandSize) el.dataset.bandSize = data.bandSize
 
-  /* The module's Figma fill, and its glyph size. A variant may override either
-     — the wide Parivesh card is drawn at a different gradient angle, and the
-     compact one uses a smaller mark. */
+  /* The module's Figma fill and glyph size. A variation may override either —
+     the wide Parivesh card is drawn at a different gradient angle. */
   const gradient = variant.gradient || mod?.gradient
   if (gradient) el.style.setProperty('--card-bg', `var(${gradient})`)
   const iconSize = variant.iconSize || mod?.iconSize
@@ -5322,53 +4783,50 @@ function renderCard(variant, opts = {}) {
     spokenName(mod, variant, data) + (isLink ? '. Opens in a new tab' : ''))
   if (isStatic) el.setAttribute('aria-hidden', 'true')
 
-  el.innerHTML = mediaFor(variant) + bodyFor(variant, mod, data) + bandFor(variant, mod, blocks)
+  const build = LAYOUTS[variant.layout] || LAYOUTS.door
+  el.innerHTML = build(mod, variant, data)
   return el
 }
 
-/**
- * What a screen reader reads out: the module, the card, and then the card's
- * actual content — so a user does not have to open Pharmacy to learn that 42
- * requests are waiting, and does not have to open Security to be told nothing
- * is wrong. Built by walking the same blocks the renderer walks, so a new block
- * type is spoken the day it is added rather than the day someone notices.
- */
+/* What a screen reader reads: the module, the card, then its actual content,
+   so nobody has to open Pharmacy to learn that 42 requests are waiting. */
 function spokenName(mod, variant, data) {
   const bits = [mod?.name]
-  const blocks = data.blocks || []
-  if (blocks.length || variant.treatment === 'image') bits.push(variant.name)
-
-  for (const blk of blocks) {
-    switch (blk.b) {
-      case 'hero':    bits.push(`${blk.value} ${blk.label}`); break
-      case 'count':   bits.push(`${blk.value} ${blk.label}`); break
-      case 'note':    bits.push(blk.text); break
-      case 'status':  bits.push(blk.text); break
-      case 'metrics': bits.push(blk.items.map((m) => `${m.value} ${m.label}`).join(', ')); break
-      case 'bar':     bits.push(blk.caption); break
-      case 'delta':   bits.push(`${blk.dir} ${blk.text}, ${blk.caption}`); break
-      case 'actions': bits.push(`Actions: ${blk.items.join(', ')}`); break
-      case 'trend':   bits.push(blk.items.map((t) => `${t.label} ${t.value}`).join(', ')); break
-      case 'rows':
-        bits.push(blk.items.map((r) =>
-          [r.lead, r.text, r.value, r.meta].filter(Boolean).join(' ')).join('; '))
-        break
-      /* `link` is deliberately not spoken: the whole card is one control and
-         announcing "View Requests" after its contents describes a second
-         control that is not there. */
-    }
-  }
+  if (variant.layout !== 'door' && variant.layout !== 'compact') bits.push(variant.name)
+  if (data.value) bits.push(`${data.value}${data.of ? ' of ' + data.of : ''} ${data.label || ''}`)
+  if (data.sub) bits.push(data.sub)
+  if (data.total) bits.push(`${data.total} total`)
+  if (data.caption) bits.push(data.caption)
+  if (data.summary) bits.push(data.summary)
+  for (const i of data.items || []) bits.push([i.value, i.label, i.text, i.name, i.kind, i.meta, i.when].filter(Boolean).join(' '))
+  for (const r of data.rows || []) bits.push(`${r.text} ${r.value}`)
+  for (const f of data.figures || []) bits.push(`${f.value} ${f.label}`)
+  for (const a of data.actions || []) bits.push(a)
   return bits.filter(Boolean).join('. ')
 }
 
-/* ── layers ─────────────────────────────────────────────────────────────── */
+/* ── shared parts ───────────────────────────────────────────────────────── */
 
-function mediaFor(variant) {
+function glyph(mod, variant, cls = 'card__icon') {
+  const file = variant.icon || mod?.icon
+  if (!file) return ''
+  const fish = mod?.iconShape === 'fish' && !variant.icon
+  return `<span class="${cls}${fish ? ' card__icon--fish' : ''}">` +
+         `<img src="${ASSET_ICON}${esc(file)}" alt="" aria-hidden="true"></span>`
+}
+
+/** The title line on a data card. A small glyph, then the card's own name. */
+function head(mod, variant, data) {
+  return `<span class="c-head">${glyph(mod, variant, 'c-head__icon')}` +
+         `<span class="c-head__text">${esc(data.title || mod?.name || '')}</span></span>`
+}
+
+function media(variant) {
   if (!variant.image) return ''
   const pos = variant.imagePosition ? ` style="object-position:${esc(variant.imagePosition)}"` : ''
   let out = `<img class="card__media"${pos} src="${ASSET_IMG}${esc(variant.image)}" alt="" aria-hidden="true">`
-  /* Figma stacks a second exported layer on the Species card — a leaf plate
-     under a tint pass. Both are real layers in the file, so both are drawn. */
+  /* Figma stacks two exported layers on the Species card, a leaf plate under a
+     tint pass. Both are real layers in the file, so both are drawn. */
   if (variant.imageOver) {
     out += `<img class="card__media" src="${ASSET_IMG}${esc(variant.imageOver)}" alt="" aria-hidden="true">`
   }
@@ -5376,206 +4834,167 @@ function mediaFor(variant) {
   return out
 }
 
-function glyph(mod, variant, extraClass = '') {
-  const file = variant.icon || mod?.icon
-  if (!file) return ''
-  const fish = mod?.iconShape === 'fish' && !variant.icon
-  const cls = ['card__icon', fish ? 'card__icon--fish' : '', extraClass].filter(Boolean).join(' ')
-  return `<span class="${cls}"><img src="${ASSET_ICON}${esc(file)}" alt="" aria-hidden="true"></span>`
-}
-
-function bodyFor(variant, mod, data) {
-  const blocks = data.blocks || []
-
-  /* A DOOR. Icon at the top, name at the foot — the artboard's `justify-between`
-     column, and the whole of a plain module card. A photograph carries its name
-     in the scrim band instead, so there its body is just the glyph. */
-  if (!blocks.length) {
-    const name = variant.treatment === 'image'
-      ? ''
-      : `<span class="card__name">${esc(mod?.name || '')}</span>`
-    return `<span class="card__body">${glyph(mod, variant)}${name}</span>`
-  }
-
-  /* A PANEL. Label row, then the blocks. */
-  return `<span class="card__body card__body--panel">` +
-           headRow(mod, variant, data) +
-           `<span class="card__blocks">${blocks.map(renderBlock).join('')}</span>` +
-         `</span>`
-}
-
-/**
- * The head is the module's glyph, the card's title, and — on an attention card
- * — one small warning mark. That mark is the entire visual difference between
- * "Medical Requests" and "Medical Care": the brief is explicit that an
- * attention card must not become a red card, so the signal is a glyph and a
- * hairline ring (see cards.css), not a repaint.
- */
-function headRow(mod, variant, data) {
-  const flag = variant.tone === 'attention'
-    ? `<span class="card__flag">${icon('alert', 'icon card__flag-icon')}</span>`
-    : ''
-  return `<span class="card__label-row">${glyph(mod, variant)}` +
-         `<span class="card__name">${esc(data.title || mod?.name || '')}</span>${flag}</span>`
-}
-
-/* The band is a separate layer, pinned to the bottom edge and wider than the
-   card — see the note in cards.css for why it is not a full-height overlay.
-   Only a photographic DOOR gets one; a photographic panel puts its title in the
-   head row like every other panel does. */
-function bandFor(variant, mod, blocks) {
-  if (variant.treatment !== 'image' || blocks.length) return ''
-  return `<span class="card__band"><span class="card__name">${esc(mod?.name || '')}</span></span>`
-}
-
 /* ───────────────────────────────────────────────────────────────────────────
-   THE BLOCKS
-   Eleven of them, and the whole product is built out of these. Each one is a
-   pure function of its own data — no block reads another block, and no block
-   knows what card it is on, which is why the same `rows` block can be the
-   Approvals breakdown and the Species population without a flag.
+   THE LAYOUTS
+   Twelve compositions. Each owns its markup; none is a variation of another.
    ─────────────────────────────────────────────────────────────────────────── */
 
-function renderBlock(blk) {
-  const fn = BLOCKS[blk.b]
-  return fn ? fn(blk) : ''
-}
+const LAYOUTS = {
 
-const BLOCKS = {
-  /* One large figure. The Species card's construction, reused everywhere a
-     card has a single number worth the whole width. */
-  hero: (b) =>
-    `<span class="stat">` +
-      `<span class="stat__value">${esc(b.value)}</span>` +
-      `<span class="stat__label">${esc(b.label)}</span>` +
+  /* A glyph and a name, pushed to opposite ends of the card — the artboard's
+     own module tile, and the whole of a navigation card. No figures, no
+     description, no arrow: the card is the link. */
+  door: (mod, variant) =>
+    `<span class="l-door">${glyph(mod, variant)}` +
+    `<span class="l-door__name">${esc(mod?.name || '')}</span></span>`,
+
+  /* The same entry point on its side, one row high, for a page that wants many
+     modules visible at once. */
+  compact: (mod, variant) =>
+    `<span class="l-compact">${glyph(mod, variant, 'l-compact__icon')}` +
+    `<span class="l-compact__name">${esc(mod?.name || '')}</span></span>`,
+
+  /* A photograph with its name in a scrim band — or, on the Species card, with
+     the collection's two figures over it. */
+  photo: (mod, variant, data) => {
+    if (data.figures) {
+      return media(variant) +
+        `<span class="l-photo-stat">${head(mod, variant, data)}` +
+        `<span class="l-photo-stat__figures">` +
+        data.figures.map((f) =>
+          `<span class="figure"><span class="figure__value">${esc(f.value)}</span>` +
+          `<span class="figure__label">${esc(f.label)}</span></span>`).join('') +
+        `</span></span>`
+    }
+    return media(variant) +
+      `<span class="l-photo">${glyph(mod, variant)}</span>` +
+      `<span class="card__band"><span class="l-door__name">${esc(mod?.name || '')}</span></span>`
+  },
+
+  /* ONE number, as large as the card allows, with its caption under it and the
+     supporting figure demoted to a quiet line at the foot. The hierarchy is
+     the point: primary, secondary, tertiary, and nothing else competing. */
+  stat: (mod, variant, data) =>
+    `<span class="l-stat">${head(mod, variant, data)}` +
+      `<span class="l-stat__body">` +
+        `<span class="l-stat__value">${esc(data.value)}</span>` +
+        `<span class="l-stat__label">${esc(data.label || '')}</span>` +
+      `</span>` +
+      (data.sub ? `<span class="l-stat__sub"${data.subTone ? ` data-tone="${esc(data.subTone)}"` : ''}>${esc(data.sub)}</span>` : '') +
     `</span>`,
 
-  /* Two to four medium figures. They lay out as a row and wrap to a 2×2 when
-     the card is not wide enough — see the container queries in cards.css. */
-  metrics: (b) =>
-    `<span class="blk-metrics" data-n="${b.items.length}">` +
-      b.items.map((m) =>
+  /* Two to four figures side by side, separated by whitespace alone — no
+     boxes, no dividers, no card-within-a-card. */
+  metrics: (mod, variant, data) =>
+    `<span class="l-metrics">${head(mod, variant, data)}` +
+      `<span class="l-metrics__row" data-n="${(data.items || []).length}">` +
+      (data.items || []).map((m) =>
         `<span class="metric"${m.tone ? ` data-tone="${esc(m.tone)}"` : ''}>` +
           `<span class="metric__value">${esc(m.value)}</span>` +
-          `<span class="metric__label">${esc(m.label)}</span>` +
-        `</span>`).join('') +
-    `</span>`,
-
-  /* A headline that reads as a sentence — "24 Pending", "842 Active". The
-     figure and its word are one line, because "24" on its own line above
-     "Pending" is a statistic, and this is a status. */
-  count: (b) =>
-    `<span class="blk-count">` +
-      `<span class="blk-count__value">${esc(b.value)}</span>` +
-      `<span class="blk-count__label">${esc(b.label)}</span>` +
-    `</span>`,
-
-  note: (b) => `<span class="blk-note">${esc(b.text)}</span>`,
-
-  status: (b) =>
-    `<span class="blk-status" data-tone="${esc(b.tone || 'ok')}">` +
-      `<i class="blk-status__dot"></i>${esc(b.text)}</span>`,
+          `<span class="metric__label">${esc(m.label)}</span></span>`).join('') +
+      `</span></span>`,
 
   /**
-   * Named rows in four dresses. The four share one row element and differ only
-   * in what is in it, which is why a timeline and a breakdown sit on the same
-   * card without looking like two components.
+   * A trend line that owns the card, with the summary beneath it.
    *
-   *   breakdown  text · figure, with a proportional track when `share` is given
-   *   list       text · figure, no track, tone-coloured figure
-   *   timeline   dot · title over meta
-   *   schedule   small lead line, then dot · title
+   * SCALED FROM ZERO, NOT FROM THE MINIMUM. Mortality's three months are 18,
+   * 15 and 12; scaled from the minimum the last point would sit on the floor
+   * and the card would read as a collapse rather than as a 33% improvement.
+   * Truncated axes are how honest data becomes a lie.
    */
-  rows: (b) => {
-    const items = b.items || []
-    const max = Math.max(1, ...items.map((r) => Number(r.share) || 0))
-    return `<span class="blk-rows" data-style="${esc(b.style)}">` +
-      items.map((r) => {
-        if (b.style === 'timeline') {
-          return `<span class="blk-row">` +
-            `<i class="blk-row__dot"></i>` +
-            `<span class="blk-row__stack">` +
-              `<span class="blk-row__title">${esc(r.text)}</span>` +
-              `<span class="blk-row__meta">${esc(r.meta || '')}</span>` +
-            `</span></span>`
-        }
-        if (b.style === 'schedule') {
-          return `<span class="blk-row blk-row--sched"${r.tone ? ` data-tone="${esc(r.tone)}"` : ''}>` +
-            `<span class="blk-row__lead">${esc(r.lead || '')}</span>` +
-            `<span class="blk-row__line">` +
-              `<i class="blk-row__dot"></i>` +
-              `<span class="blk-row__title">${esc(r.text)}</span>` +
-            `</span></span>`
-        }
-        /* breakdown / list */
-        const track = r.share != null
-          ? `<span class="blk-row__track"><i style="width:${((Number(r.share) / max) * 100).toFixed(1)}%"></i></span>`
-          : ''
-        return `<span class="blk-row blk-row--fig"${r.tone ? ` data-tone="${esc(r.tone)}"` : ''}>` +
-          `<span class="blk-row__line">` +
-            `<span class="blk-row__title">${esc(r.text)}</span>` +
-            `<span class="blk-row__value">${esc(r.value ?? '')}</span>` +
-          `</span>${track}</span>`
-      }).join('') +
-    `</span>`
-  },
-
-  /* A filled track and the sentence that says what it means. The number is in
-     the caption rather than inside the bar because a figure sitting on a bar
-     has to be legible against both the filled and the empty half of it. */
-  bar: (b) => {
-    const pct = Math.max(0, Math.min(1, Number(b.value) || 0)) * 100
-    return `<span class="blk-bar">` +
-      `<span class="blk-bar__track"><i style="width:${pct.toFixed(1)}%"></i></span>` +
-      `<span class="blk-bar__caption">${esc(b.caption)}</span>` +
-    `</span>`
-  },
-
-  /**
-   * A small column chart and its own figures.
-   *
-   * COLUMNS ARE SCALED FROM ZERO, NOT FROM THE MINIMUM. Mortality's three
-   * months are 18, 15 and 12; scaled from the minimum, the last column would be
-   * a sliver and the card would read as a collapse rather than as a 33%
-   * improvement. Truncated axes are how honest data becomes a lie.
-   */
-  trend: (b) => {
-    const items = b.items || []
-    const max = Math.max(1, ...items.map((t) => Number(t.value) || 0))
-    return `<span class="blk-trend">` +
-      `<span class="blk-trend__chart" aria-hidden="true">` +
-        items.map((t) =>
-          `<i class="blk-trend__col${t.current ? ' is-current' : ''}"` +
-          ` style="height:${Math.max(8, (Number(t.value) / max) * 100).toFixed(1)}%"></i>`).join('') +
+  chart: (mod, variant, data) => {
+    const s = data.series || []
+    const max = Math.max(1, ...s.map((p) => p.value))
+    const W = 100, H = 34
+    const pts = s.map((p, i) => [
+      s.length > 1 ? (i / (s.length - 1)) * W : W / 2,
+      H - (p.value / max) * (H - 4) - 2,
+    ])
+    const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('')
+    const area = `${line}L${W} ${H}L0 ${H}Z`
+    return `<span class="l-chart">${head(mod, variant, data)}` +
+      `<span class="l-chart__plot">` +
+        `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" focusable="false">` +
+          `<path class="l-chart__area" d="${area}"/>` +
+          `<path class="l-chart__line" d="${line}" vector-effect="non-scaling-stroke"/>` +
+        `</svg>` +
       `</span>` +
-      `<span class="blk-rows" data-style="list">` +
-        items.map((t) =>
-          `<span class="blk-row blk-row--fig${t.current ? ' is-current' : ''}"><span class="blk-row__line">` +
-            `<span class="blk-row__title">${esc(t.label)}</span>` +
-            `<span class="blk-row__value">${esc(t.value)}</span>` +
-          `</span></span>`).join('') +
-      `</span>` +
-    `</span>`
+      `<span class="l-chart__foot">` +
+        `<span class="l-chart__summary">${esc(data.summary || '')}</span>` +
+        (data.delta ? `<span class="l-chart__delta" data-dir="${esc(data.delta.dir)}">` +
+          `${data.delta.dir === 'down' ? '↓' : '↑'} ${esc(data.delta.text)}</span>` : '') +
+      `</span></span>`
   },
 
-  /* A movement against the previous period. The arrow is part of the chip so
-     the direction survives being read at 30% in a picker preview. */
-  delta: (b) =>
-    `<span class="blk-delta">` +
-      `<span class="blk-delta__chip" data-dir="${esc(b.dir)}">` +
-        `<span class="blk-delta__arrow" aria-hidden="true">${b.dir === 'down' ? '↓' : '↑'}</span>` +
-        `${esc(b.text)}</span>` +
-      `<span class="blk-delta__caption">${esc(b.caption)}</span>` +
+  /* A total at the top right of its title, then named rows with their figures
+     right-aligned on a common edge — the shape of a work queue. */
+  queue: (mod, variant, data) =>
+    `<span class="l-queue">` +
+      `<span class="l-queue__head">${head(mod, variant, data)}` +
+        (data.total ? `<span class="l-queue__total">${esc(data.total)}</span>` : '') +
+      `</span>` +
+      `<span class="l-queue__rows">` +
+      (data.rows || []).map((r) =>
+        `<span class="l-queue__row"><span class="l-queue__text">${esc(r.text)}</span>` +
+        `<span class="l-queue__value">${esc(r.value)}</span></span>`).join('') +
+      `</span></span>`,
+
+  /* Dotted rows. A state rather than a measurement, so the dot carries the
+     meaning and the card is never repainted by its worst line. */
+  status: (mod, variant, data) =>
+    `<span class="l-status">${head(mod, variant, data)}` +
+      `<span class="l-status__rows">` +
+      (data.items || []).map((i) =>
+        `<span class="l-status__row" data-tone="${esc(i.tone || 'ok')}">` +
+          `<i class="l-status__dot"></i>` +
+          `<span class="l-status__value">${esc(i.value)}</span>` +
+          `<span class="l-status__text">${esc(i.text)}</span></span>`).join('') +
+      `</span></span>`,
+
+  /* A ratio, a full-width track, a caption. The track is the largest thing on
+     the card because the card is about how far along something is. */
+  progress: (mod, variant, data) =>
+    `<span class="l-progress">${head(mod, variant, data)}` +
+      `<span class="l-progress__ratio">` +
+        `<span class="l-progress__value">${esc(data.value)}</span>` +
+        `<span class="l-progress__of">/ ${esc(data.of)}</span>` +
+      `</span>` +
+      `<span class="l-progress__track"><i style="width:${Math.max(0, Math.min(100, data.pct))}%"></i></span>` +
+      `<span class="l-progress__caption">${esc(data.caption || '')}</span>` +
     `</span>`,
 
-  actions: (b) =>
-    `<span class="blk-actions" data-n="${b.items.length}">` +
-      b.items.map((a) => `<span class="blk-action">${esc(a)}</span>`).join('') +
-    `</span>`,
+  /* Entries down a hairline rule, newest first. */
+  timeline: (mod, variant, data) =>
+    `<span class="l-timeline">${head(mod, variant, data)}` +
+      `<span class="l-timeline__items">` +
+      (data.items || []).map((i) =>
+        `<span class="l-timeline__item"${i.tone ? ` data-tone="${esc(i.tone)}"` : ''}>` +
+          `<i class="l-timeline__dot"></i>` +
+          `<span class="l-timeline__text">${esc(i.text)}</span>` +
+          `<span class="l-timeline__meta">${esc(i.meta || '')}</span></span>`).join('') +
+      `</span></span>`,
 
-  link: (b) =>
-    `<span class="blk-link">${esc(b.text)}` +
-      `<span class="blk-link__arrow" aria-hidden="true">→</span></span>`,
+  /* The objects you were last working on, so the card is a way back into work
+     rather than a log of it. */
+  recent: (mod, variant, data) =>
+    `<span class="l-recent">${head(mod, variant, data)}` +
+      `<span class="l-recent__items">` +
+      (data.items || []).map((i) =>
+        `<span class="l-recent__item">` +
+          `<span class="l-recent__main">` +
+            `<span class="l-recent__name">${esc(i.name)}</span>` +
+            `<span class="l-recent__kind">${esc(i.kind)}</span></span>` +
+          `<span class="l-recent__when">${esc(i.when)}</span></span>`).join('') +
+      `</span></span>`,
+
+  /* Controls, and the controls are the content — not a footer under something
+     else. Two to four; a fifth would make the card a menu. */
+  actions: (mod, variant, data) =>
+    `<span class="l-actions">${head(mod, variant, data)}` +
+      `<span class="l-actions__set" data-n="${(data.actions || []).length}">` +
+      (data.actions || []).slice(0, 4).map((a) =>
+        `<span class="l-action">${esc(a)}</span>`).join('') +
+      `</span></span>`,
 }
 
 /* Every string that reaches innerHTML goes through here. The data is local and
@@ -5667,7 +5086,6 @@ const { renderCard } = __req('js/components/ModuleCard.js');
 const { icon } = __req('js/icons.js');
 const { animate } = __req('js/lib/motion.js');
 
-const ADD_UID = '__add__'
 
 function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
   const slots = new Map()          // uid → slot element
@@ -5682,12 +5100,14 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
   function render(cards, { animate = true } = {}) {
     cols = currentColumns()
 
-    /* The add tile is packed as if it were a small card, so it always lands in
-       the first free slot after the last one rather than in a bar the user has
-       to go looking for. */
-    const list = editing
-      ? [...cards, { uid: ADD_UID, variantId: null, size: 'small' }]
-      : cards
+    /* ADD MODULE IS NOT IN HERE ANY MORE.
+       It used to be packed as a tile after the last card, on the theory that it
+       lands in the first free slot rather than in a bar you go looking for. On
+       a fifteen-card page that theory is wrong: the tile sits below the fold,
+       and the one action a person opens Edit Modules to perform is the one they
+       have to scroll to find. It is now a header action — see
+       EditModulesMode.js — and the grid holds only the user's own modules. */
+    const list = cards
 
     const next = pack(list, cols)
 
@@ -5701,10 +5121,10 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
       let slot = slots.get(item.uid)
 
       if (!slot) {
-        slot = item.uid === ADD_UID ? buildAddSlot() : buildSlot(item)
+        slot = buildSlot(item)
         slots.set(item.uid, slot)
         root.append(slot)
-      } else if (item.uid !== ADD_UID) {
+      } else {
         syncSlot(slot, item)
       }
 
@@ -5831,22 +5251,6 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
     slot.append(btn)
   }
 
-  function buildAddSlot() {
-    const slot = document.createElement('div')
-    slot.className = 'slot slot-add'
-    slot.dataset.uid = ADD_UID
-    const btn = document.createElement('button')
-    btn.type = 'button'
-    btn.className = 'add-tile'
-    /* "Add Widget", not "Add Module" — the tile adds a CARD, and every other
-       surface that does the same thing (the sheet's title, the profile menu,
-       the commit button) says widget. It used to say module, which described
-       the gallery you land in rather than the thing you leave with. */
-    btn.innerHTML = `<span class="add-tile__ring">${icon('plus')}</span><span>Add Widget</span>`
-    btn.addEventListener('click', () => onAdd?.())
-    slot.append(btn)
-    return slot
-  }
 
   /**
    * Removing a slot outright makes the cards around it jump. Fading it first
@@ -5874,7 +5278,7 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
    * last.
    */
   function neighbourOf(uid) {
-    const order = placed.filter((p) => p.uid !== ADD_UID)
+    const order = placed.slice()
     const i = order.findIndex((p) => p.uid === uid)
     if (i < 0) return null
     return order[i + 1]?.uid || order[i - 1]?.uid || null
@@ -5883,7 +5287,7 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
   /** Hand focus to a uid captured earlier, falling back to the Add tile. */
   function restoreFocus(uid) {
     const target =
-      (uid && slots.get(uid)?.querySelector('.card')) || root.querySelector('.add-tile')
+      uid && slots.get(uid)?.querySelector('.card')
     target?.focus({ preventScroll: true })
   }
 
@@ -5950,7 +5354,6 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
     /** Every real card slot in visual order — what the drag maths runs on. */
     orderedSlots() {
       return placed
-        .filter((p) => p.uid !== ADD_UID)
         .map((p) => ({ ...p, el: slots.get(p.uid) }))
         .filter((p) => p.el)
     },
@@ -5962,7 +5365,6 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize }) {
   }
 }
 
-__x.ADD_UID = ADD_UID;
   __x.createModuleGrid = createModuleGrid;
 });
 
@@ -6019,10 +5421,10 @@ function createDragController({ grid, root, getCards, canDrag, onGrab, onCommit,
        press on a door, and the grid must scroll under a finger like any page. */
     if (canDrag && !canDrag()) return
     if (e.button != null && e.button > 0) return              // right / middle click
-    if (e.target.closest('.slot__remove, .add-tile, .slot__locked')) return
+    if (e.target.closest('.slot__remove, .slot__locked')) return
 
     const slot = e.target.closest('.slot')
-    if (!slot || !slot.dataset.uid || slot.classList.contains('slot-add')) return
+    if (!slot || !slot.dataset.uid) return
 
     const cards = getCards()
     const index = cards.findIndex((c) => c.uid === slot.dataset.uid)
@@ -6383,7 +5785,7 @@ __def('js/components/EditModulesMode.js', function (__x, __req) {
  * EDIT MODULES MODE
  * ───────────────────────────────────────────────────────────────────────────
  * Owns the difference between reading the home page and rearranging it: the
- * section header's copy, the edit affordances on the grid, the Add Widget tile,
+ * section header's copy, the edit affordances on the grid, the Add Module action,
  * and a keyboard route through the whole thing.
  *
  * KEYBOARD REORDERING IS NOT A CONSOLATION PRIZE. A drag-and-drop grid that can
@@ -6398,7 +5800,7 @@ __def('js/components/EditModulesMode.js', function (__x, __req) {
 const { moveItem } = __req('js/lib/pack.js');
 const { icon } = __req('js/icons.js');
 
-function createEditMode({ head, grid, root, getCards, onCommit, onExit }) {
+function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd }) {
   const title = head.querySelector('.section-head__title')
   const actions = head.querySelector('.section-head__actions')
 
@@ -6432,6 +5834,25 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit }) {
   doneBtn.className = 'link-btn link-btn--done'
   doneBtn.textContent = 'Done'
 
+  /**
+   * ADD MODULE, AT THE TOP.
+   *
+   * This was a tile at the end of the grid. With fifteen modules on the page
+   * that put the primary action of the whole mode below the fold: you entered
+   * Edit Modules to add something and had to scroll past everything you already
+   * had to find out how. It now sits beside the title, where it is the first
+   * thing in the mode after the mode's own name.
+   *
+   * It is an ACTION and is dressed as one — an outlined control next to Done,
+   * not another module card. Making it look like a card would put it in
+   * competition with the things it adds.
+   */
+  const addBtn = document.createElement('button')
+  addBtn.type = 'button'
+  addBtn.className = 'add-module-btn'
+  addBtn.innerHTML = `${icon('plus')}<span>Add Module</span>`
+  addBtn.addEventListener('click', () => onAdd?.())
+
   const hint = document.createElement('p')
   hint.className = 'edit-hint'
   hint.innerHTML =
@@ -6451,6 +5872,8 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit }) {
     document.body.classList.add('is-editing')
     title.textContent = 'Edit Modules'
     editBtn.replaceWith(doneBtn)
+    actions.insertBefore(addBtn, doneBtn)
+    head.classList.add('section-head--editing')
     head.after(hint)
     grid.setEditing(true)
     onCommit?.(getCards(), { rerender: true })
@@ -6464,6 +5887,8 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit }) {
     releaseGrab({ commit: false })
     document.body.classList.remove('is-editing')
     title.textContent = 'Modules'
+    addBtn.remove()
+    head.classList.remove('section-head--editing')
     doneBtn.replaceWith(editBtn)
     hint.remove()
     grid.setEditing(false)
@@ -6482,10 +5907,10 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit }) {
        guard the grab handler calls preventDefault first and swallows the
        activation, so Remove and Resize simply do nothing from a keyboard while
        working perfectly under a pointer. */
-    if (e.target.closest?.('.slot__remove, .slot__resize, .slot__locked, .add-tile')) return
+    if (e.target.closest?.('.slot__remove, .slot__resize, .slot__locked')) return
 
     const slot = e.target.closest?.('.slot')
-    if (!slot || slot.classList.contains('slot-add')) return
+    if (!slot) return
 
     const cards = getCards()
     const uid = slot.dataset.uid
@@ -6759,7 +6184,7 @@ __def('js/components/ModulePickerBottomSheet.js', function (__x, __req) {
 /**
  * THE WIDGET GALLERY
  * ───────────────────────────────────────────────────────────────────────────
- * "Add Widget" — a sheet on touch, a panel on desktop, one component.
+ * "Add Module" — a sheet on touch, a panel on desktop, one component.
  *
  * ═══ WHY THIS IS A RAIL AND NOT A GRID OF FOLDERS ══════════════════════════
  *
@@ -6832,14 +6257,14 @@ function createModulePicker({ onAdd }) {
   sheet.innerHTML = `
     <span class="sheet__handle" aria-hidden="true"></span>
     <div class="sheet__head">
-      <h2 class="sheet__title" id="picker-title">Add Widget</h2>
+      <h2 class="sheet__title" id="picker-title">Add Module</h2>
       <button type="button" class="sheet__close" aria-label="Close">${icon('close')}</button>
     </div>
 
     <div class="sheet__side">
       <div class="sheet-search">
         ${icon('search')}
-        <input type="search" placeholder="Search widgets" aria-label="Search modules and widgets"
+        <input type="search" placeholder="Search modules" aria-label="Search modules"
                autocomplete="off" autocorrect="off" spellcheck="false">
         <button type="button" class="sheet-search__clear" aria-label="Clear search">${icon('close')}</button>
       </div>
@@ -6877,7 +6302,7 @@ function createModulePicker({ onAdd }) {
   const addBtn = document.createElement('button')
   addBtn.type = 'button'
   addBtn.className = 'btn-primary'
-  addBtn.innerHTML = `${icon('plus')}<span>Add Widget</span>`
+  addBtn.textContent = 'Add to Home'
   actions.append(cancelBtn, addBtn)
   foot.append(sizeSelector.root, actions)
 
@@ -7121,7 +6546,7 @@ function createModulePicker({ onAdd }) {
     el.innerHTML =
       `<span class="sheet-empty__icon">${icon('search')}</span>` +
       `<span class="sheet-empty__title">Nothing matches &ldquo;${esc(searchInput.value)}&rdquo;</span>` +
-      `<span class="sheet-empty__note">Try a module name, or something the widget shows — ` +
+      `<span class="sheet-empty__note">Try a module name, or something the card shows — ` +
       `&ldquo;overdue&rdquo;, &ldquo;population&rdquo;, &ldquo;low stock&rdquo;.</span>`
     return el
   }
@@ -7164,7 +6589,7 @@ function createModulePicker({ onAdd }) {
     onAdd?.(selected.variantId, sizeSelector.value || selected.size)
     close()
   })
-  /* Beside "Add Widget" in a footer, "Cancel" means abandon the whole thing —
+  /* Beside "Add to Home" in a footer, "Cancel" means abandon the whole thing —
      that is what the control reads as. Deselecting without leaving is still
      available by tapping the chosen widget again, which is the gesture that
      selected it. */
@@ -7658,7 +7083,6 @@ const grid = createModuleGrid({
     /* No router in a prototype — say what would happen and leave it there. */
     edit.announce(`Opening ${variant.name}.`)
   },
-  onAdd: () => picker.open(),
   onRemove(uid) {
     /* Work out where focus should land while the card is still on the grid —
        once it is gone there is nothing left to be adjacent to. */
@@ -7668,7 +7092,7 @@ const grid = createModuleGrid({
       return
     }
     grid.restoreFocus(neighbour)
-    edit.announce('Card removed.')
+    edit.announce('Module removed.')
   },
   onResize(uid, size, slot) {
     sizePopover.open(uid, size, slot)
@@ -7699,7 +7123,7 @@ const picker = createModulePicker({
         [{ transform: 'scale(.86)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }],
         { duration: 320, easing: 'cubic-bezier(.16,1,.3,1)' },
       )
-      edit.announce('Card added to your home page.')
+      edit.announce('Module added to your home page.')
     })
   },
 })
@@ -7708,6 +7132,7 @@ const edit = createEditMode({
   head,
   grid,
   root: gridRoot,
+  onAdd: () => picker.open(),
   getCards: () => layoutStore.get().cards,
   onCommit(next, opts = {}) {
     reorder(next, grid.columns)
@@ -7735,7 +7160,7 @@ const profileMenu = createProfileMenu({
       label: (s) => (s.editing ? 'Done Editing' : 'Edit Modules'),
       note: (s) => (s.editing ? 'Save the arrangement' : 'Rearrange, resize or remove cards'),
     },
-    { id: 'add', icon: 'widgets', label: 'Add Widget', note: 'Browse every module’s widgets' },
+    { id: 'add', icon: 'widgets', label: 'Add Module', note: 'Choose a module to add to Home' },
     null,
     {
       id: 'reset',
