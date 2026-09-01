@@ -2332,6 +2332,88 @@ business; the menu is the module catalogue's opinion.** What a Site Manager is
 collection is inside its approved capacity, and both are one tap away for
 everybody else.
 
+## The header gave its controls back
+
+The Site header carried five controls — a role chip, **Add**, **Customize**,
+**More**, and the modules menu — and four of them were a second route to
+something the avatar menu already offered.
+
+```
+before   [☰] [Viewing as  Site Manager ▾] [＋ Add] [⚙ Customize] [⋯]
+after    [☰]
+```
+
+What is left is the one control that is about the **product** rather than the
+page: the modules this role can put on it. Everything a person can do to their
+own workspace hangs off their own avatar — which is not a new rule, it is the
+rule the home page has followed since the profile menu was written, and the Site
+header had quietly been the exception.
+
+### What moved, and why each one belongs there
+
+| | |
+|---|---|
+| **Viewing as** | Which seat you are looking through is a statement about **you**, not about the Site. In the header it was a dashed chip that had to explain it was scaffolding; in the account menu it needs no explaining, because that is where a person expects to find who they are signed in as. It is the only radio group in the menu — one role at a time, ticked. |
+| **Customize / Reset** | Already there. The Customize button and the More menu were both second doors to items the avatar had carried for two sessions. |
+| **On this Site** | The quick actions. These are the one genuine argument *against* the move — "Add Task" is a thing you do to the Site, not to your account — and they moved anyway, under a heading that names the subject, because the alternative was deleting eight permission-gated actions to save a button. Gated exactly as before: the role's permissions and the level. |
+| **Open Report** | The only item the More menu had that was nowhere else. |
+
+The rest of the More menu — *Open a Section*, *All Sites*, *Go Up* — is not
+reproduced anywhere, and that is deliberate. Every one of them was a third route
+to a move the breadcrumb, the sibling caret, the counts strip and <kbd>Esc</kbd>
+already make: a menu item that says *"Go one level deeper"* next to a
+breadcrumb is a menu item nobody reads twice.
+
+The menu is ordinary on the home page — three items, as it always was — and long
+on the Site. **That asymmetry is the point rather than a cost:** the home page
+has one thing to arrange, and a Site has a role, a workspace and a subject.
+
+### The row is defined once now, for both menus
+
+There are two menu components and there is a good reason for both: `ProfileMenu`
+renders a fixed head with the user's avatar and name because it is the account
+menu, and `PopMenu` has no opinion about content because it hangs off several
+controls. What they must **not** have two of is the **row** — the glyph plate,
+the label and note, the tick, checkbox-against-radio semantics, the heading, the
+rule.
+
+That went out of step immediately. The role switcher moved into the profile menu
+and **arrived without a tick**, because `ProfileMenu` had never needed one and
+its renderer knew nothing about `checked`. So `menuEntry(item, state)` is
+exported from `PopMenu.js` and both callers attach their own listener. What stays
+in each component is what genuinely differs: the head, the anchoring, the
+dismissal, and whether choosing something closes it.
+
+`ProfileMenu`'s `items` is a **function of the state** now, too. It was a fixed
+array of three whose *labels* were functions — enough while the only thing that
+varied was wording, and not enough once the number of rows depends on the level
+and the role's permissions. **A label function cannot make a row that is not
+there.**
+
+### And a duplicated requirement failed the way duplicated requirements do
+
+The modules menu capped its own height against the space under its anchor. The
+profile menu did not, because it had never needed to. Move eighteen rows into it
+and it came out **1,097px tall in a 1,000px window**, with its last two rows
+below the bottom edge and no way to reach them.
+
+`capToViewport(menu, top, margin)` is shared for the same reason the row is: it
+is not a difference between the two menus, it is the same requirement. A fixed
+`max-height` in CSS cannot do the job — too short on a desktop, past the edge on
+a tablet — and `.pmenu` carries `overflow-y: auto` so that what does not fit
+scrolls instead of vanishing.
+
+### A second check that agreed with itself
+
+The truncation probe measured `.pmenu__label` and `.pmenu__note` and **not
+`.pmenu__heading-note`** — so it reported zero while *"Site Manager · Command
+Ce…"* sat ellipsed at the top of the menu. The note is gone (the ticked row
+directly below it answers the same question, which is what makes a heading note
+redundant rather than short), and the probe measures headings now.
+
+Two sessions running, the defect and the blind spot have been the same shape:
+**a check that reads what the code intended rather than what the page renders.**
+
 ## The bug that shipped, and the check that agreed with itself
 
 The first deploy went out with the modules button **visible on the Sites listing
@@ -2414,7 +2496,9 @@ confirm the figures move, the plurals agree and the empty states land.
 | Remove | the **−** at a card's top-left · core cards show a lock |
 | Resize | the **⤢** at a card's bottom-right |
 | Add | **avatar → Add Module**, or **＋ Add Module** in the edit-mode header |
-| Add a whole module | **☰ in the Site header** — the modules your role answers for, ticked where they are already on the workspace. Tap to add, tap a ticked row to remove; the menu stays open |
+| Add a whole module | **☰ in the Site header** — the modules your role answers for, ticked where they are already on the workspace. Tap to add, tap a ticked row to remove; the dialog stays open |
+| Change role | **avatar → Viewing as** — five seats, one ticked. It was a chip in the Site header |
+| Site actions | **avatar → On this Site** — Add Task, Report Incident and the rest, gated by role and level |
 | Open a widget's record | **tap the widget** — Sections, Enclosures and Section Contents drill down instead |
 | Move around a record | the chips under its title, or scroll |
 | Close a record | **Close**, the **×**, the scrim, <kbd>Esc</kbd>, or drag the header down |
@@ -2423,6 +2507,31 @@ confirm the figures move, the plurals agree and the empty states land.
 
 Species Management and Medical are non-removable. Everything else is the
 user's call.
+
+### The modules menu is a dialog, and now looks like one
+
+Thirty-four rows in two groups, deciding what the whole workspace contains —
+hung off its button in the header it ran the full height of the screen and past
+the left edge of it. One flag on the shared `createPopMenu`, `centred: true`,
+and nothing was forked:
+
+| | Popover | Centred |
+|---|---|---|
+| Position | measured from the anchor in JS | stated in CSS, `translate: -50% -50%` |
+| Width | 356px, measured against the longest label | **460px** — no name ellipses |
+| Height | capped by the space under the button | `min(76dvh, 720px)`, scrolls inside |
+| Behind it | the page, sharp | **the page, blurred** — one veil that is also the catcher |
+| Page scroll | follows the anchor | locked |
+| Chrome | none — it belongs to its button | a **sticky title and a ×**, because centred over a veil nothing says what this is or how to leave |
+
+**Each row carries the widget count and nothing else.** It used to read *Site
+Overview · 6 widgets* — a domain name repeated on every row of a group whose
+heading already says what these modules are, with the one useful number pushed
+to the far side of a separator.
+
+The other four menus in the header — siblings, roles, add, more — are four rows
+each and stay popovers, because a popover belongs to the control it came from
+and the page behind it is still the page you are working on.
 
 ### Where the switch lands
 

@@ -227,5 +227,85 @@ with Chrome(width=1024, height=1200) as c:
     check("no console errors while navigating", not c.errors(), str(c.errors()[:2]))
 
 
+
+# ── the modules menu is a centred dialog over a blurred page ───────────────
+MENU_PROBE = r"""
+(() => {
+  const m = document.querySelector('.pmenu--centre');
+  if (!m || m.hidden) return { open: false };
+  const r = m.getBoundingClientRect();
+  const veil = document.querySelector('.pmenu-catcher--veil');
+  const cs = veil && !veil.hidden ? getComputedStyle(veil) : null;
+  const notes = [...m.querySelectorAll('.pmenu__note')].map(n => n.textContent);
+  return {
+    open: true,
+    offCentre: [Math.abs((r.left + r.width / 2) - innerWidth / 2),
+                Math.abs((r.top + r.height / 2) - innerHeight / 2)],
+    inViewport: r.left >= 0 && r.top >= 0 && r.right <= innerWidth + 1 && r.bottom <= innerHeight + 1,
+    scrolls: m.scrollHeight > m.clientHeight,
+    veilBlur: cs ? cs.backdropFilter : null,
+    veilOpacity: cs ? cs.opacity : null,
+    locked: document.body.style.overflow,
+    title: (m.querySelector('.pmenu__dtitle') || {}).textContent || null,
+    close: !!m.querySelector('.pmenu__dclose'),
+    rows: m.querySelectorAll('.pmenu__item').length,
+    notesAreCounts: notes.length > 0 && notes.every(n => /^\d+ widgets$/.test(n.trim())),
+    sampleNotes: notes.slice(0, 3),
+    ellipsed: [...m.querySelectorAll('.pmenu__label')].filter(e => e.scrollWidth > e.clientWidth + 1).length,
+  };
+})()
+"""
+
+MENU_BTN = "document.querySelector(\"button[aria-label='Modules for your role']\").click()"
+
+with Chrome(width=1024, height=1300) as c:
+    print("\nthe modules menu")
+    c.goto(URL)
+    c.eval("location.hash='#site/bg-safari'"); time.sleep(0.8)
+    c.eval(MENU_BTN); time.sleep(0.9)
+    got = c.eval(MENU_PROBE)
+    check("the menu opens", got.get("open") is True)
+    check("centred in the viewport", got["offCentre"][0] <= 2 and got["offCentre"][1] <= 2, str(got["offCentre"]))
+    check("wholly on screen", got["inViewport"] is True)
+    check("the page behind it is blurred", "blur" in (got["veilBlur"] or ""), str(got["veilBlur"]))
+    check("the veil is fully faded in", got["veilOpacity"] == "1", str(got["veilOpacity"]))
+    check("the page cannot scroll under it", got["locked"] == "hidden", str(got["locked"]))
+    check("it has a title and a way out", bool(got["title"]) and got["close"], str(got["title"]))
+    check("every row's note is a widget count and nothing else",
+          got["notesAreCounts"], str(got["sampleNotes"]))
+    check("no module name is ellipsed", got["ellipsed"] == 0, f"{got['ellipsed']} ellipsed")
+    check("a long list scrolls inside the dialog", got["scrolls"] is True)
+
+    # a row is a switch, and the dialog stays open while you flick them
+    before = c.eval("document.querySelectorAll('#siteGrid .card').length")
+    c.eval("document.querySelectorAll('.pmenu--centre .pmenu__item')[1].click()"); time.sleep(0.5)
+    after = c.eval("document.querySelectorAll('#siteGrid .card').length")
+    check("toggling a row keeps the dialog open and changes the page",
+          c.eval("!document.querySelector('.pmenu--centre').hidden") and after != before,
+          f"{before} -> {after} cards")
+
+    # the two ways out
+    c.eval("document.querySelector('.pmenu__dclose').click()"); time.sleep(0.6)
+    check("the close button closes it and unlocks the page",
+          c.eval("document.querySelector('.pmenu--centre').hidden") is True and
+          c.eval("document.body.style.overflow") == "", "")
+    c.eval(MENU_BTN); time.sleep(0.8)
+    c.eval("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))")
+    time.sleep(0.6)
+    check("Escape closes it too", c.eval("document.querySelector('.pmenu--centre').hidden") is True)
+
+    # and it fits at every width the product is drawn at
+    for w in (1920, 1024, 820, 768, 500, 430):
+        c.set_viewport(w, 900); time.sleep(0.25)
+        c.eval(MENU_BTN); time.sleep(0.7)
+        got = c.eval(MENU_PROBE)
+        check(f"{w}px: the dialog fits and stays centred",
+              got.get("open") and got["inViewport"] and got["offCentre"][0] <= 2,
+              str(got.get("offCentre")))
+        c.eval("document.querySelector('.pmenu__dclose').click()"); time.sleep(0.45)
+
+    check("no console errors around the menu", not c.errors(), str(c.errors()[:2]))
+
+
 print("\n" + ("ALL PASS" if not fails else f"{len(fails)} FAILED: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)

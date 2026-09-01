@@ -99,6 +99,43 @@ space actually left below the button rather than by a number in CSS.
 | a queue whose rows did not sum to its total | scaled separately; the total comes from the rows now |
 | five 1×1 titles ellipsed at 900px | the title line gets 92px there, about twelve characters |
 
+### The header gave its controls back
+
+Five controls became one. The role chip, **Add**, **Customize** and **More** are
+gone from the Site header; what is left is the **☰**, which is the only one of
+the five that is about the product rather than the page.
+
+    before   [☰] [Viewing as  Site Manager] [+ Add] [Customize] [...]
+    after    [☰]
+
+Everything else hangs off the avatar, which is the rule the home page has
+followed since the profile menu was written — the Site header had been the
+exception. `Viewing as` is a ticked radio group there; the quick actions are
+under an `On this <level>` heading, gated by permission and level exactly as
+before; `Open Report` came across because it was the one More item that was
+nowhere else. The More menu's *Go Up* / *Open a Section* items are **not**
+reproduced: the breadcrumb, the sibling caret, the counts strip and Escape are
+already three routes to that move.
+
+**THE ROW IS DEFINED ONCE FOR BOTH MENUS NOW.** `menuEntry()` is exported from
+PopMenu.js, because the two components genuinely differ in their head, their
+anchoring and their dismissal — and not in what a row is. It went out of step on
+the first attempt: the role switcher arrived in the profile menu **without a
+tick**, because ProfileMenu's renderer had never needed `checked`. `ProfileMenu`
+takes `items` as a function of the state now; a label function cannot make a row
+that is not there.
+
+**AND A DUPLICATED REQUIREMENT FAILED THE WAY THEY DO.** The modules menu capped
+its height against the space under its anchor and the profile menu did not, so
+eighteen rows came out 1,097px tall in a 1,000px window with the last two
+unreachable. `capToViewport()` is shared, and `.pmenu` scrolls.
+
+**A SECOND CHECK THAT AGREED WITH ITSELF.** The truncation probe measured
+`.pmenu__label` and `.pmenu__note` and not `.pmenu__heading-note`, so it passed
+while "Site Manager · Command Ce…" sat ellipsed at the top of the menu. Two
+sessions running, the blind spot has been the same shape as the bug: a check that
+reads what the code intended rather than what the page renders.
+
 ### And one found in production, after the first deploy
 
 **`btn.hidden = true` set the property, cleared the accessibility tree, and left
@@ -188,6 +225,25 @@ tone string ('ok'/'warn'/'alert') sitting in the sub column** — which rendered
 the word "warn" as a caption under a figure. Both fixed. The check resolves
 every domain at every level and asserts tiles have values, groups have rows,
 table rows match their columns, and every widget's landing group exists.
+
+**THE MODULES MENU IS A CENTRED DIALOG NOW.** Reported from the deployed build:
+it opened to the side and ran off the edge. It is thirty-four rows in two groups
+and it decides what the whole workspace holds — that is a dialog, and it was
+drawn as a hint. `createPopMenu` gained ONE flag, `centred`, and no component
+was forked: the box is positioned in CSS rather than measured from the anchor,
+capped at `min(76dvh, 720px)` with its own scroll, widened to 460 so no module
+name ellipses, and the catcher doubles as a VEIL that blurs the page (same
+values as the record sheet's scrim). Page scroll locks while it is open, and it
+gained a sticky title and a × — a popover needs neither, because it belongs to
+the button it came from; centred over a veil, nothing on screen says what it is
+or how to leave it.
+
+**AND EACH ROW SAYS ONLY HOW MANY WIDGETS.** It was "Site Overview · 6 widgets":
+a domain name repeated on all thirty-four rows, under a heading that already
+says what the group is, with the one useful number on the far side of a
+separator.
+
+The other four menus in the header are four rows each and stay popovers.
 
 **THE SWITCH NOW OPENS THE SITES LISTING, AND IT TOOK THREE PASSES TO GET THE
 INTENT RIGHT.** The first reading of the report was backwards — it was built to

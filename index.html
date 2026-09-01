@@ -2607,6 +2607,13 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   z-index: var(--z-sheet);
   width: min(304px, calc(100vw - 24px));
   padding: var(--s2);
+  /* The cap itself is set in JS from the space under the anchor — see
+     capToViewport() — and this is the promise that a menu taller than that
+     scrolls rather than running off the bottom edge. It matters for the profile
+     menu now: four items on the home page, eighteen on a Site. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   border-radius: 18px;
   background: rgba(255, 255, 255, .94);
   -webkit-backdrop-filter: blur(20px) saturate(1.6);
@@ -3780,54 +3787,17 @@ body.is-site .home-header::before {
   flex-wrap: wrap;
 }
 
-.role-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 var(--s2) 0 var(--s3);
-  border: 1px dashed var(--line-2);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--ink-2);
-  font-family: inherit;
-  font-size: var(--fs-micro);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
-}
-/* DASHED, AND THAT IS DELIBERATE. The role chip is a prototype affordance —
-   in the real product a role comes from the signed-in user and there is
-   nothing to switch. A dashed outline is the quiet convention for "this is
-   scaffolding", and it keeps the control from reading as a product feature
-   that shipped. */
-.role-chip:hover { background: var(--petrol-050); border-color: var(--petrol-200); }
-.role-chip__cap { opacity: .72; }
-.role-chip__name { font-weight: 650; color: var(--petrol-800); }
-.role-chip .icon { width: 15px; height: 15px; opacity: .6; }
+/* ── the one control ──
+   The header carried a role chip, Add, Customize and a More button as well as
+   this, and every one of them is gone: the role and the workspace actions hang
+   off the avatar now, which is where the home page has kept them since the
+   profile menu was written. `.role-chip`, `.btn-solid` and `.btn-line` went with
+   them — they existed for this row and nothing else drew them.
 
-.btn-solid, .btn-line {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 var(--s4) 0 var(--s3);
-  border-radius: var(--r-pill);
-  font-family: inherit;
-  font-size: var(--fs-label);
-  font-weight: 650;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
-              transform var(--t-fast) var(--ease);
-}
-.btn-solid { border: 1px solid transparent; background: var(--ui-link); color: var(--on-dark); }
-.btn-solid:hover { background: color-mix(in srgb, var(--ui-link) 88%, #000); }
-.btn-solid:active, .btn-line:active { transform: scale(.97); }
-.btn-line { border: 1px solid var(--line-2); background: var(--surface); color: var(--petrol-800); }
-.btn-line:hover { background: var(--petrol-050); border-color: var(--petrol-200); }
-.btn-solid .icon, .btn-line .icon { width: 17px; height: 17px; }
-
+   `[hidden]` is kept on the selector because it does not win on its own: the UA
+   stylesheet styles the attribute at specificity 0,1,0 and `display: grid` on a
+   class beats it, which is how this button shipped visible on the Sites listing
+   once already. */
 .btn-icon {
   display: grid;
   place-items: center;
@@ -3843,18 +3813,7 @@ body.is-site .home-header::before {
 }
 .btn-icon:hover { background: var(--petrol-050); }
 .btn-icon .icon { width: 18px; height: 18px; }
-/* `hidden` HAS TO OUTRANK THE CLASS THAT SETS `display`, and on these three it
-   does not on its own. The attribute is styled by the UA sheet as a bare
-   `[hidden] { display: none }` at specificity 0,1,0, which any class here beats
-   — so `btn.hidden = true` set the property, cleared the accessibility tree,
-   and left the button on the screen. The modules button was hidden that way on
-   the Sites listing and at the two deeper levels, and it shipped, because a
-   test that reads `el.hidden` reads the property and agrees with itself.
-
-   The listing rules below are the same problem solved one selector at a time;
-   this is the general form, so the next control to be hidden does not have to
-   rediscover it. */
-.btn-icon[hidden], .btn-solid[hidden], .btn-line[hidden] { display: none; }
+.btn-icon[hidden] { display: none; }
 
 /* ── counts strip ──
    Every count is a BUTTON. Section 11 of the brief makes the workspace a
@@ -3905,9 +3864,8 @@ body.is-site .home-header::before {
 
 @media (max-width: 767px) {
   .site-head { padding: var(--s3) var(--s4); }
-  .site-head__actions { width: 100%; }
-  .btn-solid, .btn-line { flex: 1 1 auto; justify-content: center; }
-  .role-chip { order: -1; width: 100%; justify-content: center; }
+  /* One 38px button no longer needs a row of its own, and taking the full-width
+     rule out is what lets the identity block keep the line it is on. */
   .site-sync { margin-left: 0; width: 100%; }
 }
 
@@ -4001,6 +3959,108 @@ body.is-site .home-header::before {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ══ A MENU LONG ENOUGH TO BE A DIALOG ═══════════════════════════════════
+   The modules menu is thirty-four rows in two groups, and it decides what the
+   whole workspace contains. Hung off its button in the header it ran the full
+   height of the screen and past the left edge of it. Centred it becomes what it
+   already was — a dialog — and the page behind it is blurred, because a page
+   that stays sharp behind a dialog still looks pressable.
+
+   These come AFTER `.pmenu--modules` on purpose: same specificity, so source
+   order is what lets the centred box win on width and position. */
+.pmenu--centre {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  /* 460, not the popover's 356. Off the anchor there is room for the longest
+     name in the catalogue — "Safety, Security & Emergency", ticked — to sit on
+     one line, which is the whole reason the width was ever measured. */
+  width: min(460px, calc(100vw - 48px));
+  /* The cap is stated here rather than measured in JS, because a centred box
+     has no anchor to be capped against. 76dvh leaves the veil visible top and
+     bottom, so the dialog reads as floating over the page rather than as a
+     second page. */
+  max-height: min(76dvh, 720px);
+  padding: var(--s2) var(--s2) var(--s3);
+  border-radius: 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  translate: -50% -50%;
+  /* Scale only. The popover rises from its button because that is where it came
+     from; a centred dialog comes from nowhere and should not appear to drift. */
+  transform: scale(.97);
+  transform-origin: center;
+  box-shadow: 0 2px 6px rgba(31, 65, 91, .10), 0 40px 90px -28px rgba(31, 65, 91, .45);
+}
+.pmenu--centre.is-open { transform: scale(1); }
+
+/* Sticky, because a thirty-four row list scrolls under it and the reader
+   should never have to scroll BACK to find the way out. */
+.pmenu__dhead {
+  position: sticky;
+  top: calc(var(--s2) * -1);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin: calc(var(--s2) * -1) calc(var(--s2) * -1) var(--s1);
+  padding: var(--s4) var(--s4) var(--s3);
+  border-bottom: 1px solid var(--line);
+  border-radius: 22px 22px 0 0;
+  background: rgba(255, 255, 255, .92);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+}
+.pmenu__dtitle {
+  font-size: var(--fs-card-title);
+  font-weight: 650;
+  letter-spacing: -.015em;
+  color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pmenu__dclose {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.pmenu__dclose:hover { background: var(--petrol-050); color: var(--ink); }
+.pmenu__dclose .icon { width: 16px; height: 16px; }
+
+/* The first group heading sits under the title now, so it does not need the
+   extra air it was given for being first in the box. */
+.pmenu--centre .pmenu__heading:first-child { padding-top: var(--s3); }
+
+/* THE VEIL. Same values as the record sheet's scrim — one product, one way of
+   saying "the thing in front is the thing you are dealing with". */
+.pmenu-catcher--veil {
+  z-index: calc(var(--z-sheet) - 1);
+  background: rgba(10, 38, 44, .34);
+  -webkit-backdrop-filter: blur(3px) saturate(.9);
+  backdrop-filter: blur(3px) saturate(.9);
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease);
+}
+.pmenu-catcher--veil.is-open { opacity: 1; }
+
+@media (max-width: 767px) {
+  .pmenu--centre {
+    width: calc(100vw - 32px);
+    max-height: 82dvh;
+  }
 }
 
 /* ══ 5 · sprite glyphs on cards and in the gallery ═══════════════════════
@@ -4523,9 +4583,7 @@ body.is-site .card:active { transform: scale(.978); }
    absent: an action that cannot apply here should not be occupying a control
    the reader has to rule out. The role chip stays, because the role travels
    with you into whichever Site you open. */
-.site-head--listing .site-head__caret,
-.site-head--listing [data-add],
-.site-head--listing [data-customize] { display: none; }
+.site-head--listing .site-head__caret { display: none; }
 .site-head--listing .site-head__name { cursor: default; }
 .site-head--listing .site-head__name:hover { background: none; }
 .site-stat--flat { cursor: default; }
@@ -8060,6 +8118,34 @@ const DOMAINS = [
   },
 ]
 
+/**
+ * QUICK ACTIONS, AND THE PERMISSION EACH ONE NEEDS.
+ * ───────────────────────────────────────────────────────────────────────────
+ * Section 2 of the brief says permissions decide which actions are visible, and
+ * this is the same permission set the widget library uses — a veterinarian who
+ * cannot see Finance widgets must not be offered "Create Request" either. One
+ * source, checked in both places, which is why these live beside the domains
+ * they are gated by rather than beside the control that draws them.
+ *
+ * `levels` is the second gate: "Add Asset" is a Site action, and offering it on
+ * an enclosure would be offering to register a water pump against a tiger.
+ *
+ * THEY WERE IN WorkspaceHeader.js UNTIL THE HEADER STOPPED DRAWING THEM. The
+ * header is one button now and everything a person can do to the page hangs off
+ * their own avatar, so the data outlived the control that used to own it — which
+ * is the argument for it having been data all along.
+ */
+const QUICK_ACTIONS = [
+  { id: 'task',      label: 'Add Task',        note: 'Assign work here',            icon: 'plus',      needs: 'd.work',        levels: ['site', 'section', 'enclosure'] },
+  { id: 'incident',  label: 'Report Incident', note: 'Log a safety event',          icon: 'alert',     needs: 'd.safety',      levels: ['site', 'section'] },
+  { id: 'asset',     label: 'Add Asset',       note: 'Register equipment',          icon: 'd-assets',  needs: 'd.assets',      levels: ['site'] },
+  { id: 'request',   label: 'Create Request',  note: 'Raise a purchase request',    icon: 'inbox',     needs: 'd.finance',     levels: ['site'] },
+  { id: 'defect',    label: 'Log Defect',      note: 'Record a structural fault',   icon: 'd-condition', needs: 'd.condition', levels: ['section', 'enclosure'] },
+  { id: 'obs',       label: 'Record Observation', note: 'Behaviour or welfare note', icon: 'd-assessment', needs: 'd.assessment', levels: ['enclosure'] },
+  { id: 'reading',   label: 'Log Reading',     note: 'Temperature, water, substrate', icon: 'd-environment', needs: 'd.environment', levels: ['section', 'enclosure'] },
+  { id: 'map',       label: 'View Site Map',   note: 'Sections and enclosures',     icon: 'pin',       needs: 'd.overview',    levels: ['site', 'section'] },
+]
+
 const DOMAIN_BY_ID = Object.assign(
   Object.create(null),
   Object.fromEntries(DOMAINS.map((d) => [d.id, d])),
@@ -8077,6 +8163,7 @@ registerGroups(DOMAINS)
 
   __x.DOMAIN_GROUPS = DOMAIN_GROUPS;
   __x.DOMAINS = DOMAINS;
+  __x.QUICK_ACTIONS = QUICK_ACTIONS;
   __x.getDomain = getDomain;
 });
 
@@ -18284,13 +18371,23 @@ __def('js/components/ProfileMenu.js', function (__x, __req) {
  */
 
 const { icon } = __req('js/icons.js');
+const { menuEntry, capToViewport } = __req('js/components/PopMenu.js');
 
 /**
  * @param {object} opts
  *   anchor      the avatar button the menu hangs from
- *   items       [{ id, label, note, icon, danger }] — a `null` entry is a rule
+ *   items       an array, or a function of the state returning one. See
+ *               menuEntry() in PopMenu.js for what an entry can be — an item,
+ *               a `null` rule, a `{ heading }`, or a falsy value to skip.
  *   onSelect    (id) => void
- *   getState    () => ({ editing }) so the Edit item can name what it will do
+ *   getState    () => ({ editing, ... }) so an item can name what it will do
+ *
+ * A FUNCTION, BECAUSE THE MENU IS NOT THE SAME MENU ON BOTH WORKSPACES. It was
+ * a fixed array of three items whose LABELS were functions of the state, which
+ * was enough while the only thing that varied was wording. It is not enough now
+ * that the Site's role switcher and its quick actions live here: those are
+ * different NUMBERS of rows, gated by permission, and a label function cannot
+ * make a row that is not there.
  */
 function createProfileMenu({ anchor, items, onSelect, getState }) {
   let open = false
@@ -18326,37 +18423,16 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
       `</span>`
     menu.append(head)
 
-    for (const item of items) {
-      if (!item) {
-        const rule = document.createElement('span')
-        rule.className = 'pmenu__rule'
-        rule.setAttribute('role', 'separator')
-        menu.append(rule)
-        continue
+    /* The Edit item names the state it is going TO, not the state it is in — a
+       control labelled "Edit Modules" while you are already editing is a control
+       that looks like it does nothing. menuEntry() resolves that. */
+    for (const item of (typeof items === 'function' ? items(state) : items)) {
+      const el = menuEntry(item, state)
+      if (!el) continue
+      if (el.tagName === 'BUTTON') {
+        el.addEventListener('click', () => { close(); onSelect?.(item.id) })
       }
-
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.className = 'pmenu__item'
-      btn.setAttribute('role', 'menuitem')
-      if (item.danger) btn.classList.add('is-danger')
-      btn.dataset.id = item.id
-
-      /* The Edit item names the state it is going TO, not the state it is in —
-         a control labelled "Edit Modules" while you are already editing is a
-         control that looks like it does nothing. */
-      const label = typeof item.label === 'function' ? item.label(state) : item.label
-      const note = typeof item.note === 'function' ? item.note(state) : item.note
-
-      btn.innerHTML =
-        `<span class="pmenu__icon">${icon(item.icon)}</span>` +
-        `<span class="pmenu__text">` +
-          `<span class="pmenu__label">${esc(label)}</span>` +
-          (note ? `<span class="pmenu__note">${esc(note)}</span>` : '') +
-        `</span>`
-
-      btn.addEventListener('click', () => { close(); onSelect?.(item.id) })
-      menu.append(btn)
+      menu.append(el)
     }
   }
 
@@ -18373,8 +18449,12 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
     const w = menu.offsetWidth
     const margin = 12
     const left = Math.max(margin, Math.min(r.right - w, window.innerWidth - w - margin))
-    menu.style.top = `${r.bottom + 10}px`
+    const top = r.bottom + 10
+    menu.style.top = `${top}px`
     menu.style.left = `${left}px`
+    /* This menu is four items on the home page and eighteen on a Site, so the
+       cap is not optional any more. Shared with PopMenu — see capToViewport(). */
+    capToViewport(menu, top, margin)
   }
 
   function show() {
@@ -18550,23 +18630,113 @@ __def('js/components/PopMenu.js', function (__x, __req) {
  * version of that guess is a race), right-alignment clamped to the viewport,
  * arrow keys, Escape, and focus returned to the anchor.
  *
- * ═══ AN ITEM CAN BE FOUR THINGS, AND THE FOURTH IS WHY THIS GREW ═══════════
- *
- *   an item      { id, label, note?, icon?, checked?, on?, danger? }
- *   a separator  null
- *   a heading    { heading: 'For your role', note? }
- *   nothing      a falsy value in the list is skipped, so a caller can build
- *                one array with conditionals in it
+ * ═══ WHAT AN ITEM CAN BE — see menuEntry() below ═══════════════════════════
  *
  * The modules menu is thirty-four rows under two headings and it is the reason
- * headings, badges, `on` and `keepOpen` exist. Every one of them was added HERE
- * rather than in a second component, because the four things a menu has to get
- * right — the catcher, the clamp, the roving focus, the return of focus — are
- * four decisions and a copy would have made them eight. A second menu component
- * is the shortcut that costs the most later; see the same note in the gallery.
+ * headings, `on` and `keepOpen` exist. Every one of them was added HERE rather
+ * than in a second component, because the four things a menu has to get right —
+ * the catcher, the clamp, the roving focus, the return of focus — are four
+ * decisions and a copy would have made them eight. A second menu component is
+ * the shortcut that costs the most later; see the same note in the gallery.
  */
 
 const { icon } = __req('js/icons.js');
+
+/**
+ * ONE DEFINITION OF WHAT A MENU ROW IS, FOR BOTH MENUS.
+ * ───────────────────────────────────────────────────────────────────────────
+ * There are two menu components in this product and there is a good reason for
+ * both: ProfileMenu renders a fixed header with the user's avatar and name,
+ * because it is the account menu and that head is the point of it, and PopMenu
+ * has no opinion about content because it hangs off five different controls.
+ *
+ * What they must NOT have two of is the ROW — the glyph plate, the label and
+ * note, the tick, the checkbox-against-radio semantics, the heading, the rule.
+ * That went out of step once already: the role switcher moved into the profile
+ * menu and arrived without a tick, because ProfileMenu had never needed one.
+ *
+ * So the row is built here and both callers attach their own listener. What
+ * stays in each component is what genuinely differs — the head, the anchoring,
+ * the dismissal, whether choosing something closes it.
+ *
+ * Returns a <button> for an item, a <span> for a heading or a rule, or null for
+ * an entry the caller conditionally left out.
+ *
+ *   an item      { id, label, note?, icon?, checked?, on?, danger? }
+ *   a separator  null
+ *   a heading    { heading: 'Viewing as', note? }
+ *   nothing      any other falsy value — so an items() function can be written
+ *                as one array with conditionals in it
+ *
+ * `label` and `note` may be functions of the caller's state, which is how the
+ * profile menu's first item names the mode it is going TO rather than the one
+ * it is in.
+ */
+function menuEntry(item, state = {}) {
+  if (item === null) {
+    const rule = document.createElement('span')
+    rule.className = 'pmenu__rule'
+    rule.setAttribute('role', 'separator')
+    return rule
+  }
+  if (!item) return null
+
+  if (item.heading) {
+    const h = document.createElement('span')
+    h.className = 'pmenu__heading'
+    h.setAttribute('role', 'presentation')
+    h.innerHTML = `<span class="pmenu__heading-text">${esc(item.heading)}</span>` +
+      (item.note ? `<span class="pmenu__heading-note">${esc(item.note)}</span>` : '')
+    return h
+  }
+
+  const label = typeof item.label === 'function' ? item.label(state) : item.label
+  const note = typeof item.note === 'function' ? item.note(state) : item.note
+
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = 'pmenu__item'
+  /* `checked` is a CHOICE among siblings — one role, one Site — and `on` is a
+     switch that stands on its own. They look the same and they do not announce
+     the same, so the role follows whichever the caller used. */
+  const set = item.on != null ? item.on : item.checked
+  btn.setAttribute('role',
+    item.on != null ? 'menuitemcheckbox' : item.checked == null ? 'menuitem' : 'menuitemradio')
+  if (set != null) btn.setAttribute('aria-checked', String(!!set))
+  if (item.danger) btn.classList.add('is-danger')
+  if (set) btn.classList.add('is-checked')
+  btn.dataset.id = item.id
+
+  btn.innerHTML =
+    (item.icon ? `<span class="pmenu__icon">${icon(item.icon)}</span>` : '') +
+    `<span class="pmenu__text">` +
+      `<span class="pmenu__label">${esc(label)}</span>` +
+      (note ? `<span class="pmenu__note">${esc(note)}</span>` : '') +
+    `</span>` +
+    (set ? `<span class="pmenu__tick">${icon('check')}</span>` : '')
+
+  return btn
+}
+
+/**
+ * A MENU THAT CANNOT FIT UNDER ITS ANCHOR SCROLLS INSIDE WHAT IS LEFT.
+ * ───────────────────────────────────────────────────────────────────────────
+ * Shared with ProfileMenu for the same reason `menuEntry` is: it is not a
+ * difference between the two menus, it is the same requirement, and it went
+ * wrong in exactly the way a duplicated requirement does — the modules menu
+ * capped itself and the profile menu did not, so when the role switcher and the
+ * quick actions moved into the profile menu it came out 1,097px tall in a
+ * 1,000px window with its last two rows off the bottom edge and no way to
+ * reach them.
+ *
+ * A fixed `max-height` in CSS cannot do this: it is either too short on a
+ * desktop or past the bottom edge on a tablet. The floor of 180px is so that a
+ * menu opened from a control near the foot of a short window still shows
+ * something rather than collapsing to a sliver.
+ */
+function capToViewport(menu, top, margin = 12) {
+  menu.style.maxHeight = `${Math.max(180, window.innerHeight - top - margin)}px`
+}
 
 function createPopMenu({
   anchor, items, onSelect, label = 'Menu', align = 'right', getState,
@@ -18577,17 +18747,38 @@ function createPopMenu({
      after every tick would make picking three modules three round trips. It is
      re-rendered in place instead, so the ticks are live. */
   keepOpen = false,
+  /**
+   * CENTRED, OVER A BLURRED PAGE, RATHER THAN HUNG OFF ITS BUTTON.
+   * ─────────────────────────────────────────────────────────────────────────
+   * A popover is the right shape for four rows: it belongs to the control it
+   * came from, and the page behind it stays readable because the reader is
+   * still working on that page. The modules menu is not four rows — it is
+   * thirty-four, in two groups, and it is a CHOICE about what the whole
+   * workspace contains. Hung off a button on the left of the header it ran the
+   * height of the screen and off the side of it: a list long enough to be a
+   * dialog, drawn as a hint.
+   *
+   * So one flag, and the same component — centred, capped, scrolling inside
+   * itself, over a veil that blurs the page. A page that stays sharp behind a
+   * dialog is a page that still looks pressable.
+   */
+  centred = false,
 }) {
   let open = false
 
   const menu = document.createElement('div')
-  menu.className = `pmenu pmenu--compact${variant ? ` ${variant}` : ''}`
+  menu.className = `pmenu pmenu--compact${variant ? ` ${variant}` : ''}` +
+                   (centred ? ' pmenu--centre' : '')
   menu.setAttribute('role', 'menu')
   menu.setAttribute('aria-label', label)
+  if (centred) menu.setAttribute('aria-modal', 'true')
   menu.hidden = true
 
   const catcher = document.createElement('div')
-  catcher.className = 'pmenu-catcher'
+  /* THE VEIL IS THE CATCHER. One element cannot be two things unless they are
+     the same thing, and here they are: what closes the menu is the page behind
+     it, and what the page behind it should look like is out of focus. */
+  catcher.className = `pmenu-catcher${centred ? ' pmenu-catcher--veil' : ''}`
   catcher.hidden = true
 
   document.body.append(catcher, menu)
@@ -18597,52 +18788,36 @@ function createPopMenu({
     menu.replaceChildren()
     const list = typeof items === 'function' ? items(state) : items
 
+    /**
+     * A CENTRED DIALOG NEEDS A NAME AND A WAY OUT.
+     *
+     * A popover needs neither: it is attached to the control that opened it, so
+     * it is self-evidently that control's list, and it closes the moment you
+     * look away. Centred over a veil, both of those go — nothing on screen says
+     * what this is or how to leave it, and on a touch screen "tap outside" is a
+     * thing you have to already know. Sticky, so it is still there thirty rows
+     * down.
+     */
+    if (centred) {
+      const head = document.createElement('div')
+      head.className = 'pmenu__dhead'
+      head.innerHTML = `<span class="pmenu__dtitle">${esc(label)}</span>`
+      const x = document.createElement('button')
+      x.type = 'button'
+      x.className = 'pmenu__dclose'
+      x.setAttribute('aria-label', 'Close')
+      x.innerHTML = icon('close')
+      x.addEventListener('click', () => { close(); anchor.focus() })
+      head.append(x)
+      menu.append(head)
+    }
+
     for (const item of list) {
-      if (item === null) {
-        const rule = document.createElement('span')
-        rule.className = 'pmenu__rule'
-        rule.setAttribute('role', 'separator')
-        menu.append(rule)
-        continue
-      }
-      /* A falsy entry that is not an explicit null is a conditional the caller
-         did not take. Skipping it silently is what lets an items() function be
-         written as one array rather than as a series of pushes. */
-      if (!item) continue
+      const el = menuEntry(item, state)
+      if (!el) continue
+      if (el.tagName !== 'BUTTON') { menu.append(el); continue }
 
-      if (item.heading) {
-        const h = document.createElement('span')
-        h.className = 'pmenu__heading'
-        h.setAttribute('role', 'presentation')
-        h.innerHTML = `<span class="pmenu__heading-text">${esc(item.heading)}</span>` +
-          (item.note ? `<span class="pmenu__heading-note">${esc(item.note)}</span>` : '')
-        menu.append(h)
-        continue
-      }
-
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.className = 'pmenu__item'
-      /* `checked` is a CHOICE among siblings — one role, one Site — and `on` is
-         a switch that stands on its own. They look the same and they do not
-         announce the same, so the role follows whichever the caller used. */
-      const state = item.on != null ? item.on : item.checked
-      btn.setAttribute('role',
-        item.on != null ? 'menuitemcheckbox' : item.checked == null ? 'menuitem' : 'menuitemradio')
-      if (state != null) btn.setAttribute('aria-checked', String(!!state))
-      if (item.danger) btn.classList.add('is-danger')
-      if (state) btn.classList.add('is-checked')
-      btn.dataset.id = item.id
-
-      btn.innerHTML =
-        (item.icon ? `<span class="pmenu__icon">${icon(item.icon)}</span>` : '') +
-        `<span class="pmenu__text">` +
-          `<span class="pmenu__label">${esc(item.label)}</span>` +
-          (item.note ? `<span class="pmenu__note">${esc(item.note)}</span>` : '') +
-        `</span>` +
-        (state ? `<span class="pmenu__tick">${icon('check')}</span>` : '')
-
-      btn.addEventListener('click', () => {
+      el.addEventListener('click', () => {
         if (keepOpen) {
           onSelect?.(item.id)
           /* Re-render in place and put focus back on the row that was tapped,
@@ -18657,11 +18832,15 @@ function createPopMenu({
         close()
         onSelect?.(item.id)
       })
-      menu.append(btn)
+      menu.append(el)
     }
   }
 
   function place() {
+    /* A centred menu has nothing to measure — its box is stated in CSS, so the
+       cap, the width and the corner radius live in one place instead of half
+       here and half there. */
+    if (centred) return
     const r = anchor.getBoundingClientRect()
     const w = menu.offsetWidth
     const margin = 12
@@ -18670,11 +18849,7 @@ function createPopMenu({
     const top = r.bottom + 8
     menu.style.top = `${top}px`
     menu.style.left = `${Math.round(left)}px`
-    /* A LONG MENU IS CAPPED BY THE SPACE UNDER ITS ANCHOR, NOT BY A GUESS.
-       Thirty-four rows is taller than a phone, and a fixed max-height in CSS is
-       either too short on a desktop or off the bottom edge on a tablet. The
-       menu scrolls inside whatever is actually left below the button. */
-    menu.style.maxHeight = `${Math.max(180, window.innerHeight - top - margin)}px`
+    capToViewport(menu, top, margin)
   }
 
   function show() {
@@ -18685,7 +18860,14 @@ function createPopMenu({
     menu.hidden = false
     place()
     anchor.setAttribute('aria-expanded', 'true')
-    requestAnimationFrame(() => menu.classList.add('is-open'))
+    /* Scrolling the page under a centred dialog moves the thing being chosen
+       FOR out from under the choice. A popover does not need this — it is
+       anchored to something on the page and re-places on scroll. */
+    if (centred) document.body.style.overflow = 'hidden'
+    requestAnimationFrame(() => {
+      menu.classList.add('is-open')
+      catcher.classList.add('is-open')
+    })
     menu.querySelector('.pmenu__item')?.focus()
     document.addEventListener('keydown', onKeydown)
     window.addEventListener('resize', place)
@@ -18696,8 +18878,12 @@ function createPopMenu({
     if (!open) return
     open = false
     menu.classList.remove('is-open')
+    catcher.classList.remove('is-open')
     anchor.setAttribute('aria-expanded', 'false')
-    catcher.hidden = true
+    if (centred) document.body.style.overflow = ''
+    /* The veil fades WITH the menu rather than vanishing from under it. */
+    if (centred) setTimeout(() => { if (!open) catcher.hidden = true }, 220)
+    else catcher.hidden = true
     document.removeEventListener('keydown', onKeydown)
     window.removeEventListener('resize', place)
     window.removeEventListener('scroll', place)
@@ -18738,6 +18924,8 @@ function esc(s) {
   ))
 }
   __x.createPopMenu = createPopMenu;
+  __x.menuEntry = menuEntry;
+  __x.capToViewport = capToViewport;
 });
 
 __def('js/components/WorkspaceHeader.js', function (__x, __req) {
@@ -18785,31 +18973,10 @@ __def('js/components/WorkspaceHeader.js', function (__x, __req) {
 const { icon } = __req('js/icons.js');
 const { SITES, getSite } = __req('js/data/sites.js');
 const { getSection, sectionsForSite, getEnclosure, enclosuresIn } = __req('js/data/sections.js');
-const { ROLES, getRole } = __req('js/data/roles.js');
 const { createPopMenu } = __req('js/components/PopMenu.js');
 
-/**
- * Quick actions, and the permission each one needs. Section 2 of the brief says
- * permissions decide which actions are visible, and it is the same permission set
- * the widget library uses — a veterinarian who cannot see Finance widgets must
- * not be offered "Create Request" either. One source, checked in both places.
- *
- * `levels` is the second gate: "Add Asset" is a Site action, and offering it on
- * an enclosure would be offering to register a water pump against a tiger.
- */
-const QUICK_ACTIONS = [
-  { id: 'task',      label: 'Add Task',        note: 'Assign work here',            icon: 'plus',      needs: 'd.work',        levels: ['site', 'section', 'enclosure'] },
-  { id: 'incident',  label: 'Report Incident', note: 'Log a safety event',          icon: 'alert',     needs: 'd.safety',      levels: ['site', 'section'] },
-  { id: 'asset',     label: 'Add Asset',       note: 'Register equipment',          icon: 'd-assets',  needs: 'd.assets',      levels: ['site'] },
-  { id: 'request',   label: 'Create Request',  note: 'Raise a purchase request',    icon: 'inbox',     needs: 'd.finance',     levels: ['site'] },
-  { id: 'defect',    label: 'Log Defect',      note: 'Record a structural fault',   icon: 'd-condition', needs: 'd.condition', levels: ['section', 'enclosure'] },
-  { id: 'obs',       label: 'Record Observation', note: 'Behaviour or welfare note', icon: 'd-assessment', needs: 'd.assessment', levels: ['enclosure'] },
-  { id: 'reading',   label: 'Log Reading',     note: 'Temperature, water, substrate', icon: 'd-environment', needs: 'd.environment', levels: ['section', 'enclosure'] },
-  { id: 'map',       label: 'View Site Map',   note: 'Sections and enclosures',     icon: 'pin',       needs: 'd.overview',    levels: ['site', 'section'] },
-]
-
 function createWorkspaceHeader({
-  root, getState, onNavigate, onLevel, onRole, onCustomize, onReset, onAction,
+  root, getState, onNavigate, onLevel,
   /**
    * THE MODULES MENU'S CONTENT COMES FROM OUTSIDE THIS FILE, and that split is
    * the same one the rest of the header follows. The header owns the CONTROL —
@@ -18836,20 +19003,16 @@ function createWorkspaceHeader({
         <div class="site-head__meta" data-meta></div>
       </div>
 
+      <!-- ONE CONTROL. The header used to carry five — a role chip, Add,
+           Customize, More and this — and four of them were a second route to
+           something the avatar menu already offered. What is left is the one
+           control that is about the PRODUCT rather than about the page: the
+           modules this role can put on it. Everything a person can do to their
+           own workspace hangs off their own avatar, which is the rule the home
+           page has followed since the profile menu was written. -->
       <div class="site-head__actions">
-        <!-- THE MENU ICON LEADS, because that is where a reader's hand goes for
-             it and because it is the only control here that opens the product
-             rather than the page. Icon only: the label is on the rows. -->
         <button type="button" class="btn-icon" data-modules
                 aria-label="Modules for your role">${icon('menu')}</button>
-        <button type="button" class="role-chip" data-role>
-          <span class="role-chip__cap">Viewing as</span>
-          <span class="role-chip__name" data-role-name></span>
-          ${icon('chev-down', 'icon')}
-        </button>
-        <button type="button" class="btn-solid" data-add>${icon('plus')}<span>Add</span></button>
-        <button type="button" class="btn-line" data-customize>${icon('sliders')}<span>Customize</span></button>
-        <button type="button" class="btn-icon" data-more aria-label="More actions">${icon('dots-h')}</button>
       </div>
     </div>
 
@@ -18860,16 +19023,9 @@ function createWorkspaceHeader({
   const nameEl    = root.querySelector('[data-name]')
   const metaEl    = root.querySelector('[data-meta]')
   const statsEl   = root.querySelector('[data-stats]')
-  const roleName  = root.querySelector('[data-role-name]')
 
-  const sibBtn  = root.querySelector('[data-siblings]')
-  const modBtn  = root.querySelector('[data-modules]')
-  const roleBtn = root.querySelector('[data-role]')
-  const addBtn  = root.querySelector('[data-add]')
-  const custBtn = root.querySelector('[data-customize]')
-  const moreBtn = root.querySelector('[data-more]')
-
-  custBtn.addEventListener('click', () => onCustomize?.())
+  const sibBtn = root.querySelector('[data-siblings]')
+  const modBtn = root.querySelector('[data-modules]')
 
   /* ── the only level-aware function in the file ─────────────────────────
      Everything the header draws comes out of here. Adding a fourth level would
@@ -19017,33 +19173,6 @@ function createWorkspaceHeader({
     onSelect: (id) => subject()?.onSibling(id),
   })
 
-  const rolesMenu = createPopMenu({
-    anchor: roleBtn, label: 'Viewing as',
-    getState: () => ({ roleId: getState().roleId }),
-    items: (s) => ROLES.map((role) => ({
-      id: role.id, label: role.name, note: role.person, checked: role.id === s.roleId,
-    })),
-    onSelect: (id) => onRole?.(id),
-  })
-
-  const addMenu = createPopMenu({
-    anchor: addBtn, label: 'Add',
-    getState: () => getState(),
-    items: (s) => {
-      const role = getRole(s.roleId)
-      const allowed = QUICK_ACTIONS.filter(
-        (a) => a.levels.includes(s.level) && role.permissions.includes(a.needs))
-      /* A menu with nothing in it is worse than no menu — the control would open
-         onto a void. Section 16 asks the product to handle a role narrow enough
-         for this to happen. */
-      return allowed.length ? allowed : [{
-        id: 'none', label: 'No actions available',
-        note: 'Your role has no create permissions here',
-      }]
-    },
-    onSelect: (id) => id !== 'none' && onAction?.(id),
-  })
-
   /**
    * MORE MODULES, BASED ON THE ROLE.
    * ─────────────────────────────────────────────────────────────────────────
@@ -19053,6 +19182,8 @@ function createWorkspaceHeader({
    * putting three modules on a page should be three taps and not three trips.
    */
   const modulesMenu = createPopMenu({
+    /* THIRTY-FOUR ROWS IS A DIALOG. See the note on `centred` in PopMenu.js. */
+    centred: true,
     anchor: modBtn,
     label: 'Modules for your role',
     variant: 'pmenu--modules',
@@ -19062,53 +19193,15 @@ function createWorkspaceHeader({
     onSelect: (id) => onModule?.(id),
   })
 
-  const moreMenu = createPopMenu({
-    anchor: moreBtn, label: 'More',
-    getState: () => getState(),
-    /* THE LISTING HAS NO WORKSPACE, so it is not offered Customize or Reset —
-       both would silently edit the Site workspace underneath it, which is the
-       kind of action a person only discovers went wrong later. */
-    items: (s) => (s.level === 'sites'
-      ? [
-          { id: 'down', icon: 'chev-right', label: 'Open Current Site',
-            note: 'Back into the Site you last had open' },
-          { id: 'export', icon: 'arrow-out', label: 'Open Report',
-            note: 'Every Site, as a document' },
-        ]
-      : [
-      { id: 'customize', icon: 'sliders', label: 'Customize Workspace',
-        note: 'Add, move, resize or remove widgets' },
-      ...(s.level !== 'enclosure'
-        ? [{ id: 'down', icon: 'chev-right',
-             label: s.level === 'site' ? 'Open a Section' : 'Open an Enclosure',
-             note: 'Go one level deeper' }]
-        : []),
-      { id: 'up', icon: 'chev-left',
-        label: s.level === 'site' ? 'All Sites' : 'Go Up',
-        note: s.level === 'site' ? 'Back to the Housing listing' : 'Back to the level above' },
-      { id: 'export', icon: 'arrow-out', label: 'Open Report', note: 'This view, as a document' },
-      null,
-      { id: 'reset', icon: 'refresh', label: 'Reset Workspace',
-        note: 'Back to the default for your role at this level', danger: true },
-    ]),
-    onSelect(id) {
-      if (id === 'customize') onCustomize?.()
-      else if (id === 'reset') onReset?.()
-      else if (id === 'up' || id === 'down') onLevel?.(id)
-      else onAction?.(id)
-    },
-  })
-
   /* ── render ───────────────────────────────────────────────────────────── */
 
   function render() {
     const sub = subject()
     if (!sub) return
-    const role = getRole(getState().roleId)
 
     root.dataset.level = sub.level
-    /* One flag, read by CSS, that turns off everything a list has no use for:
-       the sibling caret, the status pill, Add and Customize. */
+    /* One flag, read by CSS, that turns off what a list has no use for: the
+       sibling caret and the status pill. */
     root.classList.toggle('site-head--listing', !!sub.listing)
     sibBtn.disabled = !!sub.listing
 
@@ -19155,8 +19248,6 @@ function createWorkspaceHeader({
       if (i || !sub.listing) metaEl.append(dot())
       metaEl.append(text(m))
     })
-
-    roleName.textContent = role.name
 
     statsEl.replaceChildren()
     for (const stat of sub.stats) {
@@ -19224,17 +19315,11 @@ function createWorkspaceHeader({
        from the grid while the menu is open. */
     refreshModules() { modulesMenu.refresh() },
     openModules() { modulesMenu.open() },
-    /* Escape means "close this" while any of the five is open, and "go up a
-       level" only when none of them is. Asked here because this is the only
-       place that holds all five. */
-    get menuOpen() {
-      return sibMenu.isOpen || rolesMenu.isOpen || addMenu.isOpen ||
-             moreMenu.isOpen || modulesMenu.isOpen
-    },
-    closeMenus() {
-      sibMenu.close(); rolesMenu.close(); addMenu.close()
-      moreMenu.close(); modulesMenu.close()
-    },
+    /* Escape means "close this" while either menu is open, and "go up a level"
+       only when neither is. Asked here because this is the only place that
+       holds both. */
+    get menuOpen() { return sibMenu.isOpen || modulesMenu.isOpen },
+    closeMenus() { sibMenu.close(); modulesMenu.close() },
   }
 }
 
@@ -19814,12 +19899,21 @@ const { buildContext, detailFor, hasDetail } = __req('js/data/domainDetail.js');
 const { viewStore, setView, openHousing, setSite, setSection, setEnclosure, setLevel, setRole, goUp, goDown } =
   __req('js/state/viewStore.js');
 const { workspaces, forLevel } = __req('js/state/siteWorkspaceStore.js');
-const { DOMAINS, DOMAIN_GROUPS, getDomain } = __req('js/data/siteDomains.js');
+const { DOMAINS, DOMAIN_GROUPS, QUICK_ACTIONS, getDomain } = __req('js/data/siteDomains.js');
 const { modulesForRole, getModule: getV5Module, MODULES: V5_MODULES } =
   __req('js/data/siteModules.js');
 const { getSite } = __req('js/data/sites.js');
 const { getSection, getEnclosure, sectionsForSite, enclosuresIn } = __req('js/data/sections.js');
-const { getRole, permits, defaultsFor } = __req('js/data/roles.js');
+const { ROLES, getRole, permits, defaultsFor } = __req('js/data/roles.js');
+
+/**
+ * What the thing in front of you is CALLED, by level. `LEVELS` below carries the
+ * same word as `noun`, but only for the level that is live — and the profile
+ * menu needs it for whichever level the store says, before `cat()` is in scope.
+ * One table, so "Add a widget for this Enclosure" cannot drift from "On this
+ * Enclosure" two rows below it.
+ */
+const LEVEL_NOUN = { sites: 'Site', site: 'Site', section: 'Section', enclosure: 'Enclosure' }
 
 mountIconSprite()
 
@@ -19963,32 +20057,116 @@ const profileMenu = createProfileMenu({
     const mode = onSite ? wsEdit : edit
     return { onSite, editing: mode.editing }
   },
-  items: [
-    {
-      id: 'edit',
-      icon: 'pencil',
-      label: (s) => (s.editing ? 'Done Editing' : s.onSite ? 'Customize Workspace' : 'Edit Modules'),
-      note: (s) => (s.editing ? 'Save the arrangement'
-        : s.onSite ? 'Rearrange, resize or remove widgets' : 'Rearrange, resize or remove cards'),
-    },
-    {
-      id: 'add',
-      icon: 'widgets',
-      label: (s) => (s.onSite ? 'Add Widget' : 'Add Module'),
-      note: (s) => (s.onSite ? 'Choose a widget for this Site' : 'Choose a module to add to Home'),
-    },
-    null,
-    {
-      id: 'reset',
-      icon: 'refresh',
-      label: (s) => (s.onSite ? 'Reset Workspace' : 'Reset Home Page'),
-      note: (s) => (s.onSite ? 'Back to the default for your role' : 'Back to the default arrangement'),
-      danger: true,
-    },
-  ],
+  /**
+   * IT IS A FUNCTION NOW, BECAUSE THE SITE HEADER GAVE ITS CONTROLS BACK.
+   * ─────────────────────────────────────────────────────────────────────────
+   * The Site header carried five controls — a role chip, Add, Customize, More
+   * and the modules menu — and four of them were a second route to something
+   * this menu already offered, or to something that belongs here rather than
+   * there. So the header is one button and this is where the rest lives, which
+   * is the rule the home page has followed since the profile menu was written:
+   * everything a person can do to their own page hangs off their own avatar.
+   *
+   * WHAT MOVED, AND WHY EACH ONE BELONGS HERE
+   *
+   *   Viewing as       Which seat you are looking through is a statement about
+   *                    YOU, not about the Site. It sat in the header as a
+   *                    dashed chip that had to explain it was scaffolding; in
+   *                    the account menu it needs no explaining, because that is
+   *                    where a person expects to find who they are signed in
+   *                    as. It is the only radio group in the menu — one role at
+   *                    a time, ticked.
+   *   Customize/Reset  Already here. The header's Customize button and its More
+   *                    menu were both second doors to these two.
+   *   On this <level>  The quick actions. These are the one genuine argument
+   *                    against the move — "Add Task" is a thing you do to the
+   *                    SITE, not to your account — and they are here anyway,
+   *                    under a heading that names the subject, because the
+   *                    alternative was deleting eight permission-gated actions
+   *                    to save a button. They are gated exactly as before: the
+   *                    role's permissions and the level, from QUICK_ACTIONS.
+   *
+   * The menu is ordinary on the home page — three items, as it always was — and
+   * long on the Site. That asymmetry is the point rather than a cost: the home
+   * page has one thing to arrange and the Site has a role, a workspace and a
+   * subject.
+   */
+  items: (s) => {
+    if (!s.onSite) {
+      return [
+        {
+          id: 'edit', icon: 'pencil',
+          label: (x) => (x.editing ? 'Done Editing' : 'Edit Modules'),
+          note: (x) => (x.editing ? 'Save the arrangement' : 'Rearrange, resize or remove cards'),
+        },
+        { id: 'add', icon: 'widgets', label: 'Add Module',
+          note: 'Choose a module to add to Home' },
+        null,
+        { id: 'reset', icon: 'refresh', label: 'Reset Home Page',
+          note: 'Back to the default arrangement', danger: true },
+      ]
+    }
+
+    const st = viewStore.get()
+    const role = getRole(st.roleId)
+    /* THE LISTING HAS NO WORKSPACE, so it is offered neither Customize nor
+       Reset — both would silently edit the Site workspace underneath it, which
+       is the kind of action a person only discovers went wrong later. It keeps
+       the role switcher, because which seat you are looking through is true of
+       the listing too. */
+    const listing = st.level === 'sites'
+    const actions = QUICK_ACTIONS.filter(
+      (a) => a.levels.includes(st.level) && role.permissions.includes(a.needs))
+
+    return [
+      /* NO NOTE ON THIS HEADING. It carried `role.title` — "Site Manager ·
+         Command Centre" — which came out as "Site Manager · Command Ce…" at the
+         menu's width, and was answering a question the ticked row directly
+         below it already answers. A heading note earns its place by saying
+         something the rows do not. */
+      { heading: 'Viewing as' },
+      ...ROLES.map((r) => ({
+        id: `role:${r.id}`, label: r.name, note: r.person, checked: r.id === role.id,
+      })),
+
+      !listing ? null : false,
+      !listing && {
+        id: 'edit', icon: 'pencil',
+        label: (x) => (x.editing ? 'Done Editing' : 'Customize Workspace'),
+        note: (x) => (x.editing ? 'Save the arrangement' : 'Rearrange, resize or remove widgets'),
+      },
+      !listing && { id: 'add', icon: 'widgets', label: 'Add Widget',
+                    note: `Choose a widget for this ${LEVEL_NOUN[st.level] || 'Site'}` },
+
+      /* A HEADING WITH NOTHING UNDER IT IS WORSE THAN NO HEADING, so the
+         actions group appears only when the role has actions here. §16 asks the
+         product to cope with a role narrow enough for this to happen. */
+      actions.length ? null : false,
+      actions.length ? { heading: `On this ${LEVEL_NOUN[st.level] || 'Site'}` } : false,
+      ...actions.map((a) => ({ id: `do:${a.id}`, icon: a.icon, label: a.label, note: a.note })),
+
+      null,
+      { id: 'report', icon: 'arrow-out', label: 'Open Report',
+        note: listing ? 'Every Site, as a document' : 'This view, as a document' },
+      !listing && { id: 'reset', icon: 'refresh', label: 'Reset Workspace',
+                    note: 'Back to the default for your role at this level', danger: true },
+    ]
+  },
   onSelect(id) {
     const onSite = viewStore.get().view === 'site'
     const mode = onSite ? wsEdit : edit
+
+    /* Two namespaced families, so a role id and an action id can never collide
+       with a menu id — `admin` is a role and `map` is an action, and both are
+       plausible names for something else this menu might grow. */
+    if (id.startsWith('role:')) { setRole(id.slice(5)); return }
+    if (id.startsWith('do:')) {
+      const key = id.slice(3)
+      wsEdit.announce(`${ACTION_NAMES[key] || key} — opening.`)
+      return
+    }
+    if (id === 'report') { wsEdit.announce('Report — opening.'); return }
+
     if (id === 'edit') { mode.editing ? mode.exit() : mode.enter(); return }
     if (id === 'add') {
       /* Adding a card is an edit, so arrive in edit mode — otherwise the new
@@ -20541,16 +20719,18 @@ function moduleMenuItems() {
       icon: w?.sprite || domain?.sprite,
       label: m.name,
       /**
-       * THE DOMAIN AND THE MODULE'S OWN SIZE, ON THE NOTE LINE.
+       * THE COUNT, AND NOTHING ELSE.
        *
-       * The size was a right-aligned badge for a version of this and it cost
-       * the thing it sat next to: "Medical & Veterinary Care" and "Safety,
-       * Security & Emergency" both ellipsed, and only on the rows that were
-       * ticked, because the badge and the tick were competing for the same
-       * edge. A module's name is the reason to tap the row and the count is a
-       * hint about what is behind it, so the name gets the width.
+       * The note carried the domain as well — "Site Overview · 6 widgets" —
+       * which repeats a word on every row of a group whose HEADING already says
+       * what these modules are, and pushes the one useful number to the far
+       * side of a separator. Thirty-four rows of "<domain> · <n> widgets" is
+       * thirty-four readings of something the reader did not come for.
+       *
+       * (It was a right-aligned badge before that, and it ellipsed the names it
+       * sat beside. The count belongs under the name, small.)
        */
-      note: `${domain ? domain.name : ''} · ${m.catalog[0]} widgets`,
+      note: `${m.catalog[0]} widgets`,
       on: on.has(m.widget),
     }
   }
@@ -20659,13 +20839,11 @@ const wsHeader = createWorkspaceHeader({
   getState: () => viewStore.get(),
   moduleItems: moduleMenuItems,
   onModule: toggleModule,
-  onAction: (id) => wsEdit.announce(`${ACTION_NAMES[id] || id} — opening.`),
-  onCustomize: () => (wsEdit.editing ? wsEdit.exit() : wsEdit.enter()),
-  onReset() {
-    ws().resetWorkspace()
-    wsEdit.announce(`${cat().noun} workspace reset to the default for your role.`)
-  },
-  onRole: (id) => setRole(id),
+  /* Customize, Reset, the role switcher and the quick actions used to be wired
+     here, one callback each, because the header drew a control for every one of
+     them. They hang off the avatar now — see createProfileMenu above — and the
+     header is left with the two things it is actually for: saying where you are,
+     and getting you somewhere else. */
   /**
    * ONE HANDLER FOR EVERY MOVE THROUGH THE HIERARCHY, because the header's
    * breadcrumb, its sibling menu, its counts strip and its More menu are all
