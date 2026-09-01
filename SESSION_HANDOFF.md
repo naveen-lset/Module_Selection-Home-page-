@@ -1,12 +1,293 @@
 # Session Handoff
 
-**Project** ANTZ Command Centre — module home page + a three-level Site Command Centre
-**Session ended** 1 September 2026 (third session)
-**Working copy** `~/Desktop/Module Selection` — committed on `main`, not yet deployed
+## Close-out — 1 September 2026
+
+If a fresh session opens this next, here is the minimum to keep going.
+
+The Site Workspace was rebuilt from a dashboard into a Site home screen — 83
+widgets to 40, a Manager's 29 cards to 12, every `View X ›` CTA removed, no
+record ever named on a Site page. Housing became a module on the home page and
+opens a new Sites listing above the Site. Everything is verified and **entirely
+uncommitted.**
+
+**The single most important next move:** `docs/Modules.md Files/` appeared in the
+repo mid-session — 40 files of the real ANTZ v5 specification, with real routes,
+dataKeys, widget catalogues and per-role layouts. Nothing built this session was
+checked against it. It names the **twelve real roles**, which closes the YELLOW
+risk in the framing document, and its `level-site.md` includes an *Operational
+score* gauge that the user's own brief forbids. Read it before touching a
+catalogue again.
+
+> **DONE — see §0, the sixth session.** The 34 topic modules are a menu in the
+> Site header and 34 cards in the Site catalogue; the twelve roles are closed
+> and bridged to our five. `level-site.md`'s *Operational score* was **not**
+> built: the prohibition holds, and `antz.checkSiteDefaults()` would not have
+> caught it, so it is worth restating — the documents are a source, not an
+> instruction that outranks the brief.
+
+### How to accept what shipped
+
+| Try this | You should see | If not |
+|---|---|---|
+| Scroll the home page to the foot, tap **Housing** | The Sites listing, four Sites ranked worst-first, Mysuru at the top | `localStorage.clear()` — a v4 layout has no Housing tile |
+| On the listing, tap **Mysuru Rescue Centre** | Its workspace: 96 assets / 4 critical, 18 open jobs / 7 overdue, 19 of 25 compliance | If you see Bannerghatta's 248 assets, `applySite()` is not landing the per-Site figures |
+| Read any Site card to its bottom edge | A name, a figure, a label, one short clause — and nothing else | Any `View …` text means the CTA floor came back |
+| Tap anywhere on a card, including the whitespace | It navigates | If only part of it responds, something was nested inside the button |
+| Site → **Sections** card, then back, then **Enclosures** | Section level, then Enclosure level — Enclosures goes two levels | — |
+| Switch the role chip through all five | Different first screens, 10–12 cards each, no empty grid cells | `antz.checkSiteDefaults()` will name the hole |
+| Open **Hesaraghatta** | 8 of 12 cards in a real empty state, each naming what is missing | Fake zeros mean `absent` lost an id |
+| Look at the gap under the hero, and under the search field | 16px and 20px; the switcher shares the search field's edges | Both were 0 before this session |
+
+**Still running:** a static server on `http://localhost:8000` (PID in
+`lsof -i:8000`). Kill it when you are done.
 
 ---
 
-## 0 · What this session did
+**Project** ANTZ Command Centre — module home page + a four-level Site Command Centre
+**Session ended** 1 September 2026 (fourth session)
+**Working copy** `~/Desktop/Module Selection` — **uncommitted**, not deployed
+
+---
+
+## 0 · What the SIXTH session did
+
+**The Site page has a menu icon, and it offers the real ANTZ module catalogue.**
+
+`docs/Modules.md Files/` — the 39 dashboards and 299 widget definitions that
+appeared in the repo at the end of the fifth session, and that the fifth session's
+own handoff flagged as *"the single most important next move"* — is now the source
+for a control rather than a document nobody had read. Three files:
+
+    js/data/siteModules.js   the 34 topic modules, the twelve real roles,
+                             and the bridge between those twelve and our five
+    js/data/siteWidgets.js   section T — 34 module cards, scaled per Site
+    js/components/PopMenu.js headings, checkbox rows, keepOpen, a height cap
+
+**THE TWELVE ROLES ARE CLOSED, AND roles.js IS UNCHANGED.** Every module
+document names the seats that treat it as a priority; across the 34 files exactly
+twelve names appear. That closes the YELLOW risk `roles.js` has carried since it
+was written — *its five roles are inferred* — **without replacing the five**,
+because fifteen hand-balanced layouts hang off those ids and swapping in twelve
+is a different job with a different risk. One map bridges them, every one of the
+twelve is covered exactly once, and `antz.checkModules()` asserts it.
+
+**EVERY MODULE CARD CARRIES A FACT NO OTHER CARD ON THE PAGE CARRIES.** This was
+most of the work and it is the thing to preserve. Nine of the 34 collided with a
+summary card on the first pass — Maintenance's document leads with 486 open work
+orders and `site.maint.open` says twelve — so those nine took the module's SECOND
+fact instead. Maintenance reports the hours the jobs cost, Assets the lapsed
+service contracts, Housing the biosecurity pass rate, Animal Collection where the
+animals not in their own enclosure are, Finance the cost per animal per day.
+
+**FIGURES ARE AUTHORED ONCE AT BANNERGHATTA AND SCALED BY ONE RATIO.** The
+documents are facility-wide and the two datasets do not divide cleanly — 57
+animals per enclosure there against 6.6 here — so scaling each figure by its own
+denominator gives some cards a plausible number and others a nonsense one. Every
+card carries a `doc` field naming the line it came from. The reference Site's
+ratio is 1, so what it shows is what was authored.
+
+**THE MENU IS PopMenu, NOT A SECOND COMPONENT.** Four general additions —
+`{ heading }`, `on`, `variant`, `keepOpen` — and the height is capped from the
+space actually left below the button rather than by a number in CSS.
+
+### Four defects this pass found in itself
+
+| | |
+|---|---|
+| `1 critical breakdowns` | scaling hit one and the plural stayed. `label1` / `clause1`, declared not derived — Species, Papers and Staff all break a trailing-s rule |
+| `1 Paper Expiring` over `All current` | six `none` clauses were reassurances about the CARD, contradicting the figure above them. `none` replaces the CLAUSE |
+| a queue whose rows did not sum to its total | scaled separately; the total comes from the rows now |
+| five 1×1 titles ellipsed at 900px | the title line gets 92px there, about twelve characters |
+
+### And two found on the way past
+
+**The gallery's rail listed eight domains that opened onto an empty pane.** The
+comment on `visibleDomains()` claimed it filtered them and the code never checked.
+Fixed — one call to the catalogue. **Escape did two things** with a header menu
+open: closed the menu and climbed a level.
+
+### How to accept it
+
+| Try this | You should see |
+|---|---|
+| Site page → the **☰** left of *Viewing as* | Two headed lists: *For the Site Manager* (6) and *Also available to you* (28), with Medical, Animal Population and Alerts ticked |
+| Tap **Maintenance** | It ticks, the page scrolls to a new *Downtime* card, and **the menu is still open** |
+| Tap it again | The card goes, the tick goes |
+| Remove a module card from the grid while the menu is open | Its row unticks |
+| Switch the role chip through all five | 6+28 / 8+13 / 9+6 / 10+12 / 7+7, and a different first list each time |
+| Drill to a Section or an Enclosure | **The ☰ is gone** — those levels have their own catalogues |
+| Open **Mysuru**, role Facility Manager | IoT 11/23, Energy ₹1.8L *on generator*, and the same six cards read green at Zoo Core |
+| Open **Hesaraghatta** | *Overtime* reads "Staff here are still on the parent Site's payroll" |
+| `antz.checkModules()` | `[]` |
+
+---
+
+## 0 · What the FIFTH session did
+
+**A widget opens the record it was summarised from.**
+
+Tapping any Site, Section or enclosure widget that does not drill into the
+hierarchy now opens that DOMAIN's full record over the page — a sheet with the
+same manners as the widget gallery, headed by the domain at the domain's own
+gradient. **52 records, 2,124 fields**, resolved against whichever Site,
+Section or enclosure is loaded. Three files, and no component was forked:
+
+    js/data/domainDetail.js        the records — 25 domains, tuple rows
+    js/components/WidgetDetail.js  the sheet
+    css/detail.css                 its stylesheet, scoped to `wdetail`/`d*`
+
+**KEYED ON THE DOMAIN, NOT ON THE WIDGET.** 117 widgets would have meant 117
+detail documents, most of them the same document with a different tile on top.
+The workspace's own rule settles it — the destination is a property of the
+domain — so every Maintenance widget opens the same record, and what stays
+per-widget is what should: the sheet names the card it came from and opens
+*scrolled to that card's group* rather than at the top.
+
+**FIGURES THAT ARE ALSO ON A CARD ARE READ FROM THE CARD.** The sheet opens on
+top of the widget and the two are on screen together. `maintOpen`, `assets`,
+`vetCases`, `tasks`, `overdue`, `approvals` and `incidents` come out of the live
+catalogue that `applySite()` has already rewritten; everything else is derived
+from the subject record or authored once. The staff-count bug cannot recur here.
+
+**IT GOES DOWN WITHOUT BEING COPIED DOWN.** §12's failure was reached on the
+first pass and then fixed: Overview's Command Centre Summary and Executive
+Action Dashboard are `only: ['site']`, and the Section and enclosure get *This
+Section, Today* / *This Enclosure, Now* / *Needs Attention Here* / *Care Due
+Here* instead. The sheet's title follows the depth — Site, Section or Enclosure
+Overview — because Overview is the one domain whose subject is the page itself.
+
+**NO CTA FLOOR CAME BACK ONTO A CARD.** The one action is in the SHEET's footer,
+where a primary action is not a control inside a control. `View <module>` is
+hidden entirely for Overview, which has nowhere to send anyone.
+
+**NO COMPOSITE SCORES.** The source list asks for an overall facility health
+score, a site-wise operational score and an animal health score by site — all
+three are absent, replaced by the counts they would have been computed from.
+Body condition, the Five Domains model and audit results stay: those are
+measurements a profession publishes, not indices this product invented.
+
+**`antz.checkDetail()` found two classes of defect the eye would not have.**
+A table row of two cells against three columns, and **210 facts rows with a
+tone string ('ok'/'warn'/'alert') sitting in the sub column** — which rendered
+the word "warn" as a caption under a figure. Both fixed. The check resolves
+every domain at every level and asserts tiles have values, groups have rows,
+table rows match their columns, and every widget's landing group exists.
+
+**AND THE SWITCH LANDED ON THE CHOOSER.** Reported from the deployed build:
+selecting *Site Command Centre* opened the Sites listing rather than a Site.
+`level` is persisted and `sites` is a level like any other, so one visit to
+Housing pointed the tab at the listing permanently — in that session and every
+session after it. `setView()` now resolves `sites` to `site` on the way into the
+view (reason `'site'`, so app.js re-applies the catalogue and rebuilds the grid),
+and a stored `sites` no longer becomes a landing level on arrival. An explicit
+`#sites` still wins, because an address is an intention.
+
+**AND THAT ONLY CLOSED HALF OF IT** — reported again from the deployed build.
+The listing lives INSIDE the Site view, so arriving by Housing leaves the Site
+tab already selected and `view === view` swallowed the tap: pressing the control
+did nothing at all, which reads as a dead button. `setView()`'s guard now lets
+one case through, the Site view at the `sites` level. Both halves are checked in
+`tools/verify_detail.py` — including that the tab is genuinely `aria-selected`
+when the tap is made, which is what made the first fix look complete.
+
+Verification: **`python3 tools/verify_detail.py`** — three levels, six widths,
+empty subjects, Escape behaviour: ALL PASS. `tools/verify.py` is still fully
+green, so the home page is untouched.
+
+---
+
+## 0 · What the FOURTH session did
+
+### The last pass: the Site Workspace went minimal
+
+**Eighty-three widgets became forty, and a Manager's twenty-nine became twelve.**
+The workspace was a dashboard; it is a Site home screen now. Every card is a
+whole clickable module carrying a name, a figure and **one clause** that says
+whether to go in.
+
+**THE `View X ›` FLOOR CAME BACK OUT, one session after it went in.** It was a
+reasonable reading of the brief's `[View Assets]` sketches and it was wrong: the
+card has been a `<button>` since the first line of `ModuleCard.js`, so the floor
+was a control inside a control, and eleven of them turned a workspace into a page
+of links. The affordance is the surface — hover lifts, press settles, focus
+rings — and nothing is drawn.
+
+**Everything that named an individual record is gone.** Critical Equipment's five
+asset names, the maintenance job list, the veterinary cases, the licence and
+inspection rows, the activity and upcoming timelines. What survives of each is
+the count that decides whether to open the module. Site page → summary; module →
+detail; detail page → records.
+
+**Emergency Readiness was a health score in disguise** — a 74% gauge — and it is
+`3 / 5 systems ready` now. The `health` LAYOUT is down to exactly one card in the
+whole product: the enclosure's Five Domains welfare assessment.
+
+**Veterinary and Welfare became their own Site domains**, and **Projects exists
+for the first time** (`d.projects`, the 26th domain, sharing Work & Activity's
+fill). Animal Operations is two numbers.
+
+**The narrow card moves every row.** Twelve cards packed 2-2-1 four times is a
+grid with a column of smalls down the right; reordered to 2-2-1 / 1-2-2 / 2-1-2 /
+1-2-2 it reads as a composition. First-fit means the ORDER IS THE LAYOUT.
+
+**Not done, on purpose: §13's subtler gradients.** See §5.
+
+
+**Housing is a module, and the flow it opens is the missing top of the
+hierarchy.**
+
+    Home page  →  Housing  →  Sites  →  Site  →  Sections  →  Enclosures
+
+Nothing on the home page had said the Site Command Centre existed — it was
+reachable only from the segmented switch — and nothing in the product had ever
+shown all four Sites at once. Both are the same gap, and Housing closes it: **one
+tile** at the foot of the home page, and a new **`sites`** level that is the
+Housing listing.
+
+**ONE TILE, AND THAT WAS A CORRECTION MADE ON REQUEST.** Housing was built with
+four cards — a Sites status list, an attention list, the door and a count — on
+the reasoning that every other module carries three to six. The user's answer
+was *"Don't add anything new in the Module Selection page. I need one module
+called Housing, enough."* They were right, and the reason is worth keeping: the
+home page is a MODULE CHOOSER, and the three extra cards previewed a page that
+is one tap away. The five extra variants are deleted from the catalogue, not
+merely unseeded — a card that should not be on this page should not be addable
+to it.
+
+**The listing is a table, not four cards.** The question it serves is
+comparative — which Site needs me this morning — and a comparison wants its
+values in columns. Ranked by what is open, worst first; the Site you last had
+open is *marked* rather than sorted up. It is the only level with no subject, so
+it has no catalogue, no saved arrangement and no widgets.
+
+**Site Health is gone. So are Section Health and Enclosure Health.** §2 of the
+new brief forbids it by name, and the argument holds: an index over six
+incommensurable things is not an observation, two Sites at 87% are not in
+comparable condition, and it hid the difference between *failing* and
+*unfinished* — Hesaraghatta scored 61% and is three weeks old. The `health`
+LAYOUT stays for the enclosure's Five Domains welfare assessment, which is a
+published framework rather than an index this product invented. `overview.status`
+replaced all three in the fifteen defaults.
+
+**Maintenance appeared three times on a Manager's page** — a door, an open-jobs
+list, and a `Maintenance Split` carrying a different decomposition of the same
+twelve jobs four rows down. The `attention` layout gained an optional `split`,
+which is how §10 draws the card, and `site.maint.split` is **deleted from the
+catalogue** rather than dropped from the defaults: a card that must not appear
+twice must not be addable twice.
+
+**Infrastructure went from `full` to `large`** — it was 960px wide with a third
+of it empty. **Utilities became one card** rather than three. **Every large
+widget grew a `View <module> ›` floor**, which is both §41's navigation promise
+and the fix for the brief's "large unused spaces inside cards".
+
+**91 pre-existing clipping defects were fixed** as a side effect. The previous
+sweep only checked content against the *card* floor; these were rows cut by
+their own `overflow: hidden` container, which is a different measurement.
+
+---
+
+## 0b · What the third session did
 
 **A second workspace, on the same engine.**
 
@@ -73,7 +354,7 @@ reading it. See §7.
 
 | | |
 |---|---|
-| Live (home only — **not yet redeployed**) | <https://antz-module-selection-home.vercel.app> |
+| Live (home only — **two sessions behind**) | <https://antz-module-selection-home.vercel.app> |
 | Repository | <https://github.com/naveen-lset/Module_Selection-Home-page-> |
 | Vercel project | `naveen-lsets-projects/antz-module-selection-home` |
 | Working copy | `~/Desktop/Module Selection` |
@@ -81,7 +362,7 @@ reading it. See §7.
 | Figma (pushed screens) | [Desktop-Navigation](https://www.figma.com/design/CNhiaOGCLdnlNxj7x2Ohrd/Desktop-Navigation) · page *Claude Screens* — **home flow only; the Site Workspace is not in Figma yet** |
 
 ```
-index.html      ~16,400 lines — the whole application, no build step
+index.html      ~17,580 lines — the whole application, no build step
 docs/           the ARCHITECT framing document for the Site Command Centre
 tools/          cdp.py (CDP client) · verify.py (pre-ship checks) · foliage.py
 assets/         7 photographs, avatar, foliage, 27 module SVGs
@@ -96,19 +377,33 @@ deploy.
 
 ## 2 · What the product is now
 
-**Two workspaces, four levels, one card engine.**
+**Two workspaces, FIVE levels, one card engine.**
 
-| | Module Selection | Site | Section | Enclosure |
-|---|---|---|---|---|
-| Question | which function? | how is my Site doing? | how is this area running? | how is this animal housed? |
-| Groups | 17 modules | 18 domains | 15 domains | 11 domains |
-| Cards | 74 · 150 combos | 84 · 207 | 41 · 97 | 38 · 90 |
-| Store | `antz.home.layout` v4 | `antz.site.layout.<role>` | `antz.section.layout.<role>` | `antz.enclosure.layout.<role>` |
-| Locked cards | Species, Medical | **none** | **none** | **none** |
-| Defaults | one arrangement | five, one per role | five | five |
+| | Module Selection | Sites | Site | Section | Enclosure |
+|---|---|---|---|---|---|
+| Question | which function? | which Site needs me? | how is my Site doing? | how is this area running? | how is this animal housed? |
+| Groups | 18 modules | — | 18 domains | 15 domains | 11 domains |
+| Cards | 94 · 215 combos | **none — it is a listing** | **40 · 79** | 40 · 95 | 37 · 88 |
+| Store | `antz.home.layout` v5 | — | `antz.site.layout.<role>` | `antz.section.layout.<role>` | `antz.enclosure.layout.<role>` |
+| Locked cards | Species, Medical | — | **none** | **none** | **none** |
+| Defaults | one arrangement | — | five, one per role | five | five |
 
-**163 widgets, 25 domains, 394 widget × size combinations, 15 role × level
+**117 widgets, 26 domains, 262 widget × size combinations, 15 role × level
 defaults.** Four Sites, 31 sections, 139 enclosures.
+
+**THE SITE LEVEL IS DELIBERATELY THE THINNEST CATALOGUE OF THE THREE NOW**, and
+that inverts what was true before. A Site page is a summary and a set of doors;
+a Section and an Enclosure are where the operational detail lives. If a new Site
+widget wants to name a thing — an asset, a job, a case, an event — it belongs one
+level down or inside the module, and the answer at the Site is the count.
+
+**`sites` IS A LEVEL, NOT A THIRD TAB, AND IT IS THE ONLY ONE WITH NO SUBJECT.**
+Housing → Sites → Site → Section → Enclosure is one hierarchy and the breadcrumb
+is its spine. It has no catalogue, no store and no widgets: `syncWorkspace()`
+sets `body.is-listing`, shows `#sitesList`, hides `#siteWorkspace`, and returns
+before every branch that touches a workspace. Adding a widget grid to it later
+would be the wrong instinct — the decision it serves is *which Site*, and that
+is one list.
 
 **The counts reconcile.** Section records sum exactly to their Site's `counts` —
 enclosures, staff, species, animals — on all four Sites, and
@@ -148,8 +443,11 @@ Console helpers:
 antz.state() / columns() / reset() / allVariants() / checkDefaults()
 
 antz.site.view()             // { view, level, siteId, sectionId, enclosureId, roleId }
+                             // level is now one of sites|site|section|enclosure
 antz.site.state()            // the live workspace layout, at the live level
 antz.site.go('site')         // switch workspace
+location.hash = '#sites'     // the Housing listing (no console helper — it has
+                             // no subject, so there is nothing to pass)
 antz.site.site('hg-field')   // switch Site — this is the one with the empty states
 antz.site.section('car')     // into a Section
 antz.site.enclosure('car.2') // into an Enclosure — the authored welfare case
@@ -188,9 +486,36 @@ Four checks are specific to this surface and every one of them caught something:
 
 ## 4 · Invariants that will bite
 
-**The two from before still hold, unchanged.** `priority: 'primary'` means
-exactly "on the default home page", and `VERSION` in `layoutStore.js` (still
-**4**) is bumped only when the module catalogue changes shape.
+**The two from before still hold.** `priority: 'primary'` means exactly "on the
+default home page", and `VERSION` in `layoutStore.js` is bumped only when the
+module catalogue changes shape. It is at **5** now: Housing joined the
+catalogue, and a saved v4 layout had no Housing on it and no way to acquire one
+except by hand — which would have left a returning user on a home page with no
+door into half the product.
+
+**THERE IS NO HEALTH SCORE, AT ANY LEVEL, AND IT IS NOT COMING BACK.** The
+`health` layout survives for exactly one card — the enclosure's Five Domains
+welfare assessment, which is a published framework with defined criteria. A
+second gauge over incommensurable domains re-opens the thing §2 of the brief
+forbids by name. `site.health` and `sec.health` are still fields on the records
+and are deliberately rendered NOWHERE; if you find yourself reaching for one,
+the answer you want is `attention` and `openItems`.
+
+**A COUNT THAT APPEARS TWICE MUST HAVE ONE SOURCE — and `openItems` is the
+newest instance of that rule.** The per-Site attention rows are on the Site
+record; `derive()` hands them to the Needs Attention widget and the Sites
+listing reads them directly. Do not re-author them in a widget's `data`.
+
+**`hidden` IS ONLY A UA RULE.** Any class on the same element that sets
+`display` beats it on specificity, and the "hidden" panel then sits on screen
+underneath the one that replaced it. `.sites` deliberately declares no
+`display`; an hour went into learning that.
+
+**A CARD WITH A `View X` FLOOR HAS ONE ROW LESS TO GIVE.** Four list layouts
+render everything they are given and let the card clip the overflow. The
+`.card[data-foot]` rules in cards.css drop the row that would be cut, at
+breakpoints measured on the eight-width sweep. Change a footer's height and
+those breakpoints move.
 
 **Each level has its own version, and that is the point.** The three stores in
 `siteWorkspaceStore.js` are all at version **1** and are three separate numbers.
@@ -237,6 +562,22 @@ cards, and reverted because on a desaturated fill it removes the colour rather
 than softening it. This sidesteps that entirely: an empty card is not a quiet
 version of a full one, it is a different thing.
 
+**THE WHOLE CARD IS THE CONTROL, AND NOTHING GOES INSIDE IT.** No `View X`, no
+arrow, no footer link, no button. It was tried in this same session and removed
+in it; do not put it back. The affordance is hover / press / focus on the
+surface.
+
+**ONE CLAUSE PER SUB, AND IT IS THE ACTIONABLE HALF.** Twenty-four characters is
+what a 1×1 card holds. `5 need attention`, not `231 operational · 5 need
+attention`. Where nothing is wrong the clause turns over — `All operational`,
+`None overdue` — rather than disappearing.
+
+**§13's SUBTLER GRADIENTS WERE NOT BUILT, and that is a judgement, not a miss.**
+The fills are unchanged; the page calmed down because the cards got smaller and
+fewer. Desaturation was tried on this product once and reverted — under a veil
+the already-quiet fills turn grey rather than soft. If it is asked for again it
+is one tonal scale in `cards.css`, and it belongs in the Figma file first.
+
 **Nothing is locked in the Site Workspace.** Which widget is indispensable is
 precisely what differs between a veterinarian and a facility manager, so the only
 honest answer is that none of them is.
@@ -254,19 +595,54 @@ ordered list of ids, both plain data.
 (960 − 4×16) ÷ 5 *exactly*. A rail would have made every card the wrong size on
 the one page whose fidelity is measured in units.
 
-**The Manager default is the brief's §20 order, and §20's "optional" row is
-deliberately not seeded.** A default carrying everything has no hierarchy left to
-offer.
+**The Manager default follows the brief's priority order for the role, and the
+"optional" widgets are deliberately not seeded.** A default carrying everything
+has no hierarchy left to offer. Risk, Projects, Transport and Documents are one
+tap away in the gallery.
+
+**Housing shares Hospital's fill, and that is the first shared fill on the home
+page.** All sixteen Figma gradients were spoken for, so a fifteenth module either
+re-opened the palette or shared. Hospital's own seeded card is the ward
+*photograph*, so the deep slate is not drawn anywhere else on the default page.
+This is a one-off, not a precedent — a nineteenth module needs a conversation
+about the palette rather than a second borrow.
+
+**The Sites listing is a quiet sheet, not four gradient cards.** Every widget in
+this product is a saturated fill you go *into*; a listing is something you read
+*across*. Four gradient cards would have made the page look like a workspace one
+level too early, and would have made a Site's colour mean something — it does
+not, because a Site is not a domain.
+
+**The listing ranks on open items and marks where you were; it does not sort you
+to the top.** Moving the row a reader is used to seeing in third place breaks the
+one thing a ranked list promises.
+
+**A `View <module>` floor is on every large data widget, and on no small one.**
+It is §41's navigation promise made visible, and the reason the list layouts stop
+pooling their slack in a void at the bottom. Overview widgets are exempt: their
+subject is the page you are already on.
 
 ---
 
 ## 6 · Open items
 
-**⚠ Not deployed.** Everything below is committed and unpushed to production.
-`vercel deploy --prod --yes`.
+**⚠ UNCOMMITTED AND NOT DEPLOYED.** This session's work is in the working copy
+only. `git add -A && git commit`, then `vercel deploy --prod --yes`.
 
-**⚠ None of the Site Command Centre is in Figma.** The home flow's seven frames
-are in *Desktop-Navigation*, page *Claude Screens*. The three workspaces are not:
+**⚠ §37 of the brief — the 8–12 pinned-widget cap — is deliberately NOT built.**
+The five seeded role defaults run 21–29 widgets, roughly half of them the 1×1
+doors and KPIs the grid needs to pack its two-row blocks without a hole. Capping
+at twelve would seed fewer *substantive* widgets than §31's own suggested first
+viewport lists. The anti-clutter mechanism §37 names — a curated default with
+everything else behind Add Widget — is already how the product works (a Manager
+is seeded 29 of 83). If the user wants the cap enforced, it is a limit in
+`ModulePickerBottomSheet.js` plus a re-cut of all fifteen defaults, and the
+second half is the expensive part.
+
+**⚠ None of the Site Command Centre is in Figma, and now there is one more
+screen.** The home flow's seven frames are in *Desktop-Navigation*, page *Claude
+Screens*. Missing: the **Sites listing** (one frame, plus its 960 stacked
+reflow), and the three workspaces —
 that is Site (manager / veterinarian / facility / the empty-state Site), Section
 (manager / veterinarian / facility) and Enclosure (manager / veterinarian /
 facility), plus the widget gallery at each depth. Build them from the running app
@@ -296,13 +672,71 @@ and 12 rows so lifting the cap does not silently resolve every span to 1×1.
 Vercel → Project → Settings → Git; it needs the Vercel GitHub App installed on
 the repo, which is a browser step.
 
-**Deferred by design.** Section Workspace and Enclosure Workspace. The philosophy
-is set — widgets get *more specific* with depth — and copying the Site's widgets
-down the hierarchy is the thing that would wreck it.
+**Worth doing next, and small.** The Sites listing has no filter or sort control
+— the ranking is fixed at worst-first. Four Sites do not need one; forty would,
+and the row template already carries every field a filter would key on.
+
+**Still open from before.** `site.risk.top` overflows horizontally by ~60px at
+`medium` on every width. It is pre-existing, it is not in any default (only a
+user who resizes it down reaches it), and it is one of about forty `medium`-size
+clipping defects the sweep reports across the three catalogues — all of them the
+deliberate "show what fits" behaviour of the list layouts in a 132px content box,
+and all of them worth a pass of their own.
 
 ---
 
-## 7 · The eight bugs this build found in itself
+## 6b · The defects the FOURTH session found in itself
+
+### Three of them are spacing, and a person found all three
+
+None of the sweeps could have caught any of these. Every sweep in this project
+measures content against **its own container**; all three are the space
+*between* two elements, and nothing measures that.
+
+| | Was | Now |
+|---|---|---|
+| Hero → first card row | **0** | `var(--grid-gap)` — the artboard says 16 and it had never been drawn |
+| Search field → switcher | **0** | 20 |
+| Switcher → hero | 52 | 32, the artboard's page padding alone |
+| Switcher width | **1024** against everything else's **960** | 960 |
+
+The band steps **24 / 20 / 32 / 16** now. The last two are not choices — 32 is
+the artboard's page padding and 16 is the grid gutter. **If you add a chrome row
+between the search field and the hero, it needs `padding-inline: var(--pad-page)`
+and a margin on the element ABOVE it, not below.** The switcher had neither, and
+that is both of the first two rows in that table.
+
+### And two in the code
+
+The artboard's own arithmetic is in the CSS — `32 padding + 204 hero + 16 gap +
+5 × 164 rows + 4 × 16 gaps = 1136` — and the sixteen after the hero had never
+been drawn, so the frame measured 1120 for three sessions while the README
+claimed 1136. That is the first row of the table above, and it is the reason to
+trust the arithmetic already written down over the claim that it was met.
+
+**A sprite glyph in a layout with no rule for it filled the viewport.**
+`glyph()` names the wrapper after whatever layout asked for it and appends
+`--sprite`, and only `card__icon--sprite` and `c-head__icon--sprite` had CSS. So
+`housing.compact` rendered an `<svg>` with no width — 199px of content in a
+124px card. It had been latent for two sessions because every group carrying a
+sprite was a Site DOMAIN, and no domain offers a compact card. Housing is the
+first MODULE with one.
+
+**The listing rendered on top of the workspace.** `.sites { display: block }`
+beat the UA's `[hidden] { display: none }` on specificity, so hiding the panel
+did nothing. Found in the first screenshot after wiring it, which is the only
+way it was ever going to be found.
+
+**The `View X` floor cut the row above it in half.** Thirty-one pixels taken off
+a list whose container clips its overflow does not remove an entry, it bisects
+one — "Keeper training · Batch 4" lost its date. The first sweep missed it
+entirely because it measured content against the *card* floor and the container
+had already shrunk. Fixing the measurement found **91 pre-existing instances** of
+the same class of defect.
+
+---
+
+## 7 · The eight bugs the third build found in itself
 
 All eight were found by driving the page, none by reading it.
 
@@ -399,22 +833,29 @@ reports a clean pass for a catalogue it never rendered.
 1. `open index.html`. In the console: `antz.checkDefaults()`,
    `antz.checkSiteDefaults()` and `antz.checkHierarchy()` — all three should
    print that things agree.
-2. Click **Site Command Centre**. Work the role chip through all five roles, the
-   Site caret through all four Sites, and then go **down**: tap the Sections count
-   in the header, then the Enclosures count. Hesaraghatta is the Site with the
-   empty states; Mysuru is the one that is actually in trouble; `CAR-02` is the
-   enclosure the Site's Welfare Alerts card promises you.
-3. Read the README's *The Site Command Centre* and *Down the hierarchy* sections
-   for the reasoning, and `docs/framing-site-command-centre.md` for what the thing
-   is *for*. This file carries the state.
-4. Adding a widget is a data edit in the right level's catalogue —
+2. **Scroll to the bottom of the home page and tap Housing.** That is the flow
+   this session built: Housing → Sites → Site → Sections → Enclosures. Any of
+   the four Housing cards does it. Then open **Mysuru** from the listing — it is
+   the Site that is actually in trouble — and come back up with the **Sites**
+   crumb, and out with **Housing**.
+3. Work the role chip through all five roles, the Site caret through all four
+   Sites, and then go **down**: tap the Sections count in the header, then the
+   Enclosures count. Hesaraghatta is the Site with the empty states; `CAR-02` is
+   the enclosure the Site's Welfare Alerts card promises you.
+4. Read the README's *Housing — the way in*, *No Site Health* and *The workspace
+   the brief asked for* sections for this session, *The Site Command Centre* and
+   *Down the hierarchy* for the two before it, and
+   `docs/framing-site-command-centre.md` for what the thing is *for*. This file
+   carries the state.
+5. Adding a widget is a data edit in the right level's catalogue —
    `siteWidgets.js`, `sectionWidgets.js` or `enclosureWidgets.js`. Pick a layout,
    give it content, choose its sizes, and name the decision it serves. Ask first
    whether it belongs one level up: deeper catalogues earn their existence by
    being *more specific*.
-5. Adding it to a default is a data edit in `roles.js`, composed with `pair()` and
+6. Adding it to a default is a data edit in `roles.js`, composed with `pair()` and
    `wide()` — and then `antz.checkSiteDefaults()`, which will tell you if you have
    left a hole.
-6. Before shipping: `python3 tools/verify.py`, the three-level sweep at nine
-   widths across the eleven subjects, all three console assertions, and a
-   console-error check.
+7. Before shipping: `python3 tools/verify.py`, the clipping sweep at eight widths
+   across all twelve subjects **measured against each list container and not only
+   against the card**, all three console assertions, the Sites listing at nine
+   widths, and a console-error check.
