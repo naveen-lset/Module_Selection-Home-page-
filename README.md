@@ -2332,6 +2332,85 @@ business; the menu is the module catalogue's opinion.** What a Site Manager is
 collection is inside its approved capacity, and both are one tap away for
 everybody else.
 
+## The search field quotes the term, and Enter is answered
+
+Two changes to one text field, both asked for in a sentence.
+
+### `Search “Animals”`, not `Search Animals`
+
+```
+before   Search Animals
+after    Search “Animals”
+```
+
+One pair of quotation marks, and it changes what the field is saying. **`Search
+Animals` reads as a caption** — a label for a part of the product, the way
+*Search Settings* does. **`Search “Animals”` reads as an example of a query:**
+this is the sort of thing you type here, and if you type it you will get
+something back. Curly quotes, because that is already what the product uses where
+it quotes back what somebody typed — the gallery's empty state has said *Nothing
+matches “…”* since it was written.
+
+**The quotes move with the word rather than framing it.** Left outside the
+animated span they would sit still and correctly, until the closing one jumped
+left and right on every swap as the word inside changed width. Inside, the whole
+quoted unit slides as one thing — which is also the truer reading, since the
+quotes belong to the term and not to the field.
+
+It caught a latent bug on the way. `step()` decided whether a word was worth
+animating to with `next === cycle.textContent` — comparing the next WORD against
+the PAINTED TEXT — which stopped being the same question the moment the painted
+text grew quotes around it. Every swap would have looked new, and a list holding
+the same word twice would have animated on the spot. It compares words now.
+
+### Pressing Enter does something
+
+There is no search index in a prototype, so Enter had no result to give and
+therefore gave nothing at all — not a pixel. **A field that swallows a keystroke
+silently reads as broken**, and a reader cannot tell *there are no results* from
+*this box does not work*. The one thing this build can honestly say is **I took
+that**, so it says it in motion.
+
+| | |
+|---|---|
+| **with a query** | the field settles a fraction, a ring goes out from its edge, and the magnifier darts and returns. Three motions, and their shapes are press · release · scan |
+| **with nothing** | the hint bounces once |
+
+**The empty case is deliberately not a shake.** A shake is the gesture for *you
+did that wrong*, and pressing Enter on an empty box is not wrong, it is
+unfinished. Nudging the cycling term is the field pointing at its own answer:
+here is the sort of thing to type.
+
+**The ring starts at 2px, not 0.** From nothing it spends its first frames
+invisible and its brightest moment is already 6px out and half faded — sampled at
+160ms it was barely there, and the whole gesture read as a smudge. Beginning with
+the ring ALREADY DRAWN puts the strongest frame at the start, where the eye is,
+and the rest of the animation is it leaving:
+
+```
+   0ms   rgba(0,175,214,.55)  0 0 0 2px       ← crisp, hugging the field
+ 100ms   rgba(0,175,214,.09)  0 0 0 11.6px
+ 210ms   rgba(0,175,214,.02)  0 0 0 13.6px
+ 380ms   rgba(0,175,214,0)    0 0 0 14px      ← gone, no residue
+```
+
+**Motion is never the only channel.** `animate()` is a no-op under
+`prefers-reduced-motion` (see motion.js), so every one of those movements can be
+absent — and `onSubmit` fires either way, announcing *Searching for “leopard”* or
+*Type a name, a code or a number to search* into the live region. A
+micro-interaction that exists only as movement is one half the audience never
+receives, so that half has its own browser in the suite: **nothing moves, and the
+live region still speaks.**
+
+### And the frames are sampled, not reasoned about
+
+The first attempt to photograph the ring measured 13.5px of spread at what it
+thought was 30ms, because `getAnimations()` returns nothing once an animation has
+finished and the 420ms gesture was long over by the time the harness got there.
+The test fires Enter and pauses every animation it started **in the same turn of
+the event loop**, then seeks. That is the only way the numbers above are the same
+on every run.
+
 ## Every card looked the same
 
 A reader put it in one sentence and the catalogue confirmed it: **forty-six of

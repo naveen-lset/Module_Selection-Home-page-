@@ -99,6 +99,37 @@ space actually left below the button rather than by a number in CSS.
 | a queue whose rows did not sum to its total | scaled separately; the total comes from the rows now |
 | five 1×1 titles ellipsed at 900px | the title line gets 92px there, about twelve characters |
 
+### The search field quotes its term, and Enter is answered
+
+    before   Search Animals          <- reads as a caption
+    after    Search "Animals"        <- reads as an example query
+
+Curly quotes, matching the gallery's "Nothing matches ..." empty state. They sit
+INSIDE the animated span so the whole quoted unit slides as one thing; outside,
+the closing quote would jump horizontally on every swap as the word changed
+width. It caught a latent bug: `step()` compared the next WORD against the
+PAINTED TEXT, which stops being the same question once the text is decorated.
+
+**PRESSING ENTER DID NOTHING, AND A FIELD THAT SWALLOWS A KEYSTROKE READS AS
+BROKEN.** There is no index to answer with, so it acknowledges instead: with a
+query the field settles, a ring leaves its edge and the magnifier darts (press ·
+release · scan); with nothing the HINT bounces. Deliberately not a shake — a
+shake means "you did that wrong" and an empty box is unfinished, not wrong.
+
+**THE RING STARTS AT 2px, NOT 0.** From nothing its brightest frame is already
+6px out and half faded, and the gesture read as a smudge. Starting with the ring
+drawn puts the strongest frame where the eye is.
+
+**AND MOTION IS NEVER THE ONLY CHANNEL.** `animate()` is a no-op under reduced
+motion, so `onSubmit` announces either way. That half has its own browser in the
+suite: nothing moves, the live region still speaks.
+
+**THE FRAMES ARE SAMPLED, NOT REASONED ABOUT.** The first attempt to photograph
+the ring read 13.5px at what it thought was 30ms, because `getAnimations()`
+returns nothing once an animation has finished and 420ms was long over by the
+time the harness arrived. The test fires Enter and pauses every animation it
+started in the SAME turn of the event loop, then seeks.
+
 ### Every card looked the same, and the SEED was why
 
 Forty-six of the seventy-four Site widgets were the `stat` composition. The fault

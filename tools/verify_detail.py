@@ -346,9 +346,12 @@ with Chrome(width=1024, height=1366) as c:
     # Under reduced motion the hint is the static three-word line, so the check
     # is that the WORDS are the enclosure's, whichever form they are drawn in.
     txt = c.eval("document.querySelector('.search__cycle').textContent")
+    # The term is quoted now — `Search "Animals"` reads as an example query
+    # where `Search Animals` read as a caption — so the quotes come off before
+    # the words are compared.
+    words = set(w.strip().strip("\u201c\u201d\"") for w in txt.split(","))
     check("the words follow the depth",
-          set(w.strip() for w in txt.split(",")) <=
-          {"Animals", "Treatments", "Enrichment", "Keepers", "Documents"}, txt)
+          words <= {"Animals", "Treatments", "Enrichment", "Keepers", "Documents"}, txt)
 
     # typing hides it, like a placeholder
     c.eval("""(() => { const i = document.querySelector('.search__input');
@@ -377,6 +380,8 @@ with Chrome(width=1024, height=1000, reduced_motion=False) as c:
         time.sleep(2.4)
     check("it cycles through what can be searched", len(set(seen)) >= 3, " · ".join(seen))
     check("one word at a time", all("," not in w for w in seen), " · ".join(seen))
+    check("and the term is quoted, so it reads as a query and not a caption",
+          all(w.startswith("\u201c") and w.endswith("\u201d") for w in seen), " · ".join(seen))
 
     # THE BUG THIS CATCHES: two animations, the first with `fill: forwards`, left
     # the word sitting at opacity 0 for most of every cycle — it moved, and was
@@ -400,6 +405,50 @@ with Chrome(width=1024, height=1000, reduced_motion=False) as c:
     time.sleep(3.0)
     check("blur resumes it", c.eval("document.querySelector('.search__cycle').textContent") != b)
     check("no console errors while cycling", not c.errors(), str(c.errors()[:2]))
+
+
+# ── Enter is acknowledged, because there is no index to answer with ────────
+ENTER = """(()=>{const i=document.querySelector('.search__input');i.focus();
+  i.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));})()"""
+SET_VALUE = """(v=>{const i=document.querySelector('.search__input');i.value=v;
+  i.dispatchEvent(new Event('input'));})"""
+LIVE = "[...document.querySelectorAll('[aria-live]')].map(e=>e.textContent.trim()).filter(Boolean)"
+
+with Chrome(width=1024, height=1000, reduced_motion=False) as c:
+    print("\npressing Enter in the search field")
+    c.goto(URL)
+    c.eval(SET_VALUE + "('leopard')"); time.sleep(0.3)
+    c.eval(ENTER); time.sleep(0.1)
+    running = c.eval("document.querySelector('.search').getAnimations().length"
+                     " + document.querySelector('.search__icon').getAnimations().length")
+    check("a query is acknowledged in motion", running >= 2, f"{running} animations")
+    time.sleep(0.8)
+    check("and the field is left exactly as it was found",
+          c.eval("getComputedStyle(document.querySelector('.search')).transform") in ("none", "matrix(1, 0, 0, 1, 0, 0)")
+          and c.eval("document.querySelector('.search').getAnimations().length") == 0,
+          c.eval("getComputedStyle(document.querySelector('.search')).transform"))
+    check("the live region says what was taken",
+          any("leopard" in t for t in c.eval(LIVE)), str(c.eval(LIVE)))
+
+    # An empty Enter is unfinished, not wrong: the HINT moves, not the field
+    c.eval(SET_VALUE + "('')"); time.sleep(0.3)
+    c.eval(ENTER); time.sleep(0.1)
+    check("an empty Enter nudges the hint rather than shaking the field",
+          c.eval("document.querySelector('.search__hint').getAnimations().length") >= 1
+          and c.eval("document.querySelector('.search').getAnimations().length") == 0, "")
+    time.sleep(0.6)
+    check("and it says what to type", any("search" in t.lower() for t in c.eval(LIVE)), str(c.eval(LIVE)))
+    check("no console errors around submit", not c.errors(), str(c.errors()[:2]))
+
+# THE HALF THAT MATTERS MOST: a micro-interaction that only exists as movement
+# is one half the audience never receives. This suite forces reduced motion.
+with Chrome(width=1024, height=1000) as c:
+    print("\nEnter, with motion turned down")
+    c.goto(URL)
+    c.eval(ENTER); time.sleep(0.4)
+    check("nothing moves", c.eval("document.querySelector('.search').getAnimations().length") == 0)
+    check("and the live region still speaks", bool(c.eval(LIVE)), str(c.eval(LIVE)))
+    check("no console errors", not c.errors(), str(c.errors()[:2]))
 
 
 print("\n" + ("ALL PASS" if not fails else f"{len(fails)} FAILED: " + ", ".join(fails)))

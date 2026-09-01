@@ -20289,6 +20289,26 @@ const { animate, prefersReducedMotion } = __req('js/lib/motion.js');
 const DWELL = 2100
 const SHIFT = 260
 
+/**
+ * THE TERM IS QUOTED, AND THAT CHANGES WHAT THE FIELD IS SAYING.
+ * ───────────────────────────────────────────────────────────────────────────
+ * `Search Animals` reads as a caption — a label for a section of the product,
+ * the way `Search Settings` does. `Search “Animals”` reads as an EXAMPLE OF A
+ * QUERY: this is the sort of thing you type here, and if you type it you will
+ * get something back. One pair of quotation marks is the whole difference
+ * between naming a scope and demonstrating a use.
+ *
+ * Curly, because that is what the product already uses where it quotes back
+ * what somebody typed — see the gallery's empty state, "Nothing matches “…”".
+ *
+ * THEY MOVE WITH THE WORD RATHER THAN FRAMING IT. Left outside the animated
+ * span the quotes would sit still and correctly, until the closing one jumped
+ * left and right on every swap as the word inside changed width. Inside, the
+ * whole quoted unit slides as one thing, which is also the truer reading: the
+ * quotes belong to the term, not to the field.
+ */
+const quoted = (w) => `\u201C${w}\u201D`
+
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -20340,7 +20360,12 @@ function createSearchHint({ input, root, prefix = 'Search', words }) {
    */
   function step() {
     const next = list[(i + 1) % list.length]
-    if (!next || next === cycle.textContent) { i = (i + 1) % list.length; return }
+    /* COMPARED AGAINST THE WORD, NOT AGAINST WHAT IS PAINTED. This read
+       `next === cycle.textContent`, which stopped being the same question the
+       moment the painted text grew a pair of quotation marks around it — every
+       swap would have looked new and a list holding the same word twice would
+       have animated on the spot. */
+    if (!next || next === list[i]) { i = (i + 1) % list.length; return }
 
     anim?.cancel()
     anim = animate(cycle, [
@@ -20353,7 +20378,7 @@ function createSearchHint({ input, root, prefix = 'Search', words }) {
     clearTimeout(swap)
     swap = window.setTimeout(() => {
       i = (i + 1) % list.length
-      paint(next)
+      paint(quoted(next))
     }, SHIFT)
   }
 
@@ -20398,7 +20423,11 @@ function createSearchHint({ input, root, prefix = 'Search', words }) {
       i = 0
       /* REDUCED MOTION GETS A SENTENCE, NOT A SLIDESHOW. Three categories is
          enough to say what kind of index this is, and it never moves again. */
-      paint(still() ? list.slice(0, 3).join(', ') : list[0])
+      /* Each term quoted, in both forms. Three of them under reduced motion,
+         because three is enough to say what kind of index this is and it never
+         moves again — and quoting each one keeps them reading as three separate
+         things you could type rather than one long phrase. */
+      paint(still() ? list.slice(0, 3).map(quoted).join(', ') : quoted(list[0]))
     }
     tick()
   }
@@ -20417,7 +20446,113 @@ function createSearchHint({ input, root, prefix = 'Search', words }) {
   return { sync, stop, get el() { return hint } }
 }
 
+/**
+ * PRESSING ENTER HAS TO DO SOMETHING
+ * ───────────────────────────────────────────────────────────────────────────
+ * There is no search index in a prototype, so Enter had no result to give and
+ * therefore gave nothing at all — no ripple, no flicker, not a pixel. A field
+ * that swallows a keystroke silently reads as broken, and a reader cannot tell
+ * "there are no results" from "this box does not work". The one thing this
+ * build can honestly say is **I took that**, so it says it in motion.
+ *
+ * ═══ TWO OUTCOMES, AND ONLY ONE OF THEM IS A REFUSAL ═══════════════════════
+ *
+ *   with a query   the field settles a fraction, a ring goes out from its edge,
+ *                  and the magnifier darts and comes back. Acknowledgement:
+ *                  something left, and the shapes of the three motions are
+ *                  press · release · scan.
+ *   with nothing   the HINT bounces once. Not a shake — a shake is the gesture
+ *                  for "you did that wrong", and pressing Enter on an empty box
+ *                  is not wrong, it is unfinished. Nudging the cycling term is
+ *                  the field pointing at its own answer: here is the sort of
+ *                  thing to type.
+ *
+ * ═══ MOTION IS NEVER THE ONLY CHANNEL ══════════════════════════════════════
+ *
+ * `animate()` is a no-op under `prefers-reduced-motion` — see motion.js — so
+ * everything above can be absent, and `onSubmit` fires either way. The caller
+ * announces into the live region, which is what a screen reader and a calmed-
+ * down browser both get. A micro-interaction that only exists as movement is a
+ * micro-interaction half the audience never receives.
+ *
+ * ═══ WHY IT IS HERE AND NOT IN A FILE OF ITS OWN ═══════════════════════════
+ *
+ * It is the same object: the chrome of one text field. It shares the hint's
+ * element, its motion import and its one real coupling — with a value the hint
+ * is already hidden, so the acknowledgement plays on the field, and with none
+ * the hint is on screen and can be the thing that moves. Split across two
+ * files that coupling becomes a parameter nobody remembers to pass.
+ */
+function createSearchSubmit({ input, root, hint, onSubmit }) {
+  const glyph = root.querySelector('.search__icon')
+
+  /* #00AFD6 — Figma's `addPrimary`, the cyan the design already uses for its
+     own affordances. Written out because a keyframe value is parsed as CSS at
+     animation time and cannot see this file's tokens. */
+  const RING = (a) => `0 0 0 ${a}`
+
+  function accept() {
+    /* STARTS AT 2px, NOT 0. From nothing the ring spends its first frames
+       invisible and its brightest moment is already 6px out and half faded, so
+       the whole gesture read as a smudge — sampled at 160ms it was barely
+       there. Beginning with the ring ALREADY DRAWN puts the strongest frame at
+       the start, where the eye is, and the rest is it leaving. */
+    animate(root, [
+      { boxShadow: RING('2px rgba(0, 175, 214, .55)') },
+      { boxShadow: RING('7px rgba(0, 175, 214, .28)'), offset: .45 },
+      { boxShadow: RING('14px rgba(0, 175, 214, 0)') },
+    ], { duration: 420, easing: 'cubic-bezier(.16, 1, .3, 1)' })
+
+    /* A press and a release. The buttons use .97 on :active; a 64px-tall field
+       needs less to read as the same gesture, because the same ratio on a bigger
+       box is a bigger movement. */
+    animate(root, [
+      { transform: 'scale(1)' },
+      { transform: 'scale(.985)', offset: .3 },
+      { transform: 'scale(1)' },
+    ], { duration: 340, easing: 'cubic-bezier(.22, .61, .36, 1)' })
+
+    animate(glyph, [
+      { transform: 'translateX(0) scale(1)' },
+      { transform: 'translateX(3px) scale(1.14)', offset: .34 },
+      { transform: 'translateX(-1px) scale(1)',   offset: .72 },
+      { transform: 'translateX(0) scale(1)' },
+    ], { duration: 420, easing: 'ease-out' })
+  }
+
+  function prompt() {
+    /* `translate` already holds the hint's -50% centring, so this animates
+       `transform` and the two compose instead of fighting. */
+    animate(hint, [
+      { transform: 'translateY(0)' },
+      { transform: 'translateY(-4px)', offset: .38 },
+      { transform: 'translateY(1px)',  offset: .74 },
+      { transform: 'translateY(0)' },
+    ], { duration: 340, easing: 'cubic-bezier(.16, 1, .3, 1)' })
+
+    animate(glyph, [
+      { transform: 'scale(1)' },
+      { transform: 'scale(1.16)', offset: .38 },
+      { transform: 'scale(1)' },
+    ], { duration: 340, easing: 'cubic-bezier(.16, 1, .3, 1)' })
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return
+    /* No form to submit, but an unprevented Enter in a `type=search` field also
+       fires a `search` event and, in some browsers, offers to remember the
+       value — neither of which this prototype has anything to do with. */
+    e.preventDefault()
+    const value = input.value.trim()
+    if (value) accept(); else prompt()
+    onSubmit?.(value)
+  })
+
+  return { accept, prompt }
+}
+
   __x.createSearchHint = createSearchHint;
+  __x.createSearchSubmit = createSearchSubmit;
 });
 
 __def('js/app.js', function (__x, __req) {
@@ -20453,7 +20588,7 @@ const { createWorkspaceSwitcher } = __req('js/components/WorkspaceSwitcher.js');
 const { createSitesList } = __req('js/components/SitesList.js');
 const { createWorkspaceHeader } = __req('js/components/WorkspaceHeader.js');
 const { createWidgetDetail } = __req('js/components/WidgetDetail.js');
-const { createSearchHint } = __req('js/components/SearchHint.js');
+const { createSearchHint, createSearchSubmit } = __req('js/components/SearchHint.js');
 const { buildContext, detailFor, hasDetail } = __req('js/data/domainDetail.js');
 const { viewStore, setView, openHousing, setSite, setSection, setEnclosure, setLevel, setRole, goUp, goDown } =
   __req('js/state/viewStore.js');
@@ -21482,6 +21617,23 @@ const searchHint = createSearchHint({
   words() {
     const st = viewStore.get()
     return st.view === 'site' ? SEARCH_WORDS[st.level] || SEARCH_WORDS.site : SEARCH_WORDS.modules
+  },
+})
+
+/**
+ * ENTER IS ACKNOWLEDGED, because there is no index to answer with. The motion
+ * lives in the component; what belongs here is the WORDS, because only this file
+ * knows which workspace's live region is the one being read.
+ */
+createSearchSubmit({
+  input: searchInput,
+  root: document.querySelector('.search'),
+  hint: searchHint.el,
+  onSubmit(value) {
+    const mode = viewStore.get().view === 'site' ? wsEdit : edit
+    mode.announce(value
+      ? `Searching for \u201C${value}\u201D.`
+      : 'Type a name, a code or a number to search.')
   },
 })
 
