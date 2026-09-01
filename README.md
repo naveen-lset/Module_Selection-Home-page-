@@ -109,7 +109,7 @@ and the live one, so those two were the only changes.
 
 ## The widget system
 
-### Seventeen modules, seventy-one cards, and no two modules alike
+### Seventeen modules, a hundred and five cards, and no two modules alike
 
 The failure mode this is built to avoid is giving all seventeen modules the same
 five generic cards: it produces a gallery where every module looks identical and
@@ -118,13 +118,89 @@ its actual work has —
 
 | | |
 |---|---|
-| Security | a resting-state card (*All Systems Normal*), an alert count, an access log — and no progress bar |
-| Diet & Kitchen | a progress bar, a pending count, a daily total — and no alert card |
+| Security | a resting-state card (*All Systems Normal*), a session breakdown, an alert count, an access log — and no progress bar |
+| Diet & Kitchen | a feeding plan, a preparation bar, a diet mix, a kitchen queue — and no trend line |
 | Fetal Death | three cards, which is the honest total for a module with six records a month |
 | Parivesh | six, because a submission workflow has states worth separating |
 
 Every module has one plain **Default** door. That is the floor, and the only
 thing all seventeen share.
+
+### Nineteen compositions, and why seven were added
+
+The catalogue began with twelve layouts and they could all answer one question:
+*how much*. A stat is how much, a metrics row is how much three times, a queue
+is how much of each. Put six of them on a module and you have six ways of
+printing a number — which is the failure the layouts were introduced to fix,
+arrived at from the other direction.
+
+The seven added here answer the questions an operational home page actually
+gets asked, and each one is a question the first twelve could only answer as
+another figure:
+
+| | | |
+|---|---|---|
+| **ring** | what a total is *made of* | a donut and a legend |
+| **arc** | how *full* something is | a 240° gauge with the ratio inside it |
+| **flow** | where a population has *got to* | stages, counted, with chevrons between |
+| **attention** | what needs *someone* | one count, then the named things inside it |
+| **meters** | how much is *left* | rows that each carry their own track |
+| **entity** | *which one* | a batch, an animal, a result — named |
+| **hierarchy** | what *contains* what | indent and elbows, not three counts in a row |
+
+**The visualisations are drawn on the gradient, not on a plate laid over it.**
+Every donut segment, gauge arc and meter track is white at an opacity, so the
+module's colour shows through all of them. This is the line between a card that
+belongs to this system and a dashboard tile dropped into it, and it is the one
+rule that made the seven worth building rather than importing.
+
+**Segments are one white at four opacities, not four hues.** Four colours would
+read as four categories with meanings of their own, and would collide with
+whichever module the card belongs to — a green wedge inside a green card.
+Opacity ranks the parts, which is what a composition is actually saying.
+
+**These seven have a type hierarchy that the older twelve do not.** Primary
+text is white, a supporting label is 78%, metadata is 62%. That is deliberate
+and it is a divergence: an accessibility pass took the opacity hierarchy out of
+the original layouts and that decision still stands for them, so the two
+treatments exist side by side and are never mixed inside one card. If the
+hierarchy should come back everywhere, that is one edit — and it moves the
+measured contrast the wrong way, which is why it has not been made unasked.
+
+#### Three things the sweep caught that no screenshot would have
+
+**The featured-entity watermark made every entity card look broken.** The
+enlarged module glyph is meant to run off the bottom-right corner into the
+card's own padding. Sitting inside the composition element, it made that
+element 18px taller than its box at every size and width — indistinguishable,
+to anything measuring `scrollHeight`, from real clipping. It is a card layer
+now, beside the composition rather than inside it, and the card clips it.
+
+**`overflow-wrap: anywhere` bought a passing sweep and cost the design.** It
+lets a flex item shrink below its longest word, so a five-stage pipeline fitted
+— as *Requeste / d* and *Processin / g*. It is `break-word` now, and a stage
+list that will not fit is offered at a wider size instead of being broken to
+suit the one it was asked for.
+
+**A pipeline turns through a right angle when the card does.** Five stages need
+width, not height, and `full` gives both: the row sat in the middle of 344px of
+empty gradient looking like a fault. At two rows tall the stages stack, the
+chevrons point down the way a pipeline reads, and the labels stop having to
+survive a 43px column.
+
+### No invented periods
+
+The brief this was built to is blunt about it: no *Today*, no *This Week*, no
+*This Month* unless the module's data genuinely has that shape. Three cards
+were carrying one and have lost it — *Today's Progress* is **Preparation
+Progress**, *Today's Kitchen* is **Diet Distribution**, and Eggs' *Collected
+This Month* is now just **Eggs Collected**.
+
+Three kept a time word because theirs is real: Follow Up's *Due Today* is a due
+date, Administer's schedule is a list of appointments, and Eggs' incubation
+card says *Day 18* — a genuine position in a real 28-day cycle. The one time
+series left in the catalogue is Mortality's trend, and its axis is three months
+the module actually recorded.
 
 ### Five purposes — which order the shelf, and are never drawn
 
@@ -871,6 +947,530 @@ layout took the whole page down at module-evaluation time.
 
 ---
 
+## The Site Command Centre
+
+A second workspace, reached from a segmented switch under the search field:
+
+```
+[ Module Selection  |  Site Command Centre ]
+```
+
+Module Selection is the home page above, unchanged. The Site Command Centre is
+a configurable operating surface for one Site — `Housing → Sites → Site` — and
+it answers a different question. The home page answers *"which function do I
+want?"*. This answers *"how is my Site doing?"*, which no module card could,
+because module cards aggregate across the whole organisation.
+
+The framing that produced it is in [docs/framing-site-command-centre.md](docs/framing-site-command-centre.md):
+the problem, the stakeholder map, eleven recurring decisions in
+Decision → Question → Insight → Action form, the scope boundary, and a YELLOW
+readiness verdict with its named risk.
+
+### The IA is function-first; accountability is place-first
+
+Seventeen modules cut the organisation **vertically** by function. A Site is
+where those verticals collide **horizontally**: one place, one budget, one
+generator, one team, one licence, one set of animals. Anyone whose
+accountability is a *place* rather than a *function* had no home in the
+product — to answer "how is my Site doing?" they had to visit many modules and
+assemble the answer in their head.
+
+So the Site Workspace groups by **domain** — People, Finance, Assets,
+Utilities, Safety, eighteen of them — and each domain names the module its
+cards navigate into. That is the whole of the relationship. The workspace is
+**context, summary and navigation**; the module is where the work is done.
+
+### It is the same engine, and that was the point
+
+| | |
+|---|---|
+| Widgets | **84 across 18 domains**, 207 widget × size combinations |
+| New compositions | **2** — `health` and `insight` |
+| Reused compositions | **17** — every layout the module catalogue had except `compact` and `photo` |
+| New components | 3 — the switcher, the Site header, a small anchored menu |
+| Forked components | **0** |
+
+Of the eleven widget types the brief asks for, nine already existed:
+
+| Brief widget type | Composition |
+|---|---|
+| KPI | `stat` |
+| Status | `status` |
+| Progress | `progress` · `arc` · `meters` |
+| List | `queue` |
+| Trend | `chart` |
+| Distribution | `ring` · `metrics` |
+| Action | `attention` |
+| Timeline | `timeline` |
+| Map / hierarchy | `hierarchy` |
+| **Health** | **new** — a gauge and the domains the index is made of |
+| **Insight** | **new** — measured change, in sentences |
+
+The grid, the packer, the semantic sizes, the drag controller, the edit mode,
+the size popover and the widget gallery are the *same instances of the same
+components*, configured differently. There are exactly three seams:
+
+```js
+createModuleGrid({ isCore })            // the home page locks two cards; the workspace locks none
+createModulePicker({ source })          // a rail of modules, or a rail of domains
+createEditMode({ labels })              // "Add Module", or "Add Widget"
+```
+
+Everything else is resolved before it reaches a component: site widgets
+register into the same id lookup as module cards, so `renderCard` does not know
+there are two catalogues and does not need to.
+
+**A second gallery was the obvious shortcut and would have been a slow
+mistake.** That file is seven hundred lines of behaviour that took three
+attempts to get right — the basket that survives browsing, the tray that lets
+you re-size a card you picked four tiles ago, the split that becomes a stack on
+a phone, the search that indexes what a card *shows* rather than what it is
+called. A copy would have started drifting on the first bug fixed in one of
+them.
+
+### Every widget traces to a decision
+
+`decision` on each widget names the recurring decision from the framing
+document that it exists to serve — D1 *escalate or absorb*, D3 *which failing
+thing do I fix first*, D5 *can I still spend*. It is never rendered. The rule
+is that a widget tracing to no decision is cut, however easy its data is.
+
+Three were cut under it: a **Total Enclosures** KPI (the header already says 48,
+and knowing the number changes nothing anybody does), a **Staff Birthdays** list
+(a nice thing, not an operational one), and a **per-species population
+breakdown**, which belongs in Species Management and would have been the
+workspace pretending to be a module.
+
+### Five roles, one workspace
+
+The wrong implementation is five dashboards: identical on day one, five
+products by the end of the quarter. A role contributes exactly two things —
+a **permission set** and an **ordered list of widget ids**. Both are plain data.
+
+| Role | Opens on | Widgets | Domains | Cannot see |
+|---|---|---|---|---|
+| Site Manager | Site Health | 22 | 11 | — |
+| Veterinarian | Veterinary Cases | 21 | 10 | Finance · Assets · Maintenance · Utilities · Vendors · Risk · Insights |
+| Biologist | Species at Site | 21 | 8 | as above, plus Safety and Emergency |
+| Facility Manager | Critical Equipment | 22 | 9 | Finance · Animal Operations |
+| Administrator | People | 21 | 10 | Assets · Maintenance · Utilities · Inventory · Animal Operations |
+
+The Manager default is the brief's own §20 order: Health and Attention, then
+People and Budget, then Infrastructure full width, then Maintenance and Assets,
+Utilities and Animal Operations, Upcoming and Activity. §20's "optional" row —
+Compliance, Risk, Inventory — is deliberately **not** seeded; it is one tap away
+in the gallery, and a default carrying everything has no hierarchy left to
+offer.
+
+**Permission is subtractive, and the layout self-heals.** The saved document is
+an ordered list and positions are derived from it, so a role that loses four
+domains loses four entries and everything after them moves up. First-fit closes
+any gap a wide card would have left. The page gets *shorter*, never sparser —
+which is what §16 asks for.
+
+Permission reaches the header too: the quick-actions menu is filtered by the
+same set, so a veterinarian who cannot see Finance widgets is not offered
+"Create Request" either. One source, checked in both places.
+
+**One saved layout per role**, keyed `antz.site.layout.<role>`. A manager who
+arranges their workspace, looks at the veterinarian view, and comes back gets
+their arrangement back — sharing one key would have meant destroying your own
+work by looking at something. Not per *Site*, though: an arrangement is a
+statement about how you work, not about one Site.
+
+### Emptiness is a property of the Site, not of the widget
+
+§15 asks for real empty states and forbids fake zero values. The temptation is
+an `isEmpty` flag on a widget, which *is* the fake — the widget is not empty,
+the **Site** has no data for it.
+
+So there are four Sites, and **Hesaraghatta Field Station was commissioned three
+weeks ago**. It has people and space and no asset register, no budget line, no
+compliance history. Seven of a Manager's twenty-two widgets have nothing to draw
+there and say so, in the product's own voice, with the action that would start
+fixing it. The same Asset Health card is full at Bannerghatta.
+
+An empty card gets a **neutral outlined surface**, not the domain gradient under
+a veil. The veiled-gradient treatment was tried on this product once before, for
+data cards, and reverted: on a desaturated fill it does not soften the colour,
+it removes it. This sidesteps that entirely — an empty card is not a quiet
+version of a full one, it is a different thing, and on a workspace where a third
+of the cards have nothing to say the ones that *do* must still be the ones that
+carry.
+
+### Figures that are already in the Site record are derived, not re-typed
+
+The Site header read "19 Staff" from the Site record while the People widget
+read "86 Staff" from the catalogue, **on the same screen**. That is the worst
+class of bug this page can have — not a crash, a page that looks completely fine
+and is wrong.
+
+So anything the Site record knows is computed from it once, in `derive()`, and
+anything it does not know is authored per Site in `figures`. The split is not
+stylistic: a count that appears twice must have one source, and a judgement —
+*which two domains are dragging the health score down* — cannot be computed.
+
+The four Sites are also the reason a health score means anything. 87% is a
+number; **87% next to 94% and 61% and 72%** is a decision about where to go this
+week.
+
+| Site | Health | Reads as |
+|---|---|---|
+| Bannerghatta Safari | 87% | working, with Safety and Maintenance behind |
+| Bannerghatta Zoo Core | 94% | well run; only Maintenance behind |
+| Hesaraghatta Field Station | 61% | **not failing — unfinished.** Four domains "Not Set Up" |
+| Mysuru Rescue Centre | 72% | actually in trouble: 19 items open on half the staff |
+
+Hesaraghatta's rows say *Not Set Up* rather than showing a bad score, because a
+reader who cannot tell "failing" from "not started" will go and fix the wrong
+thing.
+
+### Colour is the domain, and the palette is still closed
+
+On the home page, colour identifies a **module** and does not vary between that
+module's cards. Here the same rule holds one level up: colour identifies the
+**domain**, so a person scanning the workspace finds the finance card by its
+green without reading it.
+
+Eighteen domains onto **the same sixteen gradients**, all from the Figma file.
+Four pairs deliberately share a fill, and each pair is two halves of one subject
+rather than two unrelated domains that ran out of colours:
+
+```
+Safety & Compliance / Emergency Readiness   coral
+Work & Activity     / Upcoming              petrol
+Assets              / Vendors & Contractors neutral
+Space & Capacity    / Site Insights         teal
+```
+
+The brief's own colour instructions are honoured where it gives them: People
+blue, Finance green, Infrastructure neutral, Utilities cool, Safety warm, Animal
+Operations a natural tone.
+
+Domain glyphs are **sprite symbols**, not exported files — the artboard has no
+Site Workspace to export from, so eighteen were drawn in the same idiom as the
+two module icons the file was already missing. A sprite glyph inherits
+`currentColor`, which is what lets the same mark sit white on a gradient card
+and petrol in a gallery rail row.
+
+### Why the switch sits under the search field
+
+Three places were on the table and two of them break something.
+
+- **A left rail** scales to a third and fourth workspace, and costs 72–88px of a
+  960px content width permanently. That width is not a preference: 179.2px
+  columns are (960 − 4×16) ÷ 5 *exactly*, and the whole artboard falls out of
+  that arithmetic. A rail would have made every card the wrong size on the one
+  page whose fidelity is measured in units.
+- **Tabs on the greeting line** are free vertically, and that row already
+  carries a two-line greeting plus three 44px controls. At 834px portrait it
+  wraps, and what wraps is the switcher.
+- **A segment between search and content** costs about 60px once, sits where the
+  eye already travels on its way to the first card, and reads as what it is —
+  two ways of looking at the same work.
+
+Both panels stay in the DOM and are toggled with `hidden`, so the switch is
+instant and each keeps its scroll position. `#site/<siteId>` is written to the
+hash with `replaceState` so a workspace can be linked to without four presses of
+Back to leave the page; a deliberate Site change *does* push, because that one
+is a navigation.
+
+The greeting steps aside in the Site view. "Good Morning, Sourav" and
+"Bannerghatta Safari Site" are both answers to *where am I*, and a page that
+gives two has given none.
+
+### Bugs this build found in itself
+
+Four, all caught by driving the page rather than reading it:
+
+**Switching Site showed the previous Site's figures.** The grid reconciles by
+uid and rebuilds a card only when its variantId or span changed — right for
+every other update, exactly wrong for this one, because a Site switch changes
+neither. It showed Bannerghatta's numbers under Hesaraghatta's name, which is
+the worst failure this page could have because it is the one that looks like it
+worked. Fixed with a teardown: a Site switch *is* a navigation, so there is no
+continuity to preserve.
+
+**Two galleries wrote the same element id.** `aria-labelledby="picker-title"`
+resolves to the first match in the document, so the site widget sheet announced
+itself as "Add Module" to anyone using a screen reader. Ids are now per
+instance — the gallery's title and all four size selectors.
+
+**A health card's rows went two-column on an iPad in portrait.** The threshold
+was written as a `max-width`, and `large` is two columns on the reference grid
+but *three* at the 768px band — so a card that had gone single-column at 1024
+came back as two 164px columns, and "Maintenance / Attention" does not fit in
+164. The threshold is now derived from the space the rows actually get.
+
+**`chev-right` and `chev-left` were being called and had never been defined.**
+The gallery's rail rows and its phone-width back button both rendered an empty
+box. Pre-existing; found while wiring the switcher, which needs the same three.
+
+### Verified
+
+| | |
+|---|---|
+| Widget catalogue | **84 widgets, 18 domains, 207 widget × size combinations** · 1–9 per domain |
+| Role defaults | `antz.checkSiteDefaults()` · all five roles: **0 unknown widgets, 0 unsupported sizes, 0 permission violations, 0 duplicates, 0 empty grid cells** |
+| Every widget at every size | **207 combinations × 4 Sites × 9 widths = 7,452 renders** at 1920 / 1366 / 1194 / 1024 / 900 / 834 / 768 / 640 / 500px · `scrollHeight` vs `clientHeight` on every composition root, `scrollWidth` vs `clientWidth` on every label · **0 overflowing, 0 clipped, 0 horizontal scroll** |
+| Roles | five defaults packed at 5 columns · **0 empty cells** in any of them · each opens on a different card |
+| Permissions | eight role × denied-domain pairs on the grid · **0 leaks** · gallery rail filtered (a vet sees 11 domains, not 18) · quick-actions menu filtered per role |
+| Empty states | Hesaraghatta: **7 of 22** widgets have no data and say so · **0 fake zeros** on any card · full data restored on switching back |
+| Header ↔ widgets | staff, animals, enclosures, sections, health and attention cross-checked between the Site header and the widgets, **on all four Sites** · 0 disagreements · three consecutive Site switches do not compound |
+| Drag | mouse drag reorders the workspace store, tears down clean, and persists to `localStorage` |
+| Gallery | 18 domains in five groups · previews are real cards · search indexes what a widget *shows* ("generator" finds Utilities) · multi-select, per-card sizes, one-write batch add |
+| Document | **0 duplicate element ids** with both galleries mounted |
+| Regression | the module home page: **0 changes** to its 213 combinations at six widths, `antz.checkDefaults()` still clean, mouse and touch drag still pass |
+| Errors | **none** — no console errors, page errors or failed requests |
+
+```js
+antz.site.view()          // { view, siteId, roleId }
+antz.site.state()         // the live workspace layout
+antz.site.go('site')      // switch workspace
+antz.site.site('hg-field')// switch Site
+antz.site.role('vet')     // switch role
+antz.site.allWidgets()    // every widget at every size, on the workspace grid
+antz.checkSiteDefaults()  // assert all five role defaults, and that they pack without gaps
+```
+
+### Not built, and deliberately
+
+*(Section and Enclosure workspaces were deferred here and have since been built —
+see the next section.)*
+
+Out of scope: a cross-site comparison view (the Sites list carries health; the
+analytics screen does not exist), real module destinations (widgets navigate;
+destinations are announced, exactly as the home page's cards are), and any
+backend — role and permission are a front-end simulation with a switcher, which
+is why the role chip is drawn with a dashed outline.
+
+---
+
+## Down the hierarchy — Section and Enclosure
+
+`Housing → Sites → Site → Section → Enclosure`. All three workspaces run on the
+same components. The switcher stays two-way; depth lives inside the Site Command
+Centre, with the breadcrumb as its spine.
+
+### Why depth is not a third tab
+
+A five-way switcher would have flattened a hierarchy into five peers and thrown
+away the one thing the reader needs most — that *this* Section is inside *that*
+Site. So `level` sits under the switch, the breadcrumb carries the ancestry, and
+going deeper is what it looks like: going into something.
+
+```
+Housing / Sites / Bannerghatta Safari / Carnivore Safari / CAR-02
+```
+
+`#site/bg-safari`, `#section/car`, `#enclosure/car.2` — a workspace switch uses
+`replaceState` because it is not a navigation; a move through the hierarchy uses
+`pushState` because it is. <kbd>Esc</kbd> goes up a level.
+
+### The rule the brief is firmest about
+
+Section 12: keep the philosophy through the hierarchy, but *"do NOT copy the same
+widgets everywhere — the widgets should become increasingly specific as the user
+moves deeper."*
+
+The failure mode is very easy to reach: ship the Site's 84 widgets again with a
+`sectionId` filter, and every level looks identical while carrying smaller
+numbers. Nobody can then tell which level they are on except by reading the
+breadcrumb, and the hierarchy has bought nothing.
+
+So the catalogues get **smaller and sharper** with depth, and the difference is
+subject rather than scale:
+
+| | a Site asks | a Section asks | an Enclosure asks |
+|---|---|---|---|
+| people | how many staff does this place have? | who is on the rota for this area right now? | who is the assigned keeper? |
+| structure | what is the asset register worth? | which of my enclosures is not sound? | is this barrier sound? |
+| conditions | what is the electricity bill? | is it too hot in the reptile house? | what is it under the shade net? |
+| animals | 42 species, 318 animals | 5 species, 38 animals, 1 welfare alert | Anand and Bhima, and how they are |
+
+| | Site | Section | Enclosure |
+|---|---|---|---|
+| Widgets | **84** | **41** | **38** |
+| Widget × size | 207 | 97 | 90 |
+| Domains | 18 | 15 | 11 |
+| Manager default | 22 widgets | 20 | 16 |
+| Gone from the level above | — | Finance, Vendors, Risk, Insights | + Safety, Inventory, Assets, Maintenance, Area Ops |
+| New at this level | — | Area Operations, Environment & Conditions | Occupancy, Condition, Husbandry, Veterinary, Assessments |
+
+**163 widgets over 25 domains**, and four whole domains are absent from the
+Section level *by design*: a section does not have a budget, a contract, a risk
+register or a quarterly insight. Five are new at the enclosure level and exist
+nowhere else.
+
+### Where the "no individual animals" rule inverts
+
+The Site catalogue has a standing rule against naming an animal: a Site widget
+that does is no longer a workspace card, it is a small copy of Species
+Management. That rule is about **altitude**, not about animals — and at the
+enclosure it inverts. §12 lists the enclosure's subjects as *"animal/occupancy,
+enclosure condition, husbandry, veterinary, assessments"*: every one is about the
+specific creatures in this specific space. A card here reporting "42 species at
+this Site" would be the failure.
+
+So `enc.occ.list` names individuals, and `enc.assess.welfare` is the **Five
+Domains** model — Nutrition, Environment, Health, Behaviour, Mental State. That
+is not five words picked to fill a card; it is the framework zoo welfare
+assessment actually uses, and the one place in this build where the widget
+followed the profession rather than the layout. It reuses the `health`
+composition, because the shape is identical: one index, and the parts it is made
+of.
+
+### The summary and the detail agree
+
+Three enclosures are authored explicitly, and they are the ones a Site-level card
+already promised: **Welfare Alerts** names `CAR-02` and `HRB-03`, **Restricted
+Areas** names `REP-04`. Drill into any of them and you find the condition the
+summary told you about — `CAR-02` is the Bengal Tiger with the stereotypic
+pacing, `REP-04` is closed for barrier repair. `antz.checkHierarchy()` asserts
+the codes exist.
+
+The other 136 are **generated** from their section's seeds, with every varying
+number hashed from the enclosure's own code so it is stable across reloads and
+identical on every machine. Authoring 139 records by hand would have produced 139
+rows of plausible noise that drifts out of step with its section the first time a
+count changes.
+
+And the counts reconcile. Section records **sum exactly** to their Site's
+`counts` — enclosures, staff, species, animals — on all four Sites, asserted in
+both directions by `antz.checkHierarchy()`. It would be tidier to derive the Site
+totals and delete the Site's own numbers; it would also be wrong, because a Site
+has staff who belong to no section. Two numbers with a stated relationship and a
+test is the honest shape.
+
+### Still no forked components
+
+| | |
+|---|---|
+| Grids | **1** |
+| Edit modes | **1** |
+| Drag controllers | **1** |
+| Size popovers | **1** |
+| Headers | **1** |
+| Widget galleries | **1** |
+| Catalogues | 3 |
+| Stores | 3 (nine keys — three levels × role) |
+
+What swaps when the level changes is three pieces of data — the catalogue, the
+store, and the subject. Nothing else.
+
+Three components were generalised rather than copied:
+
+**The store became a factory.** `createWorkspaceStore({ level, keyPrefix,
+version, getWidget })`, instantiated three times. The Site version was a
+singleton; copying it twice would have produced three files that are 95%
+identical and diverge on the first bug — and there *was* a bug in the original's
+`repair()`, which would then have needed fixing three times.
+
+**The Site header became a workspace header.** One `subject()` function is the
+only level-aware code in the file; it returns the crumbs, the siblings and the
+counts, and everything below it is written once. A Section header would otherwise
+have been the third copy of a breadcrumb, a status pill, a sibling menu, a role
+chip and a counts strip — and the fourth place to fix the next bug in any of
+them.
+
+**The gallery's search index became rebuildable.** One `revision` value, changed
+when the level does. The alternative was four picker instances: four sheets in
+the document, four sets of duplicate ids to keep unique, and four copies of a
+basket that took three attempts to get right.
+
+### Fifteen defaults, composed from blocks
+
+Five roles × three levels. On the five-column grid there are exactly two
+arrangements that fill two rows with nothing left over:
+
+```js
+pair(a, b, c, d)   // two 2×2 cards and two 1×1 cards → 4+4+1+1 = 10 cells
+wide(a)            // one full-width card             → 5×2   = 10 cells
+```
+
+The Site defaults stay a flat list because they transcribe §20 literally and that
+is worth being able to read. The ten deeper ones are composed from those two
+helpers, because hand-counting cells ten times is how a hole gets into a shipped
+default. `antz.checkSiteDefaults()` asserts the result either way.
+
+Every level therefore needs at least one 1×1 widget per domain a role can see — a
+pair leaves one column, and something has to go in it. That is why the deeper
+catalogues carry a KPI per domain, not decoration.
+
+Each role opens on a different card at every level:
+
+| Role | Site | Section | Enclosure |
+|---|---|---|---|
+| Site Manager | Site Health | Section Health | Enclosure Health |
+| Veterinarian | Veterinary Cases | Welfare Alerts | **Welfare · Five Domains** |
+| Biologist | Species at Site | Species in Section | Welfare · Five Domains |
+| Facility Manager | Critical Equipment | Enclosure Condition | Open Defects |
+| Administrator | People | Shift Roster | Enclosure Health |
+
+The Facility Manager's enclosure workspace is the **thinnest of the fifteen** —
+13 widgets over 5 domains, with no Occupancy, Husbandry, Veterinary or
+Assessment. At an enclosure a facility manager cares whether the box is sound,
+not what is in it. §16 asks for a workspace that still looks intentional when
+most of it is unavailable, and the page gets *shorter* rather than sparser: three
+blocks and the structural checks at full width, zero empty cells.
+
+### Emptiness travels down, because the reason for it does
+
+Hesaraghatta Field Station was commissioned three weeks ago. Its Site workspace
+has 7 empty widgets of 22; **Grassland Plot A** has 2 of 20; **HGA-01** has 3 of
+16. A Site with no asset register has no enclosure-level maintenance history
+either, and saying so at each depth is more honest than showing a zero once and
+then inventing detail underneath it.
+
+### Bugs this pass found in itself
+
+**Two animals in one enclosure with the same name.** The generator indexed the
+name table with a hash slice per position, and slices collide — HRB-03 came out
+holding two animals called Shakti. It walks forward from a collision now, so the
+result is still deterministic. Nobody would have crashed over it and every reader
+who looked twice would have stopped believing the page.
+
+**The clinical history named an animal that was not an occupant.** `enc.vet.history`
+was authored copy (Bhima, Kaveri) while the occupant list is derived, so on most
+enclosures the history named animals the Individuals card two rows away did not
+contain. Both come from the same function now.
+
+**REP-04's note contradicted its own occupant count** — "occupants moved to
+REP-05" on a card reporting six occupants.
+
+**Two status rows clipped at the 900px band**, which is the narrowest the
+reference grid ever gets: five columns inside 836px, so a one-row status card's
+two columns are 138px each. `"6 days"` became `"6 d"` and `"Pacing logged"`
+became `"Pacing"`.
+
+### Verified
+
+| | |
+|---|---|
+| Catalogues | **163 widgets · 25 domains · 394 widget × size combinations** |
+| Hierarchy | `antz.checkHierarchy()` · 4 sites, **31 sections, 139 enclosures** · section counts sum exactly to every Site record in both directions · all three enclosure codes a Site card names exist |
+| Defaults | `antz.checkSiteDefaults()` · **15 role × level arrangements**: 0 unknown widgets, 0 unsupported sizes, 0 permission violations, 0 duplicates, **0 empty grid cells** |
+| Every widget at every size | **394 combinations × 11 subjects × 9 widths ≈ 8,900 renders** at 1920 / 1366 / 1194 / 1024 / 900 / 834 / 768 / 640 / 500px · **0 overflowing, 0 clipped, 0 horizontal scroll** |
+| Levels differ | 18 → 15 → 11 domains in the gallery; 22 → 20 → 16 widgets in the Manager default; each role opens on a different card at each level |
+| Permissions at depth | a facility manager sees no Occupancy, Husbandry or Veterinary widget at an enclosure but does see Condition; a biologist sees no Veterinary widget; a vet sees both Veterinary and Assessments |
+| Coherence | across six enclosures: the clinical history names **no animal that is not an occupant**; CAR-02 is the Bengal Tiger, HRB-03 the Gaur, REP-04 the closed tortoise vivarium — exactly as the Site cards said |
+| Deep links | `#enclosure/hrb.3` opens with its whole ancestry and survives a reload; `#section/zaq` crosses to another Site; `#enclosure/nope.9` falls back to the Site level |
+| Per-level persistence | removing a Section widget writes `antz.section.layout.manager` and leaves `antz.site.layout.manager` untouched; drag at the enclosure level writes `antz.enclosure.layout.manager` |
+| Drag at depth | mouse drag reorders the enclosure workspace, persists, and tears down clean |
+| Regression | the module home page and the Site level: **0 changes** · `tools/verify.py` fully green |
+| Errors | **none** at any level, on any subject |
+
+```js
+antz.site.section('car')      // into a Section
+antz.site.enclosure('car.2')  // into an Enclosure
+antz.site.children()          // what is under the current subject
+antz.site.up() / .down()      // move through the hierarchy
+antz.checkHierarchy()         // the counts reconcile and the promises hold
+antz.checkSiteDefaults()      // all fifteen role × level arrangements
+```
+
+---
+
 ## Interaction reference
 
 | | |
@@ -887,6 +1487,26 @@ layout took the whole page down at module-evaluation time.
 
 Species Management and Medical are non-removable. Everything else is the
 user's call.
+
+In the **Site Command Centre** the same gestures apply, with the workspace's own
+nouns — and nothing is locked, because which widget is indispensable is exactly
+what differs between a veterinarian and a facility manager:
+
+| | |
+|---|---|
+| Switch workspace | the segment under the search field, or <kbd>←</kbd>/<kbd>→</kbd> on it |
+| Switch Site | the caret beside the Site name, or **Sites** in the breadcrumb |
+| Switch role | **Viewing as** in the header — a prototype affordance, hence the dashed outline |
+| Customize | **Customize** in the header, or **⋯ → Customize Workspace**, or long-press / right-click a widget, or <kbd>E</kbd> |
+| Add | **＋ Add Widget** in the customize header, or **avatar → Add Widget** |
+| Quick actions | **＋ Add** in the header — filtered by the same permissions as the widget library |
+| Reset | **⋯ → Reset Workspace**, or **avatar → Reset Workspace** — per role |
+| Drill down | any count in the header strip, and any widget |
+
+<kbd>E</kbd> toggles the edit mode **of the workspace you are looking at**: it is
+bound once at the document and resolved at press time, because binding two
+listeners and letting each decide whether to act is how a key ends up doing two
+things.
 
 ```js
 antz.state()           // the live layout
