@@ -2332,6 +2332,138 @@ business; the menu is the module catalogue's opinion.** What a Site Manager is
 collection is inside its approved capacity, and both are one tap away for
 everybody else.
 
+## Every card looked the same
+
+A reader put it in one sentence and the catalogue confirmed it: **forty-six of
+the seventy-four Site widgets were the `stat` composition** — a title, a figure,
+a caption, one clause. Nothing was wrong with any individual card, which is
+exactly why it survived three passes: the fault was in the DISTRIBUTION, and a
+distribution is not visible one card at a time.
+
+| | before | after |
+|---|---|---|
+| Widgets | 74 | 87 |
+| `stat` | 46 (62%) | 40 (46%) |
+| Compositions in use | 9 | 13 |
+
+The module catalogue has twenty-one compositions and the home page uses most of
+them. Five were unused here — `photo`, `actions`, `chart`, `attention`,
+`status` — so **the fix was not a new treatment, it was using the system that was
+already built.**
+
+### The seed was deciding the shape of every card in it
+
+This is the part worth keeping. The Site defaults were written as ROWS OF FIVE —
+two `medium` cards and a `small`, four or five times over — which packs perfectly
+and cannot hold anything two rows tall. A photograph, a donut and an attention
+card are all 2×2. **The arrangement was silently excluding three quarters of the
+card system**, and no amount of authoring new widgets would have got one onto a
+default page.
+
+They are BLOCKS OF TWO ROWS now — ten cells at the five-column reference, which
+is what `pair()` and `wide()` already did for the Section and Enclosure defaults.
+Four arrangements are used, and one obvious-looking one is a trap:
+
+```
+large + large + small + small               4 + 4 + 1 + 1     ✓
+large + medium + medium + small + small     4 + 2 + 2 + 1 + 1  ✓
+medium + medium + small, twice              (2 + 2 + 1) × 2    ✓
+full                                        5 × 2              ✓
+
+large + large + medium                      4 + 4 + 2          ✗
+```
+
+The last one comes to ten cells and packs into THREE rows, leaving five empty:
+first-fit puts the medium *below* the two larges rather than beside them, because
+a two-column card cannot fit in the one column they leave.
+`antz.checkSiteDefaults()` packs every seed and counts the cells no card claimed,
+so this is asserted rather than reasoned about.
+
+### Photographs, because a Site is a place
+
+Five of them — the Site, the collection, the clinic, the kitchen, the work. Four
+rows of figures make a Site a *record*, and the one thing a reader wants
+confirmed before acting on any of those figures is that they are looking at the
+right place, which a photograph answers from across a room and a name in 32px
+type does not. The home page settled this already: Hospital, Diet & Kitchen and
+Species Management all carry one.
+
+**Minimal content, and that is the whole specification.** An image, a glyph, and
+the domain's name in the scrim band. The one exception is the collection, which
+takes two figures over the image exactly as the home page's Species card does,
+because those two numbers *are* what the collection is — and they are read off
+the Site record in `derive()`, so the picture and the header cannot disagree about
+how big it is. Anything more and the photograph becomes a texture behind a table.
+
+### Quick actions, because a menu is not a workspace
+
+`Add Task` and `Report Incident` were behind the header's Add button and then
+behind the avatar — the right place to be REACHABLE and the wrong place to be
+SEEN. §11 makes the workspace context, summary *and* navigation, and the thing a
+person does after reading a summary is act on it. `Raise Job · Log Defect ·
+Schedule Service` sitting under a Maintenance card reading `2 overdue` is the two
+halves of one thought next to each other.
+
+Eight cards, three verbs each. Not four: the layout takes four and three is what
+fits a 2×1 without the chips wrapping, and a fourth verb is what the module is
+for. They are gated by the domain exactly as every other card here is, so the
+card and the menu are one source of permission.
+
+### Six module cards that were carrying the wrong shape
+
+The documents already held better data than a single figure in six cases:
+
+| | was | now |
+|---|---|---|
+| Alerts | `9 Open Alerts` | `attention` — the severity split. One critical and eight low is a different morning from four critical |
+| Taxonomy | `22 Threatened Species` | `ring` — the IUCN mix. The count is six categories added up and thrown away |
+| Energy | `₹3.7L Month to Date` | `chart` — a month's cost is a number you can do nothing about; a line climbing for nine days is a conversation |
+| Closures | `23 Days to Close` | `chart` — an average is only useful against its own history |
+| Transport | `3 Papers Expiring` | `status` — "on a trip" and "off the road on paperwork" are two very different absences |
+| Decisions | `8 Awaiting Sign-off` | `attention` — which of the eight stops something |
+
+### Four defects, and a check that found a fifth
+
+**Two cards titled "Maintenance"** in the Facility default — one reading `12 Open
+Jobs`, one reading `Raise Job · Log Defect`. The action cards had been titled
+after their domains, and four of those titles were already on a summary card in
+the same domain. Reading five defaults by eye caught three of the four, so
+`antz.checkSiteDefaults()` asserts it now — per role, because two cards from
+different domains may share a title (the same word means different things under
+different glyphs and different fills) and one role's page is the only place two
+of them are ever seen together.
+
+**It found a fifth on its first run.** Every Section default has carried TWO
+cards titled "Enclosures" for three sessions — `sec.space.count` as a figure and
+`sec.space.enclosures` as a list, showing the same total. The list is `By
+Enclosure` now, which is the catalogue's own convention for a card that
+decomposes a count (`site.maint.orders` has been "By Trade" since it was
+written).
+
+**The biologist's page showed the collection twice** — the photograph's two
+figures and a card beside it repeating them.
+
+**Two pre-existing truncations, surfaced by widening the sweep** from the module
+cards to the whole Site catalogue: `site.animal.summary`'s seventeen-character
+title needed 123px in the 92 a 1×1 card's title line gets at the 900px band, and
+the cost-split donut's legend needed 66px in the 57 a `tall` ring gives at two
+columns. `Collection`, and `Staff / Feed / Repairs / Power`.
+
+## The Hospital glyph
+
+Replaced with the redrawn export. One line, because nothing else referenced the
+old file:
+
+```
+icon: 'm-hospital.svg'   →   icon: 'hospital.svg'
+```
+
+**`iconSize` stays at 38.** It is the size of the glyph's BOX on the Figma
+artboard, not the size of the file's canvas — the new export is drawn on a 40pt
+square where the old one was 38, and the `<img>` fills the box either way.
+Following the file instead of the artboard would have made Hospital the only
+module glyph that is not the size Figma says it is.
+
 ## The header gave its controls back
 
 The Site header carried five controls — a role chip, **Add**, **Customize**,
@@ -2507,6 +2639,62 @@ confirm the figures move, the plurals agree and the empty states land.
 
 Species Management and Medical are non-removable. Everything else is the
 user's call.
+
+### The chrome, in the order the questions come
+
+The switcher moved to the **top of the page**, above the greeting and the search
+field. It used to sit under the search field, between the chrome and the content
+— the wrong altitude for it: *which workspace* is a bigger question than anything
+below it, and a control that decides what the whole page is should not be found
+after the page has been read.
+
+That settled a second thing. The greeting used to be hidden in the Site
+Command Centre and replaced by a `Site Command Centre` page title, on the
+reasoning that "Good Morning, Sourav" and "Bannerghatta Safari Site" are two
+answers to *where am I*. With the switcher first, the selected tab says which
+workspace this is in more words than the title did, and the Site header names
+the subject two rows below — so **the title was the third voice, and the one
+saying least.** One header, one greeting, both views.
+
+**The Site rows lost their status rail.** A 4px colour bar at the leading edge
+was the third thing on the row saying the same word: the pill says *Needs
+Attention* in letters, the items list says what is open, the count says how
+many. It also pushed the Site name off the row's own left edge, so nothing in
+the list lined up with anything above it.
+
+### The search field says what it will find
+
+`Search` alone gets typed into once. Now it names one category at a time —
+**Animals · Enclosures · Users · Modules** — rising through the field on a
+2.1-second dwell, so four words in a reader knows the shape of the index.
+
+It is not the placeholder: a placeholder is a string, and a string cannot
+animate. The real `placeholder` is emptied and the hint is an `aria-hidden` span
+sitting exactly where it would have been, with the **scope** — *Search
+Bannerghatta Safari* — living on the input's `aria-label`, which is the only
+place it was ever announced from. So a screen reader hears one unchanging label,
+and nobody hears a word cycling every two seconds.
+
+| | |
+|---|---|
+| Words | per view **and per depth** — the home page finds Modules and Users, the listing finds Sites, an enclosure finds Animals and Treatments |
+| Typing | hidden entirely — the value wins |
+| Focus | **frozen** on the current word. A word sliding under a live caret is the field arguing with the person using it |
+| Tab hidden | stopped, like the card jiggle |
+| Reduced motion | no cycling at all — one static line, *Animals, Treatments, Enrichment* |
+
+**One animation, not two.** The first version faded the word out with
+`fill: 'forwards'` and faded the next one in on the promise — and the first
+animation was still applied when the second ended, so every word finished
+arriving and then vanished. Sampled opacity caught it: **dim in 12 of 20
+frames**, with perfectly correct markup and text. A single keyframe set that
+leaves and returns holds nothing at the end, and the text is swapped at the
+halfway mark where there is nothing on screen to see it change.
+
+The second bug in the same component was a shared stop: `tick()` re-arms the
+dwell timer and was calling the full `stop()`, which killed the text swap it had
+scheduled 260ms earlier — so the hint animated the same word for ever. It moved
+and never changed, which is the most convincing kind of broken.
 
 ### The modules menu is a dialog, and now looks like one
 

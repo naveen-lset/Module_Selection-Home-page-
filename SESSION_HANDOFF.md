@@ -99,6 +99,46 @@ space actually left below the button rather than by a number in CSS.
 | a queue whose rows did not sum to its total | scaled separately; the total comes from the rows now |
 | five 1×1 titles ellipsed at 900px | the title line gets 92px there, about twelve characters |
 
+### Every card looked the same, and the SEED was why
+
+Forty-six of the seventy-four Site widgets were the `stat` composition. The fault
+was the DISTRIBUTION, not any one card, which is why it survived three passes.
+
+**THE DEFAULTS WERE ROWS OF FIVE AND A ROW OF FIVE CANNOT HOLD ANYTHING TWO ROWS
+TALL.** A photograph, a donut and an attention card are all 2x2, so the seed was
+silently excluding three quarters of the card system — authoring new widgets
+would not have got one onto a default page. They are blocks of ten cells now, the
+same thing `pair()` already did for Sections. `large + large + medium` looks like
+ten cells and packs into three rows leaving five empty; the packer is asked
+rather than trusted.
+
+    widgets      74 -> 87
+    stat         46 (62%) -> 40 (46%)
+    compositions 9 -> 13
+
+Thirteen new cards: **five photographs** (Site, collection, clinic, kitchen,
+work — minimal content, an image and a name, except the collection which takes
+its two figures off the record) and **eight quick-action cards** (three verbs
+each, gated by the domain like everything else). Six module cards moved off
+`stat` to `attention` / `ring` / `chart` / `status`, in every case because the
+document already held a better shape than a single figure.
+
+### Four defects, and the check that found a fifth
+
+| | |
+|---|---|
+| two cards titled "Maintenance" in one default | the action cards were named after their domains, and four of those names were already on a summary card in the same domain |
+| **every Section default has carried two cards titled "Enclosures" for three sessions** | found by the new duplicate-title assertion on its FIRST run. The list is `By Enclosure` now — the catalogue's own convention for a decomposition |
+| the biologist's page showed the collection twice | the photograph's figures and a card repeating them |
+| two pre-existing truncations | surfaced by widening the overflow sweep from the module cards to the whole Site catalogue |
+
+### And the Hospital glyph
+
+`m-hospital.svg` -> `hospital.svg`, one line. **`iconSize` stays at 38** — it is
+the glyph's box on the artboard, not the file's canvas, and following the file
+would have made Hospital the only module glyph that is not the size Figma says.
+The old file is now unreferenced and still in the repository.
+
 ### The header gave its controls back
 
 Five controls became one. The role chip, **Add**, **Customize** and **More** are
@@ -225,6 +265,45 @@ tone string ('ok'/'warn'/'alert') sitting in the sub column** — which rendered
 the word "warn" as a caption under a figure. Both fixed. The check resolves
 every domain at every level and asserts tiles have values, groups have rows,
 table rows match their columns, and every widget's landing group exists.
+
+**THE CHROME WAS REORDERED, AND THE PAGE TITLE DIED OF IT.** The switcher is now
+FIRST — above the greeting and the search field — because *which workspace* is a
+bigger question than anything under it, and it used to be discovered after the
+page had been read. That settled the greeting argument the other way: with the
+selected tab saying "Site Command Centre · Operate a Site" at the top and the
+Site header naming the subject two rows down, the `Site Command Centre` page
+title drawn from `body.is-site .home-header::before` was the third voice and the
+one saying least. It is gone, `body.is-site .greeting { opacity: 0 }` with it,
+and "Good Morning, Sourav Tambe" now shows in both views.
+
+**AND THE SITE ROWS LOST THEIR 4px STATUS RAIL** — third statement of the same
+word on a row that already carries a pill, an items list and a count, and it
+pushed the Site name off the row's own left edge so nothing lined up with the
+header above it.
+
+**THE SEARCH FIELD NAMES WHAT IT WILL FIND, ONE WORD AT A TIME.** Animals ·
+Enclosures · Users · Modules, per view AND per depth, on a 2.1s dwell.
+`js/components/SearchHint.js`. It is NOT the placeholder — a placeholder is a
+string and a string cannot animate — so the real one is emptied and the hint is
+an `aria-hidden` span where it would have been, with the SCOPE moved to the
+input's `aria-label`, which is the only place it was ever announced from.
+Freezes on focus, hides while typing, stops on a hidden tab, and under reduced
+motion does not cycle at all: one static line naming three categories.
+
+**TWO BUGS IN IT, BOTH FOUND BY MEASURING RATHER THAN LOOKING.**
+
+  `fill: 'forwards'` ON THE OUTGOING HALF. Two animations — out, then in on the
+  promise — left the first still applied when the second ended, so every word
+  finished arriving and then vanished. Sampled opacity said dim in 12 of 20
+  frames while the markup and the text were perfectly correct. One keyframe set
+  that leaves and returns holds nothing at the end.
+
+  A SHARED STOP. `tick()` re-arms the dwell timer and was calling the full
+  `stop()`, killing the text swap it had scheduled 260ms earlier — so the hint
+  animated the same word for ever. It moved and never changed.
+
+Both are asserted now: `verify_detail.py` samples the word's opacity and counts
+distinct words across a cycle.
 
 **THE MODULES MENU IS A CENTRED DIALOG NOW.** Reported from the deployed build:
 it opened to the side and ran off the edge. It is thirty-four rows in two groups

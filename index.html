@@ -1030,6 +1030,37 @@ button { font: inherit; color: inherit; }
   color: var(--ink);
 }
 .search__input::placeholder { color: var(--c-neutral-2); }
+
+/* ── the rotating hint ───────────────────────────────────────────────────
+   Where the placeholder would have been, to the pixel: the field's own inline
+   padding, plus the 24px icon, plus the gap between icon and input. It is
+   `aria-hidden` and `pointer-events: none`, so it is a picture of a
+   placeholder — the tap goes through it to the field, and a screen reader
+   still hears the input's own aria-label. See SearchHint.js. */
+.search__hint {
+  position: absolute;
+  left: calc(var(--s6) + 24px + var(--s4));
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  align-items: baseline;
+  gap: .38em;
+  max-width: calc(100% - var(--s6) * 2 - 24px - var(--s4));
+  font-size: var(--fs-search);
+  color: var(--c-neutral-2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.search__hint[hidden] { display: none; }
+/* The moving word is clipped to its own line box, so it enters and leaves
+   behind an edge rather than floating over the field's padding. */
+.search__cycle {
+  display: inline-block;
+  overflow: hidden;
+  font-weight: 600;
+  color: var(--petrol-600);
+  will-change: transform, opacity;
+}
 .search__input:focus { outline: none; }
 .search:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-add-primary) 26%, transparent); }
 
@@ -3502,7 +3533,22 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
    the full 1024 and hung 32px past both edges of the field directly above it.
    Two full-width controls that do not share an edge read as a mistake even
    when nobody can say which one is wrong. */
-.wswitch-row { margin-bottom: 0; padding-inline: var(--pad-page); }
+/* FIRST ON THE PAGE NOW, so it owns the space above it and hands the greeting
+   a smaller gap than the artboard's 32 — 20 above, 20 below. The vertical budget
+   is real: on a 1024x768 tablet the status bar, this row, the greeting, the
+   search field and the Site header all sit above the first card.
+
+   `position: relative; z-index: 1` because the header planting is a POSITIONED
+   element at z-index 0, and a positioned element paints above an unpositioned
+   in-flow sibling whatever the source order says — without this the foliage
+   would lie over the top of the switcher. */
+.wswitch-row {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
+  padding: var(--s5) var(--pad-page) 0;
+}
+.wswitch-row + .home-header { padding-top: var(--s5); }
 
 .wswitch {
   position: relative;
@@ -3599,24 +3645,19 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   .wswitch__glyph { width: 28px; height: 28px; }
 }
 
-/* ══ 2 · the greeting steps aside ════════════════════════════════════════
-   "Good Morning, Sourav" and "Bannerghatta Safari Site" are both answers to
-   "where am I". The header ACTIONS stay in both views — notifications and the
-   account belong to the person, not to the workspace — so only the greeting
-   block collapses, and the row keeps its height from the 44px avatar. */
-body.is-site .greeting {
-  opacity: 0;
-  pointer-events: none;
-}
-body.is-site .home-header::before {
-  content: 'Site Command Centre';
-  position: absolute;
-  left: 0;
-  font-size: var(--fs-greet);
-  font-weight: 500;
-  color: var(--c-secondary-dark);
-  letter-spacing: -.01em;
-}
+/* ══ 2 · the greeting does NOT step aside ════════════════════════════════
+   It used to: hidden at `opacity: 0` in the Site workspace, with a
+   `Site Command Centre` title drawn in its place from a `::before`, because
+   the greeting and the Site name were two answers to "where am I".
+
+   THE SWITCHER MOVING TO THE TOP SETTLED IT THE OTHER WAY. The selected tab now
+   says "Site Command Centre · Operate a Site" above everything else on the
+   page — more than the title said, in the control that changes it — and the
+   Site header names the subject two rows below. The title was the third voice
+   in that conversation, and it was the one saying least.
+
+   So one header, one greeting, both views. `position: relative` stays because
+   the header is still a positioning context for its own actions. */
 .home-header { position: relative; }
 
 /* ══ 3 · the Site header ═════════════════════════════════════════════════
@@ -4440,20 +4481,13 @@ body.is-site .card:active { transform: scale(.978); }
 }
 .site-row:active { transform: scale(.995); }
 
-/* THE STATE IS A RAIL DOWN THE EDGE, NOT A TINT ACROSS THE ROW.
-   A row washed amber because one of its five open items is a fault makes the
-   whole Site look like the problem. Four pixels at the leading edge is enough
-   to find in a scan and does not repaint anything the reader has to read. */
-.site-row::before {
-  content: '';
-  position: absolute;
-  inset: 10px auto 10px 0;
-  width: 4px;
-  border-radius: 0 var(--r-pill) var(--r-pill) 0;
-  background: #2E9E6B;
-}
-.site-row[data-state='attention']::before { background: var(--c-tertiary); }
-.site-row[data-state='commissioning']::before { background: #C8952B; }
+/* NO RAIL DOWN THE EDGE. There was a 4px state bar at the leading edge of every
+   row, and it was the third thing on the row saying the same word: the status
+   PILL says "Needs Attention" in letters, the open-items list says what is
+   actually open, and the count says how many. A colour a reader has to decode
+   against two labels that already spell it out is decoration wearing a
+   semantic's clothes — and it pushed the Site name off the row's own left edge,
+   so nothing in the list lined up with anything above it. */
 
 .site-row__id { min-width: 0; }
 .site-row__title { display: flex; align-items: baseline; gap: var(--s2); min-width: 0; }
@@ -5117,13 +5151,30 @@ body.is-site .card:active { transform: scale(.978); }
        see the note in the stylesheet for how the fade is done. -->
   <span class="foliage" aria-hidden="true"></span>
 
+  <!-- ══ workspace switcher ═══════════════════════════════════════════
+       FIRST, ABOVE EVERYTHING THE TWO VIEWS SHARE.
+       It used to sit under the search field, between the chrome and the
+       content, on the reasoning that it is a small control and the eye passes
+       through there anyway. That was the wrong altitude for it: WHICH WORKSPACE
+       is a bigger question than anything below it, and a control that decides
+       what the whole page is should not be discovered after the page has been
+       read. Above the greeting it also stops competing with the Site header a
+       few rows down — that one names the SUBJECT, this one names the VIEW.
+       See WorkspaceSwitcher.js. -->
+  <div class="wswitch-row">
+    <div id="workspaceSwitch"></div>
+  </div>
+
   <!-- ══ greeting ══════════════════════════════════════════════════════ -->
   <header class="home-header">
-    <!-- HIDDEN IN THE SITE WORKSPACE, not duplicated. "Good Morning, Sourav"
-         and "Bannerghatta Safari Site" are both answers to "where am I", and a
-         page that gives two has given none. The header ACTIONS stay in both —
-         notifications and the account are properties of the person, not of the
-         view. See the `is-site` rules in the stylesheet. -->
+    <!-- IN BOTH VIEWS. It used to be hidden in the Site workspace, replaced by
+         a "Site Command Centre" title, on the reasoning that the greeting and
+         the Site name are two answers to "where am I". That reasoning belonged
+         to a page whose switcher was buried under the search field: with the
+         switcher now FIRST, the selected tab already says which workspace this
+         is, in more words than a title did — and the Site header below names
+         the subject. So the page title was the duplicate, and the greeting is
+         the one line here that belongs to the person rather than the view. -->
     <div class="greeting">
       <p class="greeting__word" id="greetWord">Good Morning,</p>
       <h1 class="greeting__name">Sourav Tambe <span class="greeting__wave" aria-hidden="true">👋🏻</span></h1>
@@ -5149,16 +5200,6 @@ body.is-site .card:active { transform: scale(.978); }
       <input class="search__input" type="search" placeholder="Search" aria-label="Search"
              autocomplete="off" spellcheck="false">
     </div>
-  </div>
-
-  <!-- ══ workspace switcher ═══════════════════════════════════════════
-       Two views of the same working day. It sits between the search field and
-       the content because that is where the eye already travels, it costs its
-       ~60px once, and — unlike a left rail — it does not touch the 960px
-       content width that every card on this product is measured from. See
-       WorkspaceSwitcher.js. -->
-  <div class="wswitch-row">
-    <div id="workspaceSwitch"></div>
   </div>
 
   <div class="main-frame">
@@ -7586,7 +7627,18 @@ const MODULES = [
   },
   {
     id: 'hospital',
-    icon: 'm-hospital.svg',
+    /* REPLACED. `m-hospital.svg` was the ward-block-and-cross export; this is the
+       redrawn one, supplied separately. The old file is still in the repository
+       and in git history — nothing else referenced it, so this line is the whole
+       of the change.
+
+       `iconSize` STAYS AT 38 AND THAT IS NOT AN OVERSIGHT. It is the size of the
+       glyph's BOX on the Figma artboard, not the size of the file's canvas — the
+       new export happens to be drawn on a 40pt square, the old one on 38, and the
+       <img> fills the box either way. Following the file instead of the artboard
+       would have quietly made this the only module glyph that is not the size
+       Figma says it is. See the note on iconSize at the head of this file. */
+    icon: 'hospital.svg',
     iconSize: 38,
     gradient: '--g-hospital',
     name: 'Hospital',
@@ -8568,10 +8620,10 @@ const SITES = [
       'site.finance.remaining':   { value: '₹21.2L', label: 'Of ₹96.0L' },
       'site.finance.procurement': { value: '8', sub: '2 under review' },
       'site.finance.breakdown':   { total: '₹74.8L', segments: [
-        { label: 'Manpower',    n: 34, value: '₹34L' },
+        { label: 'Staff',       n: 34, value: '₹34L' },
         { label: 'Feed',        n: 18, value: '₹18L' },
-        { label: 'Maintenance', n: 13, value: '₹13L' },
-        { label: 'Utilities',   n: 10, value: '₹10L' },
+        { label: 'Repairs',     n: 13, value: '₹13L' },
+        { label: 'Power',       n: 10, value: '₹10L' },
       ] },
       'site.safety.incidents':  { value: '0', label: 'Open Incidents', sub: 'None open', subTone: 'ok' },
       'site.safety.compliance': { value: '25', of: '25', pct: 100, caption: 'Fully compliant' },
@@ -8698,6 +8750,14 @@ const SITES = [
          Insights has no summary card of its own for the inference to read. */
       'mod.energy', 'mod.water', 'mod.utilities',
       'mod.executive',
+      /* AND THE ACTION CARDS FOR THE FOUR REGISTERS THIS SITE HAS NOT OPENED.
+         `Raise Job` against a Site with no asset register is an action that
+         cannot complete, and — the part that would have bitten silently — the
+         domain inference counts every NON-module card in a domain, so leaving
+         these out of the list would have made four empty domains read as full
+         and un-emptied the module cards that share them. */
+      'site.maint.actions', 'site.finance.actions',
+      'site.safety.actions', 'site.stock.actions',
     ],
   },
   {
@@ -8787,10 +8847,10 @@ const SITES = [
       'site.finance.remaining':   { value: '₹3.1L', label: 'Of ₹42.0L' },
       'site.finance.procurement': { value: '19', sub: '9 under review', subTone: 'alert' },
       'site.finance.breakdown':   { total: '₹38.9L', segments: [
-        { label: 'Manpower',    n: 16, value: '₹16L' },
-        { label: 'Maintenance', n: 10, value: '₹10L' },
+        { label: 'Staff',       n: 16, value: '₹16L' },
+        { label: 'Repairs',     n: 10, value: '₹10L' },
         { label: 'Feed',        n: 8,  value: '₹8L' },
-        { label: 'Utilities',   n: 5,  value: '₹5L' },
+        { label: 'Power',       n: 5,  value: '₹5L' },
       ] },
       'site.safety.incidents':  { value: '2', label: 'Active Incidents', sub: '5 checks overdue', subTone: 'alert' },
       'site.safety.compliance': { value: '19', of: '25', pct: 76, caption: '6 require action' },
@@ -9552,7 +9612,14 @@ const WIDGETS = [
     id: 'site.animal.summary', moduleId: 'd.animal', name: 'Animal Operations',
     layout: 'stat', purpose: 'UNDERSTAND', level: 1, decision: 'D4',
     supportedSizes: ['small', 'medium'], defaultSize: 'medium',
-    data: { title: 'Animal Operations', value: '42', label: 'Species', sub: '318 animals' },
+    /* THE TITLE IS 'COLLECTION' AND THE WIDGET IS STILL CALLED ANIMAL
+       OPERATIONS. Seventeen characters needed 123px in the 92 a 1x1 card's title
+       line gets at the 900px band, and it ellipsed at four of the six widths —
+       a pre-existing defect that only surfaced when the overflow sweep was
+       widened from the module cards to the whole Site catalogue. The domain is
+       what is called Animal Operations; what this card shows is the
+       collection. */
+    data: { title: 'Collection', value: '42', label: 'Species', sub: '318 animals' },
   },
 
   /* ══ H · VETERINARY ════════════════════════════════════════════════════
@@ -9634,12 +9701,16 @@ const WIDGETS = [
     layout: 'ring', purpose: 'UNDERSTAND', level: 3, decision: 'D5',
     supportedSizes: ['large', 'tall'], defaultSize: 'large',
     data: {
+      /* SHORT LABELS, BECAUSE A DONUT'S LEGEND IS THE NARROWEST TEXT IN THE
+         PRODUCT. At two columns a `tall` ring gives each name about 57px, and
+         "Manpower" needed 66 and "Maintenance" 81. Staff, Feed, Repairs, Power —
+         the same four things, in words that fit the box they are drawn in. */
       title: 'Cost Split', total: '₹61.4L',
       segments: [
-        { label: 'Manpower',    n: 28, value: '₹28L' },
+        { label: 'Staff',       n: 28, value: '₹28L' },
         { label: 'Feed',        n: 14, value: '₹14L' },
-        { label: 'Maintenance', n: 11, value: '₹11L' },
-        { label: 'Utilities',   n: 8,  value: '₹8L' },
+        { label: 'Repairs',     n: 11, value: '₹11L' },
+        { label: 'Power',       n: 8,  value: '₹8L' },
       ],
     },
   },
@@ -9759,6 +9830,159 @@ const WIDGETS = [
     supportedSizes: ['small', 'medium'], defaultSize: 'medium',
     data: { title: 'Projects', value: '3', label: 'Active', sub: '1 delayed', subTone: 'warn' },
   },
+  /* ══ T · PHOTOGRAPHS ═══════════════════════════════════════════════════
+     THE PROBLEM THESE SOLVE IS THAT EVERY CARD LOOKED THE SAME.
+     ───────────────────────────────────────────────────────────────────────
+     Forty-six of the seventy-four widgets in this catalogue were the `stat`
+     composition — a title, a figure, a caption, one clause — and a workspace of
+     sixteen of them is a spreadsheet with rounded corners. Nothing was wrong
+     with any individual card, which is exactly why it went unnoticed: the fault
+     was in the DISTRIBUTION, and a distribution is not visible one card at a
+     time.
+
+     The module catalogue has twenty-one compositions and the home page uses
+     most of them, including three photographs. Five of them were unused here —
+     `photo`, `actions`, `chart`, `attention` and `status` — so the fix is not a
+     new treatment, it is USING THE SYSTEM THAT IS ALREADY BUILT.
+
+     WHY A PHOTOGRAPH IS NOT DECORATION. A Site is a PLACE. Four rows of figures
+     make it a record, and the one thing a reader wants confirmed before they
+     act on any of those figures is that they are looking at the right place —
+     which a photograph answers from across a room and a name in 32px type does
+     not. The home page settled this already: Hospital, Diet & Kitchen and
+     Species Management all carry one.
+
+     MINIMAL CONTENT, AND THAT IS THE WHOLE SPECIFICATION. A photo card carries
+     an image, a glyph and its domain's name in the scrim band — nothing else.
+     The one exception is the collection, which takes two figures over the image
+     exactly as the home page's Species card does, because those two numbers ARE
+     what the collection is. Anything more and the picture becomes a texture
+     behind a table. */
+
+  {
+    id: 'site.overview.photo', moduleId: 'd.overview', name: 'The Site',
+    layout: 'photo', purpose: 'NAVIGATE', level: 2, decision: 'D9',
+    image: 'hero-leopard.jpg',
+    supportedSizes: ['medium', 'large', 'full'], defaultSize: 'large',
+    data: {},
+  },
+  {
+    id: 'site.animal.photo', moduleId: 'd.animal', name: 'Photograph',
+    layout: 'photo', purpose: 'UNDERSTAND', level: 2, decision: 'D4',
+    /* Two exported layers, a leaf plate under a tint pass — the same pair the
+       home page's Species card uses, because it is the same subject. */
+    image: 'species-a.png', imageOver: 'species-b.jpg',
+    supportedSizes: ['large', 'full'], defaultSize: 'large',
+    /* The figures are rewritten per Site in derive(), so this card and the
+       header cannot disagree about how big the collection is. */
+    data: { figures: [
+      { value: '42',  label: 'Species' },
+      { value: '318', label: 'Animals' },
+    ] },
+  },
+  {
+    id: 'site.vet.photo', moduleId: 'd.veterinary', name: 'Veterinary',
+    layout: 'photo', purpose: 'NAVIGATE', level: 3, decision: 'D4',
+    image: 'hospital.jpg',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: {},
+  },
+  {
+    id: 'site.husb.photo', moduleId: 'd.husbandry', name: 'Husbandry',
+    layout: 'photo', purpose: 'NAVIGATE', level: 3, decision: 'D8',
+    image: 'diet-kitchen.jpg',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: {},
+  },
+  {
+    id: 'site.work.photo', moduleId: 'd.work', name: 'Work & Activity',
+    layout: 'photo', purpose: 'NAVIGATE', level: 3, decision: 'D2',
+    image: 'followup.jpg',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: {},
+  },
+
+  /* ══ U · QUICK ACTIONS ══════════════════════════════════════════════════
+     THREE VERBS AND NOTHING ELSE, which is the `actions` composition the module
+     catalogue already has and this one never used.
+
+     THE ACTIONS WERE IN A MENU AND A MENU IS NOT A WORKSPACE. `Add Task` and
+     `Report Incident` sat behind the header's Add button and then behind the
+     avatar, which is the right place for them to be REACHABLE and the wrong
+     place for them to be SEEN — §11 of the brief makes the workspace "context,
+     summary and navigation", and the thing a person does after reading a summary
+     is act on it. A card that says `Raise Job · Log Defect · Schedule Service`
+     under a Maintenance card reading `2 overdue` is the two halves of one
+     thought next to each other.
+
+     THEY ARE NOT DUPLICATES OF THE MENU. The menu is gated by role and level and
+     is complete; these are the three verbs a domain is mostly used for, on the
+     workspace, where the reader already is. Both are one source of permission —
+     the domain gates the card exactly as it gates everything else here.
+
+     NO CARD GETS FOUR. The layout takes four and three is what fits a 2x1
+     without the chips wrapping; a fourth verb is what the module is for.
+
+     AND NONE OF THEM IS TITLED AFTER ITS DOMAIN. The first pass named them
+     Maintenance, Veterinary, Stores, People and Welfare, and four of those are
+     already the title of a summary card in the same domain — so a facility
+     manager's default carried TWO cards headed "Maintenance", one reading
+     "12 Open Jobs" and one reading "Raise Job · Log Defect", and the reader was
+     handed the job of working out that they were the same subject. A title is
+     what distinguishes a card from the one beside it; two cards with the same
+     one are a card that has not been named. `antz.checkSiteDefaults()` asserts
+     it now, per role, because eyeballing five defaults found three of the four
+     and missed one. */
+
+  {
+    id: 'site.work.actions', moduleId: 'd.work', name: 'Task Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D2',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Work', actions: ['Add Task', 'Assign', 'Approve'] },
+  },
+  {
+    id: 'site.people.actions', moduleId: 'd.people', name: 'People Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D2',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Roster', actions: ['Mark Attendance', 'Approve Leave', 'Add Shift'] },
+  },
+  {
+    id: 'site.maint.actions', moduleId: 'd.maintenance', name: 'Maintenance Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D3',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Jobs', actions: ['Raise Job', 'Log Defect', 'Schedule Service'] },
+  },
+  {
+    id: 'site.vet.actions', moduleId: 'd.veterinary', name: 'Clinical Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D4',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Clinical', actions: ['New Case', 'Record Treatment', 'Request Medicine'] },
+  },
+  {
+    id: 'site.assess.actions', moduleId: 'd.assessment', name: 'Welfare Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D4',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Observations', actions: ['Record Observation', 'Start Assessment'] },
+  },
+  {
+    id: 'site.stock.actions', moduleId: 'd.inventory', name: 'Store Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D8',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Stock', actions: ['Issue Stock', 'Reorder', 'Stock Count'] },
+  },
+  {
+    id: 'site.safety.actions', moduleId: 'd.safety', name: 'Safety Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D7',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Incidents', actions: ['Report Incident', 'Log Check', 'Start Drill'] },
+  },
+  {
+    id: 'site.finance.actions', moduleId: 'd.finance', name: 'Finance Actions',
+    layout: 'actions', purpose: 'ACT', level: 3, decision: 'D5',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium',
+    data: { title: 'Finance', actions: ['Create Request', 'Approve PO', 'Log Expense'] },
+  },
+
   {
     id: 'site.projects.progress', moduleId: 'd.projects', name: 'Project Progress',
     layout: 'meters', purpose: 'MONITOR', level: 3, decision: 'D3',
@@ -9853,11 +10077,20 @@ const REFERENCE_SITE = 'bg-safari'
 const MODULE_CARDS = [
   /* ── Site ─────────────────────────────────────────────────────────────── */
   {
-    key: 'alerts', layout: 'stat', base: 'enclosures',
+    /* NOT A STAT. The document's own headline is a feed of every alert, and what
+       makes it a decision is not the total but the SHAPE of it — one critical
+       and eight low is a different morning from four critical. The severity mix
+       is already in the file; a single figure threw it away. */
+    key: 'alerts', layout: 'attention', base: 'enclosures',
     purpose: 'ATTENTION', level: 1, decision: 'D1',
     title: 'Alerts', n: 9, label: 'Open Alerts', label1: 'Open Alert',
-    sub: 4, clause: 'high', tone: 'alert', none: 'None open',
-    doc: 'alerts.md — 64 open facility-wide, 47% of them high',
+    items: [
+      { n: 2, text: 'Critical', tone: 'alert' },
+      { n: 4, text: 'High',     tone: 'alert' },
+      { n: 3, text: 'Medium',   tone: 'warn' },
+      { n: 1, text: 'Low' },
+    ],
+    doc: 'alerts.md — 64 open facility-wide: 12 critical, 30 high, 19 medium, 3 low',
   },
   {
     key: 'housing', layout: 'progress', base: 'enclosures',
@@ -9914,11 +10147,20 @@ const MODULE_CARDS = [
     doc: 'iot.md — 128 of 180 devices online (71%)',
   },
   {
-    key: 'transport', layout: 'stat', base: 'enclosures',
-    purpose: 'ATTENTION', level: 3, decision: 'D3',
-    title: 'Transport', n: 3, label: 'Papers Expiring', label1: 'Paper Expiring',
-    sub: 1, clause: 'fitness expired', tone: 'alert', none: 'None expired',
-    doc: 'transport.md — fitness and insurance expiry list',
+    /* FOUR STATES, NOT ONE COUNT. `site.assets.vehicles` already says how many
+       vehicles there are and how many are free; what this module knows is where
+       the rest of them have gone, and "on a trip" and "off the road on
+       paperwork" are two very different absences. */
+    key: 'transport', layout: 'status', base: 'enclosures',
+    purpose: 'MONITOR', level: 3, decision: 'D3',
+    title: 'Transport',
+    items: [
+      { n: 6, text: 'Available',  tone: 'ok' },
+      { n: 5, text: 'On trip' },
+      { n: 2, text: 'In service', tone: 'warn' },
+      { n: 1, text: 'Papers due', tone: 'alert' },
+    ],
+    doc: 'transport.md — vehicle status 16 available / 14 on trip of 40, expiry list',
   },
   {
     key: 'maintenance', layout: 'stat', base: 'enclosures',
@@ -9931,11 +10173,15 @@ const MODULE_CARDS = [
     doc: 'maintenance.md — 1,666 h downtime over 30 days, 6 critical breakdowns',
   },
   {
-    key: 'energy', layout: 'stat', base: 'enclosures', fmt: 'lakh',
+    /* THE DOCUMENT DRAWS THIS AS A TREND and the trend is the point: a month's
+       cost is a number you can do nothing about, and a line that has been
+       climbing for nine days is a conversation with the generator. */
+    key: 'energy', layout: 'chart', base: 'enclosures', fmt: 'lakh',
     purpose: 'UNDERSTAND', level: 3, decision: 'D5',
-    title: 'Energy Cost', n: 3.7, label: 'Month to Date',
-    clause: '+6% against plan', subFixed: true, tone: 'warn',
-    doc: 'energy.md — ₹142 lakh month to date, +6% vs plan',
+    title: 'Energy Cost', n: 3.7, label: 'month to date',
+    series: [2.5, 2.2, 2.6, 2.9, 2.8, 3.1, 3.4, 3.3, 3.7],
+    delta: { dir: 'up', text: '6% over plan' },
+    doc: 'energy.md — ₹142 lakh month to date, +6% vs plan, daily consumption trend',
   },
   {
     key: 'water', layout: 'progress', fixed: true,
@@ -10030,14 +10276,24 @@ const MODULE_CARDS = [
     doc: 'population.md — 1,500 held against approved capacity 3,854 (39%)',
   },
   {
-    key: 'species-master', layout: 'stat', base: 'species', sprite: 'species',
+    /* A DONUT, BECAUSE THE DOCUMENT'S FACT IS A DISTRIBUTION. "22 Threatened
+       Species" is the same six categories added up and then thrown away, and a
+       biologist's question is which end of the list the collection sits at. */
+    key: 'species-master', layout: 'ring', base: 'species', sprite: 'species',
     purpose: 'UNDERSTAND', level: 3, decision: 'D4',
-    /* TWELVE CHARACTERS IS THE CEILING ON A 1x1 TITLE, measured at the 900px
-       band where the title line gets 92px. "Species Master" came out at 101 and
-       ellipsed; the five titles in this section that did are all short now. */
-    title: 'Taxonomy', n: 22, label: 'Threatened Species',
-    sub: 16, clause: 'CITES Appendix I', tone: 'warn', none: 'None CITES-listed',
-    doc: 'species-master.md — CR+EN+VU 38 of 72, CITES Appendix I 28 of 72',
+    /* THE IUCN CODES, NOT THEIR EXPANSIONS. "Least Concern" needed 91px in the
+       75 a `tall` donut's legend gets at two columns, and LC / EN / VU is the
+       document's own vocabulary and a biologist's — this is the one card in the
+       catalogue whose reader uses the abbreviation in speech. `unit` says what
+       is being counted so the codes are not floating. */
+    title: 'Taxonomy', unit: 'Species',
+    segments: [
+      { n: 15, label: 'LC' },
+      { n: 10, label: 'EN' },
+      { n: 10, label: 'VU' },
+      { n: 7,  label: 'Other' },
+    ],
+    doc: 'species-master.md — IUCN mix LC 25 / EN 17 / VU 17 / other 13 of 72',
   },
   {
     key: 'breeding', layout: 'stat', base: 'animals', sprite: 'eggs',
@@ -10122,11 +10378,15 @@ const MODULE_CARDS = [
     doc: 'safety.md — 17 of 27 CCTV cameras online (63%)',
   },
   {
-    key: 'incidents', layout: 'stat', fixed: true,
+    /* AN AVERAGE IS ONLY USEFUL AGAINST ITS OWN HISTORY. Twenty-three days
+       means nothing on its own and everything next to the thirty-one it was in
+       March, which is the second thing the document draws. */
+    key: 'incidents', layout: 'chart', fixed: true,
     purpose: 'UNDERSTAND', level: 3, decision: 'D7',
-    title: 'Closures', n: 23, label: 'Days to Close',
-    clause: 'Improving quarter on quarter', subFixed: true, tone: 'ok',
-    doc: 'incidents.md — average closure time 23 days, trending down',
+    title: 'Closures', n: 23, label: 'days to close',
+    series: [31, 29, 30, 26, 27, 24, 23],
+    delta: { dir: 'down', text: '8 days faster' },
+    doc: 'incidents.md — average closure 23 days, repeat incident trend Mar–Sep',
   },
   {
     key: 'risk', layout: 'stat', base: 'enclosures',
@@ -10139,10 +10399,17 @@ const MODULE_CARDS = [
     doc: 'risk.md — mitigation-in-progress list against 26 open risks',
   },
   {
-    key: 'executive', layout: 'stat', base: 'enclosures',
+    /* WHAT THE DECISIONS ARE ABOUT, not just how many there are. The document's
+       overdue table sorts on impact, and a director with eight signatures
+       waiting wants to know which of them stops something. */
+    key: 'executive', layout: 'attention', base: 'enclosures',
     purpose: 'ACT', level: 2, decision: 'D1',
     title: 'Decisions', n: 8, label: 'Awaiting Sign-off',
-    sub: 3, clause: 'overdue', tone: 'alert', none: 'None overdue',
+    items: [
+      { n: 3, text: 'Overdue',   tone: 'alert' },
+      { n: 3, text: 'Financial', tone: 'warn' },
+      { n: 2, text: 'Statutory' },
+    ],
     doc: 'executive.md — matters requiring attention, overdue high-priority actions',
   },
 ]
@@ -10176,6 +10443,52 @@ function moduleData(spec, ratio) {
     return {
       title: spec.title,
       items: spec.items.map((i) => ({ value: cnt(i.n), label: i.label, tone: i.tone })),
+    }
+  }
+
+  /* A DONUT AND ITS LEGEND. `n` on a segment is what the wedge is sized by and
+     the printed value is the same number, so a reader can add the legend up and
+     get the total in the middle. */
+  if (spec.layout === 'ring') {
+    const segs = spec.segments.map((g) => ({ label: g.label, n: cnt(g.n), value: String(cnt(g.n)) }))
+    return {
+      title: spec.title, unit: spec.unit,
+      total: fig(segs.reduce((n, g) => n + g.n, 0)),
+      segments: segs,
+    }
+  }
+
+  /* A TREND, AND THE FIGURE IT ENDS ON. The summary carries the headline rather
+     than the card carrying it twice: a chart whose summary repeats the number
+     already drawn as the last point of the line is a card arguing with itself. */
+  if (spec.layout === 'chart') {
+    return {
+      title: spec.title,
+      series: spec.series.map((v) => ({ value: Math.max(0, v * r) })),
+      summary: `${num(spec.n)} ${spec.label}`,
+      delta: spec.delta,
+    }
+  }
+
+  /* A FIGURE THAT NEEDS ACTING ON, AND WHAT IT IS MADE OF. A part that scales to
+     nothing is dropped rather than printed as a zero — five rows one of which
+     reads "0 Low" is four rows and a distraction. */
+  if (spec.layout === 'attention') {
+    return {
+      title: spec.title,
+      value: num(spec.n), label: spec.label,
+      items: spec.items
+        .map((i) => ({ text: i.text, value: cnt(i.n), tone: i.tone }))
+        .filter((i) => i.value > 0),
+    }
+  }
+
+  /* DOTTED ROWS — a state rather than a measurement, so the dot carries the
+     meaning and the card is never repainted by its worst line. */
+  if (spec.layout === 'status') {
+    return {
+      title: spec.title,
+      items: spec.items.map((i) => ({ value: String(cnt(i.n)), text: i.text, tone: i.tone })),
     }
   }
 
@@ -10213,10 +10526,17 @@ function moduleData(spec, ratio) {
 
 /** A spec becomes a catalogue entry. Sizes come from the layout, not the card. */
 const MODULE_SIZES = {
-  stat:     { sizes: ['small', 'medium'],            initial: 'medium' },
-  progress: { sizes: ['medium', 'large'],            initial: 'medium' },
-  metrics:  { sizes: ['small', 'medium', 'large'],   initial: 'medium' },
-  queue:    { sizes: ['large'],                      initial: 'large' },
+  stat:      { sizes: ['small', 'medium'],           initial: 'medium' },
+  progress:  { sizes: ['medium', 'large'],           initial: 'medium' },
+  metrics:   { sizes: ['small', 'medium', 'large'],  initial: 'medium' },
+  queue:     { sizes: ['large'],                     initial: 'large' },
+  /* A donut needs both halves on screen — the ring and the legend that names
+     it — so it does not offer the one-row sizes. Same as the two rings the
+     catalogue already had. */
+  ring:      { sizes: ['large', 'tall'],             initial: 'large' },
+  chart:     { sizes: ['medium', 'large'],           initial: 'medium' },
+  attention: { sizes: ['large', 'tall'],             initial: 'large' },
+  status:    { sizes: ['medium', 'large'],           initial: 'medium' },
 }
 
 const MODULE_WIDGETS = MODULE_CARDS.map((spec) => {
@@ -10336,6 +10656,13 @@ function derive(site) {
     'site.space.sections': { value: n(c.sections), sub: `${c.enclosures} enclosures` },
     'site.space.count': { value: n(c.enclosures), sub: `${occupied} occupied` },
     'site.animal.summary': { value: n(c.species), sub: `${c.animals} animals` },
+    /* THE TWO FIGURES OVER THE PHOTOGRAPH ARE THE SAME TWO THE HEADER SHOWS.
+       They are the whole content of that card, so authoring them per Site would
+       have been the staff-count bug with a picture behind it. */
+    'site.animal.photo': { figures: [
+      { value: n(c.species), label: 'Species' },
+      { value: n(c.animals), label: 'Animals' },
+    ] },
 
     /* ── the compositions that decompose one of those counts ───────────── */
     'site.people.mix': { total: n(c.staff), segments: [
@@ -10508,6 +10835,19 @@ const EMPTY_BY_WIDGET = {
                           action: 'Log Incident' },
   'mod.risk':           { note: 'No risk register has been opened, so nothing is being mitigated yet.',
                           action: 'Open Register' },
+
+  /* ── the action cards ─────────────────────────────────────────────────
+     An action card's empty state is the one place in this catalogue where the
+     empty copy is more useful than the card: three verbs that cannot complete
+     are worse than a sentence saying which register has to exist first. */
+  'site.maint.actions':  { note: 'Raising a job needs an asset register, and this Site has not opened one.',
+                           action: 'Add Asset' },
+  'site.finance.actions': { note: 'No budget line to raise a request against yet.',
+                            action: 'Allocate' },
+  'site.safety.actions': { note: 'Incident logging opens with the first inspection.',
+                           action: 'Schedule' },
+  'site.stock.actions':  { note: 'Nothing to issue or count until a store is opened here.',
+                           action: 'Open Store' },
 }
 
 /* One line per domain, in the product's own voice — what is missing and what
@@ -10702,7 +11042,16 @@ const WIDGETS = [
     layout: 'queue', purpose: 'NAVIGATE', level: 2, decision: 'D9',
     supportedSizes: ['medium', 'large', 'tall'], defaultSize: 'tall',
     data: {
-      title: 'Enclosures', total: '6',
+      /* 'BY ENCLOSURE', NOT 'ENCLOSURES'. Every one of the five Section defaults
+         carried this card AND `sec.space.count`, both titled "Enclosures" and
+         both showing the same total — one as a figure, one as a list — and a
+         reader was handed the job of working out they were the same six things.
+         The catalogue's own convention for a card that decomposes a count is to
+         name it after the axis it decomposes on; `site.maint.orders` has been
+         "By Trade" since it was written. Found by the duplicate-title check in
+         antz.checkSiteDefaults(), which was added for the Site level and caught
+         this on its first run. */
+      title: 'By Enclosure', total: '6',
       rows: [
         { text: 'CAR-01', value: '3' },
         { text: 'CAR-02', value: '2' },
@@ -14433,6 +14782,45 @@ const ALL_DOMAINS = DOMAINS.map((d) => d.id)
  * This is also why every level needs at least one 1x1 widget per domain a role
  * can see: a pair leaves one column, and something has to go in it.
  */
+/**
+ * A SITE DEFAULT IS BLOCKS OF TEN CELLS, AND THE MIX IS THE DESIGN.
+ * ───────────────────────────────────────────────────────────────────────────
+ * These were written as rows of five — two `medium` cards and a `small`, four or
+ * five times over — which packs perfectly and produced the fault a reader
+ * reported in one sentence: EVERY CARD LOOKED THE SAME. Sixteen cards, all one
+ * row tall, all the same composition: a title, a figure, a caption, a clause.
+ * Nothing was wrong with any of them, which is why it survived three passes.
+ *
+ * A row of five cannot hold anything two rows tall, so the shape of the seed was
+ * quietly deciding the shape of every card in it. These are BLOCKS OF TWO ROWS —
+ * ten cells at the five-column reference — which is what `pair()` and `wide()`
+ * already did for the Section and Enclosure defaults, and it is the only way a
+ * photograph, a donut or an attention card can be in a default at all.
+ *
+ * The four arrangements used below, all of them checked by the packer rather
+ * than by hand — `antz.checkSiteDefaults()` packs every seed and counts the
+ * cells no card claimed:
+ *
+ *   large + large + small + small          4 + 4 + 1 + 1
+ *   large + medium + medium + small + small    4 + 2 + 2 + 1 + 1
+ *   medium + medium + small, twice         (2 + 2 + 1) x 2
+ *   full                                   5 x 2
+ *
+ * `large + large + medium` is NOT one of them and it is the trap: it comes to
+ * ten cells and packs into three rows, leaving five empty. First-fit places the
+ * medium below the two larges rather than beside them, because a two-column card
+ * cannot fit in the one column they leave.
+ *
+ * ═══ WHAT EACH ROLE OPENS ON ══════════════════════════════════════════════
+ *
+ * Every one of the five now leads with something that is not a figure — a
+ * photograph of the place, the collection, the clinic — and carries at least one
+ * `actions` card, because §11 makes the workspace context, summary AND
+ * navigation, and the thing a person does after reading a summary is act on it.
+ * Roughly half the cards are still `stat`, which is correct: most of what a Site
+ * knows IS a number. Half of them being a number was the problem.
+ */
+
 const pair = (a, b, c, d) => [
   { id: a, size: SPAN2[a] || 'large' },
   { id: b, size: SPAN2[b] || 'large' },
@@ -14493,36 +14881,35 @@ const ROLES = [
     title: 'Site Manager · Command Centre',
     permissions: ALL_DOMAINS,
     defaults: [
-      /* Section 18's order for this role — People, Assets, Maintenance,
-         Finance, Safety, Compliance, Projects, Tasks — with Sections and
-         Enclosures threaded through, because they are what is directly under a
-         Site and section 16 makes them first-class rather than a link inside
-         something else. Twelve cards; the narrow one moves every row. */
-      { id: 'site.people.count', size: 'medium' },
-      { id: 'site.assets.total', size: 'medium' },
+      /* WHERE AM I, AND WHAT IS SHOUTING. A photograph of the Site beside the
+         four states somebody set by hand, with the two ways down the hierarchy
+         in the column beside them. */
+      { id: 'site.overview.photo', size: 'large' },
+      { id: 'mod.alerts', size: 'large' },
       { id: 'site.space.sections', size: 'small' },
-
       { id: 'site.space.count', size: 'small' },
+
+      /* THE NUMBERS THE MORNING TURNS ON — §18's order for this role, People,
+         Assets, Maintenance, Finance, with what is open threaded through the
+         narrow column. People is the `metrics` card rather than the stat: the
+         header already says how many staff there are, and who is actually here
+         today is the part that changes. */
+      { id: 'site.people.today', size: 'medium' },
+      { id: 'site.assets.total', size: 'medium' },
+      { id: 'site.work.tasks', size: 'small' },
       { id: 'site.maint.open', size: 'medium' },
       { id: 'site.finance.budget', size: 'medium' },
-
-      { id: 'site.safety.compliance', size: 'medium' },
       { id: 'site.safety.incidents', size: 'small' },
-      { id: 'site.work.tasks', size: 'medium' },
 
-      { id: 'site.work.approvals', size: 'small' },
-      { id: 'site.projects.active', size: 'medium' },
-      { id: 'site.finance.procurement', size: 'medium' },
-
-      /* AND ONE ROW OF ANTZ MODULES. The twelfth card used to be the last of
-         them; the workspace now opens onto the two dashboards a Site Manager is
-         asked about most — what is being treated, and whether the collection is
-         inside its approved capacity — with the alert count beside them. Every
-         other module is one tap away in the modules menu, which is the whole
-         reason that menu exists. */
+      /* WHAT NEEDS A DECISION, AND THE ONE CARD THAT TAKES ONE. Medical and
+         Animal Population are the two module dashboards a Site Manager is asked
+         about; Work is the only card on the page with verbs on it. */
       { id: 'mod.medical', size: 'medium' },
       { id: 'mod.population', size: 'medium' },
-      { id: 'mod.alerts', size: 'small' },
+      { id: 'site.work.approvals', size: 'small' },
+      { id: 'site.work.actions', size: 'medium' },
+      { id: 'site.safety.compliance', size: 'medium' },
+      { id: 'site.work.overdue', size: 'small' },
     ],
     sectionDefaults: blocks(
       pair('sec.overview.status', 'sec.overview.attention', 'sec.space.count', 'sec.work.tasks'),
@@ -14566,32 +14953,32 @@ const ROLES = [
       'd.veterinary', 'd.assessment',
     ],
     defaults: [
-      /* Veterinary, Animal Operations, Welfare, Sections, Enclosures, Tasks —
-         section 18's six, then the three a clinician reaches for on a round:
-         who is on site, what is scheduled, and whether the store is holding.
-
-         VETERINARY IS ITS OWN DOMAIN AT THE SITE NOW. It used to be a card
-         inside Animal Operations, which made this role's first-class subject
-         somebody else's subheading. */
-      { id: 'site.animal.vet', size: 'medium' },
-      { id: 'site.animal.summary', size: 'medium' },
-      { id: 'site.animal.welfare', size: 'small' },
-
-      { id: 'site.space.sections', size: 'small' },
-      { id: 'site.space.count', size: 'small' },
-      { id: 'site.work.tasks', size: 'medium' },
-      { id: 'site.people.count', size: 'small' },
-
-      { id: 'site.safety.incidents', size: 'small' },
-      { id: 'site.schedule.upcoming', size: 'medium' },
-      { id: 'site.stock.reorder', size: 'medium' },
-
-      /* The three modules the documents mark as a priority for a Veterinarian
-         and a Paravet that this page did not already answer: the ward list, the
-         assessments falling due, and the animals a welfare review has flagged. */
+      /* THE CLINIC, THEN THE QUEUE. A veterinarian's first screen is a ward
+         round: the photograph is the hospital wing, and everything beside it is
+         who is in it. */
+      { id: 'site.vet.photo', size: 'large' },
       { id: 'mod.medical', size: 'medium' },
+      { id: 'site.animal.vet', size: 'medium' },
+      { id: 'site.animal.welfare', size: 'small' },
+      { id: 'site.space.count', size: 'small' },
+
+      /* THE COLLECTION THE CASES COME OUT OF, and the three verbs a round
+         generates — a new case, a treatment recorded, a medicine asked for. */
       { id: 'mod.welfare', size: 'medium' },
-      { id: 'mod.welfare-risk', size: 'small' },
+      { id: 'site.animal.summary', size: 'medium' },
+      { id: 'site.space.sections', size: 'small' },
+      { id: 'site.vet.actions', size: 'medium' },
+      { id: 'mod.animal-collection', size: 'medium' },
+      { id: 'site.work.tasks', size: 'small' },
+
+      /* WHAT THE ROUND DEPENDS ON — the pharmacy shelf, the identification, and
+         what is booked in. */
+      { id: 'site.stock.health', size: 'medium' },
+      { id: 'mod.pharmacy', size: 'medium' },
+      { id: 'site.work.overdue', size: 'small' },
+      { id: 'mod.animal-profile', size: 'medium' },
+      { id: 'site.schedule.upcoming', size: 'medium' },
+      { id: 'site.people.count', size: 'small' },
     ],
     sectionDefaults: blocks(
       pair('sec.animal.welfare', 'sec.overview.attention', 'sec.animal.door', 'sec.work.tasks'),
@@ -14628,29 +15015,36 @@ const ROLES = [
       'd.assessment',
     ],
     defaults: [
-      /* The collection and the spaces it lives in. No Veterinary and no
-         Safety — a biologist has neither domain — so this is the clearest case
-         of a workspace built from what the role can OPEN rather than thinned
-         down from the Manager's. */
-      { id: 'site.animal.summary', size: 'medium' },
+      /* THE COLLECTION IS THE SUBJECT, so it is the card — the photograph with
+         the two figures over it, the same composition the home page gives
+         Species Management, because it is the same thing one level down. */
+      { id: 'site.animal.photo', size: 'large' },
+      { id: 'mod.population', size: 'medium' },
+      /* NOT `site.animal.summary`. The photograph's two figures ARE 42 species
+         and 318 animals, and a card beside it reading "42 Species · 318 animals"
+         is the same sentence twice in one row. What this role wants next is
+         where the animals that are NOT on exhibit have gone. */
+      { id: 'mod.animal-collection', size: 'medium' },
       { id: 'site.space.sections', size: 'small' },
       { id: 'site.space.count', size: 'small' },
-      { id: 'site.animal.welfare', size: 'small' },
 
-      { id: 'site.overview.map', size: 'small' },
-      { id: 'site.people.count', size: 'medium' },
-      { id: 'site.work.tasks', size: 'medium' },
-
-      { id: 'site.schedule.upcoming', size: 'medium' },
-      { id: 'site.docs.recent', size: 'medium' },
-      { id: 'site.work.activity', size: 'small' },
-
-      /* Population planning is a Biologist's module in the documents and nobody
-         else's, and it is the clearest case in the product of a role's first
-         screen being built from what that role is FOR. */
-      { id: 'mod.population', size: 'medium' },
+      /* WHAT THE COLLECTION IS MADE OF. Taxonomy is a donut rather than a
+         figure: which end of the IUCN list this Site sits at is the question,
+         and a count of threatened species is that answer added up and thrown
+         away. */
+      { id: 'mod.species-master', size: 'large' },
       { id: 'mod.breeding', size: 'medium' },
-      { id: 'mod.species-master', size: 'small' },
+      { id: 'site.animal.welfare', size: 'medium' },
+      { id: 'site.overview.map', size: 'small' },
+      { id: 'site.work.overdue', size: 'small' },
+
+      /* HOW IT IS KEPT — welfare, diet, and the observation a round produces. */
+      { id: 'mod.welfare', size: 'medium' },
+      { id: 'mod.diet', size: 'medium' },
+      { id: 'site.work.tasks', size: 'small' },
+      { id: 'site.assess.actions', size: 'medium' },
+      { id: 'site.schedule.upcoming', size: 'medium' },
+      { id: 'site.people.count', size: 'small' },
     ],
     sectionDefaults: blocks(
       pair('sec.animal.species', 'sec.animal.summary', 'sec.animal.count', 'sec.space.count'),
@@ -14694,38 +15088,32 @@ const ROLES = [
       'd.area', 'd.environment', 'd.condition',
     ],
     defaults: [
-      /* THE NARROW CARD MOVES EVERY ROW, AND THAT IS THE COMPOSITION.
-         Twelve cards packed 2-2-1, 2-2-1, 2-2-1, 2-2-1 is a grid with a column
-         of small cards down the right-hand side — which is exactly the "boring
-         equal grid" section 11 asks not to build. The same twelve cards
-         reordered so the small one lands in a different column each row read as
-         a composed page, and it costs nothing but the order of this list.
+      /* THE PLACE AND ITS FOUR SYSTEMS. §31 opens this role on state, and Site
+         Status is four words somebody set rather than four numbers nobody
+         computed. */
+      { id: 'site.overview.photo', size: 'large' },
+      { id: 'site.overview.status', size: 'large' },
+      { id: 'site.space.sections', size: 'small' },
+      { id: 'site.space.count', size: 'small' },
 
-         First-fit does the rest: the packer takes them in order, so the order
-         IS the layout. */
+      /* WHAT IS BROKEN AND WHAT IT COSTS. Energy is the document's own trend
+         rather than a month-to-date figure: a number you cannot act on against
+         a line that has been climbing for nine days. */
       { id: 'site.assets.total', size: 'medium' },
       { id: 'site.maint.open', size: 'medium' },
       { id: 'site.work.tasks', size: 'small' },
-
-      { id: 'site.safety.incidents', size: 'small' },
-      { id: 'site.assets.infra', size: 'medium' },
-      { id: 'site.util.overview', size: 'medium' },
-
-      { id: 'site.people.count', size: 'medium' },
-      { id: 'site.space.sections', size: 'small' },
-      { id: 'site.projects.active', size: 'medium' },
-
-      { id: 'site.space.count', size: 'small' },
-      { id: 'site.stock.reorder', size: 'medium' },
-      { id: 'site.assets.vehicles', size: 'medium' },
-
-      /* Maintenance and Assets are already on this page as summaries, so the
-         module row takes the three the documents give Maintenance / Engineering
-         that it does not carry: what is reporting, what the power costs, and
-         which vehicles are about to be off the road on paperwork. */
-      { id: 'mod.iot', size: 'medium' },
       { id: 'mod.energy', size: 'medium' },
-      { id: 'mod.transport', size: 'small' },
+      { id: 'site.util.overview', size: 'medium' },
+      { id: 'site.safety.incidents', size: 'small' },
+
+      /* AND THE THREE VERBS A FAULT TURNS INTO, beside what is reporting and
+         where the vehicles have gone. */
+      { id: 'site.maint.actions', size: 'medium' },
+      { id: 'mod.iot', size: 'medium' },
+      { id: 'site.util.today', size: 'small' },
+      { id: 'mod.transport', size: 'medium' },
+      { id: 'mod.water', size: 'medium' },
+      { id: 'site.work.overdue', size: 'small' },
     ],
     sectionDefaults: blocks(
       pair('sec.cond.summary', 'sec.maint.open', 'sec.maint.door', 'sec.work.tasks'),
@@ -14765,30 +15153,31 @@ const ROLES = [
       'd.area', 'd.environment', 'd.occupancy',
     ],
     defaults: [
-      /* People, Finance, Compliance, Approvals, Procurement, Documents,
-         Vendors, Activity — coordination and sign-off. No Assets, no
-         Maintenance, no Animal Operations: this role cannot see them. */
-      { id: 'site.people.count', size: 'medium' },
+      /* THE ONLY ROLE WHOSE FIRST SCREEN IS PEOPLE AND MONEY rather than a state
+         of the physical Site. The photograph is the work itself. */
+      { id: 'site.work.photo', size: 'large' },
+      { id: 'site.people.today', size: 'medium' },
       { id: 'site.finance.budget', size: 'medium' },
-      { id: 'site.work.tasks', size: 'small' },
-
       { id: 'site.work.approvals', size: 'small' },
-      { id: 'site.safety.compliance', size: 'medium' },
-      { id: 'site.finance.procurement', size: 'medium' },
-
-      { id: 'site.docs.recent', size: 'medium' },
-      { id: 'site.safety.incidents', size: 'small' },
-      { id: 'site.vendors.active', size: 'medium' },
-
       { id: 'site.space.sections', size: 'small' },
-      { id: 'site.risk.register', size: 'medium' },
-      { id: 'site.work.activity', size: 'medium' },
 
-      /* HR / People and Admin / Finance are two of the four seats this role
-         covers, and these are their modules: leave waiting on a signature, the
-         overtime it is costing, and the establishment behind both. */
+      /* THE DESK. Attendance and payroll are HR / People's own modules in the
+         documents, and the actions card is the half of this role's day that is
+         a signature rather than a figure. */
+      { id: 'site.people.actions', size: 'medium' },
       { id: 'mod.attendance', size: 'medium' },
+      { id: 'site.work.tasks', size: 'small' },
+      { id: 'site.finance.procurement', size: 'medium' },
       { id: 'mod.payroll', size: 'medium' },
+      { id: 'site.work.overdue', size: 'small' },
+
+      /* AND WHAT HAS TO BE SIGNED OFF — the obligations, who has read the SOPs
+         behind them, and who the Site depends on from outside. */
+      { id: 'site.safety.compliance', size: 'medium' },
+      { id: 'mod.compliance', size: 'medium' },
+      { id: 'site.safety.incidents', size: 'small' },
+      { id: 'site.docs.recent', size: 'medium' },
+      { id: 'site.vendors.active', size: 'medium' },
       { id: 'mod.manpower', size: 'small' },
     ],
     sectionDefaults: blocks(
@@ -19862,6 +20251,175 @@ function createWidgetDetail({ getContent, onOpenModule }) {
   __x.createWidgetDetail = createWidgetDetail;
 });
 
+__def('js/components/SearchHint.js', function (__x, __req) {
+/**
+ * WHAT CAN I SEARCH FOR?
+ * ───────────────────────────────────────────────────────────────────────────
+ * The field said "Search". A search box with no idea what is in it gets typed
+ * into once, and after that it gets ignored — the reader has no way to know
+ * whether "leopard" or "CAR-02" or "Ramesh" is a thing this box will find. So
+ * the hint names one of them at a time and changes: Animals · Enclosures ·
+ * Users · Modules. Four words in, a reader knows the shape of the index.
+ *
+ * ═══ IT IS NOT THE PLACEHOLDER ═════════════════════════════════════════════
+ *
+ * `placeholder` is a string on an input, and a string cannot animate — you can
+ * only replace it, which flickers, cannot be styled by part, and is read out
+ * again by a screen reader every time it changes. So the real placeholder is
+ * emptied and this is a span sitting where it would have been, aria-hidden,
+ * with the SCOPE living in the input's `aria-label` where it always was. What a
+ * screen reader hears is unchanged and unrepeated: "Search Bannerghatta Safari".
+ *
+ * ═══ WHEN IT STOPS ═════════════════════════════════════════════════════════
+ *
+ *   typing        gone entirely — it is a placeholder, and the value wins
+ *   focus         frozen on the current word. A word sliding under a live
+ *                 caret is the field arguing with the person using it
+ *   tab hidden    stopped, like the card jiggle. An animation nobody is
+ *                 looking at is pure cost, and setInterval does not care
+ *   reduced motion  no cycling at all. One static line naming the first three
+ *                 categories, because "calm it down" was asked of all of it
+ *                 and a cross-fade every two seconds is not calm
+ */
+
+const { animate, prefersReducedMotion } = __req('js/lib/motion.js');
+
+/* Long enough to read the word and register that it changed, short enough that
+   the second word arrives before the reader has looked away. */
+const DWELL = 2100
+const SHIFT = 260
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ))
+}
+
+/**
+ * @param {object} opts
+ *   input   the real <input>, whose placeholder this replaces
+ *   root    where to mount — the field, which must be a positioning context
+ *   prefix  the unchanging half ("Search")
+ *   words   () => string[] · the categories, for the CURRENT view
+ */
+function createSearchHint({ input, root, prefix = 'Search', words }) {
+  const hint = document.createElement('span')
+  hint.className = 'search__hint'
+  hint.setAttribute('aria-hidden', 'true')
+  hint.innerHTML =
+    `<span class="search__hint-lead">${esc(prefix)}</span>` +
+    `<span class="search__cycle" data-cycle></span>`
+  root.append(hint)
+
+  const cycle = hint.querySelector('[data-cycle]')
+
+  let list = []
+  let i = 0
+  let timer = 0
+  let swap = 0
+  let anim = null
+  let frozen = false
+
+  const still = () => prefersReducedMotion()
+
+  function paint(word) {
+    cycle.textContent = word
+  }
+
+  /**
+   * The word leaves upward and the next one arrives from below, which reads as
+   * ONE list moving rather than two words swapping.
+   *
+   * ONE ANIMATION, AND NO `fill`. It was two — out with `fill: 'forwards'`,
+   * then in on the promise — and the first one was still applied when the
+   * second ended, so every word finished arriving and then vanished again: the
+   * hint measured `opacity: 0` for most of every cycle, which is a placeholder
+   * that is not there. A single keyframe set that leaves and returns cannot do
+   * that, because it holds nothing at the end. The text is swapped at the
+   * halfway mark, where there is nothing on screen to see it change.
+   */
+  function step() {
+    const next = list[(i + 1) % list.length]
+    if (!next || next === cycle.textContent) { i = (i + 1) % list.length; return }
+
+    anim?.cancel()
+    anim = animate(cycle, [
+      { transform: 'translateY(0)',    opacity: 1, offset: 0 },
+      { transform: 'translateY(-65%)', opacity: 0, offset: 0.46 },
+      { transform: 'translateY(65%)',  opacity: 0, offset: 0.54 },
+      { transform: 'translateY(0)',    opacity: 1, offset: 1 },
+    ], { duration: SHIFT * 2, easing: 'ease-in-out' })
+
+    clearTimeout(swap)
+    swap = window.setTimeout(() => {
+      i = (i + 1) % list.length
+      paint(next)
+    }, SHIFT)
+  }
+
+  /**
+   * TWO TIMERS, AND THEY MUST NOT SHARE A STOP.
+   *
+   * The dwell timer schedules the next word; the swap timer is the mid-flight
+   * text change inside the current transition. `tick()` re-arms the dwell and
+   * therefore has to clear ONLY the dwell — it was calling the full stop(),
+   * which killed the swap it had just scheduled 260ms earlier, so the animation
+   * played on the same word for ever. The hint moved and never changed, which
+   * is the most convincing kind of broken.
+   */
+  function stopDwell() {
+    if (timer) { clearTimeout(timer); timer = 0 }
+  }
+
+  function tick() {
+    stopDwell()
+    if (still() || frozen || document.hidden || list.length < 2) return
+    timer = window.setTimeout(() => { step(); tick() }, DWELL)
+  }
+
+  /* The full stop, for a freeze or a list change. The in-flight animation is
+     left to finish rather than cancelled — cancelling it mid-flight would snap
+     the word back to full opacity, and dropping the swap with it is what makes
+     the freeze land on the word already on screen. */
+  function stop() {
+    stopDwell()
+    if (swap) { clearTimeout(swap); swap = 0 }
+  }
+
+  /** Called on construction and whenever the view changes under it. */
+  function sync() {
+    const next = (typeof words === 'function' ? words() : words) || []
+    const changed = next.join('|') !== list.join('|')
+    list = next
+    if (!list.length) { hint.hidden = true; stop(); return }
+    hint.hidden = !!input.value
+
+    if (changed) {
+      i = 0
+      /* REDUCED MOTION GETS A SENTENCE, NOT A SLIDESHOW. Three categories is
+         enough to say what kind of index this is, and it never moves again. */
+      paint(still() ? list.slice(0, 3).join(', ') : list[0])
+    }
+    tick()
+  }
+
+  input.addEventListener('input', () => {
+    hint.hidden = !!input.value
+    if (input.value) stop(); else tick()
+  })
+  /* Focus freezes rather than hides: the reader is about to type and the list is
+     what tells them what will be found. It just has to hold still. */
+  input.addEventListener('focus', () => { frozen = true; stop() })
+  input.addEventListener('blur', () => { frozen = false; tick() })
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : tick()))
+
+  sync()
+  return { sync, stop, get el() { return hint } }
+}
+
+  __x.createSearchHint = createSearchHint;
+});
+
 __def('js/app.js', function (__x, __req) {
 /**
  * ANTZ COMMAND CENTRE · HOME
@@ -19895,6 +20453,7 @@ const { createWorkspaceSwitcher } = __req('js/components/WorkspaceSwitcher.js');
 const { createSitesList } = __req('js/components/SitesList.js');
 const { createWorkspaceHeader } = __req('js/components/WorkspaceHeader.js');
 const { createWidgetDetail } = __req('js/components/WidgetDetail.js');
+const { createSearchHint } = __req('js/components/SearchHint.js');
 const { buildContext, detailFor, hasDetail } = __req('js/data/domainDetail.js');
 const { viewStore, setView, openHousing, setSite, setSection, setEnclosure, setLevel, setRole, goUp, goDown } =
   __req('js/state/viewStore.js');
@@ -20896,6 +21455,36 @@ const panels = {
 }
 const searchInput = document.querySelector('.search__input')
 
+/**
+ * WHAT THIS FIELD WILL FIND, ONE WORD AT A TIME.
+ * ───────────────────────────────────────────────────────────────────────────
+ * The list is per VIEW AND PER DEPTH, because the answer genuinely differs: the
+ * home page finds modules and people, the Sites listing finds Sites, and an
+ * enclosure finds the animals in it and what has been done to them. A single
+ * list would have been quicker to write and would advertise, at an enclosure,
+ * a search for Sites.
+ *
+ * FIRST WORD FIRST. Each list opens on the thing that depth is mostly about, so
+ * a reader who never sees the animation still reads something true.
+ */
+const SEARCH_WORDS = {
+  modules:   ['Modules', 'Widgets', 'Animals', 'Users', 'Reports'],
+  sites:     ['Sites', 'Sections', 'Enclosures', 'Animals', 'Staff'],
+  site:      ['Animals', 'Enclosures', 'Sections', 'Users', 'Assets', 'Tasks'],
+  section:   ['Enclosures', 'Animals', 'Keepers', 'Tasks', 'Documents'],
+  enclosure: ['Animals', 'Treatments', 'Enrichment', 'Keepers', 'Documents'],
+}
+
+const searchHint = createSearchHint({
+  input: searchInput,
+  root: document.querySelector('.search'),
+  prefix: 'Search',
+  words() {
+    const st = viewStore.get()
+    return st.view === 'site' ? SEARCH_WORDS[st.level] || SEARCH_WORDS.site : SEARCH_WORDS.modules
+  },
+})
+
 const switcher = createWorkspaceSwitcher({
   root: document.getElementById('workspaceSwitch'),
   getView: () => viewStore.get().view,
@@ -20958,8 +21547,18 @@ function syncWorkspace(meta = {}) {
   if (onSite && edit.editing) edit.exit()
   if ((!onSite || SUBJECT_REASONS.has(meta.reason)) && wsEdit.editing) wsEdit.exit()
 
-  searchInput.placeholder = onSite ? searchScope(st) : 'Search'
-  searchInput.setAttribute('aria-label', searchInput.placeholder)
+  /**
+   * THE SCOPE GOES TO THE LABEL, AND THE FIELD'S OWN PLACEHOLDER GOES EMPTY.
+   *
+   * What is drawn in the field is the rotating hint — "Search · Animals",
+   * "Search · Enclosures" — because a placeholder is a string and a string
+   * cannot animate. The scope was the placeholder's whole contribution and it
+   * is not lost: it is on the input's `aria-label`, which is what a screen
+   * reader reads and the only place it was ever announced from.
+   */
+  searchInput.placeholder = ''
+  searchInput.setAttribute('aria-label', onSite ? searchScope(st) : 'Search')
+  searchHint.sync()
 
   if (meta.reason === 'role') {
     /* Every level's store, not just the live one — the user's arrangement at the
@@ -21208,6 +21807,34 @@ Object.assign(window, {
             }
             if (seen.has(d.id)) problems.push(`${tag}: seeded twice: ${d.id}`)
             seen.add(d.id)
+          }
+
+          /**
+           * TWO CARDS WITH THE SAME TITLE ARE A CARD THAT HAS NOT BEEN NAMED.
+           *
+           * The quick-action cards were first titled after their domain, and
+           * four of those titles were already on a summary card in the same
+           * domain — so a Facility Manager's default carried two cards headed
+           * "Maintenance", one reading "12 Open Jobs" and one reading
+           * "Raise Job · Log Defect", and the reader was handed the job of
+           * working out they were the same subject. Reading the five defaults by
+           * eye found three of the four.
+           *
+           * The TITLE is checked rather than the widget name, because the title
+           * is what is drawn on the card. Two cards from different domains may
+           * share one — the same word means different things under different
+           * glyphs and different fills — so this is scoped to ONE role's page,
+           * which is the only place two of them are ever seen together.
+           */
+          const titles = new Map()
+          for (const d of list) {
+            const w = getW(d.id)
+            const t = w && w.data && w.data.title
+            if (!t) continue
+            if (titles.has(t)) {
+              problems.push(`${tag}: two cards titled "${t}": ${titles.get(t)} and ${d.id}`)
+            }
+            titles.set(t, d.id)
           }
 
           /* Holes. Pack the role's seed at the reference five columns and count

@@ -307,5 +307,100 @@ with Chrome(width=1024, height=1300) as c:
     check("no console errors around the menu", not c.errors(), str(c.errors()[:2]))
 
 
+
+# ── the page chrome: order, greeting, rows, and the rotating search hint ───
+with Chrome(width=1024, height=1366) as c:
+    print("\nthe page chrome")
+    c.goto(URL)
+    order = c.eval("[...document.querySelector('.page').children].map(e => e.className || e.id)")
+    check("the switcher is above the greeting and the search field",
+          order.index("wswitch-row") < order.index("home-header") < order.index("search-row"),
+          " → ".join(order))
+
+    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
+    greet = c.eval("""(() => { const g = document.querySelector('.greeting');
+        return [getComputedStyle(g).opacity, g.textContent.replace(/\\s+/g,' ').trim()] })()""")
+    check("the greeting shows in the Site Command Centre too",
+          greet[0] == "1" and "Good Morning" in greet[1], str(greet))
+    check("and no page title is drawn over it",
+          c.eval("getComputedStyle(document.querySelector('.home-header'), '::before').content") in ("none", "normal", '""'),
+          str(c.eval("getComputedStyle(document.querySelector('.home-header'), '::before').content")))
+
+    rails = c.eval("""[...document.querySelectorAll('.site-row')].map(r => getComputedStyle(r,'::before').content)""")
+    check("no Site row carries a status rail", all(v in ("none", "normal") for v in rails), str(rails))
+
+    # the hint replaces the placeholder, and the scope moves to the label
+    st = c.eval("""(() => { const i = document.querySelector('.search__input'), h = document.querySelector('.search__hint');
+        return { placeholder: i.placeholder, label: i.getAttribute('aria-label'),
+                 hintHidden: h.hidden, hidden: h.getAttribute('aria-hidden'),
+                 lead: (h.querySelector('.search__hint-lead')||{}).textContent,
+                 word: (h.querySelector('.search__cycle')||{}).textContent } })()""")
+    check("the input's own placeholder is empty", st["placeholder"] == "", repr(st["placeholder"]))
+    check("the scope moved to the accessible label", "Search" in (st["label"] or ""), str(st["label"]))
+    check("the hint is decorative, not announced", st["hidden"] == "true")
+    check("and it names something searchable", st["lead"] == "Search" and bool(st["word"]),
+          f"{st['lead']} {st['word']}")
+
+    # per depth
+    c.eval("location.hash='#enclosure/car.2'"); time.sleep(0.9)
+    # Under reduced motion the hint is the static three-word line, so the check
+    # is that the WORDS are the enclosure's, whichever form they are drawn in.
+    txt = c.eval("document.querySelector('.search__cycle').textContent")
+    check("the words follow the depth",
+          set(w.strip() for w in txt.split(",")) <=
+          {"Animals", "Treatments", "Enrichment", "Keepers", "Documents"}, txt)
+
+    # typing hides it, like a placeholder
+    c.eval("""(() => { const i = document.querySelector('.search__input');
+        i.value = 'tiger'; i.dispatchEvent(new Event('input')) })()""")
+    time.sleep(0.3)
+    check("typing hides it", c.eval("document.querySelector('.search__hint').hidden") is True)
+    c.eval("""(() => { const i = document.querySelector('.search__input');
+        i.value = ''; i.dispatchEvent(new Event('input')) })()""")
+    time.sleep(0.3)
+    check("clearing brings it back", c.eval("document.querySelector('.search__hint').hidden") is False)
+
+    check("reduced motion gets a static line, not a slideshow",
+          "," in c.eval("document.querySelector('.search__cycle').textContent"),
+          c.eval("document.querySelector('.search__cycle').textContent"))
+    check("no console errors in the chrome", not c.errors(), str(c.errors()[:2]))
+
+
+# The hint only ANIMATES where motion is welcome, so that half needs its own
+# browser — this suite's default forces reduced motion for measurement.
+with Chrome(width=1024, height=1000, reduced_motion=False) as c:
+    print("\nthe search hint, with motion")
+    c.goto(URL)
+    seen = []
+    for _ in range(4):
+        seen.append(c.eval("document.querySelector('.search__cycle').textContent"))
+        time.sleep(2.4)
+    check("it cycles through what can be searched", len(set(seen)) >= 3, " · ".join(seen))
+    check("one word at a time", all("," not in w for w in seen), " · ".join(seen))
+
+    # THE BUG THIS CATCHES: two animations, the first with `fill: forwards`, left
+    # the word sitting at opacity 0 for most of every cycle — it moved, and was
+    # invisible while it did. Sampled rather than reasoned about, because the
+    # markup and the text were both perfectly correct while it was broken.
+    dim = 0
+    for _ in range(16):
+        if c.eval("+getComputedStyle(document.querySelector('.search__cycle')).opacity") < 0.5:
+            dim += 1
+        time.sleep(0.4)
+    check("and the word is actually visible while it does",
+          dim <= 5, f"below half opacity in {dim} of 16 samples")
+
+    c.eval("document.querySelector('.search__input').dispatchEvent(new FocusEvent('focus'))")
+    time.sleep(0.8)
+    a = c.eval("document.querySelector('.search__cycle').textContent")
+    time.sleep(3.6)
+    b = c.eval("document.querySelector('.search__cycle').textContent")
+    check("focus freezes it, so it does not move under the caret", a == b, f"{a} -> {b}")
+    c.eval("document.querySelector('.search__input').dispatchEvent(new FocusEvent('blur'))")
+    time.sleep(3.0)
+    check("blur resumes it", c.eval("document.querySelector('.search__cycle').textContent") != b)
+    check("no console errors while cycling", not c.errors(), str(c.errors()[:2]))
+
+
 print("\n" + ("ALL PASS" if not fails else f"{len(fails)} FAILED: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)
