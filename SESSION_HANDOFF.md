@@ -99,6 +99,22 @@ space actually left below the button rather than by a number in CSS.
 | a queue whose rows did not sum to its total | scaled separately; the total comes from the rows now |
 | five 1×1 titles ellipsed at 900px | the title line gets 92px there, about twelve characters |
 
+### And one found in production, after the first deploy
+
+**`btn.hidden = true` set the property, cleared the accessibility tree, and left
+the button on the screen.** The modules button was supposed to be gone on the
+Sites listing and at the two deeper levels; it shipped visible at all three,
+because `[hidden]` is a bare attribute selector in the UA stylesheet at
+specificity 0,1,0 and `.btn-icon { display: grid }` beats it.
+
+**It got past a check that agreed with itself.** The test read `el.hidden` — the
+property, which was correctly `true` — rather than the computed `display` or the
+element's box. The listing rules at the foot of site.css were the same problem
+solved one selector at a time; there is a general rule now
+(`.btn-icon[hidden], .btn-solid[hidden], .btn-line[hidden]`) so the next control
+to be hidden does not have to rediscover it. **Assert on the box, not on the
+attribute.**
+
 ### And two found on the way past
 
 **The gallery's rail listed eight domains that opened onto an empty pane.** The
@@ -173,22 +189,27 @@ the word "warn" as a caption under a figure. Both fixed. The check resolves
 every domain at every level and asserts tiles have values, groups have rows,
 table rows match their columns, and every widget's landing group exists.
 
-**AND THE SWITCH LANDED ON THE CHOOSER.** Reported from the deployed build:
-selecting *Site Command Centre* opened the Sites listing rather than a Site.
-`level` is persisted and `sites` is a level like any other, so one visit to
-Housing pointed the tab at the listing permanently — in that session and every
-session after it. `setView()` now resolves `sites` to `site` on the way into the
-view (reason `'site'`, so app.js re-applies the catalogue and rebuilds the grid),
-and a stored `sites` no longer becomes a landing level on arrival. An explicit
-`#sites` still wins, because an address is an intention.
+**THE SWITCH NOW OPENS THE SITES LISTING, AND IT TOOK THREE PASSES TO GET THE
+INTENT RIGHT.** The first reading of the report was backwards — it was built to
+land on a Site, then on a Site harder — and the user's reference screenshot
+settled it: *Site Command Centre* is a DOOR TO THE SITES, and the listing is
+what has to come. `setView()` resolves `level` to `sites` on the way into the
+view, with reason `'sites'` so app.js treats it as a subject change (an open
+record sheet closes, the previous level's grid is dropped).
 
-**AND THAT ONLY CLOSED HALF OF IT** — reported again from the deployed build.
-The listing lives INSIDE the Site view, so arriving by Housing leaves the Site
-tab already selected and `view === view` swallowed the tap: pressing the control
-did nothing at all, which reads as a dead button. `setView()`'s guard now lets
-one case through, the Site view at the `sites` level. Both halves are checked in
-`tools/verify_detail.py` — including that the tab is genuinely `aria-selected`
-when the tap is made, which is what made the first fix look complete.
+Two things fell out of it that are worth keeping:
+
+  A TAB THAT WAS A DEAD BUTTON. The listing lives inside the Site view, so
+  working in a Site leaves the tab selected and `view === view` swallowed the
+  tap — pressing the control did nothing at all. It now means "back out to the
+  Sites", which is what an already-selected tab does everywhere else.
+
+  THE DESTINATION NO LONGER DEPENDS ON PERSISTED STATE. `level` is saved, so
+  the tab used to point wherever you happened to be last. `siteId` is still
+  untouched by the switch, which is what lets the listing mark "Last opened".
+
+`antz.site.allWidgets()` needed one line: the switch lands on a listing now, and
+a listing has no grid to sweep, so the helper steps into the Site level itself.
 
 Verification: **`python3 tools/verify_detail.py`** — three levels, six widths,
 empty subjects, Escape behaviour: ALL PASS. `tools/verify.py` is still fully

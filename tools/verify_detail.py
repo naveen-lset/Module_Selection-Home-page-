@@ -174,66 +174,55 @@ def nav_state(c):
       onSite: document.body.classList.contains('is-site'),
       hash: location.hash,
       cards: document.querySelectorAll('#siteGrid .card').length,
+      rows: document.querySelectorAll('.site-row').length,
     }))()""")
 
 
 with Chrome(width=1024, height=1200) as c:
     print("\nwhere the switch lands")
     c.goto(URL)
-
-    # the reported bug: Housing first — which persists `level: 'sites'` — then
-    # the tab, which used to hand back the chooser instead of a Site
-    c.eval("location.hash='#sites'"); time.sleep(0.6)
     st = nav_state(c)
-    check("Housing opens the Sites listing", st["listing"] and st["level"] == "sites", str(st["level"]))
+    check("a fresh visitor lands on the home page", st["onSite"] is False, str(st))
 
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][0].click()"); time.sleep(0.6)
-    check("back to Module Selection", nav_state(c)["onSite"] is False)
-
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.8)
-    st = nav_state(c)
-    check("the Site Command Centre tab lands on a SITE", st["level"] == "site" and not st["listing"],
-          f"level={st['level']} listing={st['listing']}")
-    check("with its workspace drawn", st["cards"] >= 8, f"{st['cards']} cards")
-    check("and the hash following", st["hash"].startswith("#site/"), st["hash"])
-
-    # THE HALF THE FIRST FIX MISSED: arriving by Housing leaves the Site tab
-    # already selected, so the tap used to be swallowed by the view guard.
-    c.goto(URL)
-    c.eval("""(() => { for (const card of document.querySelectorAll('#moduleGrid .card'))
-        if ((card.dataset.variant||'').startsWith('housing')) { card.click(); return } })()""")
-    time.sleep(0.8)
-    st = nav_state(c)
-    check("the Housing tile opens the listing", st["listing"] and st["level"] == "sites", str(st["level"]))
-    sel = c.eval("[...document.querySelectorAll('.wswitch__tab')].map(t => t.getAttribute('aria-selected'))")
-    check("the Site tab is already selected there", sel == ["false", "true"], str(sel))
+    # THE TAB IS THE DOOR TO THE SITES.
     c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
     st = nav_state(c)
-    check("tapping the already-selected Site tab opens a Site",
-          st["level"] == "site" and not st["listing"] and st["cards"] >= 8, str(st))
+    check("the Site Command Centre tab opens the Sites listing",
+          st["listing"] and st["level"] == "sites", f"level={st['level']} listing={st['listing']}")
+    check("with every Site on it", st["rows"] == 4, f"{st['rows']} rows")
+    check("and the hash following", st["hash"] == "#sites", st["hash"])
 
-    # and the listing is no less reachable for it
-    c.eval("location.hash='#sites'"); time.sleep(0.6)
-    check("#sites still addresses the listing", nav_state(c)["listing"] is True)
-    rows = c.eval("document.querySelectorAll('.site-row').length")
-    check("the listing still lists every Site", rows == 4, f"{rows} rows")
-    c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.7)
+    # choosing one opens it, and the tab brings you back out
+    c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.8)
     st = nav_state(c)
-    check("choosing a Site from the listing opens it", st["level"] == "site" and st["cards"] >= 8, str(st))
+    check("choosing a Site opens its workspace", st["level"] == "site" and st["cards"] >= 8, str(st))
+    sel = c.eval("[...document.querySelectorAll('.wswitch__tab')].map(t => t.getAttribute('aria-selected'))")
+    check("the Site tab is already selected in a Site", sel == ["false", "true"], str(sel))
+    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
+    st = nav_state(c)
+    check("tapping the already-selected tab goes back out to the listing",
+          st["listing"] and st["level"] == "sites", str(st))
+
+    # from deeper in the hierarchy too
+    c.eval("location.hash='#enclosure/car.2'"); time.sleep(0.9)
+    check("an enclosure is reachable", nav_state(c)["level"] == "enclosure")
+    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
+    st = nav_state(c)
+    check("and the tab comes all the way back out to the listing",
+          st["listing"] and st["level"] == "sites", str(st))
+
+    # Housing on the home page is the other door to the same place
+    c.eval("[...document.querySelectorAll('.wswitch__tab')][0].click()"); time.sleep(0.7)
+    c.eval("""(() => { for (const card of document.querySelectorAll('#moduleGrid .card'))
+        if ((card.dataset.variant||'').startsWith('housing')) { card.click(); return } })()""")
+    time.sleep(0.9)
+    check("the Housing tile still opens the listing", nav_state(c)["listing"] is True)
+
+    # and the ways back up are unchanged
+    c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.8)
     c.eval("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))")
-    time.sleep(0.6)
-    check("Escape from a Site steps back up to the listing", nav_state(c)["listing"] is True)
-
-    # the stickiness is gone across a reload with no address of its own
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][0].click()"); time.sleep(0.5)
-    c.goto(URL); time.sleep(0.5)
-    stored = c.eval("JSON.parse(localStorage.getItem('antz.view')||'{}').level")
-    st = nav_state(c)
-    check("a stored 'sites' does not become the landing level",
-          st["level"] != "sites" and not st["listing"], f"stored {stored} -> landed on {st['level']}")
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.8)
-    st = nav_state(c)
-    check("after a reload the tab still lands on a Site", st["level"] == "site" and not st["listing"], str(st))
+    time.sleep(0.7)
+    check("Escape from a Site steps up to the listing", nav_state(c)["listing"] is True)
 
     check("no console errors while navigating", not c.errors(), str(c.errors()[:2]))
 

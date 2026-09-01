@@ -3843,6 +3843,18 @@ body.is-site .home-header::before {
 }
 .btn-icon:hover { background: var(--petrol-050); }
 .btn-icon .icon { width: 18px; height: 18px; }
+/* `hidden` HAS TO OUTRANK THE CLASS THAT SETS `display`, and on these three it
+   does not on its own. The attribute is styled by the UA sheet as a bare
+   `[hidden] { display: none }` at specificity 0,1,0, which any class here beats
+   — so `btn.hidden = true` set the property, cleared the accessibility tree,
+   and left the button on the screen. The modules button was hidden that way on
+   the Sites listing and at the two deeper levels, and it shipped, because a
+   test that reads `el.hidden` reads the property and agrees with itself.
+
+   The listing rules below are the same problem solved one selector at a time;
+   this is the general form, so the next control to be hidden does not have to
+   rediscover it. */
+.btn-icon[hidden], .btn-solid[hidden], .btn-line[hidden] { display: none; }
 
 /* ── counts strip ──
    Every count is a BUTTON. Section 11 of the brief makes the workspace a
@@ -20971,6 +20983,9 @@ Object.assign(window, {
           out.push({ uid: 'x' + (i++), variantId: w.id, size: sz })
         }
         setView('site')
+        /* The switch lands on the SITES LISTING now, and a listing has no grid
+           to sweep — so step into the Site whose catalogue this is. */
+        if (viewStore.get().level === 'sites') setLevel('site')
         ws().setCards(out, { reason: 'stress' })
       },
     },

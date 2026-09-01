@@ -2332,6 +2332,31 @@ business; the menu is the module catalogue's opinion.** What a Site Manager is
 collection is inside its approved capacity, and both are one tap away for
 everybody else.
 
+## The bug that shipped, and the check that agreed with itself
+
+The first deploy went out with the modules button **visible on the Sites listing
+and at both deeper levels**, where it is meant to be gone.
+
+`render()` sets `modBtn.hidden = sub.level !== 'site'`, which is correct and did
+nothing. `[hidden]` is a bare attribute selector in the UA stylesheet at
+specificity **0,1,0**, and `.btn-icon { display: grid }` is **0,1,0 on a class**
+— which wins. So the property was set, the element left the accessibility tree,
+and the button stayed on the screen.
+
+The `.site-head--listing [data-add]` / `[data-customize]` rules at the foot of
+site.css are the same problem, solved one selector at a time by whoever hit it
+first. There is a general form now:
+
+```css
+.btn-icon[hidden], .btn-solid[hidden], .btn-line[hidden] { display: none; }
+```
+
+**The check that missed it is the more useful lesson.** The test read `el.hidden`
+— the property, which was correctly `true` at all three levels — and reported
+PASS. A property is what you asked for; a box is what the user gets. The check
+reads `getComputedStyle().display` and `getBoundingClientRect()` now, and it
+catches the original bug when the CSS rule is removed.
+
 ## Two bugs found on the way past
 
 **The gallery's rail listed eight domains that opened onto an empty pane.** The
@@ -2401,24 +2426,27 @@ user's call.
 
 ### Where the switch lands
 
-The **Site Command Centre** tab opens the Site you were last working in — never
-the Sites listing. It used to open whichever level was persisted, and `sites` is
-a level like any other, so **one visit to Housing pointed the tab at the chooser
-for every session after it**. A control whose subtitle reads *Operate a Site* and
-delivers a list of Sites is not a preference the user set; it is a leak from the
-state machine, and `setView()` now resolves `sites` to `site` on the way in.
+The **Site Command Centre** tab opens the **Sites listing** — every Site, ranked
+by what is open, with the one you last had open marked. That is the question a
+reader arrives with (*which Site needs me this morning*), and it is the top of
+the hierarchy the whole workspace is built on: Housing → Sites → Site → Section
+→ Enclosure. Landing straight in a single Site answers a question nobody has
+asked yet and hides the other three.
 
-There were **two doors into the same leak**, and the first fix only closed one.
-The listing lives *inside* the Site view, so arriving by Housing leaves the Site
-tab already lit — and `view === view` swallowed the tap. Correct for a segmented
-control in general, wrong here: a reader looking at a list of Sites, pressing the
-control that says *Operate a Site*, got nothing at all. The guard now lets that
-one case through, because there the tap has somewhere to go.
+`setView()` resolves the level on the way in, so the destination does not depend
+on whichever level happened to be persisted. Two consequences worth stating:
 
-The listing is no less reachable: Housing on the home page opens it, the **Sites**
-crumb goes back to it, <kbd>Esc</kbd> from a Site steps up to it, and `#sites`
-still addresses it directly. An explicit address still wins on arrival — what no
-longer happens is landing there by default.
+- **Tapping the tab while it is already selected does the same thing.** The
+  listing lives *inside* the Site view, so working in a Site leaves the tab lit;
+  pressing it there means "back out to the Sites", the way an already-selected
+  tab returns to the root of its section everywhere else. It used to be a **dead
+  button** — `view === view` swallowed the tap entirely.
+- **The reason is `'sites'`, not `'view'`**, whenever the level moves, so app.js
+  treats it as a subject change: an open record sheet closes and the previous
+  level's grid is dropped on the way out.
+
+`siteId` is never touched by the switch, which is what lets the listing mark
+*Last opened* and makes going back one tap.
 
 In the **Site Command Centre** the same gestures apply, with the workspace's own
 nouns — and nothing is locked, because which widget is indispensable is exactly
