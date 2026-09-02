@@ -898,6 +898,36 @@ and 12 rows so lifting the cap does not silently resolve every span to 1×1.
 Vercel → Project → Settings → Git; it needs the Vercel GitHub App installed on
 the repo, which is a browser step.
 
+**⚠ A SECOND mockup redesigns the SITE WORKSPACE on the Apple-widget
+brief, and it is the one with a live decision in it.**
+`mockups/site-workspace.html` — Mysuru Rescue Centre, a minimal identity-only
+header, and 6–12 glanceable widgets per role from a catalogue of 24 in six
+KINDS (metric, tile, pair, state, systems, ratio). No Site Health, no score, no
+attention roll-up, no alert list, no chart, no "View" and no control inside any
+widget — which is why the three action shapes from `widget-concepts.html` are
+absent here and stay on module pages, where §28 puts the detail. Sizes 1/2/4
+columns with **content-driven heights**: 24 widgets render at nine distinct
+heights from 133 to 276px, nothing stretched.
+
+**THE ONE THING IT DEPARTS FROM IS A SETTLED DECISION.** §15 asks for soft
+tonal gradients; the product's cards are the full-saturation Figma ramps with
+white text and re-opening that was ruled out. This page shows §15 at 30%→8% of
+each module's hue over white with dark ink — the closest two families differ by
+9 levels at the corner, and dark ink clears AA at 7.7:1 on the strongest wash
+against the gradient cards' 472-of-530 failures. **If it is accepted it belongs
+in Figma first.** Two contradictions inside the brief are flagged on the page
+rather than quietly resolved: §2 puts Sections and Enclosures in the header
+while §20 wants them as widgets, and §20 calls them first-class while §21's
+Facility/Manager/Admin defaults omit them.
+
+**AND THE STRUCTURAL BLOCKER:** `SPAN_TABLE` gives fixed 164px rows, so a real
+card is 164 or 344 and never 150. §14 needs variable row heights in the packer,
+which touches the FLIP pass and the saved-layout contract — the largest single
+item in the brief. Ten assertions in `mock.check*()` are green across five
+roles, seven widths and customize mode: `checkNoHealth`, `checkNoCTA`,
+`checkNoStutter`, `checkNoStretch`, `checkTonesDiffer`, `checkType`,
+`checkSizes`, `checkOverflow`, `checkStatusHasWords`, `checkOneQuestion`.
+
 **⚠ Eighty-nine widget ideas are mocked up, module by module, and waiting on
 a decision.** `mockups/widget-concepts.html` — one BLOCK OF TEN CELLS per module
 for all eighteen home modules, 41 compositions, sizes mixed on purpose (36 at

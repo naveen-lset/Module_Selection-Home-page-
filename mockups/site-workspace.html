@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site Workspace · Glanceable Redesign</title>
+
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  SITE WORKSPACE — the glanceable redesign
+  ═══════════════════════════════════════════════════════════════════════════
+
+  A SECOND MOCKUP, NOT A REPLACEMENT. `widget-concepts.html` proposes
+  compositions for the MODULE pages; this proposes the SITE WORKSPACE. §28 of
+  the brief is the rule that keeps them apart — the Site page summarises, the
+  module page holds the detail — so the two are meant to be read together.
+
+  WHAT THIS IS BUILT AGAINST, point by point:
+
+   §2  the header is identity and context only — breadcrumb, name, status,
+       type, in-charge, four counts, three actions. No summaries of any kind.
+   §3  NO Site Health, no score, no gauge of Site condition. Mysuru's record
+       carries `health: 72` and it is not drawn anywhere on this page. Condition
+       is read off the modules and off the status pill.
+   §5  one hierarchy: TITLE → PRIMARY VALUE → SHORT CONTEXT → OPTIONAL STATUS.
+   §6  Inter, five deliberate steps, nothing below 13px, not everything bold.
+   §8  no "View →" anywhere. §9 the whole widget is one button; no controls
+       inside it, which is why the ACTION widgets from the other mockup are
+       deliberately absent here.
+   §10 four sizes, and §14 CONTENT DETERMINES THE HEIGHT — the deck is a CSS
+       grid with auto rows, so a band is as tall as its tallest widget and no
+       taller. Nothing is stretched to fill a 164px slot.
+   §13 the large widget exists only where extra room buys extra information:
+       Infrastructure's six systems.
+   §15 soft tonal surfaces. Each widget is near-white with a 13%→2% wash of
+       its module's hue, dark ink on top. **THIS IS THE ONE THING THAT DEPARTS
+       FROM THE RECORDED PALETTE DECISION** — the product's cards are the
+       full-saturation Figma ramps with white text, and that was settled. This
+       page shows what §15 actually looks like so the departure can be judged;
+       if it is accepted it belongs in the Figma file first. A side effect
+       worth knowing: dark ink on a near-white surface clears AA everywhere,
+       which the gradient cards do not.
+   §16 every status carries a word as well as a dot. §17 icons are 18px line
+       marks beside the title; type stays dominant.
+   §19 Animal Operations is one 2-column widget with two numbers.
+   §20 Sections and Enclosures are their own tappable tiles.
+   §21 five role defaults, and the switcher re-lays the deck.
+   §22 Customize adds, removes, resizes and restores. Drag-reorder is the
+       product's own and is not re-implemented here.
+   §27 every figure was tested against "would I need this before entering the
+       module" — which is what removed Site Health, the attention roll-up, the
+       alert lists, the charts and every trend.
+
+  TWO CONTRADICTIONS INSIDE THE BRIEF, flagged rather than silently resolved.
+  Both are noted at the foot of the page.
+
+  FIGURES ARE MYSURU RESCUE CENTRE'S OWN, off SITES['ms-rescue'] and its
+  `figures` override in index.html — 6 sections, 23 enclosures, 41 staff, 28
+  species, 147 animals, 96 assets / 4 critical, 18 jobs / 7 overdue, 14 vet
+  cases / 3 critical, 48 tasks / 19 due today, 19 of 25 compliance, power on
+  generator. The brief's own examples say 248 assets and 9 open jobs; those are
+  Bannerghatta's, and using them here would reintroduce the exact bug the
+  handoff warns about. Anything derived rather than overridden is listed at the
+  foot.
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+<style>
+/* ══ TOKENS ═══════════════════════════════════════════════════════════════
+   The product's own page ground and ink, kept so this reads as the same
+   application. The card surface is the one thing that changes.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  --page-bg:
+    linear-gradient(180deg, rgba(175,239,235,.42) 0%, rgba(175,239,235,.2) 32.386%, rgba(242,255,248,.44) 68.662%),
+    linear-gradient(90deg, #fff 0%, #fff 100%);
+
+  --ink:   #1F415B;   /* MD3_Antz/OnSecondaryContainer — titles and figures */
+  --ink-2: #52697A;   /* secondary labels                                   */
+  --ink-3: #7A8684;   /* metadata, breadcrumb                               */
+  --teal:  #00ABAB;
+
+  /* status · never a dot on its own (§16) */
+  --ok:    #1B8A4B;
+  --warn:  #A96A08;
+  --alert: #BC3B26;
+
+  /* ── the type ramp (§6) · five steps, nothing under 13px ─────────────── */
+  --t-title:   15px;  --w-title:   600;
+  --t-num:     40px;  --t-num-sm:  34px;  --t-num-pair: 30px;  --w-num: 600;
+  --t-label:   16px;  --w-label:   400;
+  --t-status:  14px;  --w-status:  500;
+  --t-meta:    13px;  --w-meta:    400;
+
+  --r:      18px;
+  --pad:    20px;
+  --gutter: 24px;
+  --band:   32px;
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --t-fast: 140ms; --t-base: 220ms;
+
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0 0 64px;
+  font-family: var(--font); color: var(--ink);
+  background: var(--page-bg) no-repeat; background-attachment: fixed;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+.shell { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+
+/* ══ THE HEADER (§2) ══════════════════════════════════════════════════════
+   Identity and context only, and quieter than the widgets (§26): no surface,
+   no shadow, no border. Type on the page ground.
+   ═══════════════════════════════════════════════════════════════════════ */
+.hd { padding: 40px 0 8px; }
+.hd__crumb { display: flex; align-items: center; gap: 7px; font-size: var(--t-meta); color: var(--ink-3); margin: 0 0 14px; flex-wrap: wrap; }
+.hd__crumb a { color: var(--ink-3); text-decoration: none; }
+.hd__crumb a:hover { color: var(--ink); }
+.hd__crumb b { color: var(--ink); font-weight: 500; }
+.hd__crumb i { font-style: normal; opacity: .5; }
+
+.hd__top { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+.hd__id { min-width: 0; flex: 1 1 auto; }
+.hd__name { margin: 0 0 10px; font-size: 32px; font-weight: 600; letter-spacing: -.022em; line-height: 1.12; }
+.hd__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: var(--t-status); }
+.hd__pill { display: inline-flex; align-items: center; gap: 7px; font-weight: var(--w-status); color: var(--warn); }
+.hd__pill i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+.hd__sep { color: var(--ink-3); opacity: .5; }
+.hd__type { color: var(--ink-2); }
+
+.hd__who { flex: none; text-align: right; }
+.hd__who b { display: block; font-size: var(--t-label); font-weight: 500; }
+.hd__who span { display: block; font-size: var(--t-meta); color: var(--ink-3); margin-top: 2px; }
+
+/* the four counts · identity metadata, held deliberately quiet so the
+   Sections and Enclosures WIDGETS below stay the loud version (§20) */
+.hd__counts { display: flex; gap: 28px; flex-wrap: wrap; margin: 22px 0 0; }
+.hd__count { font-size: var(--t-meta); color: var(--ink-3); }
+.hd__count b { color: var(--ink-2); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.hd__acts { display: flex; align-items: center; gap: 8px; margin: 24px 0 0; }
+.act {
+  appearance: none; border: none; font: inherit; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 36px; padding: 0 15px; border-radius: 999px;
+  font-size: var(--t-status); font-weight: var(--w-status); color: var(--ink);
+  background: rgba(255,255,255,.72);
+  box-shadow: inset 0 0 0 1px rgba(31,65,91,.09);
+  transition: background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.act:hover { background: #fff; box-shadow: inset 0 0 0 1px rgba(31,65,91,.16); }
+.act[aria-pressed='true'] { background: var(--ink); color: #fff; box-shadow: none; }
+.act svg { width: 16px; height: 16px; display: block; }
+.act--icon { width: 36px; padding: 0; justify-content: center; }
+.act__sp { margin-left: auto; }
+
+/* the role switcher (§21) */
+.roles { display: flex; gap: 6px; margin: 26px 0 0; flex-wrap: wrap; padding: 4px; background: rgba(255,255,255,.6); border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(31,65,91,.07); width: fit-content; }
+.role {
+  appearance: none; border: none; font: inherit; cursor: pointer;
+  height: 30px; padding: 0 14px; border-radius: 999px; background: transparent;
+  font-size: var(--t-meta); font-weight: 500; color: var(--ink-2);
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.role:hover { color: var(--ink); }
+.role[aria-selected='true'] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(31,65,91,.1); }
+
+/* ══ THE DECK (§10, §14, §23, §24) ════════════════════════════════════════
+   Four columns, mixed spans, and `grid-auto-rows: auto` — so a row is exactly
+   as tall as its tallest widget and NOTHING IS STRETCHED to fill a fixed
+   slot. That is the whole of §14, and it is the one thing the product's real
+   packer cannot do today: SPAN_TABLE gives fixed 164px rows, so a card there
+   is 164 or 344 and never 152.
+   ═══════════════════════════════════════════════════════════════════════ */
+.deck {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: var(--band) var(--gutter); margin: 40px 0 0;
+  /* START, NOT STRETCH. See the note in the page: a stretched band is how a
+     widget holding three lines ends up 390px tall. */
+  align-items: start;
+}
+@media (max-width: 940px) { .deck { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .deck { grid-template-columns: 1fr; } }
+
+/* ══ THE WIDGET SURFACE (§15) ═════════════════════════════════════════════
+   A soft tonal wash of the module's own hue over white — 13% at the top-left
+   corner falling to 2% — with a hairline and a low, wide shadow. Dark ink on
+   top. Gradient as atmosphere, not decoration.
+   ═══════════════════════════════════════════════════════════════════════ */
+.w {
+  appearance: none; border: none; font: inherit; text-align: left; cursor: pointer;
+  position: relative; display: flex; flex-direction: column;
+  padding: var(--pad); border-radius: var(--r); color: var(--ink);
+  background:
+    linear-gradient(148deg, rgba(var(--tint), .30) 0%, rgba(var(--tint), .18) 55%, rgba(var(--tint), .08) 100%),
+    #fff;
+  box-shadow:
+    inset 0 0 0 1px rgba(31,65,91,.055),
+    0 1px 2px rgba(31,65,91,.035),
+    0 12px 26px -18px rgba(31,65,91,.18);
+  transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .w:hover { transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1px rgba(31,65,91,.08), 0 2px 4px rgba(31,65,91,.05), 0 18px 34px -20px rgba(31,65,91,.24); }
+}
+/* §9 · a subtle pressed state, and no visible control anywhere inside */
+.w:active { transform: translateY(0) scale(.994); }
+.w:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+.w[data-cols='1'] { grid-column: span 1; }
+.w[data-cols='2'] { grid-column: span 2; }
+.w[data-cols='3'] { grid-column: span 3; }
+.w[data-cols='4'] { grid-column: span 4; }
+@media (max-width: 940px) { .w[data-cols='3'], .w[data-cols='4'] { grid-column: span 2; } }
+@media (max-width: 600px) { .w[data-cols='2'], .w[data-cols='3'], .w[data-cols='4'] { grid-column: span 1; } }
+
+/* the title line · an 18px line mark and a 15px semibold name (§17) */
+.w__hd { display: flex; align-items: center; gap: 9px; margin: 0 0 auto; }
+.w__ic { width: 18px; height: 18px; flex: none; color: rgb(var(--accent)); }
+.w__ic svg { width: 100%; height: 100%; display: block; }
+.w__t { font-size: var(--t-title); font-weight: var(--w-title); letter-spacing: -.005em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* PRIMARY VALUE → SHORT CONTEXT → OPTIONAL STATUS (§5) */
+.w__v { margin: 18px 0 0; font-size: var(--t-num); font-weight: var(--w-num); letter-spacing: -.028em; line-height: 1; font-variant-numeric: tabular-nums; }
+.w[data-cols='1'] .w__v { font-size: var(--t-num-sm); }
+.w__l { margin: 7px 0 0; font-size: var(--t-label); font-weight: var(--w-label); color: var(--ink-2); line-height: 1.25; }
+/* a unit, not a heading — see the note on the tile in the script */
+.w__l--unit { color: var(--ink-3); }
+.w__s { margin: 14px 0 0; display: flex; align-items: center; gap: 7px; font-size: var(--t-status); font-weight: var(--w-status); flex-wrap: wrap; }
+.w__s i { width: 7px; height: 7px; border-radius: 50%; flex: none; background: currentColor; }
+.w__s [data-tone='ok']    { color: var(--ok); }
+.w__s [data-tone='warn']  { color: var(--warn); }
+.w__s [data-tone='alert'] { color: var(--alert); }
+.w__s [data-tone='none']  { color: var(--ink-3); }
+.w__s span { display: inline-flex; align-items: center; gap: 7px; }
+.w__s em { font-style: normal; color: var(--ink-3); opacity: .55; font-weight: 400; }
+
+/* kind · pair (§19, §20) — two figures, no hierarchy between them */
+.w__pair { display: flex; gap: 40px; margin: 18px 0 0; flex-wrap: wrap; }
+.w__pair div { min-width: 0; }
+.w__pair b { display: block; font-size: var(--t-num-pair); font-weight: var(--w-num); letter-spacing: -.026em; line-height: 1; font-variant-numeric: tabular-nums; }
+.w__pair span { display: block; margin-top: 6px; font-size: var(--t-label); color: var(--ink-2); }
+
+/* kind · tile (§11, §20) — a first-class navigation tile, one idea, no status */
+.w--tile { justify-content: space-between; }
+.w--tile .w__v { margin-top: 22px; }
+
+/* kind · state — text-first, a word as the primary value */
+.w__w { margin: 18px 0 0; font-size: 26px; font-weight: var(--w-num); letter-spacing: -.02em; line-height: 1.1; }
+.w[data-cols='1'] .w__w { font-size: 23px; }
+
+/* kind · systems (§13) — the one place extra height buys extra information */
+.w__rows { margin: 18px 0 0; display: flex; flex-direction: column; }
+.w__row { display: flex; align-items: center; gap: 12px; padding: 9px 0; font-size: var(--t-label); }
+.w__row + .w__row { box-shadow: inset 0 1px 0 rgba(31,65,91,.07); }
+/* at full width the six systems go three-and-three */
+.w[data-cols='4'] .w__rows { display: grid; grid-auto-flow: column; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, auto); column-gap: 40px; }
+.w[data-cols='4'] .w__row { box-shadow: inset 0 1px 0 rgba(31,65,91,.07); }
+.w[data-cols='4'] .w__row:nth-child(1), .w[data-cols='4'] .w__row:nth-child(4) { box-shadow: none; }
+@media (max-width: 940px) {
+  .w[data-cols='4'] .w__rows { display: flex; flex-direction: column; }
+  .w[data-cols='4'] .w__row:nth-child(4) { box-shadow: inset 0 1px 0 rgba(31,65,91,.07); }
+}
+.w__row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w__row > span:last-child { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 7px; font-size: var(--t-status); font-weight: var(--w-status); }
+.w__row i { width: 7px; height: 7px; border-radius: 50%; flex: none; background: currentColor; }
+.w__row [data-tone='ok']    { color: var(--ok); }
+.w__row [data-tone='warn']  { color: var(--warn); }
+.w__row [data-tone='alert'] { color: var(--alert); }
+
+/* kind · ratio — X of Y, one very quiet track, and a short clause */
+.w__ratio { margin: 18px 0 0; display: flex; align-items: baseline; gap: 8px; }
+.w__ratio b { font-size: var(--t-num); font-weight: var(--w-num); letter-spacing: -.028em; line-height: 1; font-variant-numeric: tabular-nums; }
+.w[data-cols='1'] .w__ratio b { font-size: var(--t-num-sm); }
+.w__ratio span { font-size: var(--t-label); color: var(--ink-2); }
+.w__track { margin: 16px 0 0; height: 5px; border-radius: 3px; background: rgba(31,65,91,.09); overflow: hidden; }
+.w__track i { display: block; height: 100%; border-radius: 3px; background: rgb(var(--accent)); opacity: .8; }
+
+/* ══ CUSTOMIZE (§22) ══════════════════════════════════════════════════════
+   The affordances appear only in edit mode, and they sit OUTSIDE the widget's
+   own content so §9 still holds when it is off.
+   ═══════════════════════════════════════════════════════════════════════ */
+body[data-edit] .w { cursor: default; }
+body[data-edit] .w:hover { transform: none; }
+body[data-edit] .w:active { transform: none; }
+.w__edit { position: absolute; inset: 8px 8px auto auto; display: none; gap: 6px; }
+body[data-edit] .w__edit { display: flex; }
+.chip {
+  appearance: none; border: none; font: inherit; cursor: pointer;
+  height: 28px; min-width: 28px; padding: 0 10px; border-radius: 999px;
+  background: rgba(255,255,255,.92); color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(31,65,91,.12), 0 1px 3px rgba(31,65,91,.12);
+  font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+}
+.chip:hover { background: #fff; }
+.chip--x { color: var(--alert); }
+.chip svg { width: 13px; height: 13px; display: block; }
+
+.editbar {
+  display: none; align-items: center; gap: 12px; margin: 26px 0 0;
+  padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,.78);
+  box-shadow: inset 0 0 0 1px rgba(31,65,91,.08);
+  font-size: var(--t-status); color: var(--ink-2); flex-wrap: wrap;
+}
+body[data-edit] .editbar { display: flex; }
+.editbar b { color: var(--ink); font-weight: 600; }
+
+/* the Add panel */
+.addpanel { display: none; margin: 26px 0 0; padding: 20px; border-radius: 16px; background: rgba(255,255,255,.78); box-shadow: inset 0 0 0 1px rgba(31,65,91,.08); }
+.addpanel[data-open] { display: block; }
+.addpanel h3 { margin: 0 0 4px; font-size: var(--t-label); font-weight: 600; }
+.addpanel p { margin: 0 0 16px; font-size: var(--t-meta); color: var(--ink-3); }
+.addlist { display: flex; flex-wrap: wrap; gap: 8px; }
+.addlist button {
+  appearance: none; border: none; font: inherit; cursor: pointer;
+  height: 34px; padding: 0 14px; border-radius: 999px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(31,65,91,.1); font-size: var(--t-status); color: var(--ink);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.addlist button:hover { box-shadow: inset 0 0 0 1px rgba(31,65,91,.2); }
+.addlist button[disabled] { opacity: .38; cursor: default; }
+.addlist svg { width: 14px; height: 14px; color: var(--teal); }
+
+/* ══ the notes under the page — commentary, not product ══════════════════ */
+.notes { margin: 64px 0 0; }
+.notes h2 { margin: 0 0 12px; font-size: 21px; font-weight: 600; letter-spacing: -.015em; }
+.note { margin: 0 0 14px; border-left: 3px solid var(--teal); padding: 2px 0 2px 16px; font-size: var(--t-status); line-height: 1.65; color: var(--ink-2); max-width: 78ch; }
+.note--warn { border-left-color: #C0392B; }
+.note strong { color: var(--ink); }
+.note code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; background: rgba(31,65,91,.06); padding: .1em .35em; border-radius: 4px; }
+.tick { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 32px; font-size: var(--t-meta); color: var(--ink-2); }
+.tick li { padding: 3px 0 3px 20px; position: relative; break-inside: avoid; }
+.tick li::before { content: '✓'; position: absolute; left: 0; color: var(--ok); font-weight: 700; }
+@media (max-width: 700px) { .tick { columns: 1; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="sprite"></defs></svg>
+
+<div class="shell">
+  <header class="hd">
+    <nav class="hd__crumb" aria-label="Breadcrumb">
+      <a href="#">Housing</a><i>/</i><a href="#">Sites</a><i>/</i><b>Mysuru Rescue Centre</b>
+    </nav>
+    <div class="hd__top">
+      <div class="hd__id">
+        <h1 class="hd__name">Mysuru Rescue Centre</h1>
+        <div class="hd__meta">
+          <span class="hd__pill"><i></i>Needs Attention</span>
+          <span class="hd__sep">·</span>
+          <span class="hd__type">Rescue &amp; Rehabilitation</span>
+        </div>
+      </div>
+      <div class="hd__who">
+        <b>Vijay Shetty</b>
+        <span>Site In-charge</span>
+      </div>
+    </div>
+    <div class="hd__counts" id="counts"></div>
+    <div class="hd__acts">
+      <button class="act" id="addBtn" aria-expanded="false"><svg aria-hidden="true"><use href="#i-plus"/></svg>Add</button>
+      <button class="act" id="editBtn" aria-pressed="false">Customize</button>
+      <button class="act act--icon" id="moreBtn" aria-label="More actions"><svg aria-hidden="true"><use href="#i-dots"/></svg></button>
+      <div class="act__sp"></div>
+    </div>
+    <div class="roles" role="tablist" aria-label="Viewing as" id="roles"></div>
+  </header>
+
+  <div class="editbar">
+    <b>Customize</b>
+    <span>Remove a widget, or cycle its size where more than one is supported. Drag-to-reorder is the product's own and is not re-implemented in this mockup.</span>
+    <button class="act" id="restoreBtn" style="margin-left:auto">Restore Default</button>
+  </div>
+
+  <div class="addpanel" id="addPanel">
+    <h3>Add a widget</h3>
+    <p>Optional modules for this role. The workspace holds 8–12; everything else lives here (§18, §22).</p>
+    <div class="addlist" id="addList"></div>
+  </div>
+
+  <main class="deck" id="deck"></main>
+
+  <section class="notes">
+    <h2>Notes on this mockup</h2>
+
+    <p class="note note--warn"><strong>One thing here departs from a settled
+    decision.</strong> §15 asks for soft tonal gradients and controlled
+    saturation; the product's cards are the full-saturation Figma ramps with
+    white text, and re-opening that was explicitly ruled out. This page shows
+    what §15 actually looks like so the departure can be judged rather than
+    assumed — <strong>if it is accepted, it belongs in the Figma file
+    first.</strong> One side effect worth weighing: dark ink on a near-white
+    surface clears AA on every run, where the gradient cards measure 472 of 530
+    text runs below it.</p>
+
+    <p class="note note--warn"><strong>Two contradictions inside the brief,
+    left visible rather than quietly resolved.</strong> §2 puts <em>6 Sections ·
+    23 Enclosures</em> in the header and §20 wants both as first-class widgets —
+    so the same two numbers appear twice, which §27's own test would delete. I
+    have built both as specified and made the header copies quiet (13px
+    metadata) against the widgets' 34px, but the honest fix is to drop one. And
+    §20 calls Sections and Enclosures first-class while §21's Facility Manager,
+    Manager and Admin defaults omit them; here §21 wins and they sit in the Add
+    panel for those three roles.</p>
+
+    <p class="note"><strong>Content determines the height, and that is not free.</strong>
+    The deck is a CSS grid with auto rows, so a band is as tall as its tallest
+    widget — a row of metrics comes out ~150px and the Infrastructure row ~250px,
+    with nothing stretched. The product's packer cannot do this: <code>SPAN_TABLE</code>
+    gives fixed 164px rows, so a real card is 164 or 344 and never 150. Porting
+    this means variable row heights in the packer, which touches the FLIP pass
+    and the saved-layout contract — the largest single item in the brief.</p>
+
+    <p class="note"><strong>What the numbers are.</strong> Everything is Mysuru
+    Rescue Centre's own, from <code>SITES['ms-rescue']</code> and its
+    <code>figures</code> override: 6 / 23 / 41 / 28 / 147, 96 assets · 4
+    critical, 18 jobs · 7 overdue, 14 vet cases · 3 critical, 48 tasks · 19 due
+    today, 19 of 25 compliance, power on generator, diesel reserve 31%. The
+    brief's examples say 248 assets and 9 open jobs — those are Bannerghatta's,
+    and drawing them here would reintroduce the per-Site bug the handoff warns
+    about. <strong>Derived, not overridden:</strong> staff on site today (38),
+    enclosures occupied (18, from 23 less 2 free and 3 restricted), Sections'
+    per-section split, and Infrastructure's six system names — Mysuru's override
+    names four states, and two more were needed to make §13's list worth its
+    extra height.</p>
+
+    <p class="note"><strong>Deliberately absent.</strong> No Site Health, score
+    or condition gauge anywhere — <code>health: 72</code> is on the record and is
+    not drawn. No attention roll-up, no alert list, no chart, no trend, no
+    "View →", and no controls inside any widget, which is why the three action
+    shapes from <code>widget-concepts.html</code> do not appear on this page at
+    all. They still hold for module pages, where §28 says the detail lives.</p>
+
+    <h2 style="margin-top:36px">Against §30</h2>
+    <ul class="tick" id="checklist"></ul>
+  </section>
+</div>
+
+<script>
+/* ══ ICONS · 18px line marks, stroke 1.6, nothing decorative (§17) ═══════ */
+const SPRITE = {
+  plus:'<path d="M5 12h14M12 5v14"/>',
+  dots:'<circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  size:'<path d="M14.5 3.5h6v6M9.5 20.5h-6v-6M20.5 3.5 13.5 10.5M3.5 20.5 10.5 13.5"/>',
+  people:'<circle cx="9" cy="8" r="3.2"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M16.2 5.5a3.2 3.2 0 0 1 0 6.2"/><path d="M17.6 14.6A6.2 6.2 0 0 1 21.2 20"/>',
+  assets:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V5.6A2.6 2.6 0 0 1 10.6 3h2.8A2.6 2.6 0 0 1 16 5.6V8"/><path d="M3 13.4h18"/>',
+  maintenance:'<path d="M16.6 2.9a5.2 5.2 0 0 0-4.5 7.8l-8.7 8.7a2 2 0 0 0 2.8 2.8l8.7-8.7a5.2 5.2 0 0 0 6.3-6.9l-3 3-2.6-.7-.7-2.6 3-3a5.2 5.2 0 0 0-1.3-.4Z"/>',
+  sections:'<rect x="3" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="13.6" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="3" y="13.6" width="7.4" height="7.4" rx="1.6"/><rect x="13.6" y="13.6" width="7.4" height="7.4" rx="1.6"/>',
+  enclosures:'<rect x="2.7" y="4.3" width="18.6" height="15.4" rx="2.6"/><path d="M12 16.5c1.9-2.1 3.2-3.8 3.2-5.5a3.2 3.2 0 0 0-6.4 0c0 1.7 1.3 3.4 3.2 5.5Z"/><circle cx="12" cy="10.9" r="1.1"/>',
+  animal:'<path d="M12 13.2c-3 0-5.4 2-5.4 4.5 0 1.7 1.2 2.8 2.9 2.8.9 0 1.6-.3 2.5-.3s1.6.3 2.5.3c1.7 0 2.9-1.1 2.9-2.8 0-2.5-2.4-4.5-5.4-4.5Z"/><ellipse cx="6.2" cy="10.2" rx="1.8" ry="2.2"/><ellipse cx="17.8" cy="10.2" rx="1.8" ry="2.2"/><ellipse cx="10" cy="6" rx="1.7" ry="2.2"/><ellipse cx="14" cy="6" rx="1.7" ry="2.2"/>',
+  vet:'<path d="M12 3.4A8.6 8.6 0 0 0 3.4 12c0 4 3 7.2 6.2 8.4a2 2 0 0 0 1.5 0"/><path d="M12 3.4A8.6 8.6 0 0 1 20.6 12c0 1.5-.4 2.9-1.1 4.1"/><path d="M12 8.6v5.2M9.4 11.2h5.2"/><circle cx="18.4" cy="19" r="2.6"/>',
+  infra:'<path d="M12 2.6 2.8 7.1 12 11.6l9.2-4.5Z"/><path d="m2.8 12.2 9.2 4.5 9.2-4.5"/><path d="m2.8 17.3 9.2 4.5 9.2-4.5"/>',
+  utilities:'<path d="M13.2 2.5 4.6 13.6h6.3l-1 7.9 8.5-11.1h-6.3l1.1-7.9Z"/>',
+  tasks:'<path d="M9 4.6h11M9 12h11M9 19.4h11"/><path d="m3 4.9 1.2 1.2 2.2-2.5M3 12.3l1.2 1.2 2.2-2.5M3 19.7l1.2 1.2 2.2-2.5"/>',
+  safety:'<path d="M12 21.5c4.5-1.6 7.5-5 7.5-9.6V5.6L12 2.5 4.5 5.6v6.3c0 4.6 3 8 7.5 9.6Z"/><path d="M12 8.2v4.4M12 16.3h.01"/>',
+  compliance:'<path d="M8.6 3.4H6.4a2 2 0 0 0-2 2v14.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2V5.4a2 2 0 0 0-2-2h-2.2"/><rect x="8.6" y="1.9" width="6.8" height="3.4" rx="1.2"/><path d="m9.4 12.4 1.6 1.6 3.6-3.8"/>',
+  finance:'<circle cx="12" cy="12" r="9.2"/><path d="M9 8h6M9 11h6"/><path d="m9 16.9 3.7-3.6c1.4-.2 2.4-1.3 2.4-2.8"/><path d="M9 13.3h3.7"/>',
+  projects:'<path d="M3.4 3.2v17.6"/><rect x="6.4" y="4.6" width="11.2" height="3.6" rx="1.4"/><rect x="6.4" y="10.2" width="14.4" height="3.6" rx="1.4"/><rect x="6.4" y="15.8" width="7.6" height="3.6" rx="1.4"/>',
+  inventory:'<rect x="2.8" y="3.6" width="8.1" height="7.2" rx="1.5"/><rect x="13.1" y="3.6" width="8.1" height="7.2" rx="1.5"/><rect x="7.9" y="13.2" width="8.1" height="7.2" rx="1.5"/>',
+  procurement:'<rect x="2.8" y="7" width="18.4" height="13.2" rx="2"/><path d="M8.6 7V5.2A2.2 2.2 0 0 1 10.8 3h2.4a2.2 2.2 0 0 1 2.2 2.2V7"/><path d="M2.8 12.4h18.4"/>',
+  documents:'<path d="M14 2.6H7a2 2 0 0 0-2 2v14.8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.6Z"/><path d="M13.8 2.6v5h5"/><path d="M8.4 12.6h7.2M8.4 16.4h4.8"/>',
+  approvals:'<path d="M20 6 9 17l-5-5"/>',
+  transport:'<path d="M3 16.5V7.5A1.5 1.5 0 0 1 4.5 6h9v10.5"/><path d="M13.5 9.5H18l3 3.5v3.5h-2"/><circle cx="7" cy="17.5" r="2"/><circle cx="16.5" cy="17.5" r="2"/><path d="M9 17.5h5.5"/>',
+  welfare:'<path d="M12 20.5C7.5 17 4 14.2 4 10.6A4.1 4.1 0 0 1 12 8.4a4.1 4.1 0 0 1 8 2.2c0 3.6-3.5 6.4-8 9.9Z"/>',
+  transfers:'<path d="M7 4v13M7 4 4 7M7 4l3 3"/><path d="M17 20V7M17 20l3-3M17 20l-3-3"/>',
+  conservation:'<path d="M12 21c0-6 3.5-9 9-9 0 5-3.6 9-9 9Z"/><path d="M12 21c0-6-3.5-9-9-9 0 5 3.6 9 9 9Z"/><path d="M12 21V9"/>',
+  activity:'<path d="M3 13h4l2.5-7 4 14L16 13h5"/>',
+}
+document.getElementById('sprite').innerHTML = Object.entries(SPRITE).map(([n, b]) =>
+  `<symbol id="i-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${b}</symbol>`).join('')
+const ico = (n) => `<svg aria-hidden="true"><use href="#i-${n}"/></svg>`
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]))
+
+/* ══ THE SITE · SITES['ms-rescue'] and its `figures` override ════════════ */
+const SITE = {
+  name: 'Mysuru Rescue Centre', type: 'Rescue & Rehabilitation',
+  status: 'Needs Attention', inCharge: 'Vijay Shetty',
+  counts: { sections: 6, enclosures: 23, staff: 41, species: 28, animals: 147 },
+  free: 2, restricted: 3,
+}
+document.getElementById('counts').innerHTML = [
+  ['Sections', SITE.counts.sections], ['Enclosures', SITE.counts.enclosures],
+  ['Staff', SITE.counts.staff], ['Species', SITE.counts.species],
+].map(([l, n]) => `<span class="hd__count"><b>${n}</b> ${l}</span>`).join('')
+
+/* ══ TONAL FAMILIES (§15) ═════════════════════════════════════════════════
+   `tint` is the wash, at 13%→2%. `accent` is the icon and the one quiet
+   track. Different families for different modules, all at controlled
+   saturation so the type stays the loudest thing on the surface.
+   ═══════════════════════════════════════════════════════════════════════ */
+const TONE = {
+  people:      { tint: '88 124 186',  accent: '62 94 152' },
+  space:       { tint: '26 176 172',  accent: '12 126 128' },
+  assets:      { tint: '108 126 142', accent: '78 96 112' },
+  maintenance: { tint: '240 116 76',  accent: '188 80 46' },
+  care:        { tint: '54 158 104',  accent: '30 118 74' },
+  utilities:   { tint: '40 176 210',  accent: '20 124 154' },
+  work:        { tint: '78 138 152',  accent: '50 102 116' },
+  risk:        { tint: '214 84 84',   accent: '178 54 54' },
+  admin:       { tint: '132 144 168', accent: '94 108 132' },
+  finance:     { tint: '78 156 112',  accent: '46 116 78' },
+}
+
+/* ══ THE WIDGET CATALOGUE ═════════════════════════════════════════════════
+   Six KINDS, not forty-one — §25 asks for tiles, text-first, compact metrics,
+   status surfaces and larger information modules, and that is six shapes:
+
+     metric   title → value → label → optional status      (§5, §12)
+     tile     a first-class navigation tile, one idea      (§11, §20)
+     pair     two figures with no hierarchy between them   (§19, §20)
+     state    text-first; the primary value is a WORD      (§25)
+     systems  the only shape that earns extra height        (§13)
+     ratio    X of Y, one quiet track, one short clause
+
+   `sizes` is what the picker may offer. `q` is the single question the widget
+   answers (§4) and is shown nowhere — it is the test each one had to pass.
+   ═══════════════════════════════════════════════════════════════════════ */
+const CATALOGUE = {
+  people: { kind: 'metric', title: 'People', icon: 'people', tone: 'people', sizes: [2, 1],
+    q: 'How many people operate here?',
+    d: { v: '41', l: 'Staff', s: [{ t: '38 on site today', tone: 'ok' }] } },
+
+  sections: { kind: 'tile', title: 'Sections', icon: 'sections', tone: 'space', sizes: [1, 2],
+    q: 'How many sections exist?',
+    d: { v: '6', s: [{ t: '23 enclosures below', tone: 'none' }] } },
+
+  enclosures: { kind: 'tile', title: 'Enclosures', icon: 'enclosures', tone: 'space', sizes: [1, 2],
+    q: 'How many enclosures exist?',
+    d: { v: '23', s: [{ t: '18 occupied', tone: 'ok' }, { t: '2 free', tone: 'none' }] } },
+
+  space: { kind: 'pair', title: 'Site Space', icon: 'sections', tone: 'space', sizes: [2],
+    q: 'How much of this Site is there?',
+    d: { pair: [{ v: '6', l: 'Sections' }, { v: '23', l: 'Enclosures' }],
+         s: [{ t: '18 occupied', tone: 'ok' }, { t: '3 restricted', tone: 'warn' }] } },
+
+  assets: { kind: 'metric', title: 'Assets', icon: 'assets', tone: 'assets', sizes: [2, 1],
+    q: 'What is the asset situation?',
+    /* no context line: it would only say "Assets" again. The split IS the
+       context, and it is already the status line. */
+    d: { v: '96', s: [{ t: '87 Operational', tone: 'ok' }, { t: '4 Critical', tone: 'alert' }] } },
+
+  maintenance: { kind: 'metric', title: 'Maintenance', icon: 'maintenance', tone: 'maintenance', sizes: [2, 1],
+    q: 'Is maintenance under control?',
+    d: { v: '18', l: 'Open Jobs', s: [{ t: '7 Overdue', tone: 'alert' }, { t: '4 Awaiting Parts', tone: 'warn' }] } },
+
+  vet: { kind: 'metric', title: 'Veterinary', icon: 'vet', tone: 'care', sizes: [1, 2],
+    q: 'How many active veterinary cases exist?',
+    d: { v: '14', l: 'Open Cases', s: [{ t: '3 Critical', tone: 'alert' }] } },
+
+  animal: { kind: 'pair', title: 'Animal Operations', icon: 'animal', tone: 'care', sizes: [2],
+    q: 'What is held here?',
+    d: { pair: [{ v: '28', l: 'Species' }, { v: '147', l: 'Animals' }] } },
+
+  infra: { kind: 'systems', title: 'Infrastructure', icon: 'infra', tone: 'utilities', sizes: [4, 2],
+    q: 'Are the essential systems up?',
+    d: { v: '6', l: 'Systems', rows: [
+      { t: 'Power',        v: 'On generator', tone: 'alert' },
+      { t: 'Water Supply', v: 'Normal',       tone: 'ok' },
+      { t: 'Perimeter',    v: 'Secure',       tone: 'ok' },
+      { t: 'Fire Systems', v: 'Drill overdue', tone: 'warn' },
+      { t: 'HVAC',         v: 'Operational',  tone: 'ok' },
+      { t: 'Network',      v: 'Operational',  tone: 'ok' },
+    ] } },
+
+  utilities: { kind: 'state', title: 'Utilities', icon: 'utilities', tone: 'utilities', sizes: [1, 2],
+    q: 'Are essential utilities available?',
+    d: { w: 'On Generator', l: 'Grid down', s: [{ t: 'Diesel 31%', tone: 'alert' }] } },
+
+  tasks: { kind: 'metric', title: 'Tasks', icon: 'tasks', tone: 'work', sizes: [1, 2],
+    q: 'How much work is pending?',
+    d: { v: '48', l: 'Open', s: [{ t: '19 Due Today', tone: 'alert' }] } },
+
+  safety: { kind: 'metric', title: 'Safety', icon: 'safety', tone: 'risk', sizes: [1, 2],
+    q: 'Is anything unsafe right now?',
+    d: { v: '2', l: 'Active Incidents', s: [{ t: '5 checks overdue', tone: 'warn' }] } },
+
+  compliance: { kind: 'ratio', title: 'Compliance', icon: 'compliance', tone: 'space', sizes: [2, 1],
+    q: 'Will this Site pass an inspection?',
+    d: { v: '19', of: 'of 25', pct: 76, s: [{ t: '6 require action', tone: 'warn' }] } },
+
+  finance: { kind: 'ratio', title: 'Finance', icon: 'finance', tone: 'finance', sizes: [2, 1],
+    q: 'Can I still spend?',
+    d: { v: '₹38.9L', of: 'of ₹42.0L', pct: 93, s: [{ t: '93% spent at 78% of the year', tone: 'alert' }] } },
+
+  projects: { kind: 'metric', title: 'Projects', icon: 'projects', tone: 'work', sizes: [1, 2],
+    q: 'Is anything being built here?',
+    d: { v: '1', l: 'Active', s: [{ t: '1 Delayed', tone: 'alert' }] } },
+
+  inventory: { kind: 'metric', title: 'Inventory', icon: 'inventory', tone: 'admin', sizes: [1, 2],
+    q: 'Can we operate through the week?',
+    d: { v: '11', l: 'Below Reorder', s: [{ t: 'Fuel critical', tone: 'alert' }] } },
+
+  procurement: { kind: 'metric', title: 'Procurement', icon: 'procurement', tone: 'admin', sizes: [1, 2],
+    q: 'What is on order?',
+    d: { v: '19', l: 'Open Orders', s: [{ t: '9 under review', tone: 'warn' }] } },
+
+  approvals: { kind: 'metric', title: 'Approvals', icon: 'approvals', tone: 'admin', sizes: [1, 2],
+    q: 'What is waiting on me?',
+    d: { v: '5', l: 'Pending', s: [{ t: '2 Escalated', tone: 'alert' }] } },
+
+  documents: { kind: 'metric', title: 'Documents', icon: 'documents', tone: 'admin', sizes: [1, 2],
+    q: 'What paperwork does this Site hold?',
+    d: { v: '34', s: [{ t: '1 this week', tone: 'none' }] } },
+
+  transport: { kind: 'metric', title: 'Transport', icon: 'transport', tone: 'assets', sizes: [1, 2],
+    q: 'Can we move anything today?',
+    d: { v: '5', l: 'Vehicles', s: [{ t: '3 Available', tone: 'warn' }] } },
+
+  welfare: { kind: 'metric', title: 'Welfare', icon: 'welfare', tone: 'care', sizes: [1, 2],
+    q: 'Is any animal at risk?',
+    d: { v: '4', l: 'Alerts Raised', s: [{ t: '2 under review', tone: 'alert' }] } },
+
+  transfers: { kind: 'metric', title: 'Transfers', icon: 'transfers', tone: 'care', sizes: [1, 2],
+    q: 'What is moving in or out?',
+    d: { v: '3', l: 'Planned', s: [{ t: '1 this week', tone: 'none' }] } },
+
+  conservation: { kind: 'metric', title: 'Conservation', icon: 'conservation', tone: 'finance', sizes: [1, 2],
+    q: 'What are we breeding for?',
+    d: { v: '9', l: 'Programmes', s: [{ t: '4 IUCN threatened', tone: 'warn' }] } },
+
+  activity: { kind: 'metric', title: 'Activity', icon: 'activity', tone: 'work', sizes: [1, 2],
+    q: 'What has happened today?',
+    d: { v: '27', l: 'Events Today', s: [{ t: 'Last at 10:51', tone: 'none' }] } },
+}
+
+/* ══ ROLE DEFAULTS (§21) ══════════════════════════════════════════════════
+   The order and the SIZES are the default arrangement; the user changes both.
+   Each list is composed so every band fills four columns — §23 asks for a
+   composition, not an equal grid, and a band that ends in a hole is what an
+   equal grid looks like.
+   ═══════════════════════════════════════════════════════════════════════ */
+const ROLES = {
+  manager: { label: 'Manager', set: [
+    ['people', 2], ['space', 2],
+    ['assets', 2], ['maintenance', 2],
+    ['vet', 1], ['tasks', 1], ['animal', 2],
+    ['infra', 4],
+    ['utilities', 1], ['safety', 1], ['compliance', 2],
+  ] },
+  facility: { label: 'Facility Manager', set: [
+    ['maintenance', 2], ['assets', 2],
+    ['infra', 4],
+    ['people', 2], ['utilities', 1], ['safety', 1],
+    ['tasks', 1], ['projects', 1], ['transport', 1], ['inventory', 1],
+  ] },
+  vet: { label: 'Veterinarian', set: [
+    ['vet', 2], ['animal', 2],
+    ['welfare', 1], ['tasks', 1], ['sections', 1], ['enclosures', 1],
+  ] },
+  biologist: { label: 'Biologist', set: [
+    ['animal', 2], ['conservation', 2],
+    ['sections', 1], ['enclosures', 1], ['welfare', 1], ['transfers', 1],
+  ] },
+  admin: { label: 'Admin', set: [
+    ['people', 2], ['finance', 2],
+    ['compliance', 2], ['approvals', 1], ['tasks', 1],
+    ['procurement', 2], ['documents', 2],
+  ] },
+}
+
+/* ══ RENDER ═══════════════════════════════════════════════════════════════ */
+const st = (list) => (list || []).map((x) =>
+  `<span data-tone="${esc(x.tone || 'none')}"><i></i>${esc(x.t)}</span>`).join('<em>·</em>')
+
+const KIND = {
+  metric: (c) =>
+    `<span class="w__v">${esc(c.d.v)}</span>` +
+    (c.d.l ? `<span class="w__l">${esc(c.d.l)}</span>` : '') +
+    (c.d.s ? `<span class="w__s">${st(c.d.s)}</span>` : ''),
+
+  tile: (c) =>
+    `<span class="w__v">${esc(c.d.v)}</span>` +
+    (c.d.l ? `<span class="w__l w__l--unit">${esc(c.d.l)}</span>` : '') +
+    (c.d.s ? `<span class="w__s">${st(c.d.s)}</span>` : ''),
+
+  pair: (c) =>
+    `<span class="w__pair">${c.d.pair.map((p) =>
+      `<div><b>${esc(p.v)}</b><span>${esc(p.l)}</span></div>`).join('')}</span>` +
+    (c.d.s ? `<span class="w__s">${st(c.d.s)}</span>` : ''),
+
+  state: (c) =>
+    `<span class="w__w">${esc(c.d.w)}</span><span class="w__l">${esc(c.d.l)}</span>` +
+    (c.d.s ? `<span class="w__s">${st(c.d.s)}</span>` : ''),
+
+  systems: (c) =>
+    `<span class="w__v">${esc(c.d.v)}</span><span class="w__l">${esc(c.d.l)}</span>` +
+    `<span class="w__rows">${c.d.rows.map((r) =>
+      `<span class="w__row"><span>${esc(r.t)}</span>` +
+      `<span data-tone="${esc(r.tone)}"><i></i>${esc(r.v)}</span></span>`).join('')}</span>`,
+
+  ratio: (c) =>
+    `<span class="w__ratio"><b>${esc(c.d.v)}</b><span>${esc(c.d.of)}</span></span>` +
+    `<span class="w__track"><i style="width:${c.d.pct}%"></i></span>` +
+    (c.d.s ? `<span class="w__s">${st(c.d.s)}</span>` : ''),
+}
+
+let role = 'manager'
+let layout = ROLES[role].set.map((x) => x.slice())
+
+function widgetHTML(id, cols) {
+  const c = CATALOGUE[id], t = TONE[c.tone]
+  const many = c.sizes.length > 1
+  /* the accessible name says what the widget IS and where it goes — the
+     replacement for the "View →" the brief removes (§8) */
+  const label = `${c.title}. ${c.d.v || c.d.w || ''} ${c.d.l || ''}. Open ${c.title}.`
+  return `<button class="w${c.kind === 'tile' ? ' w--tile' : ''}" type="button"` +
+    ` data-cols="${cols}" data-id="${id}" data-kind="${c.kind}"` +
+    ` style="--tint:${t.tint};--accent:${t.accent}" aria-label="${esc(label)}">` +
+    `<span class="w__edit">` +
+      (many ? `<span class="chip" data-act="size" role="button" tabindex="-1" title="Change size">${ico('size')}${cols}×</span>` : '') +
+      `<span class="chip chip--x" data-act="remove" role="button" tabindex="-1" title="Remove">${ico('x')}</span>` +
+    `</span>` +
+    `<span class="w__hd"><span class="w__ic">${ico(c.icon)}</span>` +
+    `<span class="w__t">${esc(c.title)}</span></span>` +
+    KIND[c.kind](c) + `</button>`
+}
+
+function render() {
+  document.getElementById('deck').innerHTML = layout.map(([id, cols]) => widgetHTML(id, cols)).join('')
+  const have = new Set(layout.map((x) => x[0]))
+  document.getElementById('addList').innerHTML = Object.keys(CATALOGUE)
+    /* every module is offerable — `space` and the two tiles are alternative
+       forms of the same fact (§20), and which one a role wants is the point of
+       the picker rather than something to decide for it */
+    .map((id) => `<button type="button" data-add="${id}"${have.has(id) ? ' disabled' : ''}>` +
+      `${ico('plus')}${esc(CATALOGUE[id].title)}</button>`).join('')
+}
+
+document.getElementById('roles').innerHTML = Object.entries(ROLES).map(([k, r]) =>
+  `<button class="role" role="tab" data-role="${k}" aria-selected="${k === role}">${esc(r.label)}</button>`).join('')
+
+document.getElementById('roles').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-role]'); if (!b) return
+  role = b.dataset.role
+  layout = ROLES[role].set.map((x) => x.slice())
+  document.querySelectorAll('.role').forEach((r) => r.setAttribute('aria-selected', String(r.dataset.role === role)))
+  render()
+})
+
+/* Customize (§22) — add, remove, resize, restore. Reorder is the product's. */
+const editBtn = document.getElementById('editBtn')
+editBtn.addEventListener('click', () => {
+  const on = document.body.hasAttribute('data-edit')
+  if (on) document.body.removeAttribute('data-edit'); else document.body.setAttribute('data-edit', '')
+  editBtn.setAttribute('aria-pressed', String(!on))
+})
+const addBtn = document.getElementById('addBtn'), addPanel = document.getElementById('addPanel')
+addBtn.addEventListener('click', () => {
+  const on = addPanel.hasAttribute('data-open')
+  if (on) addPanel.removeAttribute('data-open'); else addPanel.setAttribute('data-open', '')
+  addBtn.setAttribute('aria-expanded', String(!on))
+})
+document.getElementById('restoreBtn').addEventListener('click', () => {
+  layout = ROLES[role].set.map((x) => x.slice()); render()
+})
+document.getElementById('moreBtn').addEventListener('click', () => {
+  layout = ROLES[role].set.map((x) => x.slice()); render()
+})
+addPanel.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-add]'); if (!b || b.disabled) return
+  layout.push([b.dataset.add, CATALOGUE[b.dataset.add].sizes[0]]); render()
+})
+document.getElementById('deck').addEventListener('click', (e) => {
+  const chip = e.target.closest('[data-act]')
+  if (chip && document.body.hasAttribute('data-edit')) {
+    e.preventDefault(); e.stopPropagation()
+    const w = chip.closest('.w'), id = w.dataset.id
+    const i = layout.findIndex((x) => x[0] === id)
+    if (chip.dataset.act === 'remove') layout.splice(i, 1)
+    else {
+      const sizes = CATALOGUE[id].sizes
+      layout[i][1] = sizes[(sizes.indexOf(layout[i][1]) + 1) % sizes.length]
+    }
+    render()
+  }
+})
+
+render()
+
+/* the §30 checklist, rendered from what the page can actually assert */
+document.getElementById('checklist').innerHTML = [
+  'No Site Health or overall score anywhere',
+  'No Needs Attention card, no alert list',
+  'No "View →" and no CTA inside a widget',
+  'Whole widget is one button',
+  'Short labels only',
+  'Five type steps, nothing under 13px',
+  'Inter throughout',
+  'No card stretched to fill a slot',
+  'Four sizes in use, content sets the height',
+  'Tonal gradients, controlled saturation',
+  'Icons 18px, type dominant',
+  'Sections and Enclosures are their own tiles',
+  'Animal Operations is two numbers',
+  'Five role defaults, switcher re-lays the deck',
+  'Add, remove, resize, restore all work',
+  'Tablet-first, 1024–1366 landscape',
+  'Every status carries a word, not only a dot',
+  'Detail stays inside the modules',
+].map((t) => `<li>${t}</li>`).join('')
+
+/* ══ THE PAGE'S OWN CHECKS ════════════════════════════════════════════════
+   The brief's prohibitions are only real if something asserts them.
+   ═══════════════════════════════════════════════════════════════════════ */
+window.mock = {
+  catalogue: CATALOGUE, roles: ROLES, get layout() { return layout },
+  setRole(r) { role = r; layout = ROLES[r].set.map((x) => x.slice()); render() },
+
+  /**
+   * §3 · nothing in the WORKSPACE may offer a Site health score.
+   *
+   * SCOPED TO THE HEADER AND THE DECK, not the body. The first version read
+   * `document.body.innerText`, which includes the notes under the page — so it
+   * matched the sentence "No Site Health, score or condition gauge anywhere"
+   * and failed on the promise that it would pass. A check that reads its own
+   * commentary is measuring the wrong document.
+   */
+  checkNoHealth() {
+    const t = document.querySelector('.hd').innerText + ' ' + document.getElementById('deck').innerText
+    return [/site health/i, /overall\s+health/i, /health score/i, /operational score/i,
+            /\bfacility health\b/i, /\b\d{1,3}%\s*healthy/i].filter((r) => r.test(t)).map(String)
+  },
+
+  /** §8 · no "View →", and §9 no interactive control inside a widget. */
+  checkNoCTA() {
+    const bad = []
+    for (const w of document.querySelectorAll('.w')) {
+      if (/View\s|›|→/.test(w.textContent)) bad.push([w.dataset.id, 'says View'])
+      for (const n of w.querySelectorAll('button, a, input, [role="button"]')) {
+        if (!n.closest('.w__edit')) bad.push([w.dataset.id, 'control inside: ' + n.tagName])
+      }
+    }
+    return bad
+  },
+
+  /**
+   * §6 · nothing under 13px, and not everything bold.
+   *
+   * A "run" is an element that OWNS a text node — not one that merely
+   * contains text. The first version skipped anything with children, which
+   * discarded every status line (each holds a decorative <i>) and made a
+   * 50%-semibold ramp measure 67%.
+   */
+  checkType() {
+    const bad = []
+    const owns = (n) => [...n.childNodes].some((k) => k.nodeType === 3 && k.textContent.trim())
+    const weights = new Set()
+    let bold = 0, total = 0
+    for (const w of document.querySelectorAll('.w')) {
+      let wb = 0, wt = 0
+      const wWeights = new Set()
+      for (const n of w.querySelectorAll('*')) {
+        /* the customize chrome is not content and is not counted */
+        if (!owns(n) || n.closest('.w__edit')) continue
+        const cs = getComputedStyle(n)
+        const px = parseFloat(cs.fontSize)
+        if (px < 13) bad.push([w.dataset.id, n.className, px + 'px'])
+        const fw = parseInt(cs.fontWeight, 10)
+        weights.add(fw); wWeights.add(fw)
+        total++; wt++
+        if (fw >= 600) { bold++; wb++ }
+      }
+      if (wt > 1 && wb === wt) bad.push([w.dataset.id, 'every run is 600+', wt])
+      if (wt > 1 && wWeights.size < 2) bad.push([w.dataset.id, 'one weight only', [...wWeights].join(',')])
+    }
+    if (weights.size < 3) bad.push(['PAGE', 'fewer than three weights in use', [...weights].join(',')])
+    return bad
+  },
+
+  /**
+   * §14 · no widget may be padded out with dead vertical space.
+   *
+   * MEASURED AS THE LARGEST GAP BETWEEN CONSECUTIVE CHILDREN, not as leftover
+   * height. The title line carries `margin-bottom: auto`, so in a stretched
+   * widget the auto margin swallows every spare pixel and first-top to
+   * last-bottom spans the whole box — the first version of this check read
+   * zero slack on a widget with 220px of air in the middle of it.
+   */
+  checkNoStretch() {
+    const bad = []
+    for (const w of document.querySelectorAll('.w')) {
+      const kids = [...w.children].filter((k) => !k.classList.contains('w__edit'))
+      for (let i = 1; i < kids.length; i++) {
+        const gap = kids[i].getBoundingClientRect().top - kids[i - 1].getBoundingClientRect().bottom
+        if (gap > 40) bad.push([w.dataset.id, 'gap after ' + kids[i - 1].className, Math.round(gap)])
+      }
+    }
+    return bad
+  },
+
+  /** §10 · the deck must use more than one size, and every band must fill. */
+  checkSizes() {
+    const cols = layout.map((x) => x[1])
+    const bad = []
+    if (new Set(cols).size < 2) bad.push(['one size only', cols.join(',')])
+    let acc = 0
+    for (const c of cols) { acc += c; if (acc > 4) { bad.push(['band overruns 4 columns', acc]); break } if (acc === 4) acc = 0 }
+    if (new Set(cols).size < 2) bad.push(['one size only', [...new Set(cols)].join(',')])
+    if (acc !== 0) bad.push(['last band leaves a hole', 4 - acc])
+    return bad
+  },
+
+  /** §16 · a status may never be a colour on its own. */
+  checkStatusHasWords() {
+    return [...document.querySelectorAll('.w__s [data-tone], .w__row [data-tone]')]
+      .filter((n) => !(n.textContent || '').trim()).map((n) => n.className)
+  },
+
+  /** Text must not clip, and the page must never scroll sideways. */
+  checkOverflow() {
+    const bad = []
+    for (const w of document.querySelectorAll('.w')) {
+      for (const n of w.querySelectorAll('*')) {
+        if (!(n.textContent || '').trim()) continue
+        const cs = getComputedStyle(n)
+        if (n.scrollWidth > n.clientWidth + 1 && cs.textOverflow !== 'ellipsis') bad.push([w.dataset.id, n.className, 'W'])
+        if (cs.overflow === 'hidden' && n.scrollHeight > n.clientHeight + 1) bad.push([w.dataset.id, n.className, 'H'])
+      }
+      if (w.scrollHeight > w.clientHeight + 1) bad.push([w.dataset.id, 'WIDGET HEIGHT', w.scrollHeight, w.clientHeight])
+    }
+    return bad
+  },
+
+  /**
+   * §15 · the tonal families have to be visible, or the wash is decoration
+   * that costs paint and says nothing. Two widgets from different families
+   * must differ measurably at their top-left corner, where the wash is
+   * strongest — asserted rather than eyeballed, because the first version at
+   * 13% alpha rendered twelve cards that were the same white.
+   */
+  checkTonesDiffer() {
+    const bad = []
+    const seen = new Map()
+    for (const w of document.querySelectorAll('.w')) {
+      const fam = CATALOGUE[w.dataset.id].tone
+      const t = w.style.getPropertyValue('--tint').trim().split(/\s+/).map(Number)
+      if (!seen.has(fam)) seen.set(fam, t)
+    }
+    const fams = [...seen.entries()]
+    for (let i = 0; i < fams.length; i++) {
+      for (let j = i + 1; j < fams.length; j++) {
+        const [a, ta] = fams[i], [b, tb] = fams[j]
+        /* the wash is .26 alpha over white, so the delivered difference is
+           .26 x the difference between the two hues */
+        const d = Math.max(...ta.map((v, k) => Math.abs(v - tb[k]))) * 0.26
+        if (d < 6) bad.push([a + ' vs ' + b, +d.toFixed(1)])
+      }
+    }
+    return bad
+  },
+
+  /** §7 · no widget may restate its own title as its label. */
+  checkNoStutter() {
+    const bad = []
+    for (const w of document.querySelectorAll('.w')) {
+      const t = w.querySelector('.w__t').textContent.trim().toLowerCase()
+      for (const n of w.querySelectorAll('.w__l, .w__pair span, .w__s span')) {
+        if (n.textContent.trim().toLowerCase() === t) bad.push([w.dataset.id, n.className])
+      }
+    }
+    return bad
+  },
+
+  /** §4 · one question per widget, and no two widgets asking the same one. */
+  checkOneQuestion() {
+    const qs = layout.map(([id]) => CATALOGUE[id].q)
+    const dupes = qs.filter((q, i) => qs.indexOf(q) !== i)
+    const missing = Object.entries(CATALOGUE).filter(([, c]) => !c.q).map(([k]) => k)
+    return [...dupes, ...missing]
+  },
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/Users/naveen/Desktop/Module Selection\" && grep -c \"id: 'site\\\\.\" index.html && echo \"--- health/attention/status widgets ---\" && grep -n \"layout: 'health'\\\\|layout: 'attention'\\\\|layout: 'arc'\\\\|layout: 'insight'\" index.html | head -12 && echo \"--- site.overview.status ---\" && sed -n '/id: .site.overview.status/,/},/p' index.html | head -14)",
+      "Bash(awk '/id: .ms-rescue./,/^  \\\\},$/' index.html)"
+    ],
+    "additionalDirectories": [
+      "/Users/naveen/Desktop/Module Selection"
+    ]
+  }
+}
