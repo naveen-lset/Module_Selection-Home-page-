@@ -141,34 +141,37 @@ with Chrome(width=1280, height=1400, reduced_motion=False) as c:
     check("and is hidden once it has finished", got is True, str(got))
 
     print("\nthe search surfaces share it")
+    # Search is a PAGE now, not a dropdown, so it is not on --t-menu — it is on
+    # the same token, but its two sheets belong to the SHEET family instead.
+    # That is the point worth asserting: they match the module picker and the
+    # widget record, not this file's menus, because they are the same gesture.
     c.click('.search')
-    time.sleep(0.45)
-    got = c.eval(TIMING + "('.gsp')")
-    check("the search panel runs at the same duration",
-          got and abs(got["ms"] - 200) < 1, f"{got['ms']}ms · origin {got['origin']}")
+    time.sleep(0.5)
+    got = c.eval(TIMING + "('.gsx')")
+    check("the search page runs at the shared menu duration",
+          got and abs(got["ms"] - 200) < 1, f"{got['ms']}ms")
 
     c.eval("""(() => {
-      const i = document.querySelector('.search__input');
+      const i = document.querySelector('.gsx__input');
       i.value = '@'; i.dispatchEvent(new InputEvent('input', { bubbles: true }));
     })()""")
-    time.sleep(0.45)
-    got = c.eval(TIMING + "('.gsm')")
-    check("Choose Search Type runs at the same duration",
-          got and abs(got["ms"] - 200) < 1, f"{got['ms']}ms")
-    # A dialog scales from its own centre. Asserted as a MEASUREMENT against the
-    # element's own box, not a string match — the first version of this line was
-    # `... or True`, which is a check that cannot fail and therefore is not one.
-    got = c.eval("""(() => {
-      const m = document.querySelector('.gsm');
-      const r = m.getBoundingClientRect();
-      const [ox, oy] = getComputedStyle(m).transformOrigin.split(' ').map(parseFloat);
-      return { dx: Math.round(Math.abs(ox - r.width / 2)),
-               dy: Math.round(Math.abs(oy - r.height / 2)),
-               box: [Math.round(r.width), Math.round(r.height)] };
+    time.sleep(0.7)
+    sheetMs = c.eval("""(() => {
+      const cs = getComputedStyle(document.querySelector('.gsx-sheet--type'));
+      return Math.max(...cs.transitionDuration.split(',').map(s => parseFloat(s) * 1000));
     })()""")
-    check("and scales from its own middle, being a dialog",
-          got["dx"] <= 2 and got["dy"] <= 2,
-          f"origin off-centre by {got['dx']}x{got['dy']}px in a {got['box'][0]}x{got['box'][1]} box")
+    pickerMs = c.eval("""(() => {
+      const cs = getComputedStyle(document.querySelector('.sheet') || document.body);
+      return Math.max(...cs.transitionDuration.split(',').map(s => parseFloat(s) * 1000));
+    })()""")
+    check("Choose Search Type is on the SHEET timing, like every other sheet",
+          abs(sheetMs - 420) < 1, f"{sheetMs}ms vs the product's sheet at {pickerMs}ms")
+    check("and it slides from the bottom rather than scaling",
+          c.eval("""(() => {
+            const s = document.querySelector('.gsx-sheet--type');
+            const r = s.getBoundingClientRect();
+            return Math.abs((r.top + r.height) - innerHeight) <= 2;
+          })()"""))
 
     check("no console errors through any of it", not c.errors(), str(c.errors()[:2]))
 

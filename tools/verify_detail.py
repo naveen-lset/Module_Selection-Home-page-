@@ -407,61 +407,77 @@ with Chrome(width=1024, height=1000, reduced_motion=False) as c:
     check("no console errors while cycling", not c.errors(), str(c.errors()[:2]))
 
 
-# ── Enter, now that there IS an index to answer with ──────────────────────
-# This block used to assert that Enter only ACKNOWLEDGED, because the field had
-# nothing to search. Global Search gave it something, so the contract moved: a
-# query with results OPENS the first one, and the acknowledgement is what a
-# query with no results still gets. Both halves are asserted below.
-ENTER = """(()=>{const i=document.querySelector('.search__input');i.focus();
-  i.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));})()"""
-SET_VALUE = """(v=>{const i=document.querySelector('.search__input');i.value=v;
-  i.dispatchEvent(new Event('input'));})"""
-LIVE = "[...document.querySelectorAll('[aria-live]')].map(e=>e.textContent.trim()).filter(Boolean)"
+# ── the header field is a trigger, and has to behave like one ─────────────
+# This block has now moved twice, with the behaviour, and that is the right
+# reason to move a test. It began asserting that Enter only ACKNOWLEDGED,
+# because the field had no index. Then it asserted that Enter opened the first
+# result. Now the field does not take a query at all: it opens the search PAGE,
+# which has its own field. What is left to assert is that it opens on the
+# gestures that mean it, and — the part a keyboard found — that it can be
+# tabbed PAST without swallowing the focus.
+KEY = """((k) => { const i = document.querySelector('.search__input');
+  i.focus();
+  i.dispatchEvent(new KeyboardEvent('keydown',
+    { key: k, bubbles: true, cancelable: true })); })"""
 
 with Chrome(width=1024, height=1000, reduced_motion=False) as c:
-    print("\npressing Enter in the search field")
+    print("\nthe header search field")
     c.goto(URL)
-    # A term with results: Enter opens the top one and leaves the page there.
-    c.eval(SET_VALUE + "('leopard')"); time.sleep(0.4)
-    c.eval(ENTER); time.sleep(0.7)
-    got = c.eval("(()=>{const st=antz.view();return {view:st.view,level:st.level}})()")
-    check("a query with results opens the first of them",
-          got["view"] == "site" and got["level"] in ("site", "section", "enclosure"),
-          f"{got['view']}/{got['level']}")
-    check("and the field is left exactly as it was found",
-          c.eval("getComputedStyle(document.querySelector('.search')).transform") in ("none", "matrix(1, 0, 0, 1, 0, 0)")
-          and c.eval("document.querySelector('.search').getAnimations().length") == 0,
-          c.eval("getComputedStyle(document.querySelector('.search')).transform"))
 
-    # A term with none: the acknowledgement is still what Enter means.
-    c.eval(SET_VALUE + "('zzzqqq')"); time.sleep(0.4)
-    c.eval(ENTER); time.sleep(0.1)
-    running = c.eval("document.querySelector('.search').getAnimations().length"
-                     " + document.querySelector('.search__icon').getAnimations().length")
-    check("a query with nothing behind it is still acknowledged in motion",
-          running >= 2, f"{running} animations")
-    time.sleep(0.8)
-    check("the live region says what was taken",
-          any("zzzqqq" in t for t in c.eval(LIVE)), str(c.eval(LIVE)))
+    check("it does not take typing, so a keystroke cannot be lost",
+          c.eval("document.querySelector('.search__input').readOnly") is True)
 
-    # An empty Enter is unfinished, not wrong: the HINT moves, not the field
-    c.eval(SET_VALUE + "('')"); time.sleep(0.3)
-    c.eval(ENTER); time.sleep(0.1)
-    check("an empty Enter nudges the hint rather than shaking the field",
-          c.eval("document.querySelector('.search__hint').getAnimations().length") >= 1
-          and c.eval("document.querySelector('.search').getAnimations().length") == 0, "")
+    # FOCUS ALONE MUST NOT OPEN IT. This is the regression that shipped: with
+    # `focus` as the trigger, tabbing through the header trapped you in search.
+    c.eval("document.querySelector('.search__input').focus()")
+    time.sleep(0.4)
+    check("focus alone does NOT open it, so the header can be tabbed past",
+          c.eval("(() => { const p = document.querySelector('.gsx'); return !p || p.hidden })()"))
+
+    c.eval(KEY + "('Enter')")
+    time.sleep(0.5)
+    got = c.eval("""(() => { const p = document.querySelector('.gsx');
+      if (!p || p.hidden) return { open: false };
+      const r = p.getBoundingClientRect();
+      return { open: true, w: Math.round(r.width), h: Math.round(r.height) }; })()""")
+    check("Enter on it opens the search page", got["open"],
+          f"{got.get('w')}x{got.get('h')}")
+    check("and the page it opened is the size of the window",
+          got["open"] and got["w"] >= c.eval("innerWidth") - 1, "")
+
+    c.eval("""document.dispatchEvent(new KeyboardEvent('keydown',
+        { key: 'Escape', bubbles: true, cancelable: true }))""")
     time.sleep(0.6)
-    check("and it says what to type", any("search" in t.lower() for t in c.eval(LIVE)), str(c.eval(LIVE)))
-    check("no console errors around submit", not c.errors(), str(c.errors()[:2]))
+
+    c.click('.search')
+    time.sleep(0.5)
+    check("and a click opens it too", c.eval("!document.querySelector('.gsx').hidden"))
+    check("no console errors around the trigger", not c.errors(), str(c.errors()[:2]))
+
 
 # THE HALF THAT MATTERS MOST: a micro-interaction that only exists as movement
 # is one half the audience never receives. This suite forces reduced motion.
+# The trigger used to shake and announce; now it opens a page, and the thing
+# worth asserting under reduced motion is that the page still ARRIVES — with a
+# preference for less movement, "less" must never resolve to "nothing happens".
 with Chrome(width=1024, height=1000) as c:
-    print("\nEnter, with motion turned down")
+    print("\nthe trigger, with motion turned down")
     c.goto(URL)
-    c.eval(ENTER); time.sleep(0.4)
-    check("nothing moves", c.eval("document.querySelector('.search').getAnimations().length") == 0)
-    check("and the live region still speaks", bool(c.eval(LIVE)), str(c.eval(LIVE)))
+    c.eval("""((k) => { const i = document.querySelector('.search__input');
+      i.focus();
+      i.dispatchEvent(new KeyboardEvent('keydown',
+        { key: k, bubbles: true, cancelable: true })); })('Enter')""")
+    time.sleep(0.4)
+    got = c.eval("""(() => { const p = document.querySelector('.gsx');
+      if (!p || p.hidden) return { open: false };
+      const r = p.getBoundingClientRect();
+      return { open: true, w: Math.round(r.width), h: Math.round(r.height),
+               op: Number(getComputedStyle(p).opacity).toFixed(2),
+               anims: p.getAnimations().length }; })()""")
+    check("the search page still opens", got["open"], f"{got.get('w')}x{got.get('h')}")
+    check("fully drawn, with nothing animating",
+          got["open"] and float(got["op"]) > 0.98 and got["anims"] == 0,
+          f"opacity {got.get('op')}, {got.get('anims')} animations")
     check("no console errors", not c.errors(), str(c.errors()[:2]))
 
 
