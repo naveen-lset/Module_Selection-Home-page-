@@ -64,7 +64,7 @@
     Sour Gummy   the "Good Morning," line, Light — one string in the product
     DM Sans      the two large figures on the Species card, Bold, opsz 14
 -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sour+Gummy:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Host+Grotesk:wght@600&family=Sour+Gummy:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
 
 <style>
 /* ══ css/tokens.css ══ */
@@ -1582,11 +1582,14 @@ body.is-searching { overflow: hidden; }
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: var(--s6);
+  /* SPACE BETWEEN, not centred: the artboard pins the mark to the ceiling and
+     the title to the floor, and the gap between them is whatever the banner's
+     height leaves. A centred column with a fixed gap draws the same two things
+     in the middle and reads as a logo lockup. */
+  justify-content: space-between;
   height: var(--hero-h);
-  padding: var(--s8) var(--s8) var(--s4);
-  border-radius: var(--r-card);
+  padding: 24px 44px;
+  border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--shadow-hero);
   border: none;
@@ -1621,13 +1624,31 @@ body.is-searching { overflow: hidden; }
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url('assets/img/hero-leopard.jpg');
-  background-size: 100% auto;
-  background-position: 50% 46.5%;
+  /* The illustrated estate replaces the leopard photograph. Cropped to the
+     band the artboard uses and re-encoded: the source was a 1.87MB PNG of a
+     1448x1086 canvas, of which this banner shows the lower third. 185KB now,
+     which is also a third of the photograph it replaces. */
+  background-image: url('assets/img/hero-banner.jpg');
+  background-size: cover;
+  /* 82%, DERIVED FROM THE ARTBOARD'S OWN CROP rather than eyeballed. The frame
+     renders the full 1448x1086 at 960 wide — 720 tall — and shows the band from
+     476 to 680, which is source y 718 to 1026. This file ships a pre-cropped
+     band starting at source y 456, so the same window lands at 82% of the
+     remaining scroll. At 92% it sat 34px low and cut off the umbrella and the
+     lion on the arch, both of which the artboard shows. */
+  background-position: 50% 82%;
   background-repeat: no-repeat;
   transition: transform var(--t-slow) var(--ease-out);
 }
 .hero__scrim { position: absolute; inset: 0; z-index: 1; background: rgba(0, 0, 0, .4); }
+/* A SECOND WASH, top-transparent to a fifth black by just past half way. The
+   flat 40% scrim alone sits evenly over an illustration whose top half is pale
+   sky and whose bottom half is dark foliage — so the title, which is on the
+   floor, was the part with the least help. This darkens where the text is. */
+.hero__veil {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .2) 54%);
+}
 @media (hover: hover) { .hero:hover .hero__media { transform: scale(1.03); } }
 
 .hero__row {
@@ -1635,45 +1656,43 @@ body.is-searching { overflow: hidden; }
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: var(--s6);
   width: 100%;
   min-width: 0;
 }
-.hero__mark {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 118.794px;
-  height: 118.794px;
-}
-.hero__mark img {
-  display: block;
-  width: 84px;
-  height: 84px;
-  transform: rotate(-45deg);
-}
+.hero__row--top  { justify-content: flex-end; }
+.hero__row--foot { padding-right: var(--s8); }
+
+.hero__mark { flex: none; display: grid; place-items: center; width: 84px; height: 84px; }
+/* UPRIGHT. The mark was rotated -45deg to read as a diamond; the artboard
+   draws it square, corner circles at the corners. */
+.hero__mark img { display: block; width: 84px; height: 84px; }
+
 .hero__title {
   flex: 1 0 0;
   min-width: 0;
-  font-size: var(--fs-hero);
+  /* The artboard's own face and metrics. Host Grotesk is loaded for this one
+     line and nothing else — it is the wordmark, which is the one place a
+     display face earns its download. */
+  font-family: 'Host Grotesk', var(--font);
+  /* 44px is the artboard's size and it should be reached whenever the banner
+     is at full width, not only at some viewport wider than the page ever gets.
+     The page caps at 1024, so the ramp has to hit its ceiling by then — the
+     previous curve topped out at 40px on a 1180 screen and never showed the
+     artboard's own figure at all. */
+  font-size: clamp(26px, 4.6vw, 44px);
   font-weight: 600;
+  letter-spacing: .88px;
   line-height: normal;
   color: var(--on-dark);
 }
-.hero__dots {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-.hero__dots img { display: block; width: 32px; height: 8px; }
 
 @media (max-width: 767px) {
-  .hero { padding: var(--s5) var(--s5) var(--s3); gap: var(--s3); }
-  .hero__mark { width: 68px; height: 68px; }
-  .hero__mark img { width: 52px; height: 52px; }
+  /* 44px of side padding is a quarter of a phone. The mark comes down with it
+     — box AND image together, which the previous override missed: it shrank
+     the 68px box around an 84px image. */
+  .hero { padding: var(--s4) var(--s5); }
+  .hero__row--foot { padding-right: 0; }
+  .hero__mark, .hero__mark img { width: 52px; height: 52px; }
 }
 
 /* ── 8 · modules section head ────────────────────────────────────────────
@@ -6115,12 +6134,19 @@ body.is-site .card:active { transform: scale(.978); }
        target="_blank" rel="noopener">
       <span class="hero__media" aria-hidden="true"></span>
       <span class="hero__scrim" aria-hidden="true"></span>
-      <span class="hero__row">
+      <span class="hero__veil" aria-hidden="true"></span>
+      <!-- TWO ROWS PUSHED APART, which is what the artboard draws: the mark in
+           the top-right corner and the title on the floor. They were one row
+           with the mark beside the title, centred — a lockup. The banner is not
+           a lockup; it is a picture with a name on it and a mark in the corner,
+           and the space between them is the point. -->
+      <span class="hero__row hero__row--top">
         <span class="hero__mark" aria-hidden="true"><img src="assets/icon/hero-logo.svg" alt=""></span>
+      </span>
+      <span class="hero__row hero__row--foot">
         <span class="hero__title">Antz Command Centre</span>
         <span class="sr-only"> (opens in a new tab)</span>
       </span>
-      <span class="hero__dots" aria-hidden="true"><img src="assets/icon/dots.svg" alt=""></span>
     </a>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
