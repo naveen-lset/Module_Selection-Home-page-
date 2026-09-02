@@ -1112,7 +1112,12 @@ button { font: inherit; color: inherit; }
   z-index: calc(var(--z-sheet) - 2);
   display: flex;
   flex-direction: column;
-  background: var(--page-bg, #F2F7F6);
+  /* WHITE, NOT THE APP'S MINT. The home page is tinted because it is a page of
+     coloured cards and the tint holds them together. This is a list of text
+     rows, and a list reads best on the ground the rows themselves sit on —
+     which is why every command palette worth copying is white. The section
+     bands and hairlines do the separating instead of the background. */
+  background: var(--c-white);
   opacity: 0;
   transform: translateY(8px);
   transition: opacity var(--t-menu) var(--ease-out), transform var(--t-menu) var(--ease-out);
@@ -1515,6 +1520,50 @@ button { font: inherit; color: inherit; }
   background: #2FA860; color: var(--c-white);
 }
 .gsx-tag__tick .icon { width: 11px; height: 11px; }
+
+/* ── separation, now that the ground is white ────────────────────────────
+   On the mint the field and the rails floated clear of the results on tone
+   alone. On white they need edges, and hairlines are the right ones: a second
+   fill would have reintroduced the banding the white was chosen to remove. */
+.gsx__rail[data-rail='tag'] { box-shadow: inset 0 -1px 0 var(--line); padding-bottom: var(--s4); }
+.gsx__body { padding-top: var(--s2); }
+.gsx-recent { padding-top: var(--s4); }
+
+/* ── the keyboard bar ────────────────────────────────────────────────────*/
+.gsx__keys {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s6);
+  padding: 10px var(--s5);
+  box-shadow: inset 0 1px 0 var(--line);
+  background: #FAFCFC;
+}
+.gsx__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-label);
+  color: var(--ink-3);
+}
+.gsx__key kbd {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding-inline: 5px;
+  border-radius: 7px;
+  background: var(--c-white);
+  box-shadow: 0 1px 0 rgba(31, 65, 91, .10), inset 0 0 0 1px var(--line-2);
+  font: inherit;
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  line-height: 1;
+}
+.gsx__key kbd.is-word { font-size: 10px; font-weight: 600; letter-spacing: .02em; }
+
+/* A phone has no keyboard to tell anyone about. */
+@media (max-width: 620px) { .gsx__keys { display: none; } }
 
 /* The page underneath does not scroll while search is over it. */
 body.is-searching { overflow: hidden; }
@@ -22821,6 +22870,17 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
     '</div>' +
 
     '<div class="gsx__body"></div>' +
+
+    /* THE KEYS WERE ALREADY THERE. Arrow keys move the cursor, Enter opens the
+       highlighted row and Escape steps back out — all of it built, none of it
+       ever said out loud. A reader who does not know a shortcut exists does not
+       have it, so the bar is not a new feature; it is the existing ones
+       becoming findable. */
+    '<div class="gsx__keys">' +
+      '<span class="gsx__key"><kbd>&darr;</kbd><kbd>&uarr;</kbd>Move</span>' +
+      '<span class="gsx__key"><kbd>&crarr;</kbd>Select</span>' +
+      '<span class="gsx__key"><kbd class="is-word">ESC</kbd>Quit</span>' +
+    '</div>' +
     '<p class="sr-only" role="status" aria-live="polite"></p>'
 
   document.body.append(page)

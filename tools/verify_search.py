@@ -94,6 +94,31 @@ with Chrome(width=1280, height=1400) as c:
     check("and the page underneath is held still",
           c.eval("getComputedStyle(document.body).overflow") == "hidden")
 
+    # WHITE, asserted as a colour rather than as "not the old one". A list of
+    # text rows reads on the ground the rows sit on; the app's mint is for the
+    # page of coloured cards. Parsed from rgb() so a rewrite to a token, a hex
+    # or a colour function all still satisfy it.
+    got = c.eval("""(() => {
+      const m = getComputedStyle(document.querySelector('.gsx')).backgroundColor
+        .match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+    })()""")
+    check("the ground is white", got == [255, 255, 255], str(got))
+
+    # The keys were built and never mentioned. The bar is what makes them real.
+    got = c.eval("""(() => {
+      const bar = document.querySelector('.gsx__keys');
+      if (!bar) return { there: false };
+      const r = bar.getBoundingClientRect();
+      return { there: true, vis: r.width > 1 && r.height > 1,
+               text: bar.textContent.replace(/\s+/g, ' ').trim(),
+               keys: bar.querySelectorAll('kbd').length };
+    })()""")
+    check("the keyboard bar names the moves that already worked",
+          got["there"] and got["vis"] and got["keys"] >= 4
+          and all(w in got["text"] for w in ("Move", "Select", "Quit")),
+          f"{got.get('text')} ({got.get('keys')} keys)")
+
     print("\ntwo rails, two rules")
     got = c.eval(BOX % '"[data-rail=\'type\']"')
     check("a type rail", got["there"] and got["vis"], got["text"][:64])
