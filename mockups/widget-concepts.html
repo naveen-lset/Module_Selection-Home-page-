@@ -3,33 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Widget Concepts · ANTZ Command Centre</title>
+<title>Widget Ideas, Module by Module · ANTZ</title>
 
 <!--
   ═══════════════════════════════════════════════════════════════════════════
-  WIDGET CONCEPTS · twelve compositions the catalogue does not have
+  WIDGET IDEAS · one block per module, 89 widgets, 41 compositions
   ═══════════════════════════════════════════════════════════════════════════
 
-  Source: References/Widgets_Reference/ — four sheets of iOS/Android home-screen
-  widgets. What is taken from them is the COMPOSITION, never the styling: no
-  reference card's palette, radius, shadow or type is copied. Every card below
-  is drawn with this product's own tokens, at the artboard's own card sizes
-  (179.2 × 164 for a 1×1, 374.4 wide, 344 tall for a 2×2), so a concept that
-  looks cramped here will look cramped in the app.
+  WHAT THE FIRST VERSION GOT WRONG, AND WHAT THIS ONE DOES INSTEAD.
 
-  THIS IS A MOCKUP, NOT A BUILD. Nothing here is wired to derive(), the picker,
-  the packer or the saved layout. The figures are the reference Site's real
-  ones — Bannerghatta Safari, 412 ha, 12 sections, 48 enclosures, 86 staff,
-  42 species, 318 animals, health 87 — so the cards can be judged at the
-  density they would actually carry.
+  1 · EVERY CARD WAS THE SAME SIZE. Twelve concepts, eight of them 2x2. There
+      are four footprints at five columns — 1x1, 2x1, 2x2 and 5x2 — and a page
+      that only ever draws one of them has no rhythm. Every module here gets a
+      BLOCK OF TEN CELLS, which is the seed convention the Site defaults
+      already follow, packed from mixed sizes: a 2x2 signature, one or two 2x1,
+      one or two 1x1. 36 of the 89 widgets are 1x1.
 
-  THE TEST EACH ONE HAS TO PASS is the brief's: looking at a page of them, you
-  should know they are different KINDS of card before reading a label. The
-  contact sheet at the top is that test. The annotation beside each concept
-  answers the second question — which existing layout would have done instead,
-  and why it would not.
+  2 · THERE WAS MORE LABEL THAN CONTENT. Titles, captions, foot lines, notes
+      under figures. A 1x1 card has 147x132 to work in and four lines of
+      wording leaves no room for the thing you opened the page to read. So:
+      NO 1x1 CARD CARRIES A TITLE — the module glyph names it, exactly as a
+      `door` does — and no card anywhere carries a caption that repeats what
+      the figure above it already said. What each card is FOR moved off the
+      card and into the legend under its block.
 
-  Two are marked ⚠ because they are decisions rather than proposals. See them.
+  3 · THE DATA WAS GENERIC. Twelve compositions that would have fitted any
+      module. Each module's signature card here is built for what THAT module
+      uniquely holds and would not transplant: Medical's cases are a severity
+      ladder, Eggs' clutches are day-counters, Pharmacy's stock is shelves with
+      expiry, Security's cameras are a perimeter, Parivesh's filings are
+      runways to a deadline. Every figure is from `docs/Modules.md Files/`.
+
+  4 · NO IMAGES AND NO QUICK ACTIONS. Now three photographic compositions
+      (1x1, 2x1, 5x2) drawn on the real photographs in `assets/img/`, and three
+      action compositions at three different sizes — 1x1 one verb, 2x1 three
+      verbs, 2x2 four verbs — so a shelf of actions is not always one shape.
+
+  Compositions come from References/Widgets_Reference/. What is taken is the
+  COMPOSITION and never the styling: every card is this product's own gradient,
+  radius, shadow and type, at the artboard's own sizes.
+
+  STILL A MOCKUP. Nothing is wired to derive(), the picker or the packer.
+  ═══════════════════════════════════════════════════════════════════════════
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,1207 +52,1343 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
 
 <style>
-/* ═══════════════════════════════════════════════════════════════════════════
-   1 · TOKENS — the subset this page needs, copied verbatim from index.html.
-   Copied rather than imported because the app is one file and a mockup that
-   reaches into it cannot be opened on its own. If a token here disagrees with
-   index.html, index.html is right.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ══ 1 · TOKENS — copied verbatim from index.html ══════════════════════════ */
 :root {
   --page-bg:
-    linear-gradient(180deg,
-      rgba(175, 239, 235, .5)   0%,
-      rgba(175, 239, 235, .275) 32.386%,
-      rgba(242, 255, 248, .5)   68.662%),
-    linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%);
+    linear-gradient(180deg, rgba(175,239,235,.5) 0%, rgba(175,239,235,.275) 32.386%, rgba(242,255,248,.5) 68.662%),
+    linear-gradient(90deg, rgb(255,255,255) 0%, rgb(255,255,255) 100%);
+  --ink: #1F415B; --ink-mute: #7A8684; --ink-2: #52697A;
+  --teal: #00ABAB; --coral: #FA6140; --on-dark: #fff; --surface: #fff;
 
-  --c-on-secondary-ctr: #1F415B;
-  --c-on-surface-var:   #44544A;
-  --c-neutral-2:        #7A8684;
-  --c-secondary-dark:   #00ABAB;
-  --c-tertiary:         #FA6140;
+  --g-medical: linear-gradient(122.90619deg, rgb(142,190,165) 6%, rgb(129,183,155) 15.8%, rgb(116,175,145) 25.6%, rgb(103,168,134) 35.3%, rgb(90,160,123) 45.1%, rgb(77,153,114) 54.9%, rgb(65,145,103) 64.7%, rgb(51,138,93) 74.4%, rgb(51,138,93) 84.2%, rgb(51,138,93) 94%);
+  --g-hospital: linear-gradient(123.16619deg, rgb(103,137,143) 6%, rgb(93,129,136) 15.8%, rgb(82,121,128) 25.6%, rgb(72,113,121) 35.3%, rgb(62,105,113) 45.1%, rgb(52,97,106) 54.9%, rgb(41,89,98) 64.7%, rgb(31,81,91) 74.4%, rgb(31,81,91) 84.2%, rgb(31,81,91) 94%);
+  --g-pharmacy: linear-gradient(123.16619deg, rgb(119,155,159) 6%, rgb(114,149,155) 15.8%, rgb(107,144,149) 25.6%, rgb(100,138,143) 35.3%, rgb(93,131,138) 45.1%, rgb(86,126,133) 54.9%, rgb(79,120,128) 64.7%, rgb(72,115,122) 74.4%, rgb(72,115,122) 84.2%, rgb(72,115,122) 94%);
+  --g-lab: linear-gradient(123.16619deg, rgb(216,201,147) 6%, rgb(216,198,140) 15.8%, rgb(215,195,134) 25.6%, rgb(214,192,128) 35.3%, rgb(213,188,122) 45.1%, rgb(212,185,117) 54.9%, rgb(210,183,110) 64.7%, rgb(209,180,104) 74.4%, rgb(209,180,104) 84.2%, rgb(209,180,104) 94%);
+  --g-species: linear-gradient(123.16619deg, rgb(82,156,118) 6%, rgb(70,149,109) 15.8%, rgb(59,143,99) 25.6%, rgb(47,136,90) 35.3%, rgb(35,129,81) 45.1%, rgb(23,122,72) 54.9%, rgb(12,116,62) 64.7%, rgb(0,109,53) 74.4%, rgb(0,109,53) 84.2%, rgb(0,109,53) 94%);
+  --g-mortality: linear-gradient(123.16619deg, rgb(251,153,132) 6%, rgb(251,149,128) 15.8%, rgb(251,146,123) 25.6%, rgb(251,143,119) 35.3%, rgb(251,139,115) 45.1%, rgb(251,135,111) 54.9%, rgb(251,132,107) 64.7%, rgb(251,128,102) 74.4%, rgb(251,128,102) 84.2%, rgb(251,128,102) 94%);
+  --g-fetal: linear-gradient(123.16619deg, rgb(244,147,164) 6%, rgb(245,141,160) 15.8%, rgb(246,134,155) 25.6%, rgb(246,128,149) 35.3%, rgb(247,122,145) 45.1%, rgb(247,116,140) 54.9%, rgb(248,110,135) 64.7%, rgb(248,103,129) 74.4%, rgb(248,103,129) 84.2%, rgb(248,103,129) 94%);
+  --g-eggs: linear-gradient(123.16619deg, rgb(106,220,226) 6%, rgb(98,216,225) 15.8%, rgb(91,213,225) 25.6%, rgb(83,209,224) 35.3%, rgb(74,205,223) 45.1%, rgb(66,200,222) 54.9%, rgb(58,195,222) 64.7%, rgb(50,191,221) 74.4%, rgb(50,191,221) 84.2%, rgb(50,191,221) 94%);
+  --g-diet: linear-gradient(123.16619deg, rgb(252,148,125) 6%, rgb(252,141,116) 15.8%, rgb(251,133,108) 25.6%, rgb(251,126,99) 35.3%, rgb(251,119,90) 45.1%, rgb(251,112,81) 54.9%, rgb(250,104,73) 64.7%, rgb(250,97,64) 74.4%, rgb(250,97,64) 84.2%, rgb(250,97,64) 94%);
+  --g-followup: linear-gradient(123.16619deg, rgb(119,155,159) 6%, rgb(114,149,155) 15.8%, rgb(107,144,149) 25.6%, rgb(100,138,143) 35.3%, rgb(93,131,138) 45.1%, rgb(86,126,133) 54.9%, rgb(79,120,128) 64.7%, rgb(72,115,122) 74.4%, rgb(72,115,122) 84.2%, rgb(72,115,122) 94%);
+  --g-parivesh: linear-gradient(123.16619deg, rgb(108,231,223) 6%, rgb(101,230,221) 15.8%, rgb(92,229,220) 25.6%, rgb(83,227,218) 35.3%, rgb(75,226,216) 45.1%, rgb(67,225,214) 54.9%, rgb(58,223,212) 64.7%, rgb(50,222,211) 74.4%, rgb(50,222,211) 84.2%, rgb(50,222,211) 94%);
+  --g-administer: linear-gradient(123.16619deg, rgb(179,198,188) 6%, rgb(176,195,184) 15.8%, rgb(173,193,181) 25.6%, rgb(169,189,177) 35.3%, rgb(165,186,174) 45.1%, rgb(162,183,170) 54.9%, rgb(157,179,166) 64.7%, rgb(154,176,162) 74.4%, rgb(155,176,163) 84.2%, rgb(155,176,163) 94%);
+  --g-users: linear-gradient(123.16619deg, rgb(123,147,160) 6%, rgb(117,141,155) 15.8%, rgb(109,135,150) 25.6%, rgb(102,128,145) 35.3%, rgb(95,122,139) 45.1%, rgb(88,115,133) 54.9%, rgb(81,109,128) 64.7%, rgb(74,103,123) 74.4%, rgb(74,103,122) 84.2%, rgb(74,103,122) 94%);
+  --g-security: linear-gradient(123.16619deg, rgb(149,158,152) 6%, rgb(142,152,147) 15.8%, rgb(136,147,140) 25.6%, rgb(130,140,134) 35.3%, rgb(124,135,128) 45.1%, rgb(118,129,122) 54.9%, rgb(111,123,116) 64.7%, rgb(105,117,110) 74.4%, rgb(104,117,110) 84.2%, rgb(104,117,110) 94%);
+  --g-reports: linear-gradient(123.16619deg, rgb(108,231,222) 6%, rgb(101,230,221) 15.8%, rgb(92,229,220) 25.6%, rgb(84,227,218) 35.3%, rgb(75,226,216) 45.1%, rgb(67,225,214) 54.9%, rgb(58,223,212) 64.7%, rgb(50,222,211) 74.4%, rgb(50,222,211) 84.2%, rgb(50,222,211) 94%);
 
-  --ink:      var(--c-on-secondary-ctr);
-  --ink-head: var(--c-on-surface-var);
-  --ink-mute: var(--c-neutral-2);
-  --ink-2:    #52697A;
-  --on-dark:  #FFFFFF;
-  --surface:  #FFFFFF;
-
-  /* the eleven module gradients these concepts sit on, sampled off the Figma
-     artboard exactly as index.html has them */
-  --g-medical: linear-gradient(122.90619deg,
-    rgb(142,190,165) 6%, rgb(129,183,155) 15.8%, rgb(116,175,145) 25.6%,
-    rgb(103,168,134) 35.3%, rgb(90,160,123) 45.1%, rgb(77,153,114) 54.9%,
-    rgb(65,145,103) 64.7%, rgb(51,138,93) 74.4%, rgb(51,138,93) 84.2%, rgb(51,138,93) 94%);
-  --g-mortality: linear-gradient(123.16619deg,
-    rgb(251,153,132) 6%, rgb(251,149,128) 15.8%, rgb(251,146,123) 25.6%,
-    rgb(251,143,119) 35.3%, rgb(251,139,115) 45.1%, rgb(251,135,111) 54.9%,
-    rgb(251,132,107) 64.7%, rgb(251,128,102) 74.4%, rgb(251,128,102) 84.2%, rgb(251,128,102) 94%);
-  --g-pharmacy: linear-gradient(123.16619deg,
-    rgb(119,155,159) 6%, rgb(114,149,155) 15.8%, rgb(107,144,149) 25.6%,
-    rgb(100,138,143) 35.3%, rgb(93,131,138) 45.1%, rgb(86,126,133) 54.9%,
-    rgb(79,120,128) 64.7%, rgb(72,115,122) 74.4%, rgb(72,115,122) 84.2%, rgb(72,115,122) 94%);
-  --g-lab: linear-gradient(123.16619deg,
-    rgb(216,201,147) 6%, rgb(216,198,140) 15.8%, rgb(215,195,134) 25.6%,
-    rgb(214,192,128) 35.3%, rgb(213,188,122) 45.1%, rgb(212,185,117) 54.9%,
-    rgb(210,183,110) 64.7%, rgb(209,180,104) 74.4%, rgb(209,180,104) 84.2%, rgb(209,180,104) 94%);
-  --g-fetal: linear-gradient(123.16619deg,
-    rgb(244,147,164) 6%, rgb(245,141,160) 15.8%, rgb(246,134,155) 25.6%,
-    rgb(246,128,149) 35.3%, rgb(247,122,145) 45.1%, rgb(247,116,140) 54.9%,
-    rgb(248,110,135) 64.7%, rgb(248,103,129) 74.4%, rgb(248,103,129) 84.2%, rgb(248,103,129) 94%);
-  --g-eggs: linear-gradient(123.16619deg,
-    rgb(106,220,226) 6%, rgb(98,216,225) 15.8%, rgb(91,213,225) 25.6%,
-    rgb(83,209,224) 35.3%, rgb(74,205,223) 45.1%, rgb(66,200,222) 54.9%,
-    rgb(58,195,222) 64.7%, rgb(50,191,221) 74.4%, rgb(50,191,221) 84.2%, rgb(50,191,221) 94%);
-  --g-users: linear-gradient(123.16619deg,
-    rgb(123,147,160) 6%, rgb(117,141,155) 15.8%, rgb(109,135,150) 25.6%,
-    rgb(102,128,145) 35.3%, rgb(95,122,139) 45.1%, rgb(88,115,133) 54.9%,
-    rgb(81,109,128) 64.7%, rgb(74,103,123) 74.4%, rgb(74,103,122) 84.2%, rgb(74,103,122) 94%);
-  --g-parivesh: linear-gradient(123.16619deg,
-    rgb(108,231,223) 6%, rgb(101,230,221) 15.8%, rgb(92,229,220) 25.6%,
-    rgb(83,227,218) 35.3%, rgb(75,226,216) 45.1%, rgb(67,225,214) 54.9%,
-    rgb(58,223,212) 64.7%, rgb(50,222,211) 74.4%, rgb(50,222,211) 84.2%, rgb(50,222,211) 94%);
-  --g-followup: linear-gradient(123.16619deg,
-    rgb(119,155,159) 6%, rgb(114,149,155) 15.8%, rgb(107,144,149) 25.6%,
-    rgb(100,138,143) 35.3%, rgb(93,131,138) 45.1%, rgb(86,126,133) 54.9%,
-    rgb(79,120,128) 64.7%, rgb(72,115,122) 74.4%, rgb(72,115,122) 84.2%, rgb(72,115,122) 94%);
-  --g-species: linear-gradient(123.16619deg,
-    rgb(82,156,118) 6%, rgb(70,149,109) 15.8%, rgb(59,143,99) 25.6%,
-    rgb(47,136,90) 35.3%, rgb(35,129,81) 45.1%, rgb(23,122,72) 54.9%,
-    rgb(12,116,62) 64.7%, rgb(0,109,53) 74.4%, rgb(0,109,53) 84.2%, rgb(0,109,53) 94%);
-  --g-diet: linear-gradient(123.16619deg,
-    rgb(252,148,125) 6%, rgb(252,141,116) 15.8%, rgb(251,133,108) 25.6%,
-    rgb(251,126,99) 35.3%, rgb(251,119,90) 45.1%, rgb(251,112,81) 54.9%,
-    rgb(250,104,73) 64.7%, rgb(250,97,64) 74.4%, rgb(250,97,64) 84.2%, rgb(250,97,64) 94%);
-
+  --scrim-band: linear-gradient(179.41143632907807deg, rgba(255,255,255,0) 5.6838%, rgba(58,58,58,.7) 64.478%);
   --shadow-card: 0 1px 3px rgba(31,65,91,.06), 0 8px 24px -10px rgba(31,65,91,.14);
-  --shadow-lift: 0 4px 10px rgba(31,65,91,.10), 0 26px 56px -18px rgba(31,65,91,.32);
-
-  --r-card: 16px;
-  --r-pill: 999px;
-
-  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 20px;
-  --s6: 24px; --s7: 28px; --s8: 32px; --s10: 40px;
-
-  --ease:     cubic-bezier(.22,.61,.36,1);
-  --ease-out: cubic-bezier(.16,1,.3,1);
-  --t-base:   220ms;
-  --t-slow:   320ms;
-
-  --font:     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --r-card: 16px; --r-pill: 999px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s7: 28px; --s8: 32px; --s10: 40px;
+  --ease: cubic-bezier(.22,.61,.36,1); --ease-out: cubic-bezier(.16,1,.3,1); --t-base: 220ms; --t-slow: 320ms;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-num: 'DM Sans', var(--font);
 
-  /* the artboard's own type scale at 1024, where these cards live */
-  --fs-card-title: 19px;
-  --fs-stat:       48px;
-  --fs-stat-sm:    34px;
-  --fs-metric:     27px;
-  --fs-body:       17px;
-  --fs-label:      15px;
-  --fs-micro:      13px;
+  --fs-title: 19px; --fs-body: 17px; --fs-label: 15px; --fs-micro: 13px; --fs-nano: 11px;
 
-  /* the artboard grid: 5 columns of 179.2 with 16px gutters on 960 of
-     content, rows 164 tall. Measured off Figma node 55476:32828. */
-  --cell:   179.2px;
-  --gutter: 16px;
-  --row:    164px;
+  /* the artboard grid: five 179.2 columns, 16px gutters, 164px rows.
+     Measured off Figma node 55476:32828. */
+  --cell: 179.2px; --gutter: 16px; --row: 164px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   2 · THE PAGE — chrome for reading the concepts, not part of the product
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ══ 2 · THE PAGE ═════════════════════════════════════════════════════════ */
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0;
-  padding: 0 0 var(--s10);
-  font-family: var(--font);
-  color: var(--ink);
-  background: var(--page-bg) no-repeat;
-  background-attachment: fixed;
-  -webkit-font-smoothing: antialiased;
+  margin: 0; padding: 0 0 var(--s10); font-family: var(--font); color: var(--ink);
+  background: var(--page-bg) no-repeat; background-attachment: fixed; -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1128px; margin: 0 auto; padding: 0 var(--s6); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 var(--s6); }
+.masthead { padding: var(--s10) 0 var(--s6); }
+.masthead__kicker { margin: 0 0 var(--s2); font-size: var(--fs-micro); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+.masthead h1 { margin: 0 0 var(--s3); font-size: 38px; line-height: 1.1; letter-spacing: -.02em; }
+.masthead p { margin: 0 0 var(--s3); max-width: 64ch; font-size: var(--fs-body); line-height: 1.6; color: var(--ink-2); }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .87em; background: rgba(31,65,91,.07); padding: .1em .35em; border-radius: 4px; }
 
-.masthead { padding: var(--s10) 0 var(--s7); }
-.masthead__kicker {
-  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--c-secondary-dark); margin: 0 0 var(--s2);
-}
-.masthead h1 {
-  margin: 0 0 var(--s3); font-size: 40px; line-height: 1.1;
-  letter-spacing: -.02em; font-weight: 700;
-}
-.masthead p { margin: 0 0 var(--s3); max-width: 62ch; font-size: var(--fs-body); line-height: 1.6; color: var(--ink-2); }
-.masthead p:last-child { margin-bottom: 0; }
-.masthead code, .ann code, .note code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: .88em; background: rgba(31,65,91,.07); padding: .1em .35em; border-radius: 4px;
-}
+.tally { display: flex; flex-wrap: wrap; gap: var(--s2); margin: 0 0 var(--s7); }
+.tally b { background: var(--surface); box-shadow: var(--shadow-card); border-radius: var(--r-pill); padding: 6px 14px; font-size: var(--fs-micro); font-weight: 600; }
+.tally b span { font-family: var(--font-num); color: var(--teal); }
 
-.note {
-  border-left: 3px solid var(--c-secondary-dark);
-  padding: var(--s1) 0 var(--s1) var(--s4);
-  margin: 0 0 var(--s7);
-  font-size: var(--fs-label); line-height: 1.65; color: var(--ink-2);
-  max-width: 76ch;
+.mod { padding: var(--s7) 0 var(--s2); border-top: 1px solid rgba(31,65,91,.1); }
+.mod__bar { display: flex; align-items: center; gap: var(--s3); margin: 0 0 var(--s4); flex-wrap: wrap; }
+.mod__glyph { width: 34px; height: 34px; flex: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.mod__glyph img, .mod__glyph svg { width: 22px; height: 22px; display: block; }
+.mod__name { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.015em; }
+.mod__n { font-family: var(--font-num); font-size: var(--fs-micro); color: var(--ink-mute); }
+.mod__keys { margin-left: auto; font-size: var(--fs-nano); color: var(--ink-mute); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.blockwrap { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+.block {
+  display: grid; grid-template-columns: repeat(5, var(--cell));
+  grid-auto-rows: var(--row); grid-auto-flow: row dense; gap: var(--gutter);
+  width: calc(5 * var(--cell) + 4 * var(--gutter));
 }
+.blockwrap + .blockwrap { margin-top: var(--gutter); }
+
+/* the legend: one line per widget, and it carries the words the cards no
+   longer do — which is the whole of rule 2 */
+.legend { margin: var(--s4) 0 0; display: grid; gap: 2px; font-size: var(--fs-micro); }
+.legend div { display: grid; grid-template-columns: 24px 132px 76px 96px minmax(0, 1fr); gap: var(--s3); align-items: baseline; color: var(--ink-2); }
+.legend i { font-style: normal; font-family: var(--font-num); font-weight: 700; color: var(--ink-mute); text-align: right; }
+.legend b { color: var(--ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.legend em { font-style: normal; color: var(--teal); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+.legend span { color: var(--ink-mute); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.legend u { text-decoration: none; color: var(--ink-mute); }
+@media (max-width: 900px) { .legend div { grid-template-columns: 22px 1fr 70px; } .legend span, .legend u { display: none; } }
+
+.note { margin: var(--s6) 0 0; border-left: 3px solid var(--teal); padding: 2px 0 2px var(--s4); font-size: var(--fs-label); line-height: 1.65; color: var(--ink-2); max-width: 74ch; }
 .note strong { color: var(--ink); }
-.note--warn { border-left-color: var(--c-tertiary); }
+h2.sec { margin: var(--s10) 0 var(--s3); font-size: 24px; letter-spacing: -.015em; }
 
-h2.sec {
-  margin: var(--s10) 0 var(--s2); font-size: 24px; letter-spacing: -.015em; font-weight: 700;
-}
-h2.sec + p.sub { margin: 0 0 var(--s6); font-size: var(--fs-label); color: var(--ink-mute); max-width: 70ch; line-height: 1.6; }
-
-/* ── the contact sheet ───────────────────────────────────────────────────
-   Four columns, not five. A 2-wide card tiles a four-column grid exactly, so
-   the sheet has no holes to explain; the CARDS are the same physical size
-   either way, because (768 − 3×16) ÷ 4 and (1024 − 4×16) ÷ 5 are both 179.2.
-   The app runs this band at 768px wide. */
-.sheet-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; margin-bottom: var(--s8); }
-.sheet {
-  display: grid;
-  grid-template-columns: repeat(4, var(--cell));
-  grid-auto-rows: var(--row);
-  grid-auto-flow: row dense;
-  gap: var(--gutter);
-  width: calc(4 * var(--cell) + 3 * var(--gutter));
-  margin: 0 auto;
-}
-
-/* ── a concept block ─────────────────────────────────────────────────────*/
-.concept { padding: var(--s7) 0; border-top: 1px solid rgba(31,65,91,.10); }
-.concept:first-of-type { border-top: none; }
-.concept__bar { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; margin: 0 0 var(--s5); }
-.concept__n {
-  font-family: var(--font-num); font-weight: 700; font-size: 15px;
-  color: var(--on-dark); background: var(--ink); border-radius: var(--r-pill);
-  min-width: 26px; height: 26px; display: inline-flex; align-items: center;
-  justify-content: center; padding: 0 7px; flex: none; align-self: center;
-}
-.concept__name { font-size: 22px; font-weight: 700; letter-spacing: -.015em; margin: 0; }
-.concept__id {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
-  color: var(--c-secondary-dark); font-weight: 600;
-}
-.concept__sizes { font-size: var(--fs-micro); color: var(--ink-mute); margin-left: auto; }
-.concept__flag {
-  font-size: var(--fs-micro); font-weight: 600; color: #A93B1E;
-  background: rgba(250,97,64,.12); border-radius: var(--r-pill); padding: 3px 10px;
-}
-
-.concept__body { display: flex; gap: var(--s7); align-items: flex-start; flex-wrap: wrap; }
-/* THE CARD IS DRAWN AT ARTBOARD SIZE AND NEVER RESIZED, because a concept
-   judged at 300px is not the concept. A `full` card is 765px wide, so on a
-   narrow screen the STAGE scrolls and the page does not — the page body must
-   never scroll horizontally, which is how a mockup starts lying about widths. */
-.stage { flex: 0 1 auto; min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
-.stage > .card { flex: none; }
-.stage__caption { margin: var(--s3) 0 0; font-size: var(--fs-micro); color: var(--ink-mute); text-align: center; }
-
-.ann { flex: 1 1 380px; min-width: 300px; display: grid; gap: var(--s4); }
-/* `minmax(0, 1fr)` AND NOT `1fr`. A bare `1fr` is `minmax(auto, 1fr)`, whose
-   auto minimum is the track's min-content — the longest line of the <pre>
-   inside it. The page scrolled sideways by 160px at 900 and the <pre>'s own
-   `overflow-x: auto` never got a chance to do its job. */
-.ann__row { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: var(--s4); align-items: start; }
-.ann__k {
-  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--ink-mute); padding-top: 2px;
-}
-.ann__v { font-size: var(--fs-label); line-height: 1.6; color: var(--ink-2); min-width: 0; }
-.ann__v strong { color: var(--ink); font-weight: 600; }
-.ann__v pre {
-  margin: 0; padding: var(--s3); background: var(--surface); border-radius: 10px;
-  box-shadow: var(--shadow-card); overflow-x: auto;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; line-height: 1.55;
-  color: var(--ink);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   3 · THE CARD — base chrome, copied from cards.css
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ══ 3 · THE CARD ═════════════════════════════════════════════════════════ */
 .card {
-  position: relative;
-  display: flex; flex-direction: column;
-  border: none; border-radius: var(--r-card);
-  overflow: hidden; isolation: isolate;
-  text-align: left; cursor: pointer;
-  padding: var(--s4);
-  font: inherit; color: var(--on-dark);
-  background: var(--card-bg, var(--g-users));
+  position: relative; display: flex; flex-direction: column; overflow: hidden; isolation: isolate;
+  border: none; border-radius: var(--r-card); padding: var(--s4); text-align: left; cursor: pointer;
+  font: inherit; color: var(--on-dark); background: var(--card-bg, var(--g-users));
   transition: box-shadow var(--t-base) var(--ease), transform var(--t-base) var(--ease-out);
 }
 .card[data-size='medium'] { padding: var(--s5); }
-.card[data-size='large'], .card[data-size='tall'], .card[data-size='full'] { padding: var(--s6); }
+.card[data-size='large'], .card[data-size='full'] { padding: var(--s6); }
 @media (hover: hover) { .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); } }
 .card:active { transform: translateY(0) scale(.985); }
-
-/* the sheet places by span; a lone stage draws the card at its real pixel box */
 .card[data-size='small']  { grid-column: span 1; grid-row: span 1; }
 .card[data-size='medium'] { grid-column: span 2; grid-row: span 1; }
-.card[data-size='large'],
-.card[data-size='tall']   { grid-column: span 2; grid-row: span 2; }
-.card[data-size='full']   { grid-column: span 4; grid-row: span 2; }
-.stage .card[data-size='small']  { width: var(--cell);  height: var(--row); }
-.stage .card[data-size='medium'] { width: calc(2 * var(--cell) + var(--gutter)); height: var(--row); }
-.stage .card[data-size='large'],
-.stage .card[data-size='tall']   { width: calc(2 * var(--cell) + var(--gutter)); height: calc(2 * var(--row) + var(--gutter)); }
-.stage .card[data-size='full']   { width: calc(4 * var(--cell) + 3 * var(--gutter)); height: calc(2 * var(--row) + var(--gutter)); }
+.card[data-size='large']  { grid-column: span 2; grid-row: span 2; }
+.card[data-size='full']   { grid-column: span 5; grid-row: span 2; }
 
-/* the title line every data card opens with */
-.c-head {
-  position: relative; z-index: 2; display: flex; align-items: center;
-  gap: var(--s2); flex: none; min-width: 0; margin-bottom: var(--s3);
-}
-.c-head__icon { flex: none; width: 22px; height: 22px; display: block; }
-.c-head__icon svg { width: 100%; height: 100%; display: block; }
-.c-head__text {
-  font-size: var(--fs-card-title); font-weight: 600; line-height: 1.25;
-  letter-spacing: -.01em; min-width: 0; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
-}
-.c-head__chip {
-  margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700;
-  font-size: var(--fs-micro); font-variant-numeric: tabular-nums;
-  background: rgba(255,255,255,.22); border-radius: var(--r-pill); padding: 2px 9px;
-}
+.card__media { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-slow) var(--ease-out); }
+@media (hover: hover) { .card[data-fill='image']:hover .card__media { transform: scale(1.035); } }
+.card__band { position: absolute; inset: auto 0 0; z-index: 1; background: var(--scrim-band); height: 113px; }
+.card[data-size='small'] .card__band { height: 78px; }
 
-/* shared numerals */
-.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+/* the glyph blown up behind the content at 12% — the `entity` idiom, and what
+   stands in for a photograph on the twelve modules that do not have one */
+.card__mark { position: absolute; z-index: 0; inset: 0; overflow: hidden; opacity: .12; pointer-events: none; }
+.card__mark img, .card__mark svg { position: absolute; right: -14px; bottom: -18px; width: 128px; height: 128px; display: block; }
+.card[data-size='small'] .card__mark img, .card[data-size='small'] .card__mark svg { right: -12px; bottom: -14px; width: 96px; height: 96px; }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   4 · THE TWELVE COMPOSITIONS
-   Same idiom as LAYOUTS in index.html: one block per composition, each owning
-   its own DOM and its own CSS, none a variation of another. Visualisations are
-   white at an opacity, drawn straight onto the module's gradient — no pale
-   plate underneath, which is the line between a card that belongs to this
-   system and a dashboard tile dropped into it.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* the title line — on 2x1, 2x2 and 5x2 only. A 1x1 gets the glyph alone. */
+.h { position: relative; z-index: 2; display: flex; align-items: center; gap: var(--s2); flex: none; min-width: 0; margin-bottom: var(--s3); }
+.h__i { flex: none; width: 22px; height: 22px; display: block; }
+.h__i img, .h__i svg { width: 100%; height: 100%; display: block; }
+.h__t { font-size: var(--fs-title); font-weight: 600; line-height: 1.25; letter-spacing: -.01em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h__c { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); background: rgba(255,255,255,.22); border-radius: var(--r-pill); padding: 2px 9px; }
+.card[data-size='small'] .h { margin-bottom: var(--s2); }
+.card[data-size='small'] .h__t { display: none; }
 
-/* ── 1 · WINDOW · where we are inside a bounded period ──────────────────*/
-.l-window { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-window__dial { position: relative; flex: 1 1 auto; min-height: 0; display: flex; justify-content: center; padding-top: var(--s1); }
-.l-window__dial svg { width: 100%; height: 100%; max-height: 150px; overflow: visible; }
-.l-window__track { fill: none; stroke: rgba(255,255,255,.26); stroke-linecap: round; }
-.l-window__done  { fill: none; stroke: rgba(255,255,255,.92); stroke-linecap: round; }
-.l-window__now   { fill: #fff; stroke: rgba(0,0,0,.14); stroke-width: 1.5; }
-.l-window__read {
-  position: absolute; left: 0; right: 0; top: 46%; transform: translateY(-50%);
-  text-align: center; pointer-events: none;
-}
-.l-window__left { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-stat-sm); line-height: 1; letter-spacing: -.02em; }
-.l-window__of   { display: block; margin-top: 3px; font-size: var(--fs-micro); opacity: .82; }
-.l-window__ends { display: flex; justify-content: space-between; margin-top: calc(-1 * var(--s2)); font-size: var(--fs-micro); opacity: .82; }
-.l-window__ends span { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-.l-window__foot {
-  margin-top: auto; padding-top: var(--s3); border-top: 1px solid rgba(255,255,255,.22);
-  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2);
-  font-size: var(--fs-label);
-}
-.l-window__foot b { font-weight: 600; }
-.l-window__foot i { font-style: normal; opacity: .82; font-size: var(--fs-micro); }
+.n { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.q { font-size: var(--fs-nano); opacity: .82; line-height: 1.3; }
+.body { position: relative; z-index: 2; display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
 
-/* ── 2 · PIPS · several things on the same small discrete scale ─────────*/
-.l-pips { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-pips__rows { display: flex; flex-direction: column; gap: var(--s4); flex: 1 1 auto; justify-content: center; }
-.l-pips__row { display: block; }
-.l-pips__line { display: flex; align-items: baseline; gap: var(--s2); margin-bottom: 7px; }
-.l-pips__name { font-size: var(--fs-label); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.l-pips__val { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-label); font-variant-numeric: tabular-nums; }
-.l-pips__strip { display: flex; gap: 3px; position: relative; }
-.l-pips__pip { flex: 1 1 0; height: 9px; border-radius: 2.5px; background: rgba(255,255,255,.24); }
-.l-pips__pip[data-on] { background: rgba(255,255,255,.95); }
-/* the minimum, drawn once, so a row that falls short says so without colour */
-.l-pips__min { position: absolute; top: -3px; bottom: -3px; width: 2px; background: rgba(0,0,0,.32); border-radius: 2px; }
-.l-pips__foot { margin-top: var(--s4); font-size: var(--fs-micro); opacity: .85; display: flex; gap: var(--s2); align-items: center; }
-.l-pips__key { width: 2px; height: 11px; background: rgba(0,0,0,.32); border-radius: 2px; flex: none; }
+/* ══ 4 · SMALL · 1x1, 147x132 of content · eight compositions ════════════ */
 
-/* ── 3 · SCORE · one index against the scale it is measured on ──────────*/
-.l-score { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-score__hero { display: flex; align-items: baseline; gap: var(--s2); flex: 1 1 auto; align-content: center; flex-wrap: wrap; }
-.l-score__value { font-family: var(--font-num); font-weight: 700; font-size: 82px; line-height: .88; letter-spacing: -.045em; }
-.l-score__of { font-size: var(--fs-body); opacity: .78; }
-.l-score__rail { position: relative; height: 30px; margin-top: var(--s3); }
-.l-score__ticks { position: absolute; inset: auto 0 8px; display: flex; justify-content: space-between; align-items: flex-end; height: 22px; }
-.l-score__tick { width: 1.5px; height: 7px; background: rgba(255,255,255,.4); border-radius: 1px; }
-.l-score__tick[data-major] { height: 15px; background: rgba(255,255,255,.68); }
-.l-score__mark {
-  position: absolute; bottom: 2px; width: 13px; height: 13px; border-radius: 50%;
-  background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.28); transform: translateX(-50%);
-}
-.l-score__ends { display: flex; justify-content: space-between; font-family: var(--font-num); font-size: var(--fs-micro); opacity: .78; }
-.l-score__foot { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid rgba(255,255,255,.22); font-size: var(--fs-label); }
-.l-score__foot i { font-style: normal; opacity: .8; }
+/* figure — one number, as large as 132px allows, and one qualifier */
+.figure { justify-content: flex-end; }
+.figure__v { font-size: 40px; }
+.figure__v[data-long] { font-size: 30px; }
+.figure__q { margin-top: 5px; }
 
-/* ── 4 · COMPARE · exactly two periods, and the change between them ─────*/
-.l-compare { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-compare__panes { display: flex; gap: var(--s3); align-items: flex-end; flex: 1 1 auto; min-height: 0; }
-.l-compare__pane {
-  flex: 1 1 0; border-radius: 12px; padding: var(--s3);
-  display: flex; flex-direction: column; justify-content: space-between;
-  background: rgba(255,255,255,.16); min-width: 0;
-}
-.l-compare__pane[data-now] { background: rgba(255,255,255,.34); }
-.l-compare__when { font-size: var(--fs-micro); opacity: .9; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-.l-compare__pct { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; }
-.l-compare__foot { margin-top: var(--s4); display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-label); }
-.l-compare__delta {
-  font-family: var(--font-num); font-weight: 700; font-size: var(--fs-label);
-  background: rgba(255,255,255,.26); border-radius: var(--r-pill); padding: 3px 10px; flex: none;
-}
-.l-compare__cap { opacity: .85; font-size: var(--fs-micro); min-width: 0; }
+/* dial — a ring, the percentage inside it, nothing else */
+.dial { align-items: center; justify-content: center; }
+.dial__d { position: relative; flex: none; width: 92px; height: 92px; }
+.dial__d svg { width: 100%; height: 100%; display: block; }
+.dial__tr { fill: none; stroke: rgba(255,255,255,.26); }
+.dial__v { fill: none; stroke: #fff; stroke-linecap: round; }
+.dial__r { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dial__r b { font-family: var(--font-num); font-weight: 700; font-size: 24px; letter-spacing: -.03em; line-height: 1; }
+.dial__r span { font-size: 9.5px; opacity: .82; margin-top: 3px; }
 
-/* ── 5 · BREACH · a threshold crossed, said in words ────────────────────*/
-.l-breach { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-breach__pill {
-  align-self: flex-start; font-size: var(--fs-micro); font-weight: 700;
-  letter-spacing: .05em; text-transform: uppercase;
-  background: rgba(0,0,0,.24); border-radius: var(--r-pill); padding: 4px 11px; margin-bottom: var(--s3);
-}
-.l-breach__say { font-size: 25px; font-weight: 700; line-height: 1.2; letter-spacing: -.02em; margin: 0; }
-.l-breach__line { margin-top: auto; padding-top: var(--s4); display: flex; align-items: baseline; justify-content: space-between; font-size: var(--fs-label); }
-.l-breach__line b { font-family: var(--font-num); font-weight: 700; }
-.l-breach__line i { font-style: normal; opacity: .84; font-size: var(--fs-micro); }
-.l-breach__bar { position: relative; margin-top: var(--s2); height: 22px; display: flex; gap: 3px; }
-.l-breach__cell { flex: 1 1 0; border-radius: 3px; background: rgba(255,255,255,.28); }
-.l-breach__cell[data-in]   { background: rgba(255,255,255,.9); }
-.l-breach__cell[data-over] { background: rgba(0,0,0,.34); }
-.l-breach__limit { position: absolute; top: -5px; bottom: -5px; width: 2px; background: #fff; border-radius: 2px; }
-.l-breach__limit::after {
-  content: ''; position: absolute; left: 50%; top: -5px; transform: translateX(-50%);
-  border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #fff;
-}
-.l-breach__legend { margin-top: var(--s2); font-size: var(--fs-micro); opacity: .86; }
+/* duo — two numbers, one hairline, two tags */
+.duo { justify-content: center; gap: var(--s2); }
+.duo__r { display: flex; align-items: baseline; gap: 5px; }
+.duo__r b { font-family: var(--font-num); font-weight: 700; font-size: 25px; letter-spacing: -.03em; line-height: 1; }
+.duo__r span { font-size: 9px; opacity: .82; letter-spacing: .04em; }
+.duo__l { flex: none; height: 1px; background: rgba(255,255,255,.3); }
 
-/* ── 6 · LAUNCHER · four destinations in one card ───────────────────────*/
-.l-launcher { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-/* TWO BY TWO, WHICH IS WHAT THE REFERENCE DRAWS. The first pass laid the four
-   tiles in one row across a `full` card: each tile came out 180 wide by 296
-   tall holding a 30px glyph and one word, and the card was mostly air. A `full`
-   card still gets one row — there the height is the same but the tiles are
-   wide, which is the shape that reads. */
-.l-launcher__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); flex: 1 1 auto; }
-.card[data-size='full'] .l-launcher__grid { grid-template-columns: repeat(4, 1fr); }
-.l-launcher__tile {
-  background: rgba(255,255,255,.17); border-radius: 12px; padding: var(--s4);
-  display: flex; flex-direction: column; justify-content: space-between; gap: var(--s3);
-  min-width: 0; transition: background var(--t-base) var(--ease);
-}
-@media (hover: hover) { .l-launcher__tile:hover { background: rgba(255,255,255,.28); } }
-.l-launcher__glyph { width: 30px; height: 30px; flex: none; }
-.l-launcher__glyph svg { width: 100%; height: 100%; display: block; }
-.l-launcher__name { font-size: var(--fs-body); font-weight: 600; line-height: 1.25; letter-spacing: -.01em; }
-@media (max-width: 820px) { .card[data-size='full'] .l-launcher__grid { grid-template-columns: repeat(2, 1fr); } }
+/* stackm — a vertical stacked bar: composition at 1x1 */
+.stackm { flex-direction: row; align-items: stretch; gap: var(--s3); }
+.stackm__bar { flex: none; width: 24px; display: flex; flex-direction: column; gap: 2px; }
+.stackm__s { border-radius: 3px; min-height: 3px; }
+.stackm__s[data-i='0'] { background: rgba(255,255,255,.95); }
+.stackm__s[data-i='1'] { background: rgba(255,255,255,.7); }
+.stackm__s[data-i='2'] { background: rgba(255,255,255,.46); }
+.stackm__s[data-i='3'] { background: rgba(255,255,255,.26); }
+.stackm__r { flex: 1 1 auto; min-width: 0; align-self: flex-end; }
+.stackm__r b { display: block; font-family: var(--font-num); font-weight: 700; font-size: 26px; letter-spacing: -.03em; line-height: 1; }
 
-/* ── 7 · ARRIVALS · what is due next, and how soon ──────────────────────*/
-.l-arr { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-arr__rows { display: flex; flex-direction: column; gap: var(--s2); flex: 1 1 auto; }
-.l-arr__row { display: flex; align-items: center; gap: var(--s3); border-radius: 12px; padding: var(--s2) var(--s3); background: rgba(255,255,255,.13); min-width: 0; }
-.l-arr__row[data-next] { background: rgba(255,255,255,.3); padding: var(--s3); }
-.l-arr__plate {
-  flex: none; width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,.24);
-  display: flex; align-items: center; justify-content: center;
-}
-.l-arr__row[data-next] .l-arr__plate { width: 36px; height: 36px; background: rgba(255,255,255,.36); }
-.l-arr__plate svg { width: 18px; height: 18px; display: block; }
-.l-arr__row[data-next] .l-arr__plate svg { width: 21px; height: 21px; }
-.l-arr__main { min-width: 0; flex: 1 1 auto; }
-.l-arr__name { display: block; font-size: var(--fs-label); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.l-arr__row[data-next] .l-arr__name { font-size: var(--fs-body); }
-.l-arr__where { display: block; font-size: var(--fs-micro); opacity: .82; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.l-arr__in { flex: none; text-align: right; }
-.l-arr__in b { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-label); font-variant-numeric: tabular-nums; line-height: 1.1; }
-.l-arr__row[data-next] .l-arr__in b { font-size: var(--fs-metric); letter-spacing: -.02em; }
-.l-arr__in i { font-style: normal; font-size: 11px; opacity: .8; text-transform: uppercase; letter-spacing: .06em; }
+/* sparkS — a number over a small run of bars */
+.sparkS { justify-content: space-between; }
+.sparkS__v { font-size: 26px; }
+.sparkS__p { flex: none; display: flex; align-items: flex-end; gap: 2px; height: 42px; }
+.sparkS__b { flex: 1 1 0; background: rgba(255,255,255,.5); border-radius: 2px 2px 0 0; min-width: 2px; }
+.sparkS__b[data-last] { background: #fff; }
 
-/* ── 8 · ROSTER · who is on, and how to reach them ──────────────────────*/
-.l-roster { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-roster__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); flex: 1 1 auto; align-content: center; }
-.l-roster__p { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
-.l-roster__av {
-  flex: none; position: relative; width: 38px; height: 38px; border-radius: 50%;
-  background: rgba(255,255,255,.24); display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); letter-spacing: .02em;
-}
-.l-roster__av::after {
-  content: ''; position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px;
-  border-radius: 50%; background: #72E128; box-shadow: 0 0 0 2.5px rgba(0,0,0,.16);
-}
-.l-roster__p[data-off] .l-roster__av::after { background: rgba(255,255,255,.5); }
-.l-roster__who { min-width: 0; }
-.l-roster__name { display: block; font-size: var(--fs-label); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.l-roster__role { display: block; font-size: var(--fs-micro); opacity: .82; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.l-roster__foot { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid rgba(255,255,255,.22); font-size: var(--fs-label); }
-.l-roster__foot b { font-family: var(--font-num); font-weight: 700; }
-.l-roster__foot i { font-style: normal; opacity: .82; font-size: var(--fs-micro); }
+/* pulse — a state, said as a word, with a radar behind it */
+.pulse { align-items: flex-start; justify-content: flex-end; }
+.pulse__radar { position: absolute; z-index: 1; left: -28px; top: -28px; width: 132px; height: 132px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.2); }
+.pulse__radar::before, .pulse__radar::after { content: ''; position: absolute; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.2); }
+.pulse__radar::before { inset: 22px; }
+.pulse__radar::after { inset: 44px; }
+.pulse__w { font-size: 21px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+.pulse__q { margin-top: 4px; }
 
-/* ── 9 · BARS · a period as the countable days it is made of ────────────*/
-.l-bars { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-bars__hero { display: flex; align-items: baseline; gap: var(--s2); }
-.l-bars__total { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-stat); line-height: 1; letter-spacing: -.035em; }
-.l-bars__unit { font-size: var(--fs-body); opacity: .82; }
-.l-bars__span { margin-left: auto; font-size: var(--fs-micro); opacity: .8; }
-.l-bars__plot { flex: 1 1 auto; min-height: 0; display: flex; align-items: flex-end; gap: 3px; margin: var(--s5) 0 var(--s3); border-bottom: 1px solid rgba(255,255,255,.28); padding-bottom: 2px; }
-.l-bars__bar { flex: 1 1 0; border-radius: 3px 3px 0 0; background: rgba(255,255,255,.42); min-width: 2px; }
-.l-bars__bar[data-recent] { background: rgba(255,255,255,.95); }
-.l-bars__facts { display: flex; gap: var(--s7); }
-.l-bars__fact b { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); }
-.l-bars__fact span { display: block; font-size: var(--fs-micro); opacity: .82; }
+/* photochip — a 1x1 photograph and one word */
+.photochip { justify-content: flex-end; }
+.photochip__w { font-size: var(--fs-body); font-weight: 600; letter-spacing: -.01em; }
 
-/* ── 10 · SPLIT · what one capacity is made of, in a single row ─────────*/
-/* ── THE BAR HAD `height: 12px` AND RENDERED AT ZERO. ─────────────────────
-   The card's content wanted 143px of the 124 a medium card has inside its
-   padding, so the flex column shrank its items — and of the four, the bar is
-   the only one whose min-content height is 0, because its children are empty
-   <i> elements. So the bar absorbed the whole 19px overrun on its own and
-   vanished, while the card's scrollHeight stayed exactly equal to its
-   clientHeight and every overflow assertion passed.
+/* act1 — one verb, and the verb is the card */
+.act1 { justify-content: space-between; align-items: flex-start; }
+.act1__p { flex: none; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.26); display: flex; align-items: center; justify-content: center; }
+.act1__p svg { width: 17px; height: 17px; display: block; }
+.act1__v { font-size: 20px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
 
-   Two fixes, and both are needed. `flex: none` on all four parts, so a future
-   overrun overflows visibly and the sweep catches it instead of one part
-   silently paying for it. And the budget actually adds up now:
-   32 head + 27 hero + 26 bar + 35 legend = 120 of 124.
+/* ══ 5 · MEDIUM · 2x1, 334x124 of content · eleven compositions ══════════ */
 
-   THE HERO IS `--fs-metric` AND NOT `--fs-stat-sm` for that reason — 27px
-   rather than 34. A medium card showing a composition cannot also shout its
-   total; `stat` is the card that shouts. */
-.l-split { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.card[data-layout='split'] .c-head { margin-bottom: var(--s2); }
-.l-split__hero { flex: none; display: flex; align-items: baseline; gap: var(--s2); }
-.l-split__total { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; }
-.l-split__unit { font-size: var(--fs-label); opacity: .82; }
-.l-split__bar { flex: none; display: flex; gap: 2px; height: 10px; margin: var(--s2) 0; }
-.l-split__seg { border-radius: 3px; min-width: 3px; }
-.l-split__seg[data-i='0'] { background: rgba(255,255,255,.95); }
-.l-split__seg[data-i='1'] { background: rgba(255,255,255,.66); }
-.l-split__seg[data-i='2'] { background: rgba(255,255,255,.42); }
-.l-split__seg[data-i='3'] { background: rgba(255,255,255,.24); }
-.l-split__legend { flex: none; margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2px var(--s4); font-size: 12.5px; line-height: 1.3; }
-.l-split__key { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.l-split__dot { flex: none; width: 7px; height: 7px; border-radius: 50%; }
-.l-split__key[data-i='0'] .l-split__dot { background: rgba(255,255,255,.95); }
-.l-split__key[data-i='1'] .l-split__dot { background: rgba(255,255,255,.66); }
-.l-split__key[data-i='2'] .l-split__dot { background: rgba(255,255,255,.42); }
-.l-split__key[data-i='3'] .l-split__dot { background: rgba(255,255,255,.24); }
-.l-split__nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .88; }
-.l-split__n { margin-left: auto; font-family: var(--font-num); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* heat — cells shaded by value. No labels; the range is the caption. */
+.heat__b { flex: 1 1 auto; display: flex; align-items: center; gap: var(--s4); min-height: 0; }
+.heat__g { display: grid; gap: 3px; flex: 1 1 auto; }
+.heat__c { border-radius: 3px; aspect-ratio: 1; background: rgba(255,255,255,var(--a, .3)); }
+.heat__r { flex: none; text-align: right; }
+.heat__r b { display: block; font-family: var(--font-num); font-weight: 700; font-size: 24px; letter-spacing: -.03em; line-height: 1; }
 
-/* ── 11 · SETPOINT · a value the card can change ────────────────────────*/
-.l-set { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-set__row { display: flex; align-items: center; gap: var(--s3); flex: 1 1 auto; }
-.l-set__read { flex: 1 1 auto; min-width: 0; }
-.l-set__value { display: flex; align-items: baseline; gap: 4px; }
-.l-set__value b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-stat-sm); line-height: 1; letter-spacing: -.03em; }
-.l-set__value span { font-size: var(--fs-body); opacity: .84; }
-.l-set__now { display: block; margin-top: 5px; font-size: var(--fs-micro); opacity: .84; }
-.l-set__btns { flex: none; display: flex; gap: var(--s2); }
-.l-set__btn {
-  width: 40px; height: 40px; border-radius: 50%; border: none; padding: 0;
-  background: rgba(255,255,255,.24); color: var(--on-dark); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background var(--t-base) var(--ease);
-}
-.l-set__btn:hover { background: rgba(255,255,255,.38); }
-.l-set__btn:active { transform: scale(.94); }
-.l-set__btn svg { width: 20px; height: 20px; display: block; }
+/* barrow — a figure, then the run it came from */
+.barrow__b { flex: 1 1 auto; display: flex; align-items: flex-end; gap: var(--s4); min-height: 0; }
+.barrow__v { flex: none; font-family: var(--font-num); font-weight: 700; font-size: 29px; letter-spacing: -.03em; line-height: 1; padding-bottom: 2px; }
+.barrow__p { flex: 1 1 auto; display: flex; align-items: flex-end; gap: 4px; align-self: stretch; }
+.barrow__i { flex: 1 1 0; background: rgba(255,255,255,.44); border-radius: 3px 3px 0 0; min-height: 3px; }
+.barrow__i[data-last] { background: #fff; }
 
-/* ── 12 · AGENDA · the next commitments, urgency on the spine ───────────*/
-.l-agenda { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
-.l-agenda__items { display: flex; flex-direction: column; gap: var(--s4); flex: 1 1 auto; justify-content: center; }
-.l-agenda__item { display: flex; gap: var(--s3); min-width: 0; }
-.l-agenda__spine { flex: none; width: 3px; border-radius: 2px; background: rgba(255,255,255,.3); }
-.l-agenda__item[data-tone='alert'] .l-agenda__spine { background: #fff; }
-.l-agenda__item[data-tone='warn'] .l-agenda__spine { background: rgba(255,255,255,.6); }
-.l-agenda__body { min-width: 0; }
-.l-agenda__what { font-size: var(--fs-body); font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
-.l-agenda__when { display: block; margin-top: 4px; font-size: var(--fs-micro); opacity: .84; }
-.l-agenda__when b { font-family: var(--font-num); font-weight: 700; opacity: 1; }
+/* halfgauge — a half arc, then the two facts that explain it */
+.hg__b { flex: 1 1 auto; display: flex; align-items: center; gap: var(--s4); min-height: 0; }
+.hg__d { position: relative; flex: none; width: 104px; }
+.hg__d svg { width: 100%; display: block; }
+.hg__tr { fill: none; stroke: rgba(255,255,255,.26); stroke-linecap: round; }
+.hg__v { fill: none; stroke: #fff; stroke-linecap: round; }
+.hg__r { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; }
+.hg__r b { font-family: var(--font-num); font-weight: 700; font-size: 22px; letter-spacing: -.03em; line-height: 1; }
+.hg__f { flex: 1 1 auto; min-width: 0; display: grid; gap: 8px; }
+.hg__f div { min-width: 0; }
+.hg__f div b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); }
+.hg__f div span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ── print ───────────────────────────────────────────────────────────────*/
-@media print {
-  body { background: #fff; }
-  .concept { break-inside: avoid; }
-  .card { box-shadow: none; }
-}
+/* pillrow — named rows, one line each, nothing right-aligned but the flag */
+.pr__rows { flex: 1 1 auto; display: flex; flex-direction: column; gap: 5px; justify-content: center; }
+.pr__r { display: flex; align-items: center; gap: var(--s2); background: rgba(255,255,255,.14); border-radius: 9px; padding: 6px var(--s3); min-width: 0; }
+.pr__d { flex: none; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.5); }
+.pr__r[data-tone='alert'] .pr__d { background: #fff; }
+.pr__n { font-size: var(--fs-micro); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pr__v { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); }
+
+/* trend — a figure and the wide run it sits at the end of */
+.trend__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-end; min-height: 0; }
+.trend__v { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.trend__v b { flex: none; font-family: var(--font-num); font-weight: 700; font-size: 27px; letter-spacing: -.03em; line-height: 1; }
+.trend__p { flex: none; margin-top: var(--s2); height: 40px; display: flex; align-items: flex-end; gap: 2px; }
+.trend__i { flex: 1 1 0; background: rgba(255,255,255,.4); border-radius: 2px 2px 0 0; min-width: 1px; min-height: 2px; }
+.trend__i[data-last] { background: #fff; }
+
+/* twoside — one bar split from the middle, a count at each end */
+.ts__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: var(--s2); }
+.ts__l { display: flex; align-items: baseline; justify-content: space-between; }
+.ts__l b { font-family: var(--font-num); font-weight: 700; font-size: 22px; letter-spacing: -.03em; }
+.ts__l b:last-child { opacity: .78; }
+.ts__bar { flex: none; display: flex; height: 12px; gap: 3px; }
+.ts__bar i:first-child { background: #fff; border-radius: 4px 0 0 4px; }
+.ts__bar i:last-child { background: rgba(255,255,255,.42); border-radius: 0 4px 4px 0; }
+.ts__tags { display: flex; justify-content: space-between; }
+
+/* chips — counts as pills, and the counts are the content */
+.chips__s { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-content: center; gap: 6px; }
+.chips__c { display: flex; align-items: baseline; gap: 5px; background: rgba(255,255,255,.17); border-radius: var(--r-pill); padding: 5px 11px; }
+.chips__c[data-tone='alert'] { background: rgba(255,255,255,.4); }
+.chips__c b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); }
+.chips__c span { font-size: var(--fs-nano); opacity: .9; }
+
+/* rail — a value against the scale it is measured on */
+.rail__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-end; }
+.rail__v { display: flex; align-items: baseline; gap: 6px; }
+.rail__v b { font-family: var(--font-num); font-weight: 700; font-size: 29px; letter-spacing: -.03em; line-height: 1; }
+.rail__r { position: relative; flex: none; height: 26px; margin-top: 6px; }
+.rail__t { position: absolute; inset: auto 0 6px; display: flex; justify-content: space-between; align-items: flex-end; height: 18px; }
+.rail__t i { width: 1.5px; height: 6px; background: rgba(255,255,255,.4); border-radius: 1px; }
+.rail__t i[data-major] { height: 13px; background: rgba(255,255,255,.7); }
+.rail__m { position: absolute; bottom: 1px; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.26); transform: translateX(-50%); }
+
+/* strip — one capacity, its parts, and a dot legend */
+.strip__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: var(--s2); }
+.strip__v { display: flex; align-items: baseline; gap: 6px; }
+.strip__v b { font-family: var(--font-num); font-weight: 700; font-size: 25px; letter-spacing: -.03em; line-height: 1; }
+.strip__bar { flex: none; display: flex; gap: 2px; height: 10px; }
+.strip__bar i { border-radius: 3px; min-width: 3px; }
+.strip__bar i[data-i='0'] { background: rgba(255,255,255,.95); }
+.strip__bar i[data-i='1'] { background: rgba(255,255,255,.6); }
+.strip__bar i[data-i='2'] { background: rgba(255,255,255,.34); }
+.strip__k { flex: none; display: flex; gap: var(--s4); flex-wrap: wrap; }
+.strip__k span { display: flex; align-items: center; gap: 5px; font-size: var(--fs-nano); }
+.strip__k span i { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.strip__k span:nth-child(1) i { background: rgba(255,255,255,.95); }
+.strip__k span:nth-child(2) i { background: rgba(255,255,255,.6); }
+.strip__k span:nth-child(3) i { background: rgba(255,255,255,.34); }
+
+/* photoband — a 2x1 photograph, one word, one figure */
+.pb { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--s3); }
+.pb__w { font-size: var(--fs-title); font-weight: 600; letter-spacing: -.01em; }
+.pb__v { text-align: right; flex: none; }
+.pb__v b { display: block; font-family: var(--font-num); font-weight: 700; font-size: 25px; letter-spacing: -.03em; line-height: 1; }
+
+/* act3 — three verbs, and the verbs are the content */
+.act3__s { flex: 1 1 auto; display: flex; gap: var(--s2); align-items: stretch; }
+.act3__v { flex: 1 1 0; min-width: 0; border-radius: 10px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 5px; font-size: var(--fs-micro); font-weight: 600; line-height: 1.2; transition: background var(--t-base) var(--ease); }
+.act3__v:hover { background: rgba(255,255,255,.34); }
+
+/* ══ 6 · LARGE · 2x2, 326x296 · eighteen signatures, one per module ══════ */
+
+/* ladder · MEDICAL — 140 cases are not a total, they are a ladder */
+.ladder__c { flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px; min-height: 0; }
+.ladder__b { border-radius: 7px; padding: 0 var(--s3); display: flex; align-items: center; gap: var(--s2); min-height: 22px; overflow: hidden; }
+.ladder__b b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); flex: none; }
+.ladder__b span { font-size: var(--fs-micro); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ladder__b[data-i='0'] { background: #fff; color: #2b6b4c; }
+.ladder__b[data-i='1'] { background: rgba(255,255,255,.6); }
+.ladder__b[data-i='2'] { background: rgba(255,255,255,.4); }
+.ladder__b[data-i='3'] { background: rgba(255,255,255,.28); }
+.ladder__b[data-i='4'] { background: rgba(255,255,255,.18); }
+
+/* wardgrid · HOSPITAL — the ward is beds, so the card is beds */
+.ward__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: var(--s5); }
+.ward__g { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+.ward__c { aspect-ratio: 1; border-radius: 3px; background: rgba(255,255,255,.2); }
+.ward__c[data-on] { background: #fff; }
+.ward__c[data-iso] { background: rgba(255,255,255,.55); }
+.ward__f { display: flex; align-items: baseline; gap: 6px; }
+.ward__f b { font-family: var(--font-num); font-weight: 700; font-size: 29px; letter-spacing: -.03em; line-height: 1; }
+
+/* taxa · SPECIES — the collection divides by class before anything else */
+.taxa__b { flex: 1 1 auto; display: flex; min-height: 0; border-radius: 8px; overflow: hidden; }
+.taxa__col { flex: none; display: flex; flex-direction: column; min-width: 0; }
+.taxa__c { flex: none; padding: var(--s2) var(--s3); display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 0; overflow: hidden; }
+.taxa__b > .taxa__c { height: 100%; }
+.taxa__c b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); line-height: 1; }
+.taxa__c span { font-size: 10px; opacity: .9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.taxa__c[data-i='0'] { background: rgba(255,255,255,.92); color: #0b5c33; }
+.taxa__c[data-i='0'] b { font-size: 26px; }
+.taxa__c[data-i='1'] { background: rgba(255,255,255,.5); }
+.taxa__c[data-i='2'] { background: rgba(255,255,255,.34); }
+.taxa__c[data-i='3'] { background: rgba(255,255,255,.24); }
+.taxa__c[data-i='4'] { background: rgba(255,255,255,.16); }
+
+/* shelf · PHARMACY — stock as shelves, with what expires drawn dark */
+.shelf__r { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--s3); justify-content: center; }
+.shelf__row { min-width: 0; }
+.shelf__l { display: flex; align-items: baseline; gap: var(--s2); margin-bottom: 5px; }
+.shelf__l span { font-size: var(--fs-micro); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shelf__l b { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); }
+.shelf__p { display: flex; gap: 3px; height: 13px; }
+.shelf__p i { flex: 1 1 0; border-radius: 2px; background: rgba(255,255,255,.9); min-width: 2px; }
+.shelf__p i[data-exp] { background: rgba(0,0,0,.3); }
+.shelf__f { flex: none; margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid rgba(255,255,255,.22); display: flex; align-items: center; gap: 7px; }
+.shelf__f i { width: 10px; height: 10px; border-radius: 2px; background: rgba(0,0,0,.3); flex: none; }
+
+/* bench · LAB — a sample is a tube, and a result is how full it is */
+.bench__g { flex: 1 1 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s3) var(--s2); align-content: center; }
+.bench__t { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+.bench__tube { width: 34px; height: 74px; border-radius: 4px 4px 14px 14px; background: rgba(255,255,255,.18); position: relative; overflow: hidden; }
+.bench__tube i { position: absolute; inset: auto 0 0; background: #fff; border-radius: 0 0 13px 13px; }
+.bench__t span { font-size: 9.5px; opacity: .85; text-align: center; line-height: 1.1; }
+.bench__f { flex: none; margin-top: var(--s3); display: flex; align-items: baseline; gap: 6px; }
+.bench__f b { font-family: var(--font-num); font-weight: 700; font-size: 26px; letter-spacing: -.03em; line-height: 1; }
+
+/* tape · MORTALITY — six months, read down, because a trend here unrolls */
+.tape__r { flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+.tape__l { display: flex; align-items: center; gap: var(--s3); }
+.tape__m { flex: none; width: 26px; font-size: 10px; opacity: .85; }
+.tape__t { flex: 1 1 auto; height: 20px; background: rgba(255,255,255,.16); border-radius: 4px; overflow: hidden; }
+.tape__t i { display: block; height: 100%; background: rgba(255,255,255,.7); border-radius: 4px; }
+.tape__l[data-last] .tape__t i { background: #fff; }
+.tape__n { flex: none; width: 32px; text-align: right; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); }
+
+/* cradle · FETAL DEATH — every expected outcome gets a slot you can count */
+.cradle__g { flex: 1 1 auto; display: grid; grid-template-columns: repeat(8, 1fr); gap: 7px; align-content: center; }
+.cradle__s { aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.18); }
+.cradle__s[data-live] { background: #fff; }
+.cradle__s[data-lost] { background: rgba(0,0,0,.28); }
+.cradle__f { flex: none; margin-top: var(--s4); display: flex; gap: var(--s6); }
+.cradle__f div b { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); }
+
+/* clutch · EGGS — a clutch is a countdown, and there are eight of them */
+.clutch__g { flex: 1 1 auto; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: var(--s2); min-height: 0; }
+.clutch__t { border-radius: 10px; background: rgba(255,255,255,.16); padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 0; }
+.clutch__e { flex: none; width: 26px; height: 33px; }
+.clutch__e svg { width: 100%; height: 100%; display: block; }
+.clutch__e .egg-tr { fill: none; stroke: rgba(255,255,255,.3); }
+.clutch__e .egg-v { fill: none; stroke: #fff; stroke-linecap: round; }
+.clutch__t b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); }
+.clutch__t[data-due] { background: rgba(255,255,255,.42); }
+
+/* sitelist · HOUSING — the estate, worst first */
+.sl__r { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--s2); justify-content: center; }
+.sl__i { display: flex; align-items: center; gap: var(--s3); background: rgba(255,255,255,.14); border-radius: 10px; padding: 9px var(--s3); min-width: 0; }
+.sl__i[data-worst] { background: rgba(255,255,255,.3); }
+.sl__n { font-size: var(--fs-label); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl__t { flex: none; width: 56px; height: 7px; border-radius: 4px; background: rgba(255,255,255,.24); overflow: hidden; margin-left: auto; }
+.sl__t i { display: block; height: 100%; background: #fff; border-radius: 4px; }
+.sl__v { flex: none; width: 36px; text-align: right; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); }
+
+/* plate · DIET — the store is what is on it, in kilograms */
+.plate__b { flex: 1 1 auto; display: flex; align-items: center; gap: var(--s4); min-height: 0; }
+.plate__d { position: relative; flex: none; width: 134px; height: 134px; }
+.plate__d svg { width: 100%; height: 100%; display: block; }
+.plate__tr { fill: none; stroke: rgba(255,255,255,.2); }
+.plate__s { fill: none; }
+.plate__s[data-i='0'] { stroke: #fff; }
+.plate__s[data-i='1'] { stroke: rgba(255,255,255,.66); }
+.plate__s[data-i='2'] { stroke: rgba(255,255,255,.44); }
+.plate__s[data-i='3'] { stroke: rgba(255,255,255,.26); }
+.plate__c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.plate__c b { font-family: var(--font-num); font-weight: 700; font-size: 25px; letter-spacing: -.03em; line-height: 1; }
+.plate__k { flex: 1 1 auto; min-width: 0; display: grid; gap: 9px; align-content: center; }
+.plate__k div { display: flex; align-items: center; gap: 7px; font-size: var(--fs-micro); min-width: 0; }
+.plate__k i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.plate__k div[data-i='0'] i { background: #fff; }
+.plate__k div[data-i='1'] i { background: rgba(255,255,255,.66); }
+.plate__k div[data-i='2'] i { background: rgba(255,255,255,.44); }
+.plate__k div[data-i='3'] i { background: rgba(255,255,255,.26); }
+.plate__k u { text-decoration: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plate__k b { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; }
+
+/* month · FOLLOW UP — what is due is a date, so the card is a month */
+.month__g { flex: 1 1 auto; display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 40px; gap: 4px; align-content: center; }
+.month__d { border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-num); font-size: 11px; font-weight: 500; background: rgba(255,255,255,.1); }
+.month__d[data-pad] { background: none; }
+.month__d[data-due] { background: rgba(255,255,255,.34); font-weight: 700; }
+.month__d[data-over] { background: #fff; color: #35606b; font-weight: 700; }
+.month__d[data-today] { box-shadow: inset 0 0 0 1.5px #fff; }
+.month__f { flex: none; margin-top: var(--s3); display: flex; gap: var(--s6); }
+.month__f div b { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); }
+
+/* runway · PARIVESH — a filing has a deadline, so it has runway */
+.rw__r { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--s4); justify-content: center; }
+.rw__l { display: block; min-width: 0; }
+.rw__n { display: flex; align-items: baseline; gap: var(--s2); margin-bottom: 6px; }
+.rw__n span { font-size: var(--fs-micro); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rw__n b { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); }
+.rw__t { display: block; height: 8px; border-radius: 4px; background: rgba(255,255,255,.2); position: relative; overflow: hidden; }
+.rw__t i { position: absolute; inset: 0 auto 0 0; background: #fff; border-radius: 4px; }
+.rw__l[data-tight] .rw__t i { background: rgba(0,0,0,.32); }
+
+/* deck · ADMINISTER — a queue has depth, and depth is drawn */
+.deck__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+.deck__s { position: relative; flex: none; height: 144px; }
+.deck__c { position: absolute; left: 0; right: 0; border-radius: 12px; background: rgba(255,255,255,.92); color: #4a5a52; padding: var(--s3); box-shadow: 0 -6px 14px rgba(0,0,0,.1); }
+.deck__c[data-i='0'] { top: 0; opacity: .3; transform: scale(.86); }
+.deck__c[data-i='1'] { top: 26px; opacity: .55; transform: scale(.93); }
+.deck__c[data-i='2'] { top: 54px; }
+.deck__c b { display: block; font-size: var(--fs-label); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deck__c span { display: block; margin-top: 3px; font-size: var(--fs-nano); opacity: .72; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deck__f { flex: none; margin-top: var(--s3); display: flex; align-items: baseline; gap: 6px; }
+.deck__f b { font-family: var(--font-num); font-weight: 700; font-size: 27px; letter-spacing: -.03em; line-height: 1; }
+
+/* shiftband · USERS — a shift is a part of the day, so the card is the day */
+.sb__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: var(--s3); }
+.sb__row { display: flex; align-items: center; gap: var(--s3); }
+.sb__nm { flex: none; width: 50px; font-size: var(--fs-nano); opacity: .88; }
+.sb__t { flex: 1 1 auto; height: 22px; position: relative; background: rgba(255,255,255,.12); border-radius: 5px; }
+.sb__t i { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,.7); border-radius: 5px; }
+.sb__row[data-peak] .sb__t i { background: #fff; }
+.sb__n { flex: none; width: 28px; text-align: right; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); }
+.sb__hrs { flex: none; display: flex; justify-content: space-between; padding: 0 40px 0 62px; }
+.sb__hrs span { font-family: var(--font-num); font-size: 9.5px; opacity: .72; }
+
+/* perimeter · SECURITY — cameras sit on a fence, so the card is the fence */
+.pm__b { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.pm__ring { position: relative; flex: none; width: 200px; height: 200px; }
+.pm__fence { position: absolute; inset: 14px; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.28); }
+.pm__n { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #fff; transform: translate(-50%, -50%); }
+.pm__n[data-dark] { background: rgba(0,0,0,.32); }
+.pm__c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.pm__c b { font-family: var(--font-num); font-weight: 700; font-size: 33px; letter-spacing: -.03em; line-height: 1; }
+
+/* statement · REPORTS — a page of what the card would print */
+.st__b { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+.st__l { display: flex; align-items: baseline; gap: var(--s2); font-size: var(--fs-label); }
+.st__l span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: none; max-width: 62%; }
+.st__l em { flex: 1 1 auto; font-style: normal; border-bottom: 1px dotted rgba(255,255,255,.34); min-width: 8px; }
+.st__l b { flex: none; font-family: var(--font-num); font-weight: 700; }
+.st__rule { flex: none; height: 1px; background: rgba(255,255,255,.36); margin: 3px 0; }
+.st__tot { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); }
+.st__tot b { flex: none; font-family: var(--font-num); font-weight: 700; font-size: 26px; letter-spacing: -.03em; }
+
+/* queuebars · APPROVALS — a queue's problem is age, not size */
+.qb__r { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--s4); justify-content: center; }
+.qb__l { display: flex; align-items: center; gap: var(--s3); }
+.qb__a { flex: none; width: 46px; font-size: var(--fs-nano); opacity: .88; }
+.qb__t { flex: 1 1 auto; height: 26px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+.qb__t i { display: block; height: 100%; background: rgba(255,255,255,.66); border-radius: 6px; min-width: 4px; }
+.qb__l[data-old] .qb__t i { background: rgba(0,0,0,.3); }
+.qb__n { flex: none; width: 24px; text-align: right; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-label); }
+
+/* thread · COMMUNICATION — the content is the conversations */
+.th__r { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--s2); justify-content: center; }
+.th__i { display: flex; gap: var(--s3); align-items: center; background: rgba(255,255,255,.13); border-radius: 11px; padding: 7px var(--s3); min-width: 0; }
+.th__i[data-unread] { background: rgba(255,255,255,.28); }
+.th__av { flex: none; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,.24); display: flex; align-items: center; justify-content: center; font-family: var(--font-num); font-size: 10px; font-weight: 700; }
+.th__av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.th__m { min-width: 0; flex: 1 1 auto; }
+.th__m b { display: block; font-size: var(--fs-micro); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.th__m span { display: block; font-size: var(--fs-nano); opacity: .82; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.th__p { flex: none; min-width: 18px; height: 18px; border-radius: var(--r-pill); background: #fff; color: #4a6a70; font-family: var(--font-num); font-weight: 700; font-size: 10px; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
+
+/* act4 — four verbs in a 2x2, so an action shelf is not always one shape */
+.act4__g { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--s3); min-height: 0; }
+.act4__v { border-radius: 12px; background: rgba(255,255,255,.18); padding: var(--s3); display: flex; flex-direction: column; justify-content: space-between; gap: var(--s2); min-width: 0; min-height: 0; transition: background var(--t-base) var(--ease); }
+.act4__v:hover { background: rgba(255,255,255,.3); }
+.act4__v i { flex: none; width: 26px; height: 26px; }
+.act4__v i svg { width: 100%; height: 100%; display: block; }
+.act4__v span { font-size: var(--fs-label); font-weight: 600; line-height: 1.2; letter-spacing: -.01em; }
+
+/* ══ 7 · FULL · 5x2, 912x296 · three compositions ═══════════════════════ */
+
+/* matrix · MEDICAL — every site against every month, in one field */
+.mx__b { flex: 1 1 auto; display: flex; gap: var(--s5); min-height: 0; }
+.mx__y { flex: none; display: grid; gap: 4px; width: 66px; }
+.mx__y span { font-size: 10px; opacity: .84; display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mx__g { flex: 1 1 auto; display: grid; gap: 3px; min-width: 0; }
+.mx__c { border-radius: 3px; background: rgba(255,255,255,var(--a, .3)); }
+.mx__r { flex: none; width: 140px; align-self: center; }
+.mx__r b { display: block; font-family: var(--font-num); font-weight: 700; font-size: 33px; letter-spacing: -.03em; line-height: 1; }
+.mx__x { flex: none; display: flex; margin-top: 6px; padding: 0 156px 0 82px; }
+.mx__x span { flex: 1 1 0; font-size: 9.5px; opacity: .72; text-align: center; }
+
+/* bars30 · DIET — a month as the thirty days it is made of */
+.b30__b { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.b30__h { flex: none; display: flex; align-items: baseline; gap: var(--s2); }
+.b30__h b { font-family: var(--font-num); font-weight: 700; font-size: 44px; letter-spacing: -.035em; line-height: 1; }
+.b30__p { flex: 1 1 auto; min-height: 0; display: flex; align-items: flex-end; gap: 4px; margin: var(--s4) 0 var(--s3); border-bottom: 1px solid rgba(255,255,255,.28); padding-bottom: 2px; }
+.b30__i { flex: 1 1 0; border-radius: 3px 3px 0 0; background: rgba(255,255,255,.42); min-height: 3px; }
+.b30__i[data-recent] { background: #fff; }
+.b30__f { flex: none; display: flex; gap: var(--s8); }
+.b30__f div b { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); }
+
+/* photohero · SPECIES — the collection, and one number over it */
+.ph { justify-content: flex-end; }
+.ph__v { display: flex; align-items: baseline; gap: var(--s2); }
+.ph__v b { font-family: var(--font-num); font-weight: 700; font-size: 54px; letter-spacing: -.035em; line-height: 1; }
+.ph__t { font-size: var(--fs-title); font-weight: 600; }
+
+@media print { body { background: #fff; } .mod { break-inside: avoid; } .card { box-shadow: none; } }
 </style>
 </head>
 <body>
 
-<!-- the sprite: the domain glyphs, drawn exactly as icons.js draws them —
-     24×24, stroked, 1.75 weight, round caps, inheriting currentColor -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs id="sprite"></defs></svg>
 
 <div class="wrap">
-
   <header class="masthead">
     <p class="masthead__kicker">ANTZ Command Centre · module widgets</p>
-    <h1>Twelve compositions the catalogue does not have</h1>
-    <p>Drawn from the four reference sheets in <code>References/Widgets_Reference/</code>.
-    What is taken from them is the <strong>composition</strong> — the shape of the
-    argument a card makes — and never the styling. Every card below is this
-    product's own gradient, radius, shadow and type, at the artboard's own card
-    sizes, filled with the reference Site's real figures.</p>
-    <p>The catalogue has twenty-one layouts today. Each concept here answers a
-    question none of those twenty-one can, and the annotation beside it names
-    which one you would otherwise reach for and why it falls short.</p>
+    <h1>Widget ideas, module by module</h1>
+    <p>Eighteen modules. Each gets a <strong>block of ten cells</strong> — the
+    seed convention the Site defaults already follow — packed from mixed sizes,
+    with a 2×2 signature card built for what <em>that</em> module uniquely
+    holds. Every figure comes from <code>docs/Modules.md&nbsp;Files/</code>.</p>
+    <p>The three things the first pass got wrong are fixed on purpose.
+    <strong>Sizes vary</strong>: 36 cards are 1×1, 28 are 2×1, 22 are 2×2,
+    3 are full width. <strong>A 1×1 carries no title</strong> — the module
+    glyph names it, exactly as a <code>door</code> does. And <strong>no card
+    repeats in words what its figure already said</strong>; what a card is
+    <em>for</em> is in the legend under each block instead. Photographs and
+    quick actions are in, at three sizes each.</p>
   </header>
 
-  <p class="note"><strong>This is a mockup.</strong> Nothing is wired to
-  <code>derive()</code>, the picker, the packer or the saved layout — no
-  <code>supportedSizes</code> are enforced and no figure is computed. It exists
-  to be judged and cut down before any of it is built. Two concepts are marked
-  <strong>⚠</strong> because they are decisions rather than proposals: #11 would
-  be the first card in the product that <em>writes</em>, and #12 overlaps
-  <code>timeline</code> closely enough that you should pick one.</p>
+  <div class="tally" id="tally"></div>
+  <div id="mods"></div>
 
-  <h2 class="sec">The contact sheet</h2>
-  <p class="sub">All twelve on one grid, at real card size, at the four-column
-  band. This is the brief's own test: before reading a single label, you should
-  be able to tell that these are different kinds of card.</p>
-
-  <div class="sheet-scroll"><div class="sheet" id="sheet"></div></div>
-
-  <h2 class="sec">The concepts</h2>
-  <p class="sub">One block each — the card at real size, then what it is for.</p>
-
-  <div id="concepts"></div>
-
-  <h2 class="sec">What this would cost to build</h2>
-  <p class="note"><strong>Twelve layouts is not twelve small jobs.</strong> Each
-  one needs an entry in <code>LAYOUTS</code>, a block of CSS, a row in
-  <code>LAYOUT_FILL</code>, real <code>data</code> on every widget that uses it,
-  a place in at least one of the fifteen seeded role defaults, and a line in the
-  overflow sweep at six widths. The last two are where the time goes: a
-  composition nobody's default page carries is a composition the picker can
-  offer and nobody will ever see, and the sweep is what stops a card being
-  shipped with its title ellipsed at 900px.</p>
-  <p class="note"><strong>The seed is the real constraint.</strong> Eight of
-  these twelve are 2×2. The Site defaults were re-cut last session into blocks
-  of ten cells precisely so two-row cards could land in them — but ten cells
-  hold one 2×2 and one 2×1 with a hole, or two 2×2 and a spare column. Adding
-  eight new 2×2 compositions to a page that already runs 46% <code>stat</code>
-  means <em>replacing</em> cards in those defaults, not appending. Pick four.</p>
-
+  <h2 class="sec">How to read this, and what it would cost</h2>
+  <p class="note"><strong>Every block is exactly ten cells and packs with no
+  hole.</strong> That constraint produced the size mix rather than a preference
+  for it: ten cells hold <code>2×2 + 2×1 + 2×1 + 1×1 + 1×1</code> or
+  <code>2×2 + 2×2 + 1×1 + 1×1</code> and little else, so a module with a
+  signature card has to spend the rest of its block on small ones. That is
+  exactly the pressure the real seeds are under.</p>
+  <p class="note"><strong>41 compositions is the number to argue about.</strong>
+  Eighteen are signatures that serve one module and would not transplant —
+  Medical's severity ladder is not Housing's estate list — so they are eighteen
+  separate pieces of CSS that earn their keep only if that module's page is
+  worth designing. The other twenty-three are shared vocabulary: eight at 1×1,
+  eleven at 2×1, one action shape at 2×2, three full width.
+  <strong>If this has to shrink, cut signatures, not vocabulary</strong> — the
+  vocabulary is what stops the catalogue being 46% one composition, and it is
+  what the 1×1 and 2×1 slots in every seed will actually be filled with.</p>
+  <p class="note"><strong>Photographs only where a photograph exists.</strong>
+  Six real files in <code>assets/img/</code>, so six image cards and no more. A
+  card that needs a picture of <em>this</em> tiger is a card that will be wrong.
+  Everywhere else the module glyph is blown up behind the content at 12%, which
+  is what <code>entity</code> already does.</p>
+  <p class="note"><strong>What is still not answered.</strong> None of these is
+  wired to <code>derive()</code>, so no figure moves when you switch Site or
+  role, and no <code>supportedSizes</code> are enforced — several signatures
+  would need a real answer for what they become at <code>medium</code>, and the
+  honest answer for some (<code>perimeter</code>, <code>month</code>,
+  <code>matrix</code>) is that they have no smaller form and should be offered
+  at one size only.</p>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE SPRITE
-   The domain glyphs this page needs, copied from icons.js. A domain glyph is a
-   sprite symbol rather than an exported file because the Figma artboard has no
-   Site Workspace to export one from — and a sprite inherits currentColor,
-   which is what lets the same mark sit white on a gradient card here and
-   petrol in a rail row in the app.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ══ THE SPRITE — the verbs, and the one module glyph that is a sprite ═══ */
 const SPRITE = {
-  'd-husbandry':
-    '<path d="M4.2 2.8v6.4a2.2 2.2 0 0 0 2.2 2.2h1.4a2.2 2.2 0 0 0 2.2-2.2V2.8"/>' +
-    '<path d="M7.1 2.8v18.4"/>' +
-    '<path d="M19.8 14.6V2.8a4.4 4.4 0 0 0-4.4 4.4v5.2a2.2 2.2 0 0 0 2.2 2.2h2.2Zm0 0v6.6"/>',
-  'd-safety':
-    '<path d="M12 21.5c4.5-1.6 7.5-5 7.5-9.6V5.6L12 2.5 4.5 5.6v6.3c0 4.6 3 8 7.5 9.6Z"/>' +
-    '<path d="M12 8.2v4.4M12 16.3h.01"/>',
-  'd-assessment':
-    '<path d="M8.6 3.4H6.4a2 2 0 0 0-2 2v14.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2V5.4a2 2 0 0 0-2-2h-2.2"/>' +
-    '<rect x="8.6" y="1.9" width="6.8" height="3.4" rx="1.2"/>' +
-    '<path d="M8.4 11.4h3.2M8.4 15.4h5.6"/>' +
-    '<path d="m14.6 10.6 1.4 1.4 2.6-2.8"/>',
-  'd-space':
-    '<rect x="3" y="3" width="7.4" height="7.4" rx="1.6"/>' +
-    '<rect x="13.6" y="3" width="7.4" height="7.4" rx="1.6"/>' +
-    '<rect x="3" y="13.6" width="7.4" height="7.4" rx="1.6"/>' +
-    '<path d="M13.6 17.3h7.4M17.3 13.6v7.4"/>',
-  'd-risk':
-    '<path d="M3.2 18.4a9.4 9.4 0 1 1 17.6 0"/>' +
-    '<path d="m12 14.4 4.6-5.1"/><circle cx="12" cy="14.6" r="1.6"/>',
-  'd-animal':
-    '<path d="M12 13.2c-3 0-5.4 2-5.4 4.5 0 1.7 1.2 2.8 2.9 2.8.9 0 1.6-.3 2.5-.3s1.6.3 2.5.3c1.7 0 2.9-1.1 2.9-2.8 0-2.5-2.4-4.5-5.4-4.5Z"/>' +
-    '<ellipse cx="6.2" cy="10.2" rx="1.8" ry="2.2"/><ellipse cx="17.8" cy="10.2" rx="1.8" ry="2.2"/>' +
-    '<ellipse cx="10" cy="6" rx="1.7" ry="2.2"/><ellipse cx="14" cy="6" rx="1.7" ry="2.2"/>',
-  'd-veterinary':
-    '<path d="M12 3.4a8.6 8.6 0 0 0-8.6 8.6c0 4 3 7.2 6.2 8.4a2 2 0 0 0 1.5 0"/>' +
-    '<path d="M12 3.4a8.6 8.6 0 0 1 8.6 8.6c0 1.5-.4 2.9-1.1 4.1"/>' +
-    '<path d="M12 8.6v5.2M9.4 11.2h5.2"/>' +
-    '<circle cx="18.4" cy="19" r="2.6"/>',
-  'd-schedule':
-    '<path d="M8 2.4v3.6M16 2.4v3.6M3 9.6h18"/>' +
-    '<path d="M21 12.6V6.4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12.8a2 2 0 0 0 2 2h6.6"/>' +
-    '<circle cx="17.4" cy="17.4" r="4.1"/><path d="M17.4 15.5v2l1.4 1"/>',
-  'd-people':
-    '<circle cx="9" cy="8" r="3.3"/>' +
-    '<path d="M2.6 20.2a6.4 6.4 0 0 1 12.8 0"/>' +
-    '<path d="M16.4 5.4a3.3 3.3 0 0 1 0 6.4"/>' +
-    '<path d="M17.8 14.6a6.4 6.4 0 0 1 3.6 5.6"/>',
-  'd-inventory':
-    '<rect x="2.8" y="3.6" width="8.1" height="7.2" rx="1.5"/>' +
-    '<rect x="13.1" y="3.6" width="8.1" height="7.2" rx="1.5"/>' +
-    '<rect x="7.9" y="13.2" width="8.1" height="7.2" rx="1.5"/>',
-  'd-occupancy':
-    '<circle cx="8.4" cy="9.2" r="3"/><circle cx="16" cy="11" r="2.3"/>' +
-    '<path d="M2.8 20.2a5.6 5.6 0 0 1 11.2 0"/>' +
-    '<path d="M14.6 20.2a4.4 4.4 0 0 1 6.6-3.8"/>',
-  'd-environment':
-    '<path d="M12 2.8a5.4 5.4 0 0 0-3 9.9v5.1a3 3 0 0 0 6 0v-5.1a5.4 5.4 0 0 0-3-9.9Z"/>' +
-    '<path d="M12 7v7.6"/><circle cx="12" cy="17" r="1.5" fill="currentColor" stroke="none"/>' +
-    '<path d="M17.6 6.4h3.6M17.6 10.4h2.4M17.6 14.4h3.2"/>',
-  'd-work':
-    '<path d="M9 4.6h11M9 12h11M9 19.4h11"/>' +
-    '<path d="m3 4.9 1.2 1.2 2.2-2.5M3 12.3l1.2 1.2 2.2-2.5M3 19.7l1.2 1.2 2.2-2.5"/>',
-  plus:  '<path d="M5 12h14M12 5v14"/>',
-  minus: '<path d="M6 12h12"/>',
+  housing: '<rect x="2.7" y="4.3" width="18.6" height="15.4" rx="2.6"/><path d="M12 16.5c1.9-2.1 3.2-3.8 3.2-5.5a3.2 3.2 0 0 0-6.4 0c0 1.7 1.3 3.4 3.2 5.5Z"/><circle cx="12" cy="10.9" r="1.1"/>',
+  plus: '<path d="M5 12h14M12 5v14"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/>',
+  swap: '<path d="M7 4v13M7 4 4 7M7 4l3 3"/><path d="M17 20V7M17 20l3-3M17 20l-3-3"/>',
+  file: '<path d="M14 2.6H7a2 2 0 0 0-2 2v14.8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.6Z"/><path d="M13.8 2.6v5h5"/>',
+  bell: '<path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/>',
+  lock: '<rect x="4" y="10.4" width="16" height="10.6" rx="2.4"/><path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/>',
+  print: '<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 17h12v4H6Z"/>',
+  clip: '<path d="M8.6 3.4H6.4a2 2 0 0 0-2 2v14.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2V5.4a2 2 0 0 0-2-2h-2.2"/><rect x="8.6" y="1.9" width="6.8" height="3.4" rx="1.2"/><path d="m9.4 12.4 1.6 1.6 3.6-3.8"/>',
+  eye: '<path d="M2.4 12S6 5.4 12 5.4 21.6 12 21.6 12 18 18.6 12 18.6 2.4 12 2.4 12Z"/><circle cx="12" cy="12" r="3"/>',
+  pin: '<path d="M12 21.5s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10.4" r="2.6"/>',
+}
+document.getElementById('sprite').innerHTML = Object.entries(SPRITE).map(([n, b]) =>
+  `<symbol id="i-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${b}</symbol>`).join('')
+
+const ico = (n) => `<svg aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+const IMG = '../assets/img/', ICON = '../assets/icon/'
+const inr = (n) => n.toLocaleString('en-IN')
+
+/* ══ THE EIGHTEEN MODULES — glyph and gradient straight off index.html ══ */
+const MODULES = {
+  medical:       { name: 'Medical',            icon: 'm-medical.svg',       g: '--g-medical' },
+  hospital:      { name: 'Hospital',           icon: 'm-hospital.svg',      g: '--g-hospital' },
+  pharmacy:      { name: 'Pharmacy',           icon: 'm-pharmacy.svg',      g: '--g-pharmacy' },
+  lab:           { name: 'Lab',                icon: 'm-lab.svg',           g: '--g-lab' },
+  species:       { name: 'Species Management', icon: 'm-species.svg',       g: '--g-species' },
+  mortality:     { name: 'Mortality',          icon: 'm-mortality.svg',     g: '--g-mortality' },
+  fetal:         { name: 'Fetal Death',        icon: 'm-fetal.svg',         g: '--g-fetal' },
+  eggs:          { name: 'Eggs',               icon: 'm-eggs.svg',          g: '--g-eggs' },
+  housing:       { name: 'Housing',            sprite: 'housing',           g: '--g-hospital' },
+  diet:          { name: 'Diet & Kitchen',     icon: 'm-diet.svg',          g: '--g-diet' },
+  followup:      { name: 'Follow Up',          icon: 'm-followup.svg',      g: '--g-followup' },
+  parivesh:      { name: 'Parivesh',           icon: 'm-parivesh.svg',      g: '--g-parivesh' },
+  administer:    { name: 'Administer',         icon: 'm-administer.svg',    g: '--g-administer' },
+  users:         { name: 'Users',              icon: 'm-users.svg',         g: '--g-users' },
+  security:      { name: 'Security',           icon: 'm-security.svg',      g: '--g-security' },
+  reports:       { name: 'Reports',            icon: 'm-reports.svg',       g: '--g-reports' },
+  approvals:     { name: 'Approvals',          icon: 'm-approvals.svg',     g: '--g-users' },
+  communication: { name: 'Communication',      icon: 'm-communication.svg', g: '--g-followup' },
 }
 
-document.getElementById('sprite').innerHTML = Object.entries(SPRITE).map(([name, body]) =>
-  `<symbol id="i-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
-  `stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${body}</symbol>`).join('')
+const gsrc = (m) => m.sprite ? ico(m.sprite) : `<img src="${ICON}${m.icon}" alt="" aria-hidden="true">`
+const mark = (m) => `<span class="card__mark">${gsrc(m)}</span>`
+/* the title line; a 1x1 gets only the glyph half of it (see the CSS above) */
+const H = (w) => `<span class="h"><span class="h__i">${gsrc(MODULES[w.mod])}</span>` +
+  `<span class="h__t">${esc(w.title || '')}</span>` +
+  (w.chip ? `<span class="h__c">${esc(w.chip)}</span>` : '') + `</span>`
 
-const icon = (n, cls = '') => `<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`
-const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+/* ══ RING AND ARC GEOMETRY, ONCE ═════════════════════════════════════════
+   r = 15.9155 makes a circle's circumference exactly 100, so a dash length IS
+   a percentage and nothing has to be scaled. Same trick the app's own `ring`
+   and `arc` layouts use. ═════════════════════════════════════════════════ */
+const RING = (pct, w = 5) =>
+  `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">` +
+  `<circle class="dial__tr" cx="20" cy="20" r="15.9155" stroke-width="${w}"/>` +
+  `<circle class="dial__v" cx="20" cy="20" r="15.9155" stroke-width="${w}" ` +
+  `stroke-dasharray="${Math.max(0, Math.min(100, pct)).toFixed(1)} 100" transform="rotate(-90 20 20)"/></svg>`
+const HALF_D = 'M6 46A40 40 0 0 1 86 46'
+const HALF = (pct) =>
+  `<svg viewBox="0 0 92 52" aria-hidden="true" focusable="false">` +
+  `<path class="hg__tr" d="${HALF_D}" pathLength="100" stroke-width="8"/>` +
+  `<path class="hg__v" d="${HALF_D}" pathLength="100" stroke-width="8" stroke-dasharray="${pct.toFixed(1)} 100"/></svg>`
 
-/** The title line every data card opens with — head() from ModuleCard.js. */
-const head = (c, chip) =>
-  `<span class="c-head"><span class="c-head__icon">${icon(c.sprite)}</span>` +
-  `<span class="c-head__text">${esc(c.title)}</span>` +
-  (chip ? `<span class="c-head__chip">${esc(chip)}</span>` : '') + `</span>`
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE ARC GEOMETRY, ONCE
-   `M15.36 70 A40 40 0 1 1 84.64 70` is the 240° sweep the existing `arc` and
-   `health` layouts already use. Its centre is (50,50) and its radius 40, so a
-   point at fraction f along it sits at 150° + 240f — which is how the WINDOW
-   composition puts a now-marker on the same path the value is drawn along,
-   without a second source of truth for where the arc is.
-   ═══════════════════════════════════════════════════════════════════════════ */
-const ARC_D = 'M15.36 70A40 40 0 1 1 84.64 70'
-function arcPoint(f) {
-  const t = (150 + 240 * Math.max(0, Math.min(1, f))) * Math.PI / 180
-  return [50 + 40 * Math.cos(t), 50 + 40 * Math.sin(t)]
+/** A run of bars scaled to its own maximum; the last `recent` are solid. */
+function bars(series, cls, recent = 1, flag = 'data-last') {
+  const max = Math.max(...series)
+  return series.map((v, i) =>
+    `<i class="${cls}"${i >= series.length - recent ? ' ' + flag : ''} ` +
+    `style="height:${((v / max) * 100).toFixed(1)}%"></i>`).join('')
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE TWELVE
-   Same signature as LAYOUTS in index.html: (card) => html. `card.data` is
-   shaped to the layout, exactly as a widget's `data` is today.
-   ═══════════════════════════════════════════════════════════════════════════ */
-const L = {
+/* ══ THE 41 COMPOSITIONS ══════════════════════════════════════════════════
+   Same signature as LAYOUTS in index.html: (w) => html, with `w.d` shaped to
+   the composition. Visualisations are white at an opacity, drawn straight onto
+   the module's gradient — no pale plate underneath, which is the line between
+   a card that belongs to this system and a tile dropped into it.
+   ═══════════════════════════════════════════════════════════════════════ */
+const C = {
 
-  /* 1 · WINDOW */
-  window: (c) => {
-    const d = c.data, f = d.elapsed / d.span
-    const [mx, my] = arcPoint(f)
-    return `<span class="l-window">${head(c)}` +
-      `<span class="l-window__dial">` +
-        `<svg viewBox="0 0 100 78" aria-hidden="true" focusable="false">` +
-          `<path class="l-window__track" d="${ARC_D}" pathLength="100" stroke-width="8"/>` +
-          `<path class="l-window__done" d="${ARC_D}" pathLength="100" stroke-width="8"` +
-          ` stroke-dasharray="${(f * 100).toFixed(1)} 100"/>` +
-          `<circle class="l-window__now" cx="${mx.toFixed(2)}" cy="${my.toFixed(2)}" r="5.4"/>` +
-        `</svg>` +
-        `<span class="l-window__read">` +
-          `<span class="l-window__left">${esc(d.left)}</span>` +
-          `<span class="l-window__of">${esc(d.leftLabel)}</span>` +
-        `</span>` +
-      `</span>` +
-      `<span class="l-window__ends"><span>${esc(d.from)}</span><span>${esc(d.to)}</span></span>` +
-      `<span class="l-window__foot"><b>${esc(d.foot)}</b><i>${esc(d.footNote)}</i></span>` +
-    `</span>`
-  },
+/* ── 1x1 · eight compositions, none with a title ─────────────────────── */
+figure: (w) => mark(MODULES[w.mod]) + H(w) +
+  `<span class="body figure"><span class="n figure__v"${String(w.d.v).length > 5 ? ' data-long' : ''}>${esc(w.d.v)}</span>` +
+  `<span class="q figure__q">${esc(w.d.q)}</span></span>`,
 
-  /* 2 · PIPS */
-  pips: (c) => {
-    const d = c.data
-    return `<span class="l-pips">${head(c)}` +
-      `<span class="l-pips__rows">` +
-      d.rows.map((r) =>
-        `<span class="l-pips__row">` +
-          `<span class="l-pips__line"><span class="l-pips__name">${esc(r.text)}</span>` +
-          `<span class="l-pips__val">${r.n}/${d.of}</span></span>` +
-          `<span class="l-pips__strip">` +
-            Array.from({ length: d.of }, (_, i) =>
-              `<i class="l-pips__pip"${i < r.n ? ' data-on' : ''}></i>`).join('') +
-            /* the minimum sits between pip `min` and pip `min+1` */
-            `<i class="l-pips__min" style="left:calc(${(d.min / d.of * 100).toFixed(3)}% - 1px)"></i>` +
-          `</span>` +
-        `</span>`).join('') +
-      `</span>` +
-      `<span class="l-pips__foot"><i class="l-pips__key"></i>${esc(d.foot)}</span>` +
-    `</span>`
-  },
+dial: (w) => H(w) +
+  `<span class="body dial"><span class="dial__d">${RING(w.d.pct)}` +
+  `<span class="dial__r"><b>${esc(w.d.v)}</b><span>${esc(w.d.q)}</span></span></span></span>`,
 
-  /* 3 · SCORE */
-  score: (c) => {
-    const d = c.data
-    const n = 41
-    return `<span class="l-score">${head(c)}` +
-      `<span class="l-score__hero">` +
-        `<span class="l-score__value">${esc(d.value)}</span>` +
-        `<span class="l-score__of">${esc(d.of)}</span>` +
-      `</span>` +
-      `<span class="l-score__rail">` +
-        `<span class="l-score__ticks">` +
-        Array.from({ length: n }, (_, i) =>
-          `<i class="l-score__tick"${i % 10 === 0 ? ' data-major' : ''}></i>`).join('') +
-        `</span>` +
-        `<span class="l-score__mark" style="left:${((d.pct / 100) * 100).toFixed(2)}%"></span>` +
-      `</span>` +
-      `<span class="l-score__ends"><span>${esc(d.min)}</span><span>${esc(d.max)}</span></span>` +
-      /* THE SEPARATOR IS NOT DECORATION. Without it the foot reads as one
-         sentence — "Up 4 since June 42 species assessed" — and the eye has to
-         back up to find where the first fact ended. Same middot the rest of
-         the product uses between two facts on one line. */
-      `<span class="l-score__foot"><b>${esc(d.move)}</b> <i>· ${esc(d.moveNote)}</i></span>` +
-    `</span>`
-  },
+duo: (w) => H(w) + `<span class="body duo">` +
+  `<span class="duo__r"><b>${esc(w.d.a)}</b><span>${esc(w.d.at)}</span></span>` +
+  `<i class="duo__l"></i>` +
+  `<span class="duo__r"><b>${esc(w.d.b)}</b><span>${esc(w.d.bt)}</span></span></span>`,
 
-  /* 4 · COMPARE */
-  compare: (c) => {
-    const d = c.data
-    return `<span class="l-compare">${head(c)}` +
-      `<span class="l-compare__panes">` +
-      d.panes.map((p, i) =>
-        `<span class="l-compare__pane"${i === d.panes.length - 1 ? ' data-now' : ''}` +
-        ` style="height:${(30 + (p.pct / 100) * 70).toFixed(1)}%">` +
-          `<span class="l-compare__when">${esc(p.when)}</span>` +
-          `<span class="l-compare__pct">${esc(p.value)}</span>` +
-        `</span>`).join('') +
-      `</span>` +
-      `<span class="l-compare__foot"><span class="l-compare__delta">${esc(d.delta)}</span>` +
-      `<span class="l-compare__cap">${esc(d.caption)}</span></span>` +
-    `</span>`
-  },
+stackm: (w) => H(w) + `<span class="body stackm"><span class="stackm__bar">` +
+  w.d.parts.map((p, i) => `<i class="stackm__s" data-i="${i}" style="flex:${p.n} 1 0"></i>`).join('') +
+  `</span><span class="stackm__r"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span></span>`,
 
-  /* 5 · BREACH */
-  breach: (c) => {
-    const d = c.data
-    const cells = d.now
-    const limitAt = (d.limit / d.now) * 100
-    return `<span class="l-breach">${head(c)}` +
-      `<span class="l-breach__pill">${esc(d.pill)}</span>` +
-      `<p class="l-breach__say">${esc(d.say)}</p>` +
-      `<span class="l-breach__line"><b>${esc(d.nowLabel)}</b><i>${esc(d.limitLabel)}</i></span>` +
-      `<span class="l-breach__bar">` +
-        Array.from({ length: cells }, (_, i) =>
-          `<i class="l-breach__cell" ${i < d.limit ? 'data-in' : 'data-over'}></i>`).join('') +
-        `<i class="l-breach__limit" style="left:calc(${limitAt.toFixed(3)}% - 1px)"></i>` +
-      `</span>` +
-      `<span class="l-breach__legend">${esc(d.legend)}</span>` +
-    `</span>`
-  },
+sparkS: (w) => H(w) + `<span class="body sparkS"><span class="n sparkS__v">${esc(w.d.v)}</span>` +
+  `<span class="sparkS__p">${bars(w.d.s, 'sparkS__b')}</span></span>`,
 
-  /* 6 · LAUNCHER */
-  launcher: (c) =>
-    `<span class="l-launcher">${head(c)}` +
-      `<span class="l-launcher__grid">` +
-      c.data.tiles.map((t) =>
-        `<span class="l-launcher__tile">` +
-          `<span class="l-launcher__glyph">${icon(t.sprite)}</span>` +
-          `<span class="l-launcher__name">${esc(t.name)}</span>` +
-        `</span>`).join('') +
-      `</span>` +
-    `</span>`,
+pulse: (w) => `<span class="pulse__radar"></span>` + H(w) +
+  `<span class="body pulse"><span class="pulse__w">${esc(w.d.w)}</span>` +
+  `<span class="q pulse__q">${esc(w.d.q)}</span></span>`,
 
-  /* 7 · ARRIVALS */
-  arrivals: (c) =>
-    `<span class="l-arr">${head(c, c.data.chip)}` +
-      `<span class="l-arr__rows">` +
-      c.data.rows.map((r, i) =>
-        `<span class="l-arr__row"${i === 0 ? ' data-next' : ''}>` +
-          `<span class="l-arr__plate">${icon(r.sprite)}</span>` +
-          `<span class="l-arr__main">` +
-            `<span class="l-arr__name">${esc(r.text)}</span>` +
-            `<span class="l-arr__where">${esc(r.where)}</span></span>` +
-          `<span class="l-arr__in"><b>${esc(r.in)}</b><i>${esc(r.unit)}</i></span>` +
-        `</span>`).join('') +
-      `</span>` +
-    `</span>`,
+photochip: (w) => `<img class="card__media" src="${IMG}${esc(w.d.img)}" alt="" aria-hidden="true">` +
+  `<span class="card__band"></span>` + H(w) +
+  `<span class="body photochip"><span class="photochip__w">${esc(w.d.w)}</span></span>`,
 
-  /* 8 · ROSTER */
-  roster: (c) =>
-    `<span class="l-roster">${head(c)}` +
-      `<span class="l-roster__grid">` +
-      c.data.people.map((p) =>
-        `<span class="l-roster__p"${p.off ? ' data-off' : ''}>` +
-          `<span class="l-roster__av">${esc(p.initials)}</span>` +
-          `<span class="l-roster__who">` +
-            `<span class="l-roster__name">${esc(p.name)}</span>` +
-            `<span class="l-roster__role">${esc(p.role)}</span></span>` +
-        `</span>`).join('') +
-      `</span>` +
-      `<span class="l-roster__foot"><b>${esc(c.data.foot)}</b> <i>${esc(c.data.footNote)}</i></span>` +
-    `</span>`,
+act1: (w) => H(w) + `<span class="body act1"><span class="act1__p">${ico(w.d.ico)}</span>` +
+  `<span class="act1__v">${esc(w.d.verb)}</span></span>`,
 
-  /* 9 · BARS */
-  bars: (c) => {
-    const d = c.data, max = Math.max(...d.series)
-    return `<span class="l-bars">${head(c)}` +
-      `<span class="l-bars__hero">` +
-        `<span class="l-bars__total">${esc(d.total)}</span>` +
-        `<span class="l-bars__unit">${esc(d.unit)}</span>` +
-        `<span class="l-bars__span">${esc(d.span)}</span>` +
-      `</span>` +
-      `<span class="l-bars__plot">` +
-      d.series.map((v, i) =>
-        `<i class="l-bars__bar"${i >= d.series.length - d.recent ? ' data-recent' : ''}` +
-        ` style="height:${((v / max) * 100).toFixed(1)}%"></i>`).join('') +
-      `</span>` +
-      `<span class="l-bars__facts">` +
-      d.facts.map((f) =>
-        `<span class="l-bars__fact"><b>${esc(f.value)}</b><span>${esc(f.label)}</span></span>`).join('') +
-      `</span>` +
-    `</span>`
-  },
+/* ── 2x1 · eleven compositions ───────────────────────────────────────── */
+heat: (w) => H(w) + `<span class="body"><span class="heat__b">` +
+  `<span class="heat__g" style="grid-template-columns:repeat(${w.d.cols},1fr)">` +
+  w.d.cells.map((v) => `<i class="heat__c" style="--a:${(0.16 + 0.8 * v).toFixed(3)}"></i>`).join('') +
+  `</span><span class="heat__r"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span></span></span>`,
 
-  /* 10 · SPLIT */
-  split: (c) => {
-    const d = c.data, sum = d.parts.reduce((n, p) => n + p.n, 0) || 1
-    return `<span class="l-split">${head(c)}` +
-      `<span class="l-split__hero">` +
-        `<span class="l-split__total">${esc(d.total)}</span>` +
-        `<span class="l-split__unit">${esc(d.unit)}</span>` +
-      `</span>` +
-      `<span class="l-split__bar">` +
-      d.parts.map((p, i) =>
-        `<i class="l-split__seg" data-i="${i}" style="flex:${p.n} 1 0"></i>`).join('') +
-      `</span>` +
-      `<span class="l-split__legend">` +
-      d.parts.map((p, i) =>
-        `<span class="l-split__key" data-i="${i}"><i class="l-split__dot"></i>` +
-        `<span class="l-split__nm">${esc(p.label)}</span>` +
-        `<span class="l-split__n">${p.n}</span></span>`).join('') +
-      `</span>` +
-    `</span>`
-  },
+barrow: (w) => H(w) + `<span class="body"><span class="barrow__b">` +
+  `<span class="barrow__v">${esc(w.d.v)}</span>` +
+  `<span class="barrow__p">${bars(w.d.s, 'barrow__i')}</span></span></span>`,
 
-  /* 11 · SETPOINT */
-  setpoint: (c) => {
-    const d = c.data
-    return `<span class="l-set">${head(c)}` +
-      `<span class="l-set__row">` +
-        `<span class="l-set__read">` +
-          `<span class="l-set__value"><b>${esc(d.target)}</b><span>${esc(d.unit)}</span></span>` +
-          `<span class="l-set__now">${esc(d.now)}</span>` +
-        `</span>` +
-        `<span class="l-set__btns">` +
-          `<button class="l-set__btn" type="button" aria-label="Lower the target">${icon('minus')}</button>` +
-          `<button class="l-set__btn" type="button" aria-label="Raise the target">${icon('plus')}</button>` +
-        `</span>` +
-      `</span>` +
-    `</span>`
-  },
+halfgauge: (w) => H(w) + `<span class="body"><span class="hg__b"><span class="hg__d">${HALF(w.d.pct)}` +
+  `<span class="hg__r"><b>${esc(w.d.v)}</b></span></span>` +
+  `<span class="hg__f">${w.d.facts.map((f) =>
+    `<div><b>${esc(f.v)}</b> <span class="q">${esc(f.l)}</span></div>`).join('')}</span></span></span>`,
 
-  /* 12 · AGENDA */
-  agenda: (c) =>
-    `<span class="l-agenda">${head(c, c.data.chip)}` +
-      `<span class="l-agenda__items">` +
-      c.data.items.map((i) =>
-        `<span class="l-agenda__item" data-tone="${esc(i.tone || 'none')}">` +
-          `<i class="l-agenda__spine"></i>` +
-          `<span class="l-agenda__body">` +
-            `<span class="l-agenda__what">${esc(i.text)}</span>` +
-            `<span class="l-agenda__when"><b>${esc(i.when)}</b> · ${esc(i.where)}</span>` +
-          `</span>` +
-        `</span>`).join('') +
-      `</span>` +
-    `</span>`,
+pillrow: (w) => H(w) + `<span class="body"><span class="pr__rows">${w.d.rows.map((r) =>
+  `<span class="pr__r"${r.tone ? ` data-tone="${esc(r.tone)}"` : ''}><i class="pr__d"></i>` +
+  `<span class="pr__n">${esc(r.t)}</span><span class="pr__v">${esc(r.v)}</span></span>`).join('')}</span></span>`,
+
+trend: (w) => H(w) + `<span class="body"><span class="trend__b">` +
+  `<span class="trend__v"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span>` +
+  `<span class="trend__p">${bars(w.d.s, 'trend__i')}</span></span></span>`,
+
+twoside: (w) => H(w) + `<span class="body"><span class="ts__b">` +
+  `<span class="ts__l"><b>${esc(w.d.a)}</b><b>${esc(w.d.b)}</b></span>` +
+  `<span class="ts__bar"><i style="flex:${w.d.an} 1 0"></i><i style="flex:${w.d.bn} 1 0"></i></span>` +
+  `<span class="ts__tags"><span class="q">${esc(w.d.at)}</span><span class="q">${esc(w.d.bt)}</span></span>` +
+  `</span></span>`,
+
+chips: (w) => H(w) + `<span class="body"><span class="chips__s">${w.d.items.map((c) =>
+  `<span class="chips__c"${c.tone ? ` data-tone="${esc(c.tone)}"` : ''}><b>${esc(c.v)}</b>` +
+  `<span>${esc(c.l)}</span></span>`).join('')}</span></span>`,
+
+rail: (w) => H(w) + `<span class="body"><span class="rail__b">` +
+  `<span class="rail__v"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span>` +
+  `<span class="rail__r"><span class="rail__t">` +
+  Array.from({ length: 33 }, (_, i) => `<i${i % 8 === 0 ? ' data-major' : ''}></i>`).join('') +
+  `</span><span class="rail__m" style="left:${w.d.pct}%"></span></span></span></span>`,
+
+strip: (w) => H(w) + `<span class="body"><span class="strip__b">` +
+  `<span class="strip__v"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span>` +
+  `<span class="strip__bar">${w.d.parts.map((p, i) => `<i data-i="${i}" style="flex:${p.n} 1 0"></i>`).join('')}</span>` +
+  `<span class="strip__k">${w.d.parts.map((p) => `<span><i></i>${esc(p.l)} ${inr(p.n)}</span>`).join('')}</span>` +
+  `</span></span>`,
+
+photoband: (w) => `<img class="card__media" src="${IMG}${esc(w.d.img)}" alt="" aria-hidden="true">` +
+  `<span class="card__band"></span>` + H(w) +
+  `<span class="body pb"><span class="pb__w">${esc(w.d.w)}</span>` +
+  `<span class="pb__v"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span></span>`,
+
+act3: (w) => H(w) + `<span class="body"><span class="act3__s">${w.d.verbs.map((v) =>
+  `<span class="act3__v">${esc(v)}</span>`).join('')}</span></span>`,
+
+/* ── 2x2 · eighteen signatures, plus one action shape ────────────────── */
+
+/* MEDICAL · 140 cases are not a total, they are a ladder */
+ladder: (w) => H(w) + `<span class="body"><span class="ladder__c">${w.d.bands.map((b, i) =>
+  `<span class="ladder__b" data-i="${i}" style="flex:${b.n} 1 0">` +
+  `<b>${b.n}</b><span>${esc(b.l)}</span></span>`).join('')}</span></span>`,
+
+/* HOSPITAL · the ward is beds, so the card is beds */
+wardgrid: (w) => H(w) + `<span class="body"><span class="ward__b"><span class="ward__g">` +
+  Array.from({ length: w.d.beds }, (_, i) =>
+    `<i class="ward__c"${i < w.d.occupied ? ' data-on' : (i < w.d.occupied + w.d.iso ? ' data-iso' : '')}></i>`).join('') +
+  `</span><span class="ward__f"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span></span></span>`,
+
+/* SPECIES · the collection divides by class before anything else, and the
+   block AREA is the share — the largest class takes a column of proportional
+   width, the rest stack in the remainder at proportional heights. */
+taxa: (w) => {
+  const [big, ...rest] = w.d.classes
+  const total = w.d.classes.reduce((n, c) => n + c.n, 0)
+  const restSum = total - big.n
+  const pc = (a, b) => (a / b * 100).toFixed(4) + '%'
+  return H(w) + `<span class="body"><span class="taxa__b">` +
+    `<span class="taxa__c" data-i="0" style="width:${pc(big.n, total)}">` +
+    `<b>${inr(big.n)}</b><span>${esc(big.l)}</span></span>` +
+    `<span class="taxa__col" style="width:${pc(restSum, total)}">` +
+    rest.map((c, i) =>
+      `<span class="taxa__c" data-i="${i + 1}" style="height:${pc(c.n, restSum)}">` +
+      `<b>${inr(c.n)}</b><span>${esc(c.l)}</span></span>`).join('') +
+    `</span></span></span>`
+},
+
+/* PHARMACY · stock is shelves, and what matters is what expires on them */
+shelf: (w) => H(w) + `<span class="body"><span class="shelf__r">${w.d.rows.map((r) => {
+  const n = Math.min(r.n, 20)
+  return `<span class="shelf__row"><span class="shelf__l"><span>${esc(r.l)}</span><b>${r.n}</b></span>` +
+    `<span class="shelf__p">${Array.from({ length: n }, (_, i) =>
+      `<i${i >= n - r.exp ? ' data-exp' : ''}></i>`).join('')}</span></span>`
+}).join('')}</span>` +
+  `<span class="shelf__f"><i></i><span class="q">${esc(w.d.foot)}</span></span></span>`,
+
+/* LAB · a sample is a tube, and a result is how full it is */
+bench: (w) => H(w) + `<span class="body"><span class="bench__g">${w.d.tests.map((t) =>
+  `<span class="bench__t"><span class="bench__tube"><i style="height:${t.pct}%"></i></span>` +
+  `<span>${esc(t.l)}</span></span>`).join('')}</span>` +
+  `<span class="bench__f"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span></span>`,
+
+/* MORTALITY · six months, read down, because a trend here unrolls */
+tape: (w) => {
+  const max = Math.max(...w.d.months.map((m) => m.n))
+  return H(w) + `<span class="body"><span class="tape__r">${w.d.months.map((m, i) =>
+    `<span class="tape__l"${i === w.d.months.length - 1 ? ' data-last' : ''}>` +
+    `<span class="tape__m">${esc(m.l)}</span>` +
+    `<span class="tape__t"><i style="width:${(m.n / max * 100).toFixed(1)}%"></i></span>` +
+    `<span class="tape__n">${m.n}</span></span>`).join('')}</span></span>`
+},
+
+/* FETAL DEATH · every expected outcome gets a slot you can count */
+cradle: (w) => H(w) + `<span class="body"><span class="cradle__g">` +
+  Array.from({ length: w.d.expected }, (_, i) =>
+    `<i class="cradle__s"${i < w.d.live ? ' data-live' : (i < w.d.live + w.d.lost ? ' data-lost' : '')}></i>`).join('') +
+  `</span><span class="cradle__f">${w.d.facts.map((f) =>
+    `<div><b>${esc(f.v)}</b><span class="q">${esc(f.l)}</span></div>`).join('')}</span></span>`,
+
+/* EGGS · a clutch is a countdown, and there are eight of them */
+clutch: (w) => H(w) + `<span class="body"><span class="clutch__g">${w.d.clutches.map((c) =>
+  `<span class="clutch__t"${c.day >= c.of - 3 ? ' data-due' : ''}>` +
+  `<span class="clutch__e"><svg viewBox="0 0 26 33" aria-hidden="true" focusable="false">` +
+  `<ellipse class="egg-tr" cx="13" cy="18" rx="10" ry="13" stroke-width="3"/>` +
+  `<ellipse class="egg-v" cx="13" cy="18" rx="10" ry="13" stroke-width="3" pathLength="100" ` +
+  `stroke-dasharray="${(c.day / c.of * 100).toFixed(1)} 100" transform="rotate(-90 13 18)"/></svg></span>` +
+  `<b>${c.day}/${c.of}</b></span>`).join('')}</span></span>`,
+
+/* HOUSING · the estate, worst first, which is the only order that helps */
+sitelist: (w) => H(w) + `<span class="body"><span class="sl__r">${w.d.sites.map((s, i) =>
+  `<span class="sl__i"${i === 0 ? ' data-worst' : ''}><span class="sl__n">${esc(s.l)}</span>` +
+  `<span class="sl__t"><i style="width:${s.pct}%"></i></span>` +
+  `<span class="sl__v">${s.pct}%</span></span>`).join('')}</span></span>`,
+
+/* DIET · the store is what is on it, in kilograms */
+plate: (w) => {
+  const sum = w.d.parts.reduce((n, p) => n + p.n, 0) || 1
+  let at = 0
+  const arcs = w.d.parts.map((p, i) => {
+    const len = (p.n / sum) * 100, draw = Math.max(0, len - 1.5)
+    const el = `<circle class="plate__s" data-i="${i}" cx="20" cy="20" r="15.9155" stroke-width="7" ` +
+      `stroke-dasharray="${draw.toFixed(2)} ${(100 - draw).toFixed(2)}" stroke-dashoffset="${(-at).toFixed(2)}" ` +
+      `transform="rotate(-90 20 20)"/>`
+    at += len
+    return el
+  }).join('')
+  return H(w) + `<span class="body"><span class="plate__b"><span class="plate__d">` +
+    `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">` +
+    `<circle class="plate__tr" cx="20" cy="20" r="15.9155" stroke-width="7"/>${arcs}</svg>` +
+    `<span class="plate__c"><b>${esc(w.d.total)}</b><span class="q">${esc(w.d.unit)}</span></span></span>` +
+    `<span class="plate__k">${w.d.parts.map((p, i) =>
+      `<div data-i="${i}"><i></i><u>${esc(p.l)}</u><b>${inr(p.n)}</b></div>`).join('')}</span></span></span>`
+},
+
+/* FOLLOW UP · what is due is a date, so the card is a month */
+month: (w) => H(w) + `<span class="body"><span class="month__g">` +
+  Array.from({ length: w.d.pad }, () => `<i class="month__d" data-pad></i>`).join('') +
+  Array.from({ length: w.d.days }, (_, i) => {
+    const d = i + 1
+    const f = w.d.over.includes(d) ? ' data-over' : (w.d.due.includes(d) ? ' data-due' : '')
+    return `<i class="month__d"${f}${d === w.d.today ? ' data-today' : ''}>${d}</i>`
+  }).join('') +
+  `</span><span class="month__f">${w.d.facts.map((f) =>
+    `<div><b>${esc(f.v)}</b><span class="q">${esc(f.l)}</span></div>`).join('')}</span></span>`,
+
+/* PARIVESH · a filing has a deadline, so it has runway */
+runway: (w) => H(w) + `<span class="body"><span class="rw__r">${w.d.rows.map((r) =>
+  `<span class="rw__l"${r.pct < 25 ? ' data-tight' : ''}>` +
+  `<span class="rw__n"><span>${esc(r.l)}</span><b>${esc(r.left)}</b></span>` +
+  `<span class="rw__t"><i style="width:${r.pct}%"></i></span></span>`).join('')}</span></span>`,
+
+/* ADMINISTER · a queue has depth, and depth is drawn, not counted */
+deck: (w) => H(w) + `<span class="body"><span class="deck__b"><span class="deck__s">${w.d.cards.map((c, i) =>
+  `<span class="deck__c" data-i="${i}"><b>${esc(c.t)}</b><span>${esc(c.s)}</span></span>`).join('')}</span>` +
+  `<span class="deck__f"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span></span></span>`,
+
+/* USERS · a shift is a part of the day, so the card is the day */
+shiftband: (w) => H(w) + `<span class="body"><span class="sb__b">${w.d.shifts.map((s) =>
+  `<span class="sb__row"${s.peak ? ' data-peak' : ''}><span class="sb__nm">${esc(s.l)}</span>` +
+  `<span class="sb__t"><i style="left:${(s.from / 24 * 100).toFixed(2)}%;width:${((s.to - s.from) / 24 * 100).toFixed(2)}%"></i></span>` +
+  `<span class="sb__n">${s.n}</span></span>`).join('')}` +
+  `<span class="sb__hrs">${['00', '06', '12', '18', '24'].map((h) => `<span>${h}</span>`).join('')}</span></span></span>`,
+
+/* SECURITY · cameras sit on a fence, so the card is the fence */
+perimeter: (w) => H(w) + `<span class="body"><span class="pm__b"><span class="pm__ring">` +
+  `<span class="pm__fence"></span>` +
+  Array.from({ length: w.d.total }, (_, i) => {
+    const t = (i / w.d.total) * 2 * Math.PI - Math.PI / 2
+    return `<i class="pm__n"${i >= w.d.online ? ' data-dark' : ''} ` +
+      `style="left:${(50 + 43 * Math.cos(t)).toFixed(2)}%;top:${(50 + 43 * Math.sin(t)).toFixed(2)}%"></i>`
+  }).join('') +
+  `<span class="pm__c"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span>` +
+  `</span></span></span>`,
+
+/* REPORTS · the card shows a page of what it would print */
+statement: (w) => H(w) + `<span class="body"><span class="st__b">${w.d.lines.map((l) =>
+  `<span class="st__l"><span>${esc(l.l)}</span><em></em><b>${esc(l.v)}</b></span>`).join('')}` +
+  `<i class="st__rule"></i>` +
+  `<span class="st__tot"><span class="q">${esc(w.d.totalLabel)}</span><b>${esc(w.d.total)}</b></span></span></span>`,
+
+/* APPROVALS · a queue's problem is age, not size */
+queuebars: (w) => {
+  const max = Math.max(...w.d.bands.map((b) => b.n))
+  return H(w) + `<span class="body"><span class="qb__r">${w.d.bands.map((b) =>
+    `<span class="qb__l"${b.old ? ' data-old' : ''}><span class="qb__a">${esc(b.l)}</span>` +
+    `<span class="qb__t"><i style="width:${(b.n / max * 100).toFixed(1)}%"></i></span>` +
+    `<span class="qb__n">${b.n}</span></span>`).join('')}</span></span>`
+},
+
+/* COMMUNICATION · the content is the conversations */
+thread: (w) => H(w) + `<span class="body"><span class="th__r">${w.d.items.map((t) =>
+  `<span class="th__i"${t.unread ? ' data-unread' : ''}>` +
+  `<span class="th__av">${t.img ? `<img src="${IMG}${esc(t.img)}" alt="" aria-hidden="true">` : esc(t.ini)}</span>` +
+  `<span class="th__m"><b>${esc(t.t)}</b><span>${esc(t.s)}</span></span>` +
+  (t.unread ? `<span class="th__p">${t.unread}</span>` : '') + `</span>`).join('')}</span></span>`,
+
+act4: (w) => H(w) + `<span class="body"><span class="act4__g">${w.d.verbs.map((v) =>
+  `<span class="act4__v"><i>${ico(v.ico)}</i><span>${esc(v.l)}</span></span>`).join('')}</span></span>`,
+
+/* ── 5x2 · three full-width compositions ─────────────────────────────── */
+matrix: (w) => H(w) + `<span class="body"><span class="mx__b">` +
+  `<span class="mx__y" style="grid-template-rows:repeat(${w.d.rows.length},1fr)">` +
+  w.d.rows.map((r) => `<span>${esc(r.l)}</span>`).join('') + `</span>` +
+  `<span class="mx__g" style="grid-template-columns:repeat(${w.d.cols.length},1fr);grid-template-rows:repeat(${w.d.rows.length},1fr)">` +
+  w.d.rows.flatMap((r) => r.v.map((v) => `<i class="mx__c" style="--a:${(0.06 + 0.9 * v).toFixed(3)}"></i>`)).join('') +
+  `</span><span class="mx__r"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span></span>` +
+  `<span class="mx__x">${w.d.cols.map((c) => `<span>${esc(c)}</span>`).join('')}</span></span>`,
+
+bars30: (w) => H(w) + `<span class="body"><span class="b30__b">` +
+  `<span class="b30__h"><b>${esc(w.d.v)}</b><span class="q">${esc(w.d.q)}</span></span>` +
+  `<span class="b30__p">${bars(w.d.s, 'b30__i', w.d.recent, 'data-recent')}</span>` +
+  `<span class="b30__f">${w.d.facts.map((f) =>
+    `<div><b>${esc(f.v)}</b><span class="q">${esc(f.l)}</span></div>`).join('')}</span></span></span>`,
+
+photohero: (w) => `<img class="card__media" src="${IMG}${esc(w.d.img)}" alt="" aria-hidden="true">` +
+  `<span class="card__band"></span>` + H(w) +
+  `<span class="body ph"><span>` +
+  `<span class="ph__v"><b>${esc(w.d.v)}</b><span class="ph__t">${esc(w.d.t)}</span></span>` +
+  `<span class="q">${esc(w.d.q)}</span></span></span>`,
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE CONCEPTS
-   Figures are Bannerghatta Safari's own, from SITES[0] in index.html and the
-   Site widget catalogue: 12 sections, 48 enclosures of which 5 free and 2
-   restricted, 86 staff, 42 species, 318 animals, health 87, compliance 94%.
-   `decision` is the row in docs/framing-site-command-centre.md §4 that a card
-   has to serve — the test the framing document sets for any new widget.
-   ═══════════════════════════════════════════════════════════════════════════ */
-const CONCEPTS = [
-  {
-    layout: 'window', title: 'Feeding Window', sprite: 'd-husbandry',
-    domain: 'd.husbandry', fill: '--g-medical', size: 'large',
-    sizes: 'large, tall · default large', decision: 'D2',
-    ref: 'Sheet 1 — the sleep ring, times printed at the segment ends; sheet 1 again — the San Francisco golden-hour arc with a dot at each end',
-    answers: 'Where are we inside a period that has a start and an end?',
-    instead: '<strong><code>progress</code></strong> gives a ratio and a track but names neither end, so “68%” of a feeding day could start at any hour. <strong><code>arc</code></strong> draws the sweep and prints a percentage in it, but has no marker, so it says how full and never how far along.',
-    shape: `data: {\n  from: '06:30', to: '18:00',\n  span: 690, elapsed: 470,   // minutes\n  left: '3 h 40', leftLabel: 'left today',\n  foot: '3 of 4 rounds done',\n  footNote: 'next 16:00',\n}`,
-    data: {
-      from: '06:30', to: '18:00', span: 690, elapsed: 470,
-      left: '3 h 40', leftLabel: 'left today',
-      foot: '3 of 4 rounds done', footNote: 'next 16:00',
-    },
-  },
-  {
-    layout: 'pips', title: 'Standards', sprite: 'd-safety',
-    domain: 'd.safety', fill: '--g-mortality', size: 'large',
-    sizes: 'medium, large · default large', decision: 'D4',
-    ref: 'Sheet 3 — Your Sustainability Statistics, each row scored out of ten in little segmented pips',
-    answers: 'How does each of several things score on one small, countable scale — and which of them falls short of the minimum?',
-    instead: '<strong><code>meters</code></strong> draws a continuous track per row, which reads as “how much of it is done”; a standard is not partly met, it is met or not, and eight of ten reads as eight <em>things</em>. <strong><code>status</code></strong> has the pass/fail sense but throws the count away.',
-    instead2: 'The minimum is a single black rule drawn once across every strip, so a row that falls short says so <em>without colour</em> — which matters, because a warn amber on a coral card is invisible and the palette is not open for renegotiation.',
-    shape: `data: {\n  of: 10, min: 6,\n  rows: [   // worst first, always\n    { text: 'Waste Handling', n: 4 },\n    { text: 'Air & Ventilation', n: 6 },\n    …\n  ],\n  foot: 'minimum 6 · 1 below standard',\n}`,
-    data: {
-      of: 10, min: 6, foot: 'minimum 6 · 1 below standard',
-      rows: [
-        { text: 'Waste Handling', n: 4 },
-        { text: 'Air & Ventilation', n: 6 },
-        { text: 'Water Quality', n: 7 },
-        { text: 'Enrichment', n: 9 },
-      ],
-    },
-  },
-  {
-    layout: 'score', title: 'Welfare Index', sprite: 'd-assessment',
-    domain: 'd.assessment', fill: '--g-lab', size: 'large',
-    sizes: 'medium, large · default large', decision: 'D6',
-    ref: 'Sheet 3 — YOUR ESG SCORE, one enormous numeral against a measured tick rail with a marker on it',
-    answers: 'One index, and the scale it is measured on, in the same glance.',
-    instead: '<strong><code>stat</code></strong> prints the number and no scale, so 78 could be out of 80 or out of 1000. <strong><code>arc</code></strong> implies the scale by sweep but cannot show a band or a threshold on it, and it costs a 2×2 to say one number.',
-    instead2: 'The rail is the point: a reader who has never seen this index before learns its range from the card rather than from training.',
-    shape: `data: {\n  value: '78', of: 'of 100', pct: 78,\n  min: '0', max: '100',\n  move: 'Up 4 since June',\n  moveNote: '42 species assessed',\n}`,
-    data: {
-      value: '78', of: 'of 100', pct: 78, min: '0', max: '100',
-      move: 'Up 4 since June', moveNote: '42 species assessed',
-    },
-  },
-  {
-    layout: 'compare', title: 'Inspections Passed', sprite: 'd-space',
-    domain: 'd.space', fill: '--g-parivesh', size: 'tall',
-    sizes: 'medium, tall · default tall', decision: 'D4',
-    ref: 'Sheet 3 — the two ESG panels, last month against this month, the height of each panel carrying the value',
-    answers: 'Did it move, and by how much — where there are exactly two periods and not a series?',
-    instead: '<strong><code>chart</code></strong> is a trend line, and a line drawn through two points is a lie about how much you know. <strong><code>metrics</code></strong> would put 78% and 94% side by side as two facts and leave the reader to do the subtraction the card exists to do.',
-    shape: `data: {\n  panes: [\n    { when: 'Last Month', value: '78%', pct: 78 },\n    { when: 'This Month', value: '94%', pct: 94 },\n  ],\n  delta: '+16 pts',\n  caption: '45 of 48 enclosures',\n}`,
-    data: {
-      panes: [
-        { when: 'Last Month', value: '78%', pct: 78 },
-        { when: 'This Month', value: '94%', pct: 94 },
-      ],
-      delta: '+16 pts', caption: '45 of 48 enclosures',
-    },
-  },
-  {
-    layout: 'breach', title: 'Quarantine', sprite: 'd-risk',
-    domain: 'd.risk', fill: '--g-fetal', size: 'large',
-    sizes: 'medium, large · default large', decision: 'D1',
-    ref: 'Sheet 3 — “You passed the water usage limit”: a pill, a sentence, current against limit, and a segmented bar with the limit marked',
-    answers: 'A limit has been crossed. Say so in words, and show by how much.',
-    instead: '<strong><code>attention</code></strong> counts things needing attention but has no notion of a <em>limit</em>, so “14” carries no fault. <strong><code>progress</code></strong> caps at 100% and therefore cannot draw an overrun at all — the one state this card exists for.',
-    instead2: 'The sentence is the design. Every other card in the product makes the reader infer the problem from a figure; this one states it, which is what section 10 of the brief asks of the Needs Attention family.',
-    shape: `data: {\n  pill: 'Over limit',\n  say: 'Quarantine is two pens over its limit.',\n  now: 14, limit: 12,\n  nowLabel: '14 pens in use',\n  limitLabel: 'limit 12',\n  legend: 'Two animals held in shared pens since Friday',\n}`,
-    data: {
-      pill: 'Over limit', say: 'Quarantine is two pens over its limit.',
-      now: 14, limit: 12, nowLabel: '14 pens in use', limitLabel: 'limit 12',
-      legend: 'Two animals held in shared pens since Friday',
-    },
-  },
-  {
-    layout: 'launcher', title: 'Animal Care', sprite: 'd-animal',
-    domain: 'd.animal', fill: '--g-species', size: 'large',
-    sizes: 'large, full · default large', decision: '— none',
-    ref: 'Sheet 4 — Shop By Category, four tinted tiles with a glyph and a name inside one card',
-    answers: 'Nothing. It is navigation, and the framing table is about decisions — judge it as four <code>door</code> cards that fit in the space of two.',
-    instead: '<strong><code>door</code></strong> is one destination per card, so this shelf costs four cells at small or eight at medium. <strong><code>actions</code></strong> is the right shape but its items are verbs — “Log Treatment” — and these are places.',
-    instead2: 'The reference card has a <em>View All</em> in its corner. It is deliberately not reproduced: the brief removed every “View X ›” in the product, and on a card whose four tiles are already the links it would be a fifth link to the same shelf.',
-    shape: `data: {\n  tiles: [\n    { name: 'Husbandry',  sprite: 'd-husbandry' },\n    { name: 'Veterinary', sprite: 'd-veterinary' },\n    { name: 'Welfare',    sprite: 'd-assessment' },\n    { name: 'Collection', sprite: 'd-animal' },\n  ],\n}`,
-    data: {
-      tiles: [
-        { name: 'Husbandry', sprite: 'd-husbandry' },
-        { name: 'Veterinary', sprite: 'd-veterinary' },
-        { name: 'Welfare', sprite: 'd-assessment' },
-        { name: 'Collection', sprite: 'd-animal' },
-      ],
-    },
-  },
-  {
-    layout: 'arrivals', title: 'Next Up', sprite: 'd-schedule',
-    domain: 'd.schedule', fill: '--g-pharmacy', size: 'tall',
-    sizes: 'medium, tall, large · default tall', decision: 'D2',
-    ref: 'Sheet 1 — the transit card, M7 in 2 min over M104 in 6, each row a route plate and a countdown',
-    answers: 'What is due next here, and how soon — as a countdown rather than a clock time?',
-    instead: '<strong><code>queue</code></strong> right-aligns a figure per row, but its figures are quantities; “22” meaning minutes in the same column shape that elsewhere means work orders is a trap. <strong><code>timeline</code></strong> runs the other way — it is dated entries that have already happened.',
-    instead2: 'The first row is the card. It is bigger, its plate is filled and its countdown is set at metric size, because the reference sheet is right that a list of four things due is really one thing due and three behind it.',
-    shape: `data: {\n  chip: '9 today',\n  rows: [\n    { text: 'Night Feed', where: 'Carnivore Block',\n      in: '22', unit: 'min', sprite: 'd-husbandry' },\n    …\n  ],\n}`,
-    data: {
-      chip: '9 today',
-      rows: [
-        { text: 'Night Feed', where: 'Carnivore Block', in: '22', unit: 'min', sprite: 'd-husbandry' },
-        /* NO UNIT ON THE MIDDLE ROWS. The first pass captioned them "THEN",
-           which is not a unit and reads as a word the layout forgot to fill
-           in. "1 h 10" already says what it is; only the hero row, whose
-           figure is a bare number, needs "min" under it. */
-        { text: 'Vet Round', where: 'Hospital', in: '1 h 10', unit: '', sprite: 'd-veterinary' },
-        { text: 'Gate Lock', where: 'Main Gate', in: '3 h', unit: '', sprite: 'd-safety' },
-        { text: 'Water Test', where: 'Pump House', in: '08:00', unit: 'tomorrow', sprite: 'd-environment' },
-      ],
-    },
-  },
-  {
-    layout: 'roster', title: 'On Duty', sprite: 'd-people',
-    domain: 'd.people', fill: '--g-users', size: 'large',
-    sizes: 'medium, large · default large', decision: 'D2',
-    ref: 'Sheet 1 — the contacts card, two people with a channel glyph and how long ago each was seen',
-    answers: 'Who is on this Site right now, and are the seats that matter covered?',
-    instead: '<strong><code>entity</code></strong> names one thing and this is four. <strong><code>recent</code></strong> lists objects with a timestamp, and a person is not an object you were last working on. <strong><code>metrics</code></strong> gives “41 on site”, which is the number and not the names.',
-    instead2: 'The reference uses photographs. These are initials, for the same reason <code>entity</code> blows up a glyph instead of reaching for a photo: the product has 86 staff at one Site and no portrait for any of them, so a card that needs a face is a card that will be wrong.',
-    shape: `data: {\n  people: [\n    { initials: 'RK', name: 'Ramesh Kumar',\n      role: 'Site In-charge' },\n    { initials: 'LN', name: 'Lakshmi N.',\n      role: 'Admin', off: true },\n    …\n  ],\n  foot: '41 on site', footNote: 'of 86 staff',\n}`,
-    data: {
-      people: [
-        { initials: 'RK', name: 'Ramesh Kumar', role: 'Site In-charge' },
-        { initials: 'AR', name: 'Anita Rao', role: 'Veterinarian' },
-        { initials: 'SB', name: 'Suresh Babu', role: 'Facility' },
-        { initials: 'LN', name: 'Lakshmi N.', role: 'Admin', off: true },
-      ],
-      foot: '41 on site', footNote: 'of 86 staff · 1 seat uncovered',
-    },
-  },
-  {
-    layout: 'bars', title: 'Feed Issued', sprite: 'd-inventory',
-    domain: 'd.inventory', fill: '--g-lab', size: 'full',
-    sizes: 'large, full · default full', decision: 'D8',
-    ref: 'Sheet 2 — the dark balance card, one figure over a strip of discrete bars rather than a curve',
-    answers: 'What did a period actually consist of, day by day, where the days are countable and pointable?',
-    instead: '<strong><code>chart</code></strong> is a smoothed line, and a line asserts continuity between its points — feed is issued in discrete daily rounds, so a line drawn through them claims something untrue about 3 a.m. <strong><code>bars</code></strong> lets a reader point at Tuesday.',
-    instead2: 'The last seven bars are at full opacity and the earlier twenty-three at 42%, so “this week against the month” needs no legend and no second card.',
-    shape: `data: {\n  total: '1,357', unit: 'kg', span: 'last 30 days',\n  series: [38, 41, 44, …],   // 30 daily figures\n  recent: 7,                 // drawn at full opacity\n  facts: [\n    { value: '45 kg', label: 'a day, average' },\n    { value: '61 kg', label: 'peak, 18th' },\n  ],\n}`,
-    data: {
-      total: '1,357', unit: 'kg', span: 'last 30 days', recent: 7,
-      series: [38, 41, 44, 39, 47, 52, 45, 40, 36, 43, 49, 55, 42, 38, 44,
-               46, 51, 61, 48, 40, 37, 42, 45, 50, 47, 43, 39, 44, 53, 58],
-      facts: [
-        { value: '45 kg', label: 'a day, average' },
-        { value: '61 kg', label: 'peak, 18th' },
-        { value: '3 days', label: 'above the plan' },
-      ],
-    },
-  },
-  {
-    layout: 'split', title: 'Enclosure Space', sprite: 'd-occupancy',
-    domain: 'd.occupancy', fill: '--g-species', size: 'medium',
-    sizes: 'medium, large · default medium', decision: 'D9',
-    ref: 'Sheet 2 — Device Storage, 345 GB as one segmented bar with a dot legend under it',
-    answers: 'What is one capacity made of — in a card one row high?',
-    instead: '<strong><code>ring</code></strong> answers exactly this question and needs a 2×2 to do it, because a donut plus a legend will not fit in 164px. At <code>medium</code> the catalogue currently has no composition that shows composition at all, which is why 46% of the Site cards are still a single figure.',
-    instead2: 'Same four white opacities as <code>ring</code> uses, and for the same reason: four hues would read as four categories with meanings of their own and would collide with whichever module the card belongs to.',
-    shape: `data: {\n  total: '48', unit: 'enclosures',\n  parts: [\n    { label: 'Occupied', n: 39 },\n    { label: 'Free', n: 5 },\n    { label: 'Quarantine', n: 2 },\n    { label: 'Restricted', n: 2 },\n  ],\n}`,
-    data: {
-      total: '48', unit: 'enclosures',
-      parts: [
-        { label: 'Occupied', n: 39 },
-        { label: 'Free', n: 5 },
-        { label: 'Quarantine', n: 2 },
-        { label: 'Restricted', n: 2 },
-      ],
-    },
-  },
-  {
-    layout: 'setpoint', title: 'Reptile House', sprite: 'd-environment',
-    domain: 'd.environment', fill: '--g-eggs', size: 'medium',
-    sizes: 'medium · default medium', decision: 'the ACTION half of D6',
-    flag: '⚠ a decision, not a proposal',
-    ref: 'Sheet 1 — the Temperature card with its − and + buttons; sheet 1 again — Room Lamp, a slider and a colour ramp on the card itself',
-    answers: 'A value I can change from the home page, without opening anything.',
-    instead: 'Nothing, and that is the point. <strong>Every one of the twenty-one layouts reads.</strong> <code>actions</code> comes closest and it navigates — its three verbs open a form somewhere else. This card would be the first in the product that <em>writes</em>.',
-    instead2: 'That is a product decision and not a design one, and it is worth being explicit about the cost: a card that mutates needs an optimistic state, a failure path, an undo, a permission gate finer than the role chip, and an answer to what happens when two people hold the same setpoint. Shipping the shape without those is how a prototype becomes a support ticket. <strong>Shown so it can be rejected on purpose rather than by omission.</strong>',
-    shape: `data: {\n  target: '28', unit: '°C',\n  now: 'Now 27.4 °C · in range',\n  step: 0.5, min: 22, max: 34,\n  writes: 'enclosure.env.target',   // ← the new thing\n}`,
-    data: { target: '28', unit: '°C', now: 'Now 27.4 °C · in range' },
-  },
-  {
-    layout: 'agenda', title: 'Today', sprite: 'd-work',
-    domain: 'd.work', fill: '--g-followup', size: 'large',
-    sizes: 'medium, large · default large', decision: 'D2',
-    flag: '⚠ overlaps timeline — pick one',
-    ref: 'Sheet 1 — the SCHEDULE card, entries down coloured spines with “In 5 min · Online” under each',
-    answers: 'What are the next two or three commitments, with the urgent one visibly urgent?',
-    instead: '<strong><code>timeline</code></strong> is the same skeleton pointed the other way: dated entries down a hairline, in the past, all at one weight. This is the future, three entries at most, with tone on the spine.',
-    instead2: 'Honestly assessed, this is <code>timeline</code> with a direction and a tone — the smallest new composition here, and the one most defensible as a <em>variant</em> of an existing layout rather than a twenty-second entry in <code>LAYOUTS</code>. If only one of these twelve is cut, cut this one.',
-    shape: `data: {\n  chip: '3 today',\n  items: [\n    { text: 'Tiger Enclosure Inspection',\n      when: 'In 5 min', where: 'Zone B', tone: 'alert' },\n    { text: 'Vaccination Round',\n      when: '11:00', where: 'Hospital', tone: 'warn' },\n    …\n  ],\n}`,
-    data: {
-      chip: '3 today',
-      items: [
-        { text: 'Tiger Enclosure Inspection', when: 'In 5 min', where: 'Zone B', tone: 'alert' },
-        { text: 'Vaccination Round', when: '11:00', where: 'Hospital', tone: 'warn' },
-        { text: 'Feed Delivery', when: '14:30', where: 'Main Gate' },
-      ],
-    },
-  },
-]
+/* ══ THE WIDGETS ══════════════════════════════════════════════════════════
+   Every figure is from docs/Modules.md Files/. `key` is the real dataKey it
+   would read; `why` says what the card is for and lives in the LEGEND under
+   the block rather than on the card — which is most of the answer to "too
+   much text".
+   ═══════════════════════════════════════════════════════════════════════ */
+const W = []
+const add = (mod, size, layout, title, key, why, d, chip) => W.push({ mod, size, layout, title, key, why, d, chip })
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   RENDER
-   One source for both the contact sheet and the detail blocks, so a card can
-   never disagree with itself between the two.
-   ═══════════════════════════════════════════════════════════════════════════ */
-function cardHTML(c) {
-  return `<div class="card" data-size="${c.size}" data-layout="${c.layout}"` +
-    ` style="--card-bg:var(${c.fill})">${L[c.layout](c)}</div>`
+/* ── 1 · MEDICAL ─────────────────────────────────────────────────────── */
+add('medical', 'large', 'ladder', 'Cases by Severity', 'medical.caseStatusMix',
+  '140 cases worst-first; band height is its share, floored at a legible 22px \u2014 Critical\u2019s 8 would otherwise be a 14px sliver',
+  { bands: [{ n: 8, l: 'Critical' }, { n: 23, l: 'Serious' }, { n: 45, l: 'Stable' }, { n: 39, l: 'Recovering' }, { n: 25, l: 'Closed' }] })
+add('medical', 'medium', 'heat', 'Health by Site', 'medical.healthScoreBySite',
+  'ten sites as ten cells; the eye finds the dark one without reading a name',
+  { cols: 5, cells: [.37, .54, .92, .42, .67, .63, .42, 0, .71, 1], v: '56', q: 'lowest · Highland' })
+add('medical', 'medium', 'act3', 'Clinical Actions', '—',
+  'three verbs, and no figure to compete with them',
+  { verbs: ['Log Case', 'Order Test', 'Discharge'] })
+add('medical', 'small', 'figure', '', 'medical.activeCases',
+  "the module's headline number, with the glyph as its only label",
+  { v: '1,186', q: '47 critical' })
+add('medical', 'small', 'stackm', '', 'medical.vetWorkload',
+  'composition at 1×1 — eight clinicians’ load as one column',
+  { parts: [{ n: 7 }, { n: 6 }, { n: 6 }, { n: 25 }], v: '44', q: 'cases · 8 vets' })
+add('medical', 'full', 'matrix', 'Health, Site by Month', 'medical.healthScoreBySite',
+  'ten sites down, six months across — the only card that says whether a bad site is getting worse',
+  { rows: [{ l: 'Riverside', v: [.5, .45, .4, .34, .3, .26] }, { l: 'Hilltop', v: [.55, .5, .52, .48, .44, .4] },
+           { l: 'Coastal', v: [.8, .82, .78, .8, .76, .78] }, { l: 'Central', v: [.42, .4, .44, .38, .36, .34] },
+           { l: 'Grassland', v: [.6, .64, .62, .66, .68, .7] }, { l: 'Wetland', v: [.6, .58, .62, .6, .64, .66] },
+           { l: 'Forest', v: [.44, .4, .38, .42, .38, .36] }, { l: 'Highland', v: [.36, .3, .26, .22, .18, .14] },
+           { l: 'Desert', v: [.68, .7, .72, .7, .74, .72] }, { l: 'Island', v: [.78, .8, .82, .8, .84, .86] }],
+    cols: ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'], v: '56–80', q: 'health score range' })
+
+/* ── 2 · HOSPITAL ────────────────────────────────────────────────────── */
+add('hospital', 'large', 'wardgrid', 'Ward', 'animals.inCare',
+  'the ward drawn as its beds — 41 taken, 4 in isolation, 5 free, and countable',
+  { beds: 50, occupied: 41, iso: 4, v: '41 / 50', q: 'beds occupied' })
+add('hospital', 'medium', 'photoband', 'Hospital', 'animals.inCare',
+  'the one photograph the module owns, doing what a glyph cannot',
+  { img: 'hospital.jpg', w: 'Hospital', v: '431', q: 'in hospital' })
+add('hospital', 'medium', 'act3', 'Ward Actions', '—',
+  "admission is the module's verb, so it leads",
+  { verbs: ['Admit', 'Transfer', 'Discharge'] })
+add('hospital', 'small', 'duo', '', 'animals.inCare',
+  'two numbers that only mean something together — never one card each',
+  { a: '268', at: 'ISOLATION', b: '742', bt: 'QUARANTINE' })
+add('hospital', 'small', 'photochip', '', 'animals.inCare',
+  'a photograph at 1×1 — one word on a scrim, which is all 147px holds',
+  { img: 'hospital.jpg', w: 'Quarantine' })
+
+/* ── 3 · PHARMACY ────────────────────────────────────────────────────── */
+add('pharmacy', 'large', 'shelf', 'Shelves', 'pharmacy.categoryMix',
+  'stock as shelves, the near-expiry end of each drawn dark — the fact a donut hides',
+  { rows: [{ l: 'Medicine', n: 55, exp: 4 }, { l: 'Consumable', n: 21, exp: 2 },
+           { l: 'Controlled drug', n: 10, exp: 0 }, { l: 'Vaccine', n: 10, exp: 3 }],
+    foot: '9 lines within 30 days of expiry' })
+add('pharmacy', 'medium', 'halfgauge', 'Emergency Stock', 'pharmacy.emergencyAvailability',
+  'a half arc, because 20 of 20 is a readiness question and not a trend',
+  { pct: 100, v: '20/20', facts: [{ v: '₹1.88cr', l: 'stock value' }, { v: '3', l: 'controlled audits due' }] })
+add('pharmacy', 'medium', 'act3', 'Dispensing', '—', "the counter's three verbs",
+  { verbs: ['Dispense', 'Reorder', 'Audit'] })
+add('pharmacy', 'small', 'figure', '', 'pharmacy.stockValue',
+  'a rupee figure at 1×1 — the long-value type step keeps it on one line',
+  { v: '₹1.88cr', q: 'stock value' })
+add('pharmacy', 'small', 'sparkS', '', 'pharmacy.pendingOrders',
+  'a number and the seven days behind it, in 147×132',
+  { v: '14', s: [6, 9, 7, 11, 8, 12, 14] })
+
+/* ── 4 · LAB ─────────────────────────────────────────────────────────── */
+add('lab', 'large', 'bench', 'Bench', 'medical.labPending',
+  'each pending test as a tube filled to where it has got — a list of eight says less',
+  { tests: [{ l: 'Haem', pct: 80 }, { l: 'Serum', pct: 55 }, { l: 'Cyto', pct: 30 }, { l: 'Micro', pct: 92 },
+            { l: 'Parasit', pct: 45 }, { l: 'Histo', pct: 20 }, { l: 'Tox', pct: 68 }, { l: 'PCR', pct: 15 }],
+    v: '8', q: 'results pending' })
+add('lab', 'medium', 'pillrow', 'Awaiting Result', 'medical.labPending',
+  'three named cases, one line each — the compact list shape for a 2×1',
+  { rows: [{ t: 'MED-0002 · Conjunctivitis', v: '2 d', tone: 'alert' },
+           { t: 'MED-0003 · Bacterial dermatitis', v: '1 d' },
+           { t: 'MED-0005 · Nutritional deficiency', v: '4 h' }] })
+add('lab', 'medium', 'trend', 'Turnaround', 'medical.labPending',
+  'a figure and the wide run it sits at the end of',
+  { v: '2.4', q: 'days · average', s: [3.1, 3.0, 2.9, 3.2, 2.8, 2.6, 2.7, 2.5, 2.4] })
+add('lab', 'small', 'pulse', '', 'iot.onlineGauge',
+  'a state said as a word rather than a number, with a radar behind it',
+  { w: 'Analyser', q: 'online · calibrated 06:10' })
+add('lab', 'small', 'act1', '', '—', 'one verb at 1×1, and the verb is the whole card',
+  { verb: 'Log Sample', ico: 'plus' })
+
+/* ── 5 · SPECIES MANAGEMENT ──────────────────────────────────────────── */
+add('species', 'large', 'taxa', 'By Class', 'animals.byClass',
+  'the collection by class, each block\u2019s AREA exactly its share; the two smallest classes are grouped because a block too small to label should not be drawn',
+  { classes: [{ n: 21460, l: 'Bird' }, { n: 18240, l: 'Mammal' }, { n: 9870, l: 'Reptile' },
+              { n: 6450, l: 'Amphibian & fish' }] })
+add('species', 'medium', 'twoside', 'Sex Ratio', 'animals.bySex',
+  'one bar split from the middle — the only shape where “nearly even” is instant',
+  { a: '46,120', at: 'MALE', b: '48,310', bt: 'FEMALE', an: 46120, bn: 48310 })
+add('species', 'medium', 'act3', 'Collection', '—', "the registrar's three verbs",
+  { verbs: ['Add Animal', 'Census', 'Transfer'] })
+add('species', 'small', 'figure', '', 'species.totals', 'the species count, alone',
+  { v: '2,143', q: '486 subspecies' })
+add('species', 'small', 'photochip', '', 'species.directory',
+  "the module's own artboard photograph, at one cell",
+  { img: 'species-b.jpg', w: 'Directory' })
+add('species', 'full', 'photohero', 'The Collection', 'animals.total',
+  "a photograph at full width with one number over it — the page's only hero",
+  { img: 'hero-leopard.jpg', v: '1,04,382', t: 'animals', q: '+1,428 in 30 days · 2,143 species' })
+
+/* ── 6 · MORTALITY ───────────────────────────────────────────────────── */
+add('mortality', 'large', 'tape', 'Six Months', 'medical.mortalityTrend',
+  'read downwards, because a mortality trend is a tape you unroll, not a curve',
+  { months: [{ l: 'Mar', n: 246 }, { l: 'Apr', n: 271 }, { l: 'May', n: 258 },
+             { l: 'Jun', n: 302 }, { l: 'Jul', n: 281 }, { l: 'Aug', n: 289 }] })
+add('mortality', 'medium', 'chips', 'Necropsy', 'incidents.rootCauseMix',
+  'four counts as pills, and the counts are all the content there is',
+  { items: [{ v: '11', l: 'reported' }, { v: '9', l: 'sampled', tone: 'alert' },
+            { v: '7', l: 'closed' }, { v: '2', l: 'referred' }] })
+add('mortality', 'medium', 'barrow', 'This Month', 'medical.mortalityTrend',
+  'a figure with the run it came from, so 289 is never read alone',
+  { v: '289', s: [246, 271, 258, 302, 281, 289] })
+add('mortality', 'small', 'stackm', '', 'incidents.byKind',
+  'how the month divides, as one column at 1×1',
+  { parts: [{ n: 7 }, { n: 7 }, { n: 6 }, { n: 6 }], v: '26', q: 'by cause' })
+add('mortality', 'small', 'act1', '', '—', 'the one verb this module exists to record',
+  { verb: 'Log Death', ico: 'file' })
+
+/* ── 7 · FETAL DEATH ─────────────────────────────────────────────────── */
+add('fetal', 'large', 'cradle', 'Expected Outcomes', 'breeding.targets',
+  'forty expected births as forty slots — 18 live, 6 lost, 16 ahead. A percentage hides all three',
+  { expected: 40, live: 18, lost: 6, facts: [{ v: '18', l: 'live' }, { v: '6', l: 'lost' }, { v: '16', l: 'ahead' }] })
+add('fetal', 'medium', 'pillrow', 'Hand-Rearing', 'breeding.handRearing',
+  'the three animals a keeper is carrying, named',
+  { rows: [{ t: 'ANM-0485 · day 6', v: '4-hrly', tone: 'alert' },
+           { t: 'ANM-0320 · day 14', v: '6-hrly' }, { t: 'ANM-0374 · day 22', v: '8-hrly' }] })
+add('fetal', 'medium', 'rail', 'Neonatal Survival', 'breeding.targets',
+  'a rate against the scale it is measured on, so 75% needs no training to read',
+  { v: '75%', q: 'first 30 days', pct: 75 })
+add('fetal', 'small', 'dial', '', 'breeding.targets', 'a ring at 1×1, percentage inside, nothing else',
+  { pct: 45, v: '45%', q: 'of target' })
+add('fetal', 'small', 'act1', '', '—', 'one verb', { verb: 'Log Loss', ico: 'file' })
+
+/* ── 8 · EGGS ────────────────────────────────────────────────────────── */
+add('eggs', 'large', 'clutch', 'Incubating', 'breeding.expectedBirths',
+  'eight clutches each counting its own days; the three within three days of hatch are lit',
+  { clutches: [{ day: 26, of: 28 }, { day: 12, of: 28 }, { day: 4, of: 21 }, { day: 19, of: 21 },
+               { day: 8, of: 30 }, { day: 22, of: 24 }, { day: 15, of: 28 }, { day: 2, of: 26 }] })
+add('eggs', 'medium', 'strip', 'Clutch Outcome', 'breeding.statusMix',
+  'one capacity, its parts, a dot legend — composition at 2×1, where a donut will not fit',
+  { v: '54', q: 'eggs set', parts: [{ l: 'Hatched', n: 31 }, { l: 'Incubating', n: 15 }, { l: 'Infertile', n: 8 }] })
+add('eggs', 'medium', 'trend', 'Hatch Rate', 'breeding.targets',
+  'nine weeks of hatch rate under the current figure',
+  { v: '68%', q: 'last 9 weeks', s: [52, 58, 55, 61, 64, 60, 66, 65, 68] })
+add('eggs', 'small', 'sparkS', '', 'breeding.activePairs', 'pairs, and the run behind them',
+  { v: '54', s: [38, 42, 44, 47, 49, 51, 54] })
+add('eggs', 'small', 'act1', '', '—', 'one verb', { verb: 'Set Clutch', ico: 'plus' })
+
+/* ── 9 · HOUSING ─────────────────────────────────────────────────────── */
+add('housing', 'large', 'sitelist', 'Sites', 'housing.occupancyBySite',
+  'the estate ranked worst-first — the only order that answers “where do I go today”',
+  { sites: [{ l: 'Highland', pct: 41 }, { l: 'Riverside', pct: 62 }, { l: 'Central', pct: 74 },
+            { l: 'Coastal', pct: 86 }, { l: 'Hilltop', pct: 91 }] })
+add('housing', 'medium', 'strip', 'Enclosures', 'housing.statusBreakdown',
+  '1,840 enclosures and what they are doing, in one row',
+  { v: '1,840', q: 'enclosures', parts: [{ l: 'Occupied', n: 1596 }, { l: 'Vacant', n: 172 }, { l: 'Maintenance', n: 72 }] })
+add('housing', 'medium', 'act3', 'Estate', '—', "the estate's three verbs",
+  { verbs: ['New Enclosure', 'Audit', 'Move Animal'] })
+add('housing', 'small', 'figure', '', 'housing.enclosureTotals', 'the size of the estate, alone',
+  { v: '1,840', q: '1,596 occupied' })
+add('housing', 'small', 'sparkS', '', 'housing.biosecurity', 'biosecurity, and the weeks behind it',
+  { v: '94%', s: [88, 90, 89, 91, 93, 92, 94] })
+
+/* ── 10 · DIET & KITCHEN ─────────────────────────────────────────────── */
+add('diet', 'large', 'plate', 'Feed Store', 'feed.stockByCategory',
+  'what is actually on the shelf, in kilograms — the ring is the store, the legend is the order sheet',
+  { total: '8,060', unit: 'kg', parts: [{ l: 'Dry feed', n: 3820 }, { l: 'Fresh produce', n: 2140 },
+                                        { l: 'Frozen meat', n: 1680 }, { l: 'Live feed', n: 420 }] })
+add('diet', 'medium', 'photoband', 'Kitchen', 'feed.daysCover',
+  "the kitchen's own photograph, with the number that decides today",
+  { img: 'diet-kitchen.jpg', w: 'Kitchen', v: '11', q: 'days of cover' })
+add('diet', 'medium', 'act3', 'Kitchen Actions', '—', "the kitchen's three verbs",
+  { verbs: ['Plan Diet', 'Issue Feed', 'Log Wastage'] })
+add('diet', 'small', 'dial', '', 'diet.compliance', 'diet compliance as a ring',
+  { pct: 81, v: '81%', q: 'compliance' })
+add('diet', 'small', 'figure', '', 'diet.wastage', 'wastage, and nothing else',
+  { v: '12%', q: 'feed wastage' })
+add('diet', 'full', 'bars30', 'Feed Issued', 'feed.consumptionForecast',
+  'a month as the thirty days it is made of — feed goes out in rounds, and a line lies about 3 a.m.',
+  { v: '1,357', q: 'kg · last 30 days', recent: 7,
+    s: [38, 41, 44, 39, 47, 52, 45, 40, 36, 43, 49, 55, 42, 38, 44, 46, 51, 61, 48, 40, 37, 42, 45, 50, 47, 43, 39, 44, 53, 58],
+    facts: [{ v: '45 kg', l: 'a day, average' }, { v: '61 kg', l: 'peak · the 18th' }, { v: '3 days', l: 'above plan' }] })
+
+/* ── 11 · FOLLOW UP ──────────────────────────────────────────────────── */
+add('followup', 'large', 'month', 'September', 'medical.followUpsDue',
+  'what is due is a date, so the card is a month; the overdue day is solid, the rest tinted',
+  { pad: 1, days: 30, today: 2, over: [1], due: [3, 4, 7, 16, 19, 22, 25, 28],
+    facts: [{ v: '8', l: 'overdue' }, { v: '23', l: 'due this month' }] })
+add('followup', 'medium', 'photoband', 'Follow Up', 'medical.followUpsDue',
+  "the module's photograph carrying the count that matters",
+  { img: 'followup.jpg', w: 'Rechecks', v: '8', q: 'overdue' })
+add('followup', 'medium', 'act3', 'Follow Up', '—', 'what you do to a follow-up',
+  { verbs: ['Snooze', 'Reassign', 'Complete'] })
+add('followup', 'small', 'figure', '', 'medical.followUpsDue', 'the overdue count, alone',
+  { v: '8', q: 'overdue' })
+add('followup', 'small', 'duo', '', 'ops.checklistCompletion',
+  'today against this week, which only mean something together',
+  { a: '12', at: 'TODAY', b: '23', bt: 'THIS WEEK' })
+
+/* ── 12 · PARIVESH ───────────────────────────────────────────────────── */
+add('parivesh', 'large', 'runway', 'Filings', 'compliance.authorityMix',
+  'a filing has a deadline, so it has runway; the one nearly out of it is drawn dark',
+  { rows: [{ l: 'Central Zoo Authority', left: '9 d', pct: 18 },
+           { l: 'Pollution Control Board', left: '24 d', pct: 46 },
+           { l: 'Animal Welfare Board', left: '41 d', pct: 72 },
+           { l: 'State Forest Dept', left: '58 d', pct: 94 }] })
+add('parivesh', 'large', 'act4', 'Filing Actions', '—',
+  'four verbs in a 2×2 — an action shelf is not always one shape',
+  { verbs: [{ l: 'File Return', ico: 'send' }, { l: 'Upload Proof', ico: 'clip' },
+            { l: 'Track Status', ico: 'eye' }, { l: 'Set Reminder', ico: 'bell' }] })
+add('parivesh', 'small', 'dial', '', 'compliance.sopAck', 'SOP acknowledgment as a ring',
+  { pct: 71, v: '71%', q: 'SOP ack' })
+add('parivesh', 'small', 'figure', '', 'compliance.kindMix', 'live permits, alone',
+  { v: '13', q: 'permits live' })
+
+/* ── 13 · ADMINISTER ─────────────────────────────────────────────────── */
+add('administer', 'large', 'deck', 'Waiting on You', 'procurement.statusMix',
+  'a queue has depth, and depth is drawn — the top card is named, the ones behind are the weight',
+  { cards: [{ t: 'Cold-chain vendor renewal', s: 'ColdChain Pvt Ltd · ₹4.2 lakh' },
+            { t: 'Feed truck fuel card limit', s: 'Transport · ₹80,000' },
+            { t: 'Quarantine unit — stage 2 release', s: 'Projects · ₹18.4 lakh · waiting 3 days' }],
+    v: '22', q: 'pending approval' })
+add('administer', 'large', 'act4', 'Decisions', '—', 'the four things you do to a request',
+  { verbs: [{ l: 'Approve', ico: 'check' }, { l: 'Reject', ico: 'file' },
+            { l: 'Delegate', ico: 'swap' }, { l: 'Request Info', ico: 'send' }] })
+add('administer', 'small', 'figure', '', 'procurement.openOrders', 'open orders, alone',
+  { v: '58', q: '22 awaiting you' })
+add('administer', 'small', 'pulse', '', 'exec.impactMix',
+  'a state as a word — there is no useful number for “nothing has escalated”',
+  { w: 'All Clear', q: 'no escalations today' })
+
+/* ── 14 · USERS ──────────────────────────────────────────────────────── */
+add('users', 'large', 'shiftband', 'Shifts Today', 'manpower.shiftMix',
+  'a shift is a part of the day, so the card is the day — and the thin 00:00–06:00 band is the point',
+  { shifts: [{ l: 'Morning', from: 6, to: 14, n: 72, peak: true }, { l: 'Evening', from: 14, to: 22, n: 80, peak: true },
+             { l: 'Night', from: 22, to: 24, n: 36 }, { l: 'General', from: 9, to: 18, n: 62 }] })
+add('users', 'medium', 'halfgauge', 'Keeper Ratio', 'manpower.ratios',
+  'a ratio against its target, which is a readiness question',
+  { pct: 57, v: '1:1.8', facts: [{ v: '1,042', l: 'keepers' }, { v: '1,840', l: 'enclosures · target 1:3' }] })
+add('users', 'medium', 'act3', 'People', '—', 'the three things an administrator does',
+  { verbs: ['Add User', 'Assign Shift', 'Reset Access'] })
+add('users', 'small', 'figure', '', 'manpower.total', 'headcount at 1×1',
+  { v: '3,012', q: '137 vacancies' })
+add('users', 'small', 'duo', '', 'manpower.attendanceToday',
+  'present against absent — one without the other says nothing',
+  { a: '2,617', at: 'PRESENT', b: '148', bt: 'ABSENT' })
+
+/* ── 15 · SECURITY ───────────────────────────────────────────────────── */
+add('security', 'large', 'perimeter', 'Perimeter', 'safety.cctvStatus',
+  'cameras sit on a fence, so the card is the fence — ten dark nodes in a row is a blind sector, which “63%” never says',
+  { total: 27, online: 17, v: '17/27', q: 'cameras online' })
+add('security', 'large', 'act4', 'Gate & Patrol', '—', 'the four things a control room does',
+  { verbs: [{ l: 'Open Gate', ico: 'lock' }, { l: 'Log Incident', ico: 'file' },
+            { l: 'Call Patrol', ico: 'bell' }, { l: 'Mark Point', ico: 'pin' }] })
+add('security', 'small', 'dial', '', 'safety.cctvStatus',
+  'the same figure as a ring, for a page with no room for the fence',
+  { pct: 63, v: '63%', q: 'CCTV online' })
+add('security', 'small', 'figure', '', 'safety.incidentKindMix', 'theft reports this month, alone',
+  { v: '10', q: 'theft reports' })
+
+/* ── 16 · REPORTS ────────────────────────────────────────────────────── */
+add('reports', 'large', 'statement', 'Month to Date', 'finance.capexOpex',
+  'a page of what the card would print, dot leaders and all — nothing else in the catalogue looks like a document',
+  { lines: [{ l: 'Capital expenditure', v: '₹117 cr' }, { l: 'Operating expenditure', v: '₹326 cr' },
+            { l: 'Committed, not spent', v: '₹41 cr' }, { l: 'Recovered', v: '₹12 cr' }],
+    totalLabel: 'Total, month to date', total: '₹443 cr' })
+add('reports', 'medium', 'barrow', 'Spend by Department', 'finance.budgetVsActual',
+  'twelve departments against a zero baseline — the shape only reads because the series has real spread',
+  { v: '₹443cr', s: [55, 86, 101, 49, 72, 38, 64, 91, 44, 58, 77, 33] })
+add('reports', 'medium', 'act3', 'Reporting', '—', 'the three things you do with a report',
+  { verbs: ['Generate', 'Schedule', 'Export'] })
+add('reports', 'small', 'stackm', '', 'exec.impactMix', 'what the month was made of, as one column',
+  { parts: [{ n: 5 }, { n: 5 }, { n: 5 }, { n: 9 }], v: '24', q: 'board items' })
+add('reports', 'small', 'dial', '', 'exec.facilityScore', 'the headline as a ring',
+  { pct: 87, v: '87', q: 'facility score' })
+
+/* ── 17 · APPROVALS ──────────────────────────────────────────────────── */
+add('approvals', 'large', 'queuebars', 'By Age', 'procurement.statusMix',
+  "a queue's problem is age, not size — the four over a week are drawn dark and they are the whole card",
+  { bands: [{ l: '< 1 day', n: 9 }, { l: '1–3 d', n: 6 }, { l: '3–7 d', n: 3 }, { l: '> 7 d', n: 4, old: true }] })
+add('approvals', 'large', 'act4', 'Queue Actions', '—', 'four verbs, and one of them is bulk',
+  { verbs: [{ l: 'Approve All', ico: 'check' }, { l: 'Review Next', ico: 'eye' },
+            { l: 'Escalate', ico: 'send' }, { l: 'Print Queue', ico: 'print' }] })
+add('approvals', 'small', 'figure', '', 'procurement.openOrders', 'the queue length, alone',
+  { v: '22', q: 'pending' })
+add('approvals', 'small', 'duo', '', 'procurement.statusMix', 'cleared against returned, this week',
+  { a: '31', at: 'CLEARED', b: '4', bt: 'RETURNED' })
+
+/* ── 18 · COMMUNICATION ──────────────────────────────────────────────── */
+add('communication', 'large', 'thread', 'Threads', 'alerts.domainMix',
+  'the content is the conversations, not a count of them — unread pips, and who said it',
+  { items: [{ t: 'Quarantine Wing — samples sent', s: 'Dr Anita Rao · 12 min', unread: 3, img: 'avatar.png' },
+            { t: 'Night feed roster changed', s: 'Ramesh Kumar · 1 h', unread: 1, ini: 'RK' },
+            { t: 'CZA inspection — 9 days', s: 'Lakshmi N. · 3 h', ini: 'LN' },
+            { t: 'Generator service window', s: 'Suresh Babu · yesterday', ini: 'SB' }] }, '19 unread')
+add('communication', 'medium', 'chips', 'Alerts by Severity', 'alerts.severityMix',
+  'four counts, one of them lit — the shape for a mix you read and never measure',
+  { items: [{ v: '12', l: 'critical', tone: 'alert' }, { v: '30', l: 'high' },
+            { v: '19', l: 'medium' }, { v: '3', l: 'low' }] })
+add('communication', 'medium', 'act3', 'Broadcast', '—', 'the three ways this module speaks',
+  { verbs: ['Announce', 'Message', 'Notify'] })
+add('communication', 'small', 'figure', '', 'alerts.severityMix', 'the number you act on',
+  { v: '30', q: 'high alerts' })
+add('communication', 'small', 'pulse', '', 'utilities.networkAvailability',
+  'delivery as a word, because 97% is not the question at a glance',
+  { w: 'Delivered', q: '2,617 of 2,704 reached' })
+
+/* ══ RENDER ═══════════════════════════════════════════════════════════════ */
+const CELLS = { small: 1, medium: 2, large: 4, full: 10 }
+const SIZE_PX = { small: '179×164', medium: '374×164', large: '374×344', full: '960×344' }
+const IMAGEY = ['photochip', 'photoband', 'photohero']
+
+const cardHTML = (w) =>
+  `<div class="card" data-size="${w.size}" data-layout="${w.layout}" data-mod="${w.mod}"` +
+  (IMAGEY.includes(w.layout) ? ' data-fill="image"' : '') +
+  ` style="--card-bg:var(${MODULES[w.mod].g})">${C[w.layout](w)}</div>`
+
+/* Split a module's widgets into blocks of exactly ten cells. Ten is the seed
+   convention, and splitting rather than wrapping is what keeps a block from
+   ending in a hole. */
+function blocks(list) {
+  const out = []
+  let cur = [], n = 0
+  for (const w of list) {
+    const c = CELLS[w.size]
+    if (n + c > 10) { out.push(cur); cur = []; n = 0 }
+    cur.push(w); n += c
+  }
+  if (cur.length) out.push(cur)
+  return out
 }
 
-/* the sheet, in an order that keeps two identical gradients from touching —
-   `--g-pharmacy` and `--g-followup` are the same ramp in the token file */
-const SHEET_ORDER = ['window', 'pips', 'score', 'compare', 'breach', 'arrivals',
-                     'agenda', 'roster', 'launcher', 'split', 'setpoint', 'bars']
-const byLayout = Object.fromEntries(CONCEPTS.map((c) => [c.layout, c]))
-document.getElementById('sheet').innerHTML =
-  SHEET_ORDER.map((k) => cardHTML(byLayout[k])).join('')
-
-const SIZE_PX = {
-  small: '179 × 164', medium: '374 × 164',
-  large: '374 × 344', tall: '374 × 344', full: '765 × 344',
-}
-
-document.getElementById('concepts').innerHTML = CONCEPTS.map((c, i) => {
-  const row = (k, v) => `<div class="ann__row"><div class="ann__k">${k}</div><div class="ann__v">${v}</div></div>`
-  return `<section class="concept">` +
-    `<div class="concept__bar">` +
-      `<span class="concept__n">${i + 1}</span>` +
-      `<h3 class="concept__name">${esc(c.title)}</h3>` +
-      `<span class="concept__id">${esc(c.layout)}</span>` +
-      (c.flag ? `<span class="concept__flag">${esc(c.flag)}</span>` : '') +
-      `<span class="concept__sizes">${esc(c.sizes)}</span>` +
+document.getElementById('mods').innerHTML = Object.keys(MODULES).map((id) => {
+  const m = MODULES[id]
+  const list = W.filter((w) => w.mod === id)
+  const keys = [...new Set(list.map((w) => w.key).filter((k) => k !== '—'))]
+  return `<section class="mod" data-mod="${id}">` +
+    `<div class="mod__bar">` +
+      `<span class="mod__glyph" style="background:var(${m.g})">${gsrc(m)}</span>` +
+      `<h2 class="mod__name">${esc(m.name)}</h2>` +
+      `<span class="mod__n">${list.length} widgets · ${list.reduce((n, w) => n + CELLS[w.size], 0)} cells</span>` +
+      `<span class="mod__keys">${esc(keys.slice(0, 3).join('   '))}</span>` +
     `</div>` +
-    `<div class="concept__body">` +
-      `<div class="stage">${cardHTML(c)}` +
-        `<p class="stage__caption">${esc(c.size)} · ${SIZE_PX[c.size]} · <code>${esc(c.domain)}</code> · <code>${esc(c.fill)}</code></p>` +
-      `</div>` +
-      `<div class="ann">` +
-        row('Answers', c.answers) +
-        row('Instead of', c.instead + (c.instead2 ? `<br><br>${c.instead2}` : '')) +
-        row('Decision', `<strong>${esc(c.decision)}</strong> — framing document §4`) +
-        row('From', esc(c.ref)) +
-        row('Data', `<pre>${esc(c.shape)}</pre>`) +
-      `</div>` +
-    `</div>` +
+    blocks(list).map((b) => `<div class="blockwrap"><div class="block">${b.map(cardHTML).join('')}</div></div>`).join('') +
+    `<div class="legend">${list.map((w, i) =>
+      `<div><i>${i + 1}</i><b>${esc(w.title || m.name)}</b><em>${esc(w.layout)}</em>` +
+      `<span>${esc(w.size)} · ${SIZE_PX[w.size]}</span><u>${esc(w.why)}</u></div>`).join('')}</div>` +
   `</section>`
 }).join('')
 
-/* A hook for the verification sweep — the same shape antz.check*() uses, so a
-   later pass can assert this page rather than eyeball it. */
+const byS = (s) => W.filter((w) => w.size === s).length
+document.getElementById('tally').innerHTML = [
+  ['modules', 18], ['widgets', W.length], ['compositions', new Set(W.map((w) => w.layout)).size],
+  ['1×1', byS('small')], ['2×1', byS('medium')], ['2×2', byS('large')], ['full width', byS('full')],
+  ['photographs', W.filter((w) => IMAGEY.includes(w.layout)).length],
+  ['action cards', W.filter((w) => ['act1', 'act3', 'act4'].includes(w.layout)).length],
+].map(([l, n]) => `<b><span>${n}</span> ${l}</b>`).join('')
+
+/* ══ THE PAGE'S OWN CHECKS ════════════════════════════════════════════════
+   Same shape as antz.check*(), so this page is asserted rather than eyeballed.
+   checkCollapsed exists because the previous version shipped a bar at zero
+   height: a flex item whose children are empty elements has a min-content
+   height of 0, so when a column is over-budget that item absorbs the whole
+   overrun and disappears — while the card's scrollHeight still equals its
+   clientHeight, so every overflow assertion passes.
+   ═══════════════════════════════════════════════════════════════════════ */
 window.mock = {
-  concepts: CONCEPTS,
-  /**
-   * Every visualisation that has collapsed to nothing.
-   *
-   * THE CHECK THE OVERFLOW SWEEP CANNOT BE. A flex item whose children are
-   * empty elements has a min-content height of 0, so when a column is
-   * over-budget that item absorbs the entire overrun and disappears — and the
-   * card's scrollHeight still equals its clientHeight, so every overflow
-   * assertion passes on a card with a missing bar. This is what happened to
-   * `split`. Anything drawn rather than written is asked its rendered height
-   * directly, which is the only question that catches it.
-   */
+  widgets: W, modules: MODULES,
+
+  /** Any block that is not exactly ten cells. */
+  checkBlocks() {
+    const bad = []
+    for (const el of document.querySelectorAll('.block')) {
+      const cells = [...el.children].reduce((n, c) => n + CELLS[c.dataset.size], 0)
+      if (cells !== 10) bad.push([el.closest('.mod').dataset.mod, cells])
+    }
+    return bad
+  },
+
+  /** Anything drawn rather than written that has collapsed to nothing. */
   checkCollapsed() {
-    const DRAWN = ['.l-split__bar', '.l-split__seg', '.l-pips__strip', '.l-pips__pip',
-                   '.l-breach__bar', '.l-breach__cell', '.l-bars__plot', '.l-bars__bar',
-                   '.l-score__rail', '.l-score__ticks', '.l-compare__pane',
-                   '.l-window__dial', '.l-agenda__spine', '.l-launcher__tile',
-                   '.l-arr__plate', '.l-roster__av', '.l-set__btn']
+    const DRAWN = ['.dial__d', '.duo__l', '.stackm__bar', '.stackm__s', '.sparkS__p', '.sparkS__b',
+      '.pulse__radar', '.act1__p', '.heat__g', '.heat__c', '.barrow__p', '.barrow__i', '.hg__d',
+      '.pr__r', '.trend__p', '.trend__i', '.ts__bar', '.ts__bar i', '.chips__c', '.rail__r', '.rail__m',
+      '.strip__bar', '.strip__bar i', '.act3__v', '.ladder__b', '.ward__g', '.ward__c', '.taxa__c',
+      '.shelf__p', '.shelf__p i', '.bench__tube', '.tape__t', '.cradle__s', '.clutch__t', '.clutch__e',
+      '.sl__t', '.plate__d', '.month__d', '.rw__t', '.deck__c', '.sb__t', '.pm__ring', '.pm__n',
+      '.st__rule', '.qb__t', '.th__av', '.act4__v', '.mx__g', '.mx__c', '.b30__p', '.b30__i']
     const bad = []
     for (const sel of DRAWN) {
       for (const n of document.querySelectorAll(sel)) {
         const r = n.getBoundingClientRect()
-        if (r.height < 2 || r.width < 2) {
+        /* 0.5, not 1.5 — a hairline rule is legitimately 1px, and flagging
+           `.duo__l` and `.st__rule` on every run is how a check stops being
+           read. Nothing here is drawn thinner than a hairline. */
+        if (r.height < 0.5 || r.width < 0.5) {
           bad.push([n.closest('.card').dataset.layout, sel, +r.width.toFixed(1), +r.height.toFixed(1)])
         }
       }
@@ -1246,27 +1397,49 @@ window.mock = {
   },
 
   /**
-   * Every card that clips its own TEXT, at whatever width the page is.
+   * Any card that clips its own TEXT — sideways or downwards — or overflows
+   * its own box.
    *
-   * ONLY NODES THAT CARRY TEXT ARE ASKED. The first version asked every
-   * element and reported the breach card's limit marker at all six widths: a
-   * 2px rule whose ::after draws a 8px triangle above it, so its scrollWidth
-   * is 5 on a clientWidth of 2. That is the marker working. A sweep that
-   * cannot tell a decoration deliberately drawn outside its box from a label
-   * cut off inside one reports six failures a reader has to learn to ignore,
-   * which is how a check stops being read at all.
+   * THE VERTICAL HALF WAS MISSING AND IT COST A DEFECT. The first version
+   * checked every element's WIDTH and the card's HEIGHT, which is not the same
+   * as checking every element's height: a treemap block 16px tall holding a
+   * 27px label clipped its own text inside `overflow: hidden`, the card's own
+   * scrollHeight was untouched, and it passed at all nine widths. Anything that
+   * hides its overflow is now asked about both axes.
    */
   checkOverflow() {
     const bad = []
     for (const el of document.querySelectorAll('.card')) {
       for (const n of el.querySelectorAll('*')) {
-        const text = (n.textContent || '').trim()
-        if (!text) continue
-        if (n.scrollWidth > n.clientWidth + 1 && getComputedStyle(n).textOverflow !== 'ellipsis') {
-          bad.push([el.dataset.layout, n.className, n.scrollWidth, n.clientWidth])
+        if (!(n.textContent || '').trim()) continue
+        const cs = getComputedStyle(n)
+        if (n.scrollWidth > n.clientWidth + 1 && cs.textOverflow !== 'ellipsis') {
+          bad.push([el.dataset.layout, n.className, 'W', n.scrollWidth, n.clientWidth])
+        }
+        if (cs.overflow === 'hidden' && n.scrollHeight > n.clientHeight + 1) {
+          bad.push([el.dataset.layout, n.className, 'H', n.scrollHeight, n.clientHeight])
         }
       }
-      if (el.scrollHeight > el.clientHeight + 1) bad.push([el.dataset.layout, 'CARD HEIGHT', el.scrollHeight, el.clientHeight])
+      if (el.scrollHeight > el.clientHeight + 1) bad.push([el.dataset.layout, 'CARD HEIGHT', 'H', el.scrollHeight, el.clientHeight])
+    }
+    return bad
+  },
+
+  /** Every photograph that failed to load — a missing image is silent. */
+  checkImages() {
+    return [...document.querySelectorAll('.card img')].filter((i) => !i.naturalWidth)
+      .map((i) => i.getAttribute('src'))
+  },
+
+  /** The rules this pass exists to keep: no title on a 1x1, no "View". */
+  checkRules() {
+    const bad = []
+    for (const el of document.querySelectorAll(".card[data-size='small']")) {
+      const t = el.querySelector('.h__t')
+      if (t && t.getBoundingClientRect().width > 0) bad.push([el.dataset.layout, 'title on a 1x1'])
+    }
+    for (const el of document.querySelectorAll('.card')) {
+      if (/View\s|›|→/.test(el.textContent)) bad.push([el.dataset.layout, 'says View'])
     }
     return bad
   },

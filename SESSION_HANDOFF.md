@@ -898,7 +898,42 @@ and 12 rows so lifting the cap does not silently resolve every span to 1×1.
 Vercel → Project → Settings → Git; it needs the Vercel GitHub App installed on
 the repo, which is a browser step.
 
-**⚠ Twelve new widget compositions are mocked up and waiting on a decision.**
+**⚠ Eighty-nine widget ideas are mocked up, module by module, and waiting on
+a decision.** `mockups/widget-concepts.html` — one BLOCK OF TEN CELLS per module
+for all eighteen home modules, 41 compositions, sizes mixed on purpose (36 at
+1x1, 28 at 2x1, 22 at 2x2, 3 full width). Eighteen of the compositions are
+SIGNATURES that serve one module and would not transplant: Medical's cases are a
+severity ladder, Hospital's ward is its beds, Pharmacy's stock is shelves with
+the expiry end drawn dark, Lab's samples are tubes, Species is an exact treemap,
+Mortality is a tape read downwards, Fetal Death is forty outcome slots, Eggs is
+eight day-counters, Housing is the estate worst-first, Diet is the store in
+kilograms, Follow Up is a month, Parivesh is runway to a deadline, Administer is
+a queue's depth drawn, Users is the day, Security is the fence, Reports is a page
+it would print, Approvals is age not size, Communication is the conversations.
+The other 23 are shared vocabulary. **If it has to shrink, cut signatures, not
+vocabulary.** Every figure is from `docs/Modules.md Files/` — the file and
+dataKey are printed in each block's legend; six modules have no spec of their own
+(Lab, Hospital, Mortality, Fetal, Eggs, Follow Up) and read the nearest real
+keys, and a few row-level distributions inside signatures are invented to fill
+the shape while the totals are real. Photographs only where one exists — six
+files in `assets/img/`, so six image cards; everywhere else the glyph is blown up
+at 12%. Quick actions at three sizes (1x1 one verb, 2x1 three, 2x2 four).
+
+**Rules the page keeps, and asserts:** no 1x1 carries a title (the glyph names
+it, as a `door` does), no card repeats in words what its figure said — what a
+card is FOR lives in the legend under the block — and no card says "View".
+`mock.checkBlocks()`, `checkCollapsed()`, `checkOverflow()`, `checkImages()` and
+`checkRules()` are green at nine widths. **Four defects the checks caught that
+review had not:** a runway track at 0x0 (a bare `<span>` is inline and ignores
+height); the watermark inflating every 1x1's scrollHeight by 14px (an absolutely
+positioned descendant counts toward scroll overflow even under `overflow:
+hidden` — it needs a clipper, and a transform does not help); the treemap's
+blocks not matching their shares because `flex-grow` does not distribute free
+space in exact proportion at those magnitudes (percentages do); and a treemap
+block 16px tall clipping a 27px label, which passed until `checkOverflow` was
+taught to ask about the VERTICAL axis as well as the horizontal.
+
+**Old note, superseded.** **⚠ Twelve new widget compositions are mocked up and waiting on a decision.**
 `mockups/widget-concepts.html` — a standalone page, this product's own tokens,
 cards at artboard size, the reference Site's real figures. Drawn from the four
 sheets in `References/Widgets_Reference/`; what is taken is the composition and
