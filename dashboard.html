@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ANTZ Command Centre — Role Dashboard</title>
+
+<!-- INTER ONLY. The home page also loads DM Sans and Sour Gummy for the
+     artboard's display type; this surface does not, because the brief names one
+     family and a second family loaded "just in case" is how a second family
+     ends up on screen. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   ANTZ COMMAND CENTRE · ROLE-AWARE DASHBOARD
+
+   ONE SHELL, FOUR HIERARCHIES. Every role gets the same chrome, type, spacing,
+   card geometry and interaction model. What changes is which modules come
+   first, how much room each one gets, and how much detail it carries. That is
+   the whole idea: a Vet and a Director are looking at one product, not four.
+
+   THE CARD IS A PICTURE, NOT A FIGURE. Each module owns a visual that answers
+   its own question — a ward map, a pipeline, a runway, an incubation track —
+   and the number is what the picture is annotated with. A wall of big numbers
+   under small icons tells you the shape of the database, not the shape of the
+   work.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  /* ── spacing · the whole scale, and nothing between its steps ──────────── */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 20px; --s6: 24px; --s8: 32px;
+
+  /* ── surfaces · white and light neutral, per §27 ───────────────────────── */
+  --bg:        #F5F7F7;
+  --surface:   #FFFFFF;
+  --surface-2: #FAFBFB;
+  --line:      #E4E9E9;
+  --line-2:    #D2DADA;
+
+  --ink:    #17211F;
+  --ink-2:  #56656B;
+  --ink-3:  #7E8C92;
+
+  /* ── status · the ONLY place saturated colour is allowed ────────────────
+     Not one hue per module. Eighteen bright modules is eighteen things
+     shouting, and then nothing is urgent because everything is coloured. */
+  --crit:   #C0453C;  --crit-t: #FAEAE8;  --crit-b: #F0CFCB;
+  --warn:   #A9761B;  --warn-t: #FBF2E1;  --warn-b: #EEDCB8;
+  --ok:     #2C7A5B;  --ok-t:   #E6F3EC;  --ok-b:   #C6E3D4;
+  --info:   #336E8C;  --info-t: #E9F1F5;  --info-b: #C8DCE6;
+  --idle:   #9AA7AC;  --idle-t: #EFF2F2;
+
+  /* ── geometry ───────────────────────────────────────────────────────────── */
+  --r-card: 16px;
+  --r-in:   10px;
+  --r-pill: 999px;
+
+  /* ── type · tablet is the base, desktop steps up at 1280 (§10) ─────────── */
+  --fs-title:   24px;
+  --fs-section: 18px;
+  --fs-hero:    28px;
+  --fs-num:     20px;
+  --fs-label:   13px;
+  --fs-support: 12px;
+  --fs-nav:     13px;
+
+  /* ── layout ─────────────────────────────────────────────────────────────── */
+  --pad-page: var(--s6);       /* 24 on tablet, 32 from 1024 up */
+  --gap:      var(--s4);
+  --gap-sec:  var(--s6);
+  --pad-card: var(--s4);
+  --pad-feat: var(--s5);
+  --cols:     2;
+  --max:      1440px;
+
+  --tap: 44px;                 /* §23 minimum; 48 where the control is primary */
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--fs-label);
+  font-weight: 400;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+
+/* ══ SHELL ═══════════════════════════════════════════════════════════════ */
+
+.app { max-width: var(--max); margin-inline: auto; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s3) var(--pad-page);
+  background: rgba(255, 255, 255, .86);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: inset 0 -1px 0 var(--line);
+}
+
+.brand { display: flex; align-items: center; gap: var(--s2); margin-right: auto; min-width: 0; }
+.brand__mark {
+  flex: none; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: #1F515B; color: #fff;
+  font-size: 12px; font-weight: 600; letter-spacing: .04em;
+}
+.brand__name { font-size: var(--fs-nav); font-weight: 600; white-space: nowrap; }
+.brand__sub  { font-size: var(--fs-support); color: var(--ink-3); white-space: nowrap; }
+
+/* ── the role switcher · §32 ──────────────────────────────────────────────
+   A segmented control rather than a dropdown: four roles is few enough that
+   the alternatives should be visible, and seeing the other three is part of
+   understanding that the page you are on is one of four readings. */
+.roles {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--idle-t);
+}
+.role {
+  /* 44 EVERYWHERE, not 44-on-touch. The first version bumped these to 44 only
+     under `pointer: coarse`, on the reasoning that a mouse does not need the
+     room — and §24 does allow desktop controls to be more compact. But §23
+     states the minimum without qualification, and an iPad reporting a fine
+     pointer because a trackpad is attached would have got the 38px control.
+     The rule is cheaper to honour than to reason around: it costs six pixels
+     of header. */
+  min-height: 44px;
+  padding: 0 var(--s4);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-nav);
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition: background .16s ease, color .16s ease;
+}
+.role[aria-pressed='true'] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(20,40,45,.10); }
+
+
+.nav { display: flex; gap: var(--s1); }
+.nav__item {
+  min-height: var(--tap); padding: 0 var(--s3);
+  border-radius: var(--r-in);
+  font-size: var(--fs-nav); font-weight: 500; color: var(--ink-2);
+}
+.nav__item[aria-current='page'] { background: var(--idle-t); color: var(--ink); font-weight: 600; }
+
+/* ── page head ───────────────────────────────────────────────────────────── */
+.head { padding: var(--s6) var(--pad-page) var(--s4); }
+.head__title { margin: 0; font-size: var(--fs-title); font-weight: 600; letter-spacing: -.01em; }
+/* 4px, because the line under a title belongs to the title (§11). */
+.head__ask { margin: var(--s1) 0 0; font-size: var(--fs-label); color: var(--ink-2); }
+
+/* ══ BOARD ═══════════════════════════════════════════════════════════════ */
+
+.board { padding: 0 var(--pad-page) var(--s8); }
+.sec + .sec { margin-top: var(--gap-sec); }
+.sec__head {
+  display: flex; align-items: baseline; gap: var(--s2);
+  margin-bottom: var(--s3);                       /* §11 · 12–16 to the cards */
+}
+.sec__title { font-size: var(--fs-section); font-weight: 600; }
+.sec__note { font-size: var(--fs-support); color: var(--ink-3); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--gap);
+  align-items: start;
+}
+
+/* Spans are capped by the column count, so a 2-wide card in a 2-column grid
+   does not silently become a 1-column card with a hole beside it. */
+.sp2 { grid-column: span min(2, var(--cols)); }
+.sp3 { grid-column: span min(3, var(--cols)); }
+.spf { grid-column: 1 / -1; }
+
+/* ══ CARD ════════════════════════════════════════════════════════════════ */
+
+.c {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(20, 40, 45, .05), 0 1px 0 var(--line) inset;
+  text-align: left;
+  width: 100%;
+  transition: box-shadow .16s ease, transform .16s ease;
+}
+/* THE WHOLE CARD IS THE TARGET (§23) — there is no View button anywhere in
+   this file, and there is nothing nested inside the button either, so a tap on
+   the whitespace does what a tap on the title does. */
+.c:hover { box-shadow: 0 2px 4px rgba(20,40,45,.07), 0 10px 24px -14px rgba(20,40,45,.28); }
+.c:active { transform: translateY(1px); }
+.c:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+.c--feat { padding: var(--pad-feat); gap: var(--s4); }
+
+.c__head { display: flex; align-items: center; gap: var(--s2); }   /* §11 · 6–8 icon→text */
+.c__name { font-size: var(--fs-label); font-weight: 600; letter-spacing: .01em; }
+.c__flag {
+  margin-left: auto; padding: 2px 8px; border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 600; letter-spacing: .01em;
+}
+.c__flag.is-crit { background: var(--crit-t); color: var(--crit); }
+.c__flag.is-warn { background: var(--warn-t); color: var(--warn); }
+.c__flag.is-ok   { background: var(--ok-t);   color: var(--ok); }
+.c__flag.is-info { background: var(--info-t); color: var(--info); }
+
+.c__dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--idle); }
+.c__dot.is-crit { background: var(--crit); }
+.c__dot.is-warn { background: var(--warn); }
+.c__dot.is-ok   { background: var(--ok); }
+.c__dot.is-info { background: var(--info); }
+
+/* The number sits UNDER its own label at 4px, never floating alone (§11). */
+.c__read { display: flex; align-items: baseline; gap: var(--s2); }
+.c__num  { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.c__num--hero { font-size: var(--fs-hero); }
+.c__of   { font-size: var(--fs-support); color: var(--ink-3); }
+.c__foot { display: flex; gap: var(--s3); font-size: var(--fs-support); color: var(--ink-3); }
+
+/* ══ THE VISUALS ═════════════════════════════════════════════════════════
+   One per module, each answering that module's own question. They share a
+   colour language and a grid rhythm and nothing else — a ward is not a
+   pipeline is not a runway, and drawing all three as bar charts would have
+   been the fastest way to make eighteen modules look like one. */
+
+/* ── journey · Medical, Fetal Death · proportional states in sequence ───── */
+.jr { display: flex; gap: 3px; }
+.jr__seg { height: 34px; border-radius: 6px; display: flex; align-items: flex-end; padding: 5px 6px; min-width: 26px; }
+.jr__seg b { font-size: 12px; font-weight: 600; line-height: 1; }
+.jr-key { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s3); font-size: var(--fs-support); color: var(--ink-2); }
+.jr-key span { display: inline-flex; align-items: center; gap: 5px; }
+.jr-key i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+
+/* ── ward · Hospital · a bed is a cell, pressure is a shape ─────────────── */
+.ward { display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); gap: 4px; }
+.bed { aspect-ratio: 1; border-radius: 3px; background: var(--ok-t); box-shadow: inset 0 0 0 1px var(--ok-b); }
+.bed.is-occ { background: var(--info); box-shadow: none; }
+.bed.is-iso { background: var(--warn); box-shadow: none; }
+
+/* ── shelf · Pharmacy · stock as fill, exceptions as a mark ─────────────── */
+.shelf { display: flex; flex-direction: column; gap: 7px; }
+/* THE NAME CAME OUT OF THE BAR. It was laid over the track, which meant that
+   at 12% stock the label crossed the edge of its own red fill and half of it
+   was dark-on-red — the one row on the shelf that most needed reading. A name
+   column costs 86px and the collision cannot recur. */
+.shelf__row { display: grid; grid-template-columns: 86px 1fr 52px; align-items: center; gap: var(--s2); }
+.shelf__bar { display: block; height: 16px; border-radius: 4px; background: var(--idle-t); overflow: hidden; position: relative; }
+.shelf__fill { display: block; height: 100%; border-radius: 4px; background: var(--ok); }
+.shelf__fill.is-low { background: var(--crit); }
+.shelf__fill.is-mid { background: var(--warn); }
+.shelf__name { font-size: 11px; font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shelf__meta { font-size: 11px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── pipeline · Lab · where the work is stuck ───────────────────────────── */
+.pipe { display: flex; align-items: stretch; gap: 0; }
+.pipe__st { flex: 1 0 0; padding: var(--s2) var(--s3); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.pipe__st:first-child { border-radius: var(--r-in) 0 0 var(--r-in); }
+.pipe__st:last-child  { border-radius: 0 var(--r-in) var(--r-in) 0; }
+.pipe__st.is-block { background: var(--crit-t); box-shadow: inset 0 0 0 1px var(--crit-b); }
+.pipe__n { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pipe__l { font-size: 11px; color: var(--ink-2); }
+.pipe__st.is-block .pipe__n, .pipe__st.is-block .pipe__l { color: var(--crit); }
+
+/* ── landscape · Species · proportion you can see, not a pie ────────────── */
+.land { display: flex; flex-wrap: wrap; gap: 3px; align-content: flex-start; }
+.land__b { border-radius: 4px; display: flex; align-items: flex-end; padding: 5px 6px; min-width: 34px; }
+.land__b span { font-size: 11px; font-weight: 500; line-height: 1.1; }
+
+/* ── field · Mortality · events placed, concentration visible ───────────── */
+.field { display: grid; grid-template-columns: repeat(auto-fill, minmax(11px, 1fr)); gap: 4px; }
+/* An empty event still has to read as a POSITION in the field, or the
+   occupied ones float in white space and the clustering — the whole point of
+   drawing mortality as a field — cannot be seen. */
+.ev { aspect-ratio: 1; border-radius: 50%; background: #E2E7E7; }
+.ev.is-1 { background: var(--warn-b); }
+.ev.is-2 { background: var(--warn); }
+.ev.is-3 { background: var(--crit); }
+
+/* ── track · Eggs · each clutch moving toward its own hatch ─────────────── */
+.track { display: flex; flex-direction: column; gap: 9px; }
+.track__row { display: grid; grid-template-columns: 62px 1fr auto; align-items: center; gap: var(--s2); }
+.track__sp { font-size: 11px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track__rail { display: block; height: 8px; border-radius: var(--r-pill); background: var(--idle-t); position: relative; }
+.track__go { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--info); }
+.track__go.is-soon { background: var(--warn); }
+.track__go.is-due  { background: var(--crit); }
+.track__d { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+/* ── estate · Housing · where the pressure is ───────────────────────────── */
+.estate { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; }
+.plot { padding: 7px 8px; border-radius: 8px; background: var(--ok-t); box-shadow: inset 0 0 0 1px var(--ok-b); }
+.plot.is-tight { background: var(--warn-t); box-shadow: inset 0 0 0 1px var(--warn-b); }
+.plot.is-over  { background: var(--crit-t); box-shadow: inset 0 0 0 1px var(--crit-b); }
+.plot b { display: block; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.plot span { font-size: 10px; color: var(--ink-2); }
+
+/* ── flow · Diet · stock to animals, and what is lost ───────────────────── */
+.flow { display: flex; align-items: center; gap: 4px; }
+.flow__n { flex: 1 0 0; padding: var(--s2); border-radius: 8px; background: var(--info-t); text-align: center; }
+.flow__n b { display: block; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.flow__n span { font-size: 10px; color: var(--ink-2); }
+.flow__n.is-loss { background: var(--crit-t); }
+.flow__n.is-loss b { color: var(--crit); }
+.flow__a { flex: none; color: var(--ink-3); font-size: 11px; }
+
+/* ── lanes · Follow Up, Administer, Approvals · queues by urgency ───────── */
+.lanes { display: flex; flex-direction: column; gap: var(--s2); }
+.lane { display: grid; grid-template-columns: 78px 1fr 26px; align-items: center; gap: var(--s2); }
+.lane__l { font-size: 11px; font-weight: 500; color: var(--ink-2); }
+/* `display: block` IS LOAD-BEARING HERE, and its absence was invisible.
+   These are <span>s, so they were inline: height did nothing, the percentage
+   widths on the fills resolved against nothing, and every bar rendered 0px
+   wide. The card still looked plausible — a track, a number, a label — which
+   is exactly why it survived a screenshot and only fell to a measurement. */
+.lane__bar { display: block; height: 20px; border-radius: 5px; background: var(--idle-t); overflow: hidden; }
+.lane__fill { display: block; height: 100%; border-radius: 5px; }
+.lane__fill.is-crit { background: var(--crit); }
+.lane__fill.is-warn { background: var(--warn); }
+.lane__fill.is-info { background: var(--info); }
+.lane__fill.is-ok   { background: var(--ok); }
+.lane__fill.is-idle { background: var(--idle); }
+.lane__n { font-size: 12px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── runway · Parivesh · time is the axis, because here time IS the work ── */
+.runway { position: relative; height: 46px; border-radius: 8px; background: linear-gradient(90deg, var(--ok-t) 0%, var(--warn-t) 62%, var(--crit-t) 100%); }
+.runway__t { position: absolute; top: 6px; translate: -50% 0; text-align: center; }
+/* THE THIRD TIME THIS BUG APPEARED. A <span> sized in px is inline until
+   something blockifies it; `.c__dot`, `.jr-key i` and `.cov__pip` all sit
+   inside flex parents and were fine by luck, and this one sits inside an
+   absolutely-positioned label and was not. verify_dashboard.py now sweeps
+   every visual for a zero-size box in every role, which is the only version of
+   this check that would have caught all three at once. */
+.runway__pin { display: block; width: 9px; height: 9px; border-radius: 50%; margin-inline: auto; background: var(--ink); }
+.runway__pin.is-warn { background: var(--warn); }
+.runway__pin.is-crit { background: var(--crit); }
+.runway__d { margin-top: 3px; font-size: 10px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.runway__scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-3); }
+
+/* ── coverage · Users · who is covered, not who clocked in ──────────────── */
+.cov { display: flex; flex-direction: column; gap: 7px; }
+.cov__row { display: grid; grid-template-columns: 84px 1fr auto; align-items: center; gap: var(--s2); }
+.cov__r { font-size: 11px; color: var(--ink-2); }
+.cov__pips { display: flex; gap: 3px; }
+.cov__pip { width: 100%; height: 14px; border-radius: 3px; background: var(--ok); flex: 1 0 0; }
+.cov__pip.is-gap { background: var(--idle-t); box-shadow: inset 0 0 0 1px var(--line-2); }
+.cov__n { font-size: 11px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* ── perimeter · Security · where the problem is, on a plan ─────────────── */
+.perim { position: relative; aspect-ratio: 16 / 7; border-radius: 10px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.gate { position: absolute; width: 16px; height: 16px; border-radius: 50%; translate: -50% -50%; display: grid; place-items: center; }
+.gate i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+.gate.is-warn i { background: var(--warn); }
+.gate.is-crit i { background: var(--crit); }
+.gate.is-crit { box-shadow: 0 0 0 5px var(--crit-t); }
+
+/* ── docs · Reports · a stack you can see the shape of ──────────────────── */
+.docs { display: flex; gap: 6px; }
+.doc { flex: 1 0 0; height: 44px; border-radius: 5px 5px 3px 3px; background: var(--info-t); box-shadow: inset 0 0 0 1px var(--info-b); position: relative; }
+.doc::after { content: ''; position: absolute; inset: 6px 6px auto 6px; height: 2px; border-radius: 1px; background: var(--info-b); box-shadow: 0 5px 0 var(--info-b), 0 10px 0 var(--info-b); }
+.doc.is-new { background: var(--ok-t); box-shadow: inset 0 0 0 1px var(--ok-b); }
+.doc.is-new::after { background: var(--ok-b); box-shadow: 0 5px 0 var(--ok-b), 0 10px 0 var(--ok-b); }
+
+/* ── threads · Communication · who is waiting on a reply ────────────────── */
+.thr { display: flex; flex-direction: column; gap: var(--s2); }
+.thr__t { display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: var(--s2); }
+.thr__w { font-size: 12px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.thr__a { font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+
+/* ══ BREAKPOINTS (§15) ═══════════════════════════════════════════════════
+   Each step changes the composition on purpose. Column counts are set on a
+   custom property so the span classes above clamp themselves rather than
+   overflowing a narrow grid. */
+
+/* mobile · < 768 · one column, and only what matters (§33) */
+@media (max-width: 767px) {
+  :root { --cols: 1; --pad-page: var(--s4); --gap: var(--s3); --gap-sec: var(--s5); }
+  .topbar { flex-wrap: wrap; }
+  .roles { order: 3; width: 100%; overflow-x: auto; }
+  .nav { display: none; }
+  .role { flex: 1 0 auto; justify-content: center; }
+  .is-deep { display: none; }        /* secondary detail is dropped, not shrunk */
+}
+
+/* tablet · 768–1023 · two columns; three only when the cards stay wide */
+@media (min-width: 768px) { :root { --cols: 2; --pad-page: var(--s6); } }
+@media (min-width: 820px) and (max-width: 1023px) { :root { --cols: 3; } }
+
+/* large tablet · 1024–1279 · a transition, not the desktop composition yet */
+@media (min-width: 1024px) { :root { --cols: 3; --pad-page: var(--s8); } }
+
+/* desktop · 1280–1439 */
+@media (min-width: 1280px) {
+  :root {
+    --cols: 4;
+    --gap: var(--s5); --gap-sec: var(--s8);
+    --fs-title: 28px; --fs-section: 20px; --fs-hero: 34px;
+    --fs-num: 22px; --fs-label: 14px; --fs-support: 13px; --fs-nav: 14px;
+    --pad-card: var(--s4); --pad-feat: var(--s6);
+  }
+}
+
+/* large desktop · 1440+ · wider, not bigger. The max-width is the point. */
+@media (min-width: 1440px) { :root { --cols: 4; } }
+
+/* Portrait tablet is its own composition (§21), not landscape wrapped. */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  :root { --cols: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">AZ</span>
+      <span>
+        <span class="brand__name">ANTZ Command Centre</span><br>
+        <span class="brand__sub" id="siteName">Bannerghatta Safari</span>
+      </span>
+    </div>
+
+    <nav class="nav" aria-label="Sections">
+      <button class="nav__item" type="button" aria-current="page">Dashboard</button>
+      <button class="nav__item" type="button">Modules</button>
+      <button class="nav__item" type="button">Records</button>
+    </nav>
+
+    <div class="roles" role="group" aria-label="Role"></div>
+  </header>
+
+  <div class="head">
+    <h1 class="head__title" id="roleTitle">Vet</h1>
+    <p class="head__ask" id="roleAsk">What needs my clinical attention?</p>
+  </div>
+
+  <main class="board" id="board"></main>
+</div>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>
