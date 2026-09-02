@@ -4444,14 +4444,100 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
    takes another eighty pixels means the workspace opens on a picture of its
    own chrome. */
 
+/* ══ THE SITE HEADER ═════════════════════════════════════════════════════
+   EDGE TO EDGE. The card used to float inside the page padding with a rounded
+   border on all four sides, which made the identity of the place you are in
+   read as one more card on a page of cards. It is not one of them — it is the
+   thing they are all about — so it now spans the full width of the frame and
+   is separated by a hairline underneath rather than by a box around it.
+
+   The negative inline margin is how a child breaks out of a padded parent
+   without the parent having to know about it; the padding is added back inside
+   so the text still lines up with the grid below. */
 .site-head {
+  position: relative;
+  margin-inline: calc(var(--pad-page) * -1);
   margin-bottom: var(--s5);
-  padding: var(--s4) var(--s5) var(--s3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .74));
+  padding: var(--s4) var(--pad-page) var(--s3);
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 var(--line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .94), rgba(255, 255, 255, .78));
   backdrop-filter: blur(10px);
-  box-shadow: var(--e0);
+  /* Room for the locator, which is pinned to the right edge. Below 900 the map
+     is hidden and the reserve is released. */
+  padding-right: calc(var(--pad-page) + 224px);
+}
+
+/* ── back, or breadcrumbs ────────────────────────────────────────────────
+   One of the two, never both. Below 1024 the crumb wraps to a second line and
+   costs more height than the title it sits above; above it, the crumb is the
+   better control because it names every level and can skip two at once. */
+.site-back {
+  display: none;
+  place-items: center;
+  width: 40px; height: 40px;
+  margin: 0 0 var(--s2) -6px;
+  border: 0; border-radius: var(--r-pill);
+  background: none; color: var(--ink-2); cursor: pointer;
+}
+.site-back:hover { background: color-mix(in srgb, var(--petrol-800) 7%, transparent); }
+.site-back .icon { width: 22px; height: 22px; }
+
+@media (max-width: 1023px) {
+  .site-back { display: grid; }
+  .site-head .crumb { display: none; }
+}
+
+/* ── the locator ─────────────────────────────────────────────────────────
+   Pinned to the right of the header, full height of the card, so the map is a
+   PANEL of the header rather than a widget sitting inside it. */
+.site-map {
+  position: absolute;
+  top: var(--s3);
+  right: var(--s4);
+  bottom: var(--s3);
+  width: 200px;
+  border-radius: 12px;
+  background: var(--petrol-050);
+  box-shadow: inset 0 0 0 1px var(--line);
+  overflow: hidden;
+}
+.site-map[hidden] { display: none; }
+.site-map__land { position: absolute; inset: 8px 8px 20px; width: calc(100% - 16px); height: calc(100% - 28px); }
+.site-map__land path { fill: color-mix(in srgb, var(--petrol-300) 34%, transparent); stroke: var(--petrol-400); stroke-width: .6; }
+.site-map__pin {
+  position: absolute;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  translate: -50% -50%;
+  background: var(--petrol-400);
+  /* The pins sit in the same padded box as the outline, so a coordinate maps
+     to the same point on both. */
+  margin: 8px 8px 20px;
+}
+/* THE ONE YOU ARE ON is filled and ringed; the other three are present but
+   quiet. Showing only the current pin would have made the map a decoration —
+   a dot in a shape tells you nothing until there is something to compare. */
+.site-map__pin.is-here {
+  width: 11px; height: 11px;
+  background: var(--c-add-primary, #00AFD6);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-add-primary) 26%, transparent);
+}
+.site-map__label {
+  position: absolute;
+  left: 8px; right: 8px; bottom: 6px;
+  font-size: 10px;
+  color: var(--ink-3);
+  text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* A 200px map beside a title is a title with no room. Below 900 the header is
+   the identity and nothing else. */
+@media (max-width: 899px) {
+  .site-head { padding-right: var(--pad-page); }
+  .site-map { display: none; }
 }
 
 /* ── breadcrumb ── */
@@ -9720,6 +9806,7 @@ const SITES = [
     statusLabel: 'Operational',
     inCharge: 'Ramesh Kumar',
     location: 'Bannerghatta, Bengaluru South',
+    lat: 12.8, lon: 77.577,
     area: '412 ha',
     synced: '2 minutes ago',
     health: 87,
@@ -9765,6 +9852,7 @@ const SITES = [
     statusLabel: 'Operational',
     inCharge: 'Lakshmi Narayan',
     location: 'Bannerghatta, Bengaluru South',
+    lat: 12.8, lon: 77.577,
     area: '108 ha',
     synced: '11 minutes ago',
     health: 94,
@@ -9883,6 +9971,7 @@ const SITES = [
     statusLabel: 'Commissioning',
     inCharge: 'Dr. Anita Rao',
     location: 'Hesaraghatta Grasslands, Bengaluru North',
+    lat: 13.139, lon: 77.478,
     area: '96 ha',
     synced: '1 hour ago',
     health: 61,
@@ -9980,6 +10069,7 @@ const SITES = [
     statusLabel: 'Needs Attention',
     inCharge: 'Vijay Shetty',
     location: 'Chamundi Foothills, Mysuru',
+    lat: 12.274, lon: 76.673,
     area: '54 ha',
     synced: '24 minutes ago',
     health: 72,
@@ -21499,6 +21589,15 @@ function createWorkspaceHeader({
   root.className = 'site-head'
 
   root.innerHTML = `
+    <!-- TWO WAYS UP, ONE AT A TIME. A breadcrumb is the better control when
+         there is room for it: it names every level and lets you jump two at
+         once. Below 1024 there is not room — four crumbs plus separators wrap
+         onto a second line and eat the header — so a tablet gets a back arrow
+         that goes up exactly one level, which is what a thumb reaching for the
+         top-left of a tablet expects anyway. Both are always in the DOM and CSS
+         chooses; rendering one or the other would have meant two code paths
+         through the same state. -->
+    <button type="button" class="site-back" data-back aria-label="Back"></button>
     <nav class="crumb" aria-label="Breadcrumb"></nav>
 
     <div class="site-head__row">
@@ -21524,16 +21623,36 @@ function createWorkspaceHeader({
       </div>
     </div>
 
-    <div class="site-stats" data-stats></div>`
+    <div class="site-stats" data-stats></div>
+
+    <!-- WHERE THIS SITE IS. Four Sites spread across Karnataka read as four
+         names until you see them placed; the locator answers "which one is
+         this" before the title is read. Projected from the Site's real
+         coordinates onto a schematic outline — a picture of the state, not a
+         tile server, because this needs no pan, no zoom and no network. -->
+    <div class="site-map" data-map aria-hidden="true"></div>`
 
   const crumbEl   = root.querySelector('.crumb')
   const kindEl    = root.querySelector('[data-kind]')
   const nameEl    = root.querySelector('[data-name]')
   const metaEl    = root.querySelector('[data-meta]')
   const statsEl   = root.querySelector('[data-stats]')
+  const mapEl     = root.querySelector('[data-map]')
+  const backEl    = root.querySelector('[data-back]')
 
   const sibBtn = root.querySelector('[data-siblings]')
   const modBtn = root.querySelector('[data-modules]')
+
+  backEl.innerHTML = icon('chev-left', 'icon')
+  /* UP ONE LEVEL, and the label says which one so a screen reader is not told
+     merely "Back". The crumb array already knows the answer — its last entry is
+     the level above this one — so there is no second table of parents to keep
+     in step with the first. */
+  backEl.addEventListener('click', () => {
+    const sub = subject()
+    const up = sub.crumbs && sub.crumbs[sub.crumbs.length - 1]
+    if (up && up.go) up.go()
+  })
 
   /* ── the only level-aware function in the file ─────────────────────────
      Everything the header draws comes out of here. Adding a fourth level would
@@ -21587,9 +21706,11 @@ function createWorkspaceHeader({
 
     if (st.level === 'site') {
       return {
-        level: 'site', kind: 'Site', name: site.name,
+        level: 'site', kind: 'Site', name: site.name, site,
         status: site.status, statusLabel: site.statusLabel,
-        meta: [site.type, `${site.inCharge} · Site In-charge`],
+        /* The Site type is dropped with the status pill: a classification that
+           never changed what anyone did on the page. Who is in charge does. */
+        meta: [`${site.inCharge} · Site In-charge`],
         synced: site.synced,
         crumbs, here: site.name,
         siblings: SITES.map((x) => ({
@@ -21616,7 +21737,7 @@ function createWorkspaceHeader({
 
     if (st.level === 'section') {
       return {
-        level: 'section', kind: 'Section', name: sec.name,
+        level: 'section', kind: 'Section', name: sec.name, site,
         status: sec.status, statusLabel: STATUS_LABEL[sec.status] || sec.status,
         meta: [sec.type, `${sec.inCharge} · Section In-charge`, sec.housing],
         synced: site.synced,
@@ -21641,7 +21762,7 @@ function createWorkspaceHeader({
     crumbs.push({ label: sec.name, go: () => onLevel?.('section', sec.id) })
 
     return {
-      level: 'enclosure', kind: enc.code, name: enc.vacant ? 'Vacant' : enc.name,
+      level: 'enclosure', kind: enc.code, name: enc.vacant ? 'Vacant' : enc.name, site,
       status: enc.status, statusLabel: STATUS_LABEL[enc.status] || enc.status,
       meta: [enc.housing, `${enc.area.toLocaleString('en-IN')} m²`, `${enc.keeper} · Keeper`],
       synced: site.synced,
@@ -21750,10 +21871,15 @@ function createWorkspaceHeader({
        two render paths; disabling it is one line and keeps the type identical. */
     nameEl.textContent = sub.name
 
+    /* THE STATUS PILL AND THE SITE TYPE ARE BOTH GONE. "Needs Attention" was a
+       judgement restated — the stats strip below already carries what is open,
+       and the Sites listing ranks on the same figure — and "Rescue &
+       Rehabilitation" is a classification that never changed what anybody did
+       on the page. What is left in this row is the one fact a reader acts on:
+       who is in charge of the place they are looking at. */
     metaEl.replaceChildren()
-    if (!sub.listing) metaEl.append(pill(sub.status, sub.statusLabel))
     sub.meta.filter(Boolean).forEach((m, i) => {
-      if (i || !sub.listing) metaEl.append(dot())
+      if (i) metaEl.append(dot())
       metaEl.append(text(m))
     })
 
@@ -21776,13 +21902,49 @@ function createWorkspaceHeader({
       statsEl.append(btn)
     }
 
-    /* LAST SYNCED IS CHROME, NOT A STATISTIC. It answers "can I trust this
-       page", not "how big is this thing", so it sits at the end of the strip in
-       the quiet style rather than beside the counts. */
-    const sync = document.createElement('span')
-    sync.className = 'site-sync'
-    sync.innerHTML = `${icon('refresh', 'icon')}<span>Synced ${esc(sub.synced)}</span>`
-    statsEl.append(sync)
+    /* "Synced 24 minutes ago" is removed. It was there to answer "can I trust
+       this page", and it never could: the figure is fixed per Site in the
+       fixtures, so it said the same thing on every visit and aged into
+       decoration. A staleness indicator that cannot go stale is worse than
+       none — it teaches the reader that the line means nothing. */
+
+    drawMap(sub)
+  }
+
+  /**
+   * THE LOCATOR.
+   * ───────────────────────────────────────────────────────────────────────
+   * A schematic Karnataka with this Site pinned on it, projected from the real
+   * coordinates now on each Site record. The outline is deliberately rough —
+   * it is a locator, and a locator only has to be recognisable enough that the
+   * pin means something. The four Sites are all inside a 1° box around
+   * Bengaluru and Mysuru, so the box is drawn ZOOMED to that region rather
+   * than to the whole state, where four pins would have landed on top of each
+   * other.
+   */
+  function drawMap(sub) {
+    const site = sub.site
+    if (!site || site.lat == null) { mapEl.hidden = true; return }
+    mapEl.hidden = false
+
+    /* The window the pins live in, with a margin so none sits on an edge. */
+    const LAT = [11.9, 13.6], LON = [76.2, 78.1]
+    const px = (lon) => ((lon - LON[0]) / (LON[1] - LON[0])) * 100
+    const py = (lat) => (1 - (lat - LAT[0]) / (LAT[1] - LAT[0])) * 100
+
+    /* Every Site is drawn, and the current one is filled. Seeing the other
+       three is most of the value: it says where this one sits in the estate. */
+    const pins = SITES.filter((x) => x.lat != null).map((x) => (
+      `<span class="site-map__pin${x.id === site.id ? ' is-here' : ''}" ` +
+        `style="left:${px(x.lon).toFixed(1)}%;top:${py(x.lat).toFixed(1)}%"></span>`
+    )).join('')
+
+    mapEl.innerHTML =
+      `<svg viewBox="0 0 100 100" preserveAspectRatio="none" class="site-map__land" aria-hidden="true">` +
+        `<path d="M18,6 L46,3 L63,11 L74,9 L86,20 L83,38 L88,54 L79,70 L64,80 L58,94 L41,97 ` +
+        `L28,88 L21,71 L12,55 L9,34 Z" /></svg>` +
+      pins +
+      `<span class="site-map__label">${esc(site.location || '')}</span>`
   }
 
   function sep() {
