@@ -658,33 +658,6 @@ button { font: inherit; color: inherit; }
 /* ── 1 · iPad status bar ──────────────────────────────────────────────────
    26px / 12px padding, white ground. Present because the artboard has it; it
    is chrome, not product, so it is the one block using the system font stack. */
-/* Capped with the page. The bar is the iPad's chrome, and an iPad is 1024pt
-   wide — left full-bleed it became a white band running off both sides of a
-   centred app, which reads as a broken page rather than as a device. */
-.status-bar {
-  width: 100%;
-  max-width: calc(var(--max-content) + var(--pad-page) * 2);
-  margin-inline: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 26px;
-  background: var(--c-white);
-  font-family: var(--font-sys);
-  font-size: 14px;
-  font-weight: 510;
-  color: #000;
-  overflow: hidden;
-}
-.status-bar__left  { display: flex; align-items: center; gap: 8px; padding-block: 2px; white-space: nowrap; }
-.status-bar__right { display: flex; align-items: center; gap: 4px; padding-block: 5px; }
-.status-bar__right img { display: block; }
-.status-bar__pct { font-size: 12px; line-height: 14px; text-align: right; }
-
-@media (max-width: 767px) {
-  /* a phone-width viewport is not an iPad; the iPad bar would read as a bug */
-  .status-bar { display: none; }
-}
 
 /* ── 2 · page frame ──────────────────────────────────────────────────────*/
 .page {
@@ -1073,15 +1046,27 @@ button { font: inherit; color: inherit; }
 .search__hint[hidden] { display: none; }
 /* The moving word is clipped to its own line box, so it enters and leaves
    behind an edge rather than floating over the field's padding. */
+/* THE MOVING WORD IS PART OF THE PLACEHOLDER, so it is the placeholder's
+   colour. Petrol and semibold made it read as a value already typed into the
+   field — the one thing a placeholder must never look like. It is the same grey
+   as "Search" now, and the quotation marks carry the emphasis instead. */
 .search__cycle {
   display: inline-block;
   overflow: hidden;
-  font-weight: 600;
-  color: var(--petrol-600);
+  color: inherit;
   will-change: transform, opacity;
 }
 .search__input:focus { outline: none; }
-.search:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-add-primary) 26%, transparent); }
+/* NO RING WHEN YOU CLICK IT, A RING WHEN YOU TAB TO IT.
+   `:focus-within` fires for both, which is why clicking the field lit it up.
+   `:focus-visible` is the browser's own answer to exactly this question: it
+   matches when focus arrived by keyboard and not when it arrived by pointer.
+   Dropping the ring outright would have been the easy read of "I don't want
+   the outline", and it would have left anyone tabbing through the header with
+   no idea where they were. */
+.search:has(.search__input:focus-visible) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-add-primary) 26%, transparent);
+}
 
 /* ══ GLOBAL SEARCH — THE HEADER FIELD IS A TRIGGER ═══════════════════════
    Everything the search surface draws now lives on its own page; what is left
@@ -3592,6 +3577,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 }
 .sheet.is-open { transform: translateY(0); }
 
+
 /* the grab handle — only on touch, where it means something */
 .sheet__handle {
   position: absolute;
@@ -3748,40 +3734,49 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 .mod-row {
   display: flex;
   align-items: center;
-  gap: var(--s3);
+  gap: 12px;
   width: 100%;
   min-width: 0;
-  padding: 4px var(--s2);
+  padding: 5px 10px 5px 8px;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   background: transparent;
   cursor: pointer;
   text-align: left;
   transition: background var(--t-fast) var(--ease);
 }
 .mod-row:hover { background: var(--petrol-050); }
-.mod-row[aria-selected='true'] { background: var(--petrol-100); }
+/* The artboard's own selected fill. Lighter than the petrol-100 that was here,
+   which is the point: this rail is a list of eighteen rows and the selected one
+   has to read as "you are here" without becoming the loudest thing on a panel
+   whose actual subject is the previews to its right. */
+.mod-row[aria-selected='true'] { background: #E8F4F2; }
 
 .mod-row__icon {
   flex: none;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
 }
-.mod-row__icon img { display: block; width: 19px; height: 19px; }
+.mod-row__icon img { display: block; width: 18px; height: 18px; }
 .mod-row__name {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: var(--fs-body);
-  font-weight: 550;
-  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  color: var(--c-on-primary-ctr, #1F515B);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.mod-row__chev { flex: none; width: 16px; height: 16px; color: var(--ink-4); }
+/* THE CHEVRON IS GONE. It promised navigation — a row that opens somewhere —
+   and these rows do not navigate; they change what the pane beside them shows.
+   The design has no chevron for that reason, and the selected fill already
+   says which row is live. */
+.mod-row__chev { display: none; }
 
 /* ── the widget pane ──────────────────────────────────────────────────────*/
 /* The gallery pane takes focus when the sheet opens, so that Escape reaches
@@ -3949,8 +3944,8 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   pointer-events: none;
 }
 
-.widget__meta { display: flex; flex-direction: column; max-width: 240px; }
-.widget__name { font-size: var(--fs-label); font-weight: 650; color: var(--ink); }
+.widget__meta { display: flex; flex-direction: column; max-width: 240px; padding-left: 2px; }
+.widget__name { font-size: 12px; font-weight: 600; color: #44544A; }
 
 /* ── empty state ──────────────────────────────────────────────────────────*/
 .sheet-empty {
@@ -4247,25 +4242,32 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
     left: 50%;
     right: auto;
     bottom: auto;
-    /* the same 1024 the page is capped at, so the gallery never overhangs the
-       product it is adding to */
-    width: min(1024px, calc(100vw - 64px));
-    height: min(860px, calc(100dvh - 64px));
-    border-radius: 24px;
+    /* THE ARTBOARD'S OWN BOX. 1056 x 956 rather than the 1024 x 860 that was
+       here: the page is capped at 1024 and this used to match it so the gallery
+       could not overhang the product it adds to, which was a sound rule and the
+       wrong number — the dialog floats over the page rather than sitting in it,
+       and the design gives it 32px more width to keep a 304px rail beside a
+       656px pane without either being squeezed. */
+    width: min(1056px, calc(100vw - 64px));
+    height: min(956px, calc(100dvh - 64px));
+    border-radius: 16px;
+    box-shadow: 0 18px 48px 0 rgba(11, 42, 51, .28);
     translate: -50% -50%;
     transform: translateY(24px) scale(.985);
-    grid-template-columns: 316px minmax(0, 1fr);
+    grid-template-columns: 304px minmax(0, 1fr);
   }
   .sheet.is-open { transform: translateY(0) scale(1); }
   .sheet__handle { display: none; }
 
-  .sheet__head { padding: var(--s6) var(--s8) var(--s5); }
-  .sheet__side { padding: var(--s5) var(--s5) var(--s5) var(--s8); }
+  .sheet__head { padding: 26px 24px 22px 32px; }
+  .sheet__title { font-size: 20px; font-weight: 500; letter-spacing: 0; color: #44544A; }
+  .sheet__side { padding: 20px 16px; gap: 8px; }
   .sheet-search input { height: 44px; }
-  .sheet__body { padding: 0 var(--s8) var(--s8); }
-  .detail-head { padding-top: var(--s6); }
+  .sheet__body { padding: 20px 24px 24px; }
+  .detail-head { padding-top: var(--s4); }
 
-  .sheet__foot { left: 316px; padding: var(--s4) var(--s8); border-radius: 0 0 24px 0; }
+  /* The foot starts where the rail ends, and the rail is 304 now. */
+  .sheet__foot { left: 304px; padding: var(--s4) var(--s6); border-radius: 0 0 16px 0; }
   .widget__meta { max-width: 280px; }
 }
 
@@ -5905,18 +5907,11 @@ body.is-site .card:active { transform: scale(.978); }
 <!-- ══ iPad status bar ══════════════════════════════════════════════════
      Figma "Status Bar - iPad": white, 26px / 12px padding. Chrome rather than
      product, so it uses the system font stack. -->
-<div class="status-bar" aria-hidden="true">
-  <div class="status-bar__left">
-    <span>9:41</span>
-    <span>Mon Jun 10</span>
-  </div>
-  <div class="status-bar__right">
-    <img src="assets/icon/status-wifi.svg" width="16.5" height="10" alt="">
-    <img src="assets/icon/status-cellular.svg" width="14.053" height="10" alt="">
-    <span class="status-bar__pct">100%</span>
-    <img src="assets/icon/status-battery.svg" width="26.5" height="12" alt="">
-  </div>
-</div>
+<!-- THE IPAD STATUS BAR IS GONE. It was transcribed from the artboard, where a
+     device frame is how a designer shows scale — but a browser already has a
+     clock and a battery, one row above this one, and they disagree. A frozen
+     9:41 beside the real time reads as a bug in the product rather than as a
+     picture of a tablet. The device is the viewport now. -->
 
 <main class="page">
 
@@ -20346,17 +20341,18 @@ function createModulePicker({ onAdd, source = MODULE_SOURCE }) {
     check.innerHTML = icon('check')
     stage.append(check)
 
-    btn.append(stage)
-
-    /* The name, and nothing else. The description and the size count were
-       three lines of prose under a picture that already says what the widget
-       is — and with 3 to 6 widgets a module, that prose was most of the pane.
-       The sizes are still on the footer's selector, where they are a choice
-       rather than a fact to read. */
+    /* THE NAME GOES ABOVE THE PICTURE, which is the design's order and the
+       right one. Underneath, a label sits closer to the NEXT preview than to
+       the one it belongs to — the previews are different heights, so the gap
+       below a short card is small and the gap below a tall one is large, and
+       the eye pairs by proximity. Above, every label is the same distance from
+       its own card and reads as its heading. */
     const meta = document.createElement('span')
     meta.className = 'widget__meta'
     meta.innerHTML = `<span class="widget__name">${esc(v.name)}</span>`
     btn.append(meta)
+
+    btn.append(stage)
     btn.addEventListener('click', () => toggleVariant(v))
     return btn
   }
@@ -23403,10 +23399,13 @@ document.addEventListener('visibilitychange', () => {
 })
 
 /* ── greeting ───────────────────────────────────────────────────────────
-   Left exactly as the artboard has it. A time-of-day greeting was the obvious
-   thing to add and it was wrong: the status bar above is frozen at 9:41, so
-   "Good Evening," under a 9:41 clock reads as a bug rather than as a feature.
-   Hand it real time and it should have both. */
+   Still "Good Morning," exactly as the artboard has it — but the REASON has
+   just gone. A time-of-day greeting used to be wrong because the fake status
+   bar above was frozen at 9:41, and "Good Evening," under a 9:41 clock reads
+   as a bug rather than as a feature. That bar has been removed, so nothing
+   contradicts a live greeting any more and this is now a choice rather than a
+   constraint. Left as it is because nobody asked for it to change; noted here
+   so the next person does not re-derive a rule from a thing that is gone. */
 
 /* ── the modules section ────────────────────────────────────────────────── */
 const gridRoot = document.getElementById('moduleGrid')
