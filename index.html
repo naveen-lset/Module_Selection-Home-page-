@@ -4466,7 +4466,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   backdrop-filter: blur(10px);
   /* Room for the locator, which is pinned to the right edge. Below 900 the map
      is hidden and the reserve is released. */
-  padding-right: calc(var(--pad-page) + 224px);
+  padding-right: calc(var(--pad-page) + 172px);
 }
 
 /* ── back, or breadcrumbs ────────────────────────────────────────────────
@@ -4497,24 +4497,44 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   top: var(--s3);
   right: var(--s4);
   bottom: var(--s3);
-  width: 200px;
+  /* THE PANEL IS SIZED TO THE MAP, not the other way round. The outline keeps
+     its aspect ratio, so at this header height the square works out at ~115px —
+     inside a 200px panel that left forty pixels of dead ground on each side.
+     The panel is the map's frame; it should not be wider than the thing it
+     frames, and the width it gives back goes to the title. */
+  width: 148px;
   border-radius: 12px;
   background: var(--petrol-050);
   box-shadow: inset 0 0 0 1px var(--line);
   overflow: hidden;
 }
 .site-map[hidden] { display: none; }
-.site-map__land { position: absolute; inset: 8px 8px 20px; width: calc(100% - 16px); height: calc(100% - 28px); }
-.site-map__land path { fill: color-mix(in srgb, var(--petrol-300) 34%, transparent); stroke: var(--petrol-400); stroke-width: .6; }
+/* ONE SQUARE BOX, SHARED. The outline keeps its aspect ratio now, so the SVG
+   and the pin layer have to be the SAME square or a projected coordinate lands
+   in a different place on each. Both are centred in the panel at the height the
+   panel allows, and the pins are positioned inside that square rather than
+   inside the panel. */
+.site-map__frame {
+  position: absolute;
+  left: 50%; top: 8px;
+  translate: -50% 0;
+  aspect-ratio: 1;
+  height: calc(100% - 26px);
+}
+.site-map__land { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.site-map__land path {
+  fill: color-mix(in srgb, var(--petrol-300) 46%, transparent);
+  stroke: var(--petrol-500);
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
 .site-map__pin {
   position: absolute;
-  width: 7px; height: 7px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   translate: -50% -50%;
-  background: var(--petrol-400);
-  /* The pins sit in the same padded box as the outline, so a coordinate maps
-     to the same point on both. */
-  margin: 8px 8px 20px;
+  background: var(--petrol-600);
 }
 /* THE ONE YOU ARE ON is filled and ringed; the other three are present but
    quiet. Showing only the current pin would have made the map a decoration —
@@ -21927,8 +21947,13 @@ function createWorkspaceHeader({
     if (!site || site.lat == null) { mapEl.hidden = true; return }
     mapEl.hidden = false
 
-    /* The window the pins live in, with a margin so none sits on an edge. */
-    const LAT = [11.9, 13.6], LON = [76.2, 78.1]
+    /* THE WHOLE STATE, NOT A CROP OF IT. The first version framed a 1.7-degree
+       window around the four Sites, which put the pins nicely apart and drew an
+       outline of nothing recognisable — a grey shape with dots on it is not a
+       map, it is a decoration that costs 200px. Karnataka entire is a shape a
+       reader knows, and the Sites still separate: Bengaluru and Mysuru are
+       0.9 degrees apart, which is about 35px at this size. */
+    const LAT = [11.4, 18.6], LON = [73.9, 78.8]
     const px = (lon) => ((lon - LON[0]) / (LON[1] - LON[0])) * 100
     const py = (lat) => (1 - (lat - LAT[0]) / (LAT[1] - LAT[0])) * 100
 
@@ -21940,10 +21965,17 @@ function createWorkspaceHeader({
     )).join('')
 
     mapEl.innerHTML =
-      `<svg viewBox="0 0 100 100" preserveAspectRatio="none" class="site-map__land" aria-hidden="true">` +
-        `<path d="M18,6 L46,3 L63,11 L74,9 L86,20 L83,38 L88,54 L79,70 L64,80 L58,94 L41,97 ` +
-        `L28,88 L21,71 L12,55 L9,34 Z" /></svg>` +
-      pins +
+      '<span class="site-map__frame">' +
+      /* Karnataka, traced from nine real boundary points and projected through
+         the same px()/py() the pins use — so the coastline, the northern
+         border and the pin on Bengaluru are all in one coordinate system and
+         cannot drift apart. `preserveAspectRatio` is NOT set to none any more:
+         stretching a state to fill a box is how a recognisable outline stops
+         being recognisable. */
+      `<svg viewBox="0 0 100 100" class="site-map__land" aria-hidden="true">` +
+        `<path d="M4.1,52.8 L12.2,23.6 L73.5,2.8 L71.4,33.3 L75.5,48.6 L95.9,76.4 ` +
+        `L75.5,87.5 L36.7,97.2 L18.4,80.6 Z" /></svg>` +
+      pins + '</span>' +
       `<span class="site-map__label">${esc(site.location || '')}</span>`
   }
 
