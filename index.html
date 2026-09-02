@@ -1036,6 +1036,11 @@ button { font: inherit; color: inherit; }
   color: var(--ink);
 }
 .search__input::placeholder { color: var(--c-neutral-2); }
+/* Chrome draws its OWN clear button on `type=search`, and it cannot be styled.
+   Left alone the field carries two crosses side by side — the native one and
+   the one this component draws, which is the one that also drops the token. */
+.search__input::-webkit-search-cancel-button,
+.search__input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
 
 /* ── the rotating hint ───────────────────────────────────────────────────
    Where the placeholder would have been, to the pixel: the field's own inline
@@ -1069,6 +1074,384 @@ button { font: inherit; color: inherit; }
 }
 .search__input:focus { outline: none; }
 .search:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-add-primary) 26%, transparent); }
+
+/* ══ GLOBAL SEARCH ═══════════════════════════════════════════════════════
+   The Figma is a phone: a full-screen search page with a back arrow. This is
+   the same design read for a pointer — the field keeps its place in the header
+   and the surface opens underneath it. See GlobalSearch.js for why.
+
+   THE ROW HAS TO STOP CENTRING ITSELF while the panel is open. `.search-row`
+   is a flex row that centres the field; the panel is its second child and
+   would have been laid out BESIDE the field. Anchoring it absolutely takes it
+   out of that flow, and the row is already `position: relative`. */
+
+.search__tokens { display: flex; align-items: center; gap: var(--s2); flex: none; }
+.search__tokens:empty { display: none; }
+
+/* The chip reads as one object with the text after it, so it takes the field's
+   own line — not a box floating above it. Petrol rather than the accent: it is
+   a statement of what is being searched, not something that needs answering. */
+.search__token {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 30px;
+  padding-inline: 10px 4px;
+  border-radius: var(--r-pill);
+  background: var(--petrol-050);
+  color: var(--petrol-700);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.search__token-txt { line-height: 1; }
+.search__token-x {
+  display: grid;
+  place-items: center;
+  width: 20px; height: 20px;
+  border: 0; padding: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.search__token-x:hover { background: var(--petrol-100); }
+.search__token-x .icon { width: 13px; height: 13px; }
+
+.search__clear {
+  display: none;
+  place-items: center;
+  flex: none;
+  width: 28px; height: 28px;
+  border: 0; padding: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.search.has-value .search__clear,
+.search.has-token .search__clear { display: grid; }
+.search__clear:hover { background: var(--petrol-050); color: var(--ink); }
+.search__clear .icon { width: 16px; height: 16px; }
+
+/* ── the panel ───────────────────────────────────────────────────────────
+   Anchored to the field's own edges, not to the row's, so it lines up with the
+   thing that produced it rather than with the page padding. */
+.gsp {
+  position: absolute;
+  z-index: 40;
+  top: calc(var(--search-h) + var(--s2));
+  left: var(--pad-page);
+  right: var(--pad-page);
+  max-height: min(62vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--s3) 0 var(--s2);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  opacity: 0;
+  translate: 0 -6px;
+  transition: opacity .16s ease, translate .16s ease;
+}
+.gsp.is-open { opacity: 1; translate: 0 0; }
+.gsp[hidden] { display: none !important; }
+
+/* THE ROW HAS TO OUTRANK THE PAGE WHILE IT IS OPEN. `.search-row` sits at
+   z-index 1 and that number is the panel's ceiling — a z-index inside it can
+   only reorder against its siblings, never escape the stacking context its
+   parent made. So the panel rendered correctly and painted UNDER the hero,
+   which is the failure mode that looks like a transparent background. Lifting
+   the row is the fix; lifting the panel is not. */
+body.is-searching .search-row { z-index: 60; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gsp { transition: none; opacity: 1; translate: 0 0; }
+}
+
+/* ── the type rail ───────────────────────────────────────────────────────
+   The design's two rails are one here. The tag rail's vocabulary does not
+   exist in this build, and a rail of chips that filter nothing is worse than
+   no rail — so the types that CAN answer are shown, and nothing else. */
+.gsp-rail {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 0 var(--s4) var(--s3);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.gsp-rail::-webkit-scrollbar { display: none; }
+.gsp-rail__open {
+  display: grid; place-items: center;
+  flex: none;
+  width: 32px; height: 32px;
+  border: 0; padding: 0;
+  border-radius: 10px;
+  background: var(--petrol-050);
+  color: var(--petrol-700);
+  cursor: pointer;
+}
+.gsp-rail__open:hover { background: var(--petrol-100); }
+.gsp-rail__open .icon { width: 18px; height: 18px; }
+.gsp-rail__sep { flex: none; width: 1px; height: 22px; background: var(--line); }
+
+.gsp-chip {
+  flex: none;
+  height: 30px;
+  padding-inline: var(--s3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--c-white);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-label);
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+.gsp-chip:hover { border-color: var(--petrol-300); color: var(--ink); }
+.gsp-chip.is-on {
+  background: var(--petrol-600);
+  border-color: var(--petrol-600);
+  color: var(--c-white);
+  font-weight: 600;
+}
+
+/* ── groups ──────────────────────────────────────────────────────────────
+   The header band is the design's, and it earns its tint: it is the only thing
+   separating four animals from nine species in a single scrolling column. */
+.gsp-group + .gsp-group { margin-top: var(--s2); }
+.gsp-group__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: 7px var(--s4);
+  background: var(--petrol-050);
+  color: var(--ink-2);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+.gsp-group__all {
+  border: 0; padding: 0;
+  background: none;
+  color: var(--petrol-600);
+  font: inherit;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+.gsp-group__all:hover { text-decoration: underline; }
+
+/* ── a result ────────────────────────────────────────────────────────────
+   THE WHOLE ROW IS THE TARGET. The same rule the Site cards were rebuilt to:
+   nothing nested inside a button, and no part of the row that does not respond
+   to a click landing on it. */
+.gsp-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  padding: 10px var(--s4);
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.gsp-row:hover,
+.gsp-row.is-cursor { background: var(--petrol-050); }
+.gsp-row.is-cursor { box-shadow: inset 3px 0 0 var(--petrol-600); }
+
+.gsp-row__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 0 0; }
+.gsp-row__title {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gsp-row__sub { font-size: var(--fs-label); color: var(--ink-2); }
+.gsp-row__sub.is-latin { font-style: italic; color: var(--ink-3); }
+.gsp-row__meta {
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gsp-row__meta i { font-style: normal; padding-inline: 6px; opacity: .55; }
+
+.gsp-row__count {
+  flex: none;
+  font-size: var(--fs-metric-sm);
+  font-weight: 650;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.gsp-row__go { flex: none; display: grid; place-items: center; color: var(--ink-4); }
+.gsp-row__go .icon { width: 18px; height: 18px; }
+
+/* The demographic pills. Tinted from the tone tokens the widgets already use,
+   so a count of males here is the same green a healthy figure is anywhere. */
+.gsp-row__pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.gsp-pill {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  color: var(--petrol-800);
+  font-variant-numeric: tabular-nums;
+}
+.gsp-pill.is-m { background: var(--c-ok); }
+.gsp-pill.is-f { background: var(--c-alert); }
+.gsp-pill.is-u { background: var(--c-warn); }
+
+/* ── recents and empties ─────────────────────────────────────────────────*/
+.gsp-recent { padding: 0 var(--s4) var(--s2); }
+.gsp-recent__head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--s3);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+.gsp-recent__clear {
+  border: 0; padding: 0; background: none;
+  color: var(--petrol-600);
+  font: inherit; font-size: var(--fs-label); font-weight: 600;
+  cursor: pointer;
+}
+.gsp-recent__clear:hover { text-decoration: underline; }
+.gsp-recent__chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.gsp-recent__chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 34px;
+  padding-inline: var(--s3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--c-white);
+  color: var(--ink);
+  font: inherit; font-size: var(--fs-label);
+  cursor: pointer;
+}
+.gsp-recent__chip:hover { border-color: var(--petrol-300); background: var(--petrol-050); }
+/* A clock drawn in CSS rather than fetched — it is a 12px decoration repeated
+   eight times, and the sprite has no glyph for it. */
+.gsp-recent__clock {
+  position: relative;
+  flex: none;
+  width: 13px; height: 13px;
+  border: 1.5px solid var(--ink-4);
+  border-radius: 50%;
+}
+.gsp-recent__clock::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 2px;
+  width: 1.5px; height: 4.5px;
+  background: var(--ink-4);
+  transform-origin: bottom center;
+  translate: -50% 0;
+}
+
+.gsp-empty {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: var(--s5) var(--s4) var(--s6);
+  text-align: left;
+}
+.gsp-empty__title { font-size: var(--fs-body); font-weight: 600; color: var(--ink); }
+.gsp-empty__note { font-size: var(--fs-label); color: var(--ink-3); max-width: 52ch; }
+
+/* ── Choose Search Type ──────────────────────────────────────────────────*/
+.gsm-scrim {
+  position: fixed; inset: 0; z-index: 90;
+  display: grid; place-items: center;
+  padding: var(--s5);
+  background: rgba(22, 55, 61, .38);
+}
+.gsm-scrim[hidden] { display: none !important; }
+.gsm {
+  width: min(420px, 100%);
+  max-height: min(80vh, 720px);
+  display: flex; flex-direction: column;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  opacity: 0; scale: .98;
+  transition: opacity .16s ease, scale .16s ease;
+}
+.gsm.is-open { opacity: 1; scale: 1; }
+@media (prefers-reduced-motion: reduce) { .gsm { transition: none; opacity: 1; scale: 1; } }
+
+.gsm__head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s5) var(--s5) var(--s4);
+}
+.gsm__title { margin: 0; font-size: var(--fs-title); font-weight: 600; color: var(--ink); }
+.gsm__close {
+  display: grid; place-items: center;
+  width: 32px; height: 32px;
+  border: 0; padding: 0; border-radius: var(--r-pill);
+  background: none; color: var(--ink-3); cursor: pointer;
+}
+.gsm__close:hover { background: var(--petrol-050); color: var(--ink); }
+.gsm__close .icon { width: 18px; height: 18px; }
+
+.gsm__list {
+  display: flex; flex-direction: column; gap: var(--s2);
+  padding: 0 var(--s5);
+  overflow-y: auto;
+}
+.gsm-opt {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: 13px var(--s4);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--petrol-050);
+  color: var(--ink);
+  font: inherit; font-size: var(--fs-body);
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
+}
+.gsm-opt__label { flex: 1 0 0; }
+.gsm-opt__label b { font-weight: 700; }
+.gsm-opt__none { font-size: var(--fs-micro); color: var(--ink-3); }
+.gsm-opt__dot {
+  flex: none;
+  width: 18px; height: 18px;
+  border: 2px solid var(--ink-4);
+  border-radius: 50%;
+}
+.gsm-opt:hover { background: var(--petrol-100); }
+/* The chosen row inverts, exactly as the design draws it — a filled dark bar
+   with a live dot, so the answer is readable from across the sheet. */
+.gsm-opt.is-on {
+  background: var(--petrol-800);
+  border-color: var(--petrol-800);
+  color: var(--c-white);
+}
+.gsm-opt.is-on .gsm-opt__none { color: rgba(255, 255, 255, .62); }
+.gsm-opt.is-on .gsm-opt__dot {
+  border-color: var(--c-white);
+  box-shadow: inset 0 0 0 3px var(--petrol-800), inset 0 0 0 9px var(--c-white);
+}
+
+.gsm__foot { padding: var(--s4) var(--s5) var(--s5); }
+.gsm__done {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--petrol-600);
+  color: var(--c-white);
+  font: inherit; font-size: var(--fs-body); font-weight: 600;
+  cursor: pointer;
+}
+.gsm__done:hover:not(:disabled) { background: var(--petrol-700); }
+.gsm__done:disabled { opacity: .45; cursor: default; }
+
+/* The hint must not sit under a committed chip — it is a picture of a
+   placeholder, and a placeholder behind a value is a rendering bug. */
+.search.has-token .search__hint { display: none; }
 
 /* ── 6 · main frame · Figma pt-32 px-32 gap-16 ───────────────────────────*/
 .main-frame {
@@ -13049,6 +13432,280 @@ registerVariants(ENCLOSURE_WIDGETS)
   __x.getWidget = getWidget;
   __x.widgetsForDomain = widgetsForDomain;
   __x.applyEnclosure = applyEnclosure;
+  __x.individuals = individuals;
+});
+
+__def('js/data/searchIndex.js', function (__x, __req) {
+/**
+ * ONE INDEX, BUILT FROM WHAT THE PRODUCT ALREADY KNOWS.
+ * ---------------------------------------------------------------------------
+ * The Figma search returns results GROUPED BY WHAT THEY ARE - "About 4 results
+ * in Animals", "About 9 results in Species" - which only works if there is one
+ * flat list with a type on every row. So this file walks the fixtures once and
+ * flattens them: every Site, every Section, every Enclosure, every named
+ * animal, and every species those enclosures hold.
+ *
+ * === NOTHING HERE IS NEW DATA ==============================================
+ *
+ * That is the point. The species rows are not a table somebody typed - they are
+ * the enclosures grouped by the species they hold, with the occupants added up.
+ * A separate species table would have been quicker and would have started
+ * disagreeing with the enclosures the first time either was edited. Same reason
+ * `individuals()` is imported rather than reimplemented: the animals the search
+ * finds are the animals the enclosure card lists, because they are the same
+ * function's output.
+ *
+ * === WHAT IS MISSING, AND SAYS SO ==========================================
+ *
+ * The design offers eight search types. Six of them have data. `user` and `tag`
+ * do not exist anywhere in this product yet, and they are still in the list -
+ * choosing one gets an empty state that names what is missing, which is the
+ * truth, where quietly dropping them from the menu would have been a lie about
+ * what the design asks for.
+ */
+
+const { SITES } = __req('js/data/sites.js');
+const { SECTIONS, enclosuresIn } = __req('js/data/sections.js');
+const { individuals } = __req('js/data/enclosureWidgets.js');
+const { MODULES } = __req('js/data/siteModules.js');
+
+/**
+ * THE EIGHT TYPES, IN THE DESIGN'S OWN ORDER AND WITH ITS OWN PREFIXES.
+ * `has` is whether this product can answer for that type at all - read by the
+ * empty state, so an unanswerable type explains itself instead of returning
+ * nothing and looking broken.
+ */
+const TYPES = [
+  { key: 'user',       prefix: '@',   label: 'User',       plural: 'Users',       has: false },
+  { key: 'tag',        prefix: '#',   label: 'Tag',        plural: 'Tags',        has: false },
+  { key: 'enclosure',  prefix: 'E',   label: 'Enclosure',  plural: 'Enclosures',  has: true  },
+  { key: 'animal',     prefix: 'A',   label: 'Animal',     plural: 'Animals',     has: true  },
+  { key: 'species',    prefix: 'S',   label: 'Species',    plural: 'Species',     has: true  },
+  { key: 'identifier', prefix: 'ID',  label: 'Identifier', plural: 'Identifiers', has: true  },
+  { key: 'section',    prefix: 'SEC', label: 'Section',    plural: 'Sections',    has: true  },
+  { key: 'site',       prefix: 'SI',  label: 'Site',       plural: 'Sites',       has: true  },
+]
+
+const TYPE_BY_KEY = new Map(TYPES.map((t) => [t.key, t]))
+
+/**
+ * GROUPS COME BACK IN THIS ORDER, NOT IN SIZE ORDER.
+ * The design puts Animals above Species even though Species had more hits, and
+ * it is right to: a reader searching "Lion123" wants the individual, and a list
+ * that reorders itself by how many matches each type happened to get is a list
+ * you cannot learn the shape of.
+ */
+const GROUP_ORDER = ['animal', 'species', 'enclosure', 'section', 'site', 'module',
+                     'identifier', 'user', 'tag']
+
+let INDEX = null
+
+/* Lowercased once at build time. Matching lowercases the query only. */
+function row(rec) {
+  rec.hay = [rec.title, rec.sub, ...(rec.meta || [])].join('   ').toLowerCase()
+  return rec
+}
+
+/**
+ * THE ITALIC SECOND LINE IN THE DESIGN IS A BINOMIAL - "Panthera leo" under
+ * "Lion". We do not hold taxonomy, and inventing a Latin name per species would
+ * be inventing data. So this answers only for the species the fixtures actually
+ * name, and the row omits the line otherwise. A blank is honest; a made-up
+ * binomial on a zoo record is not.
+ */
+const BINOMIAL = {
+  'Bengal Tiger': 'Panthera tigris tigris',
+  'Asiatic Lion': 'Panthera leo persica',
+  'Indian Leopard': 'Panthera pardus fusca',
+  'Sloth Bear': 'Melursus ursinus',
+  'Gaur': 'Bos gaurus',
+  'Blackbuck': 'Antilope cervicapra',
+  'Nilgai': 'Boselaphus tragocamelus',
+  'Sambar': 'Rusa unicolor',
+  'Spotted Deer': 'Axis axis',
+  'Indian Rock Python': 'Python molurus',
+  'Rhesus Macaque': 'Macaca mulatta',
+  'Indian Star Tortoise': 'Geochelone elegans',
+  'Himalayan Black Bear': 'Ursus thibetanus laniger',
+  'Black Kite': 'Milvus migrans',
+}
+function binomial(name) { return BINOMIAL[name] || '' }
+
+/* "1 sites" is the tell that a number was pasted next to a word rather than
+   counted. One helper, used for both, so the two cannot drift apart. */
+function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's') }
+
+function build() {
+  const out = []
+  const species = new Map()
+
+  for (const site of SITES) {
+    out.push(row({
+      type: 'site', id: site.id, title: site.name, sub: site.type,
+      meta: [site.code, site.location],
+      nav: { level: 'site', siteId: site.id },
+    }))
+  }
+
+  for (const sec of SECTIONS) {
+    const site = SITES.find((s) => s.id === sec.siteId)
+    const siteName = site ? site.short : sec.siteId
+
+    out.push(row({
+      type: 'section', id: sec.id, title: sec.name, sub: sec.type,
+      meta: [sec.code, 'Site: ' + siteName, 'In charge: ' + sec.inCharge],
+      nav: { level: 'section', siteId: sec.siteId, sectionId: sec.id },
+    }))
+
+    for (const enc of enclosuresIn(sec.id)) {
+      const where = ['Sec: ' + sec.code, 'Site: ' + siteName]
+
+      out.push(row({
+        type: 'enclosure', id: enc.id, title: enc.code,
+        sub: enc.vacant ? 'Vacant' : enc.name,
+        meta: [enc.housing, ...where, plural(enc.occupants, 'occupant')],
+        nav: { level: 'enclosure', siteId: sec.siteId, sectionId: sec.id, enclosureId: enc.id },
+      }))
+
+      if (enc.vacant) continue
+
+      /* SPECIES IS AN AGGREGATE, NOT A RECORD. One row per distinct species
+         name, carrying the total it holds and the sexes underneath it - which
+         is exactly the shape of the count pills in the design. */
+      let sp = species.get(enc.name)
+      if (!sp) {
+        sp = { name: enc.name, total: 0, enclosures: 0, sites: new Set(),
+               sex: { M: 0, F: 0, UO: 0 } }
+        species.set(enc.name, sp)
+      }
+      sp.total += enc.occupants
+      sp.enclosures += 1
+      sp.sites.add(sec.siteId)
+
+      for (const ind of individuals(enc)) {
+        if (ind.kind.indexOf('Male') === 0) sp.sex.M += 1
+        else sp.sex.F += 1
+
+        const code = String(ind.when || '').replace(/^ID\s*/, '')
+
+        out.push(row({
+          type: 'animal', id: enc.id + ':' + ind.name, title: ind.name,
+          sub: enc.name,
+          meta: [ind.kind, 'Encl: ' + enc.code, ...where, code ? 'ID: ' + code : ''].filter(Boolean),
+          nav: { level: 'enclosure', siteId: sec.siteId, sectionId: sec.id, enclosureId: enc.id },
+        }))
+
+        /* THE IDENTIFIER IS ITS OWN ROW, because it is its own search type in
+           the design - somebody holding a tag reads the number off it and has
+           no name to type. Same animal, indexed by the other thing it is. */
+        if (code) {
+          out.push(row({
+            type: 'identifier', id: enc.id + ':' + code, title: code,
+            sub: ind.name + ' - ' + enc.name,
+            meta: ['Encl: ' + enc.code, ...where],
+            nav: { level: 'enclosure', siteId: sec.siteId, sectionId: sec.id, enclosureId: enc.id },
+          }))
+        }
+      }
+    }
+  }
+
+  /* THE UNKNOWNS ARE THE ANIMALS THE ENCLOSURE DOES NOT NAME. `individuals()`
+     names six and stops, so an enclosure of twenty-two has sixteen animals that
+     are real, counted and unnamed - `UO` in the design's pills. Leaving them out
+     would have made the pills disagree with the total printed beside them. */
+  for (const sp of species.values()) {
+    sp.sex.UO = Math.max(0, sp.total - sp.sex.M - sp.sex.F)
+    out.push(row({
+      type: 'species', id: sp.name, title: sp.name,
+      sub: binomial(sp.name),
+      meta: [plural(sp.enclosures, 'enclosure'), plural(sp.sites.size, 'site')],
+      count: sp.total, pills: sp.sex,
+      nav: null,
+    }))
+  }
+
+  for (const m of MODULES) {
+    out.push(row({
+      type: 'module', id: m.key, title: m.name, sub: 'Module',
+      meta: [m.route, m.short],
+      nav: { module: m.key },
+    }))
+  }
+
+  return out
+}
+
+function index() {
+  if (!INDEX) INDEX = build()
+  return INDEX
+}
+
+/**
+ * WHAT COUNTS AS A MATCH.
+ * Every whitespace-separated term must appear somewhere in the row - so
+ * "lion car" narrows rather than widening, which is what a reader typing a
+ * second word means by it. Substring, not prefix: the design's own example
+ * finds "Lion123" from "Lion", and an identifier is read from its middle as
+ * often as from its start.
+ */
+function matches(rec, terms) {
+  for (const t of terms) if (rec.hay.indexOf(t) === -1) return false
+  return true
+}
+
+/* A row is in scope if it belongs to the Site being looked at. Rows with no
+   Site - species aggregates, modules - are always in scope; they are not
+   anywhere in particular. */
+function inScope(rec, scope) {
+  if (!scope || !scope.siteId) return true
+  if (!rec.nav || !rec.nav.siteId) return true
+  return rec.nav.siteId === scope.siteId
+}
+
+/**
+ * @param query  what was typed, unmodified
+ * @param opts   type   one of TYPES.key, or null for everything
+ *               scope  { siteId } or null for all Sites
+ *               cap    rows per group before "See all"
+ * @returns [{ key, label, total, rows }] in GROUP_ORDER, empty groups dropped
+ */
+function search(query, opts) {
+  const o = opts || {}
+  const terms = String(query || '').toLowerCase().split(/\s+/).filter(Boolean)
+  const type = o.type || null
+  const scope = o.scope || null
+  const cap = o.cap == null ? 4 : o.cap
+  if (!terms.length && !type) return []
+
+  const buckets = new Map()
+  for (const rec of index()) {
+    if (type && rec.type !== type) continue
+    if (!inScope(rec, scope)) continue
+    if (terms.length && !matches(rec, terms)) continue
+    let b = buckets.get(rec.type)
+    if (!b) { b = []; buckets.set(rec.type, b) }
+    b.push(rec)
+  }
+
+  const out = []
+  for (const key of GROUP_ORDER) {
+    const rows = buckets.get(key)
+    if (!rows || !rows.length) continue
+    const t = TYPE_BY_KEY.get(key)
+    out.push({
+      key,
+      label: t ? t.plural : key.charAt(0).toUpperCase() + key.slice(1) + 's',
+      total: rows.length,
+      rows: cap ? rows.slice(0, cap) : rows,
+    })
+  }
+  return out
+}
+
+  __x.TYPES = TYPES;
+  __x.search = search;
+  __x.index = index;
 });
 
 __def('js/data/domainDetail.js', function (__x, __req) {
@@ -21773,6 +22430,556 @@ function createSearchSubmit({ input, root, hint, onSubmit }) {
   __x.createSearchSubmit = createSearchSubmit;
 });
 
+__def('js/components/GlobalSearch.js', function (__x, __req) {
+/**
+ * THE FIELD HOLDS TOKENS, NOT A STRING.
+ * ---------------------------------------------------------------------------
+ * That is the one idea in the Figma worth porting, and everything else follows
+ * from it. Typing `@` does not search for an at-sign - it opens a menu of the
+ * eight things this product can be asked about, and picking one commits a CHIP
+ * into the field. What is left of the field is then a search WITHIN that type,
+ * which is why the design can show "@animal | Lion12223 | x" as three separate
+ * objects on one line rather than as one string somebody has to parse.
+ *
+ * A string field would have needed a parser, and a parser would have had to
+ * decide what "A" at the start of a query means - the Animal prefix, or the
+ * first letter of "Asiatic Lion". There is no good answer, so the design does
+ * not ask the question: one unambiguous trigger, then a menu.
+ *
+ * === WHY THIS IS A PANEL AND NOT A PAGE ====================================
+ *
+ * The Figma frames are 390x844 - a phone, where search takes the whole screen
+ * and gets a back arrow. This file is the desktop reading of the same design:
+ * the field stays in the header where it already lives, and the surface opens
+ * UNDER it as an overlay. Same order, same grammar, same groups. Taking the
+ * whole viewport on a 1440px screen to show four results would be a translation
+ * of the frame rather than of the design.
+ *
+ * === WHAT IS SHOWN, IN ORDER ===============================================
+ *
+ *   nothing typed   Recently searched items, as clock chips, with Clear
+ *   typing          groups, each headed "About N results in X"
+ *   no matches      the term quoted back, the way the gallery already does it
+ *   a dead type     User and Tag exist in the menu and hold no data, and the
+ *                   panel says so rather than showing an empty list
+ */
+
+const { icon } = __req('js/icons.js');
+const { TYPES, search } = __req('js/data/searchIndex.js');
+const { prefersReducedMotion } = __req('js/lib/motion.js');
+
+const RECENT_KEY = 'antz.search.recent'
+const RECENT_MAX = 8
+
+/* Rows per group before the header offers "See all". Four is what the design
+   shows for Animals, and it is about the most a reader scans without deciding
+   to narrow the query instead. */
+const CAP = 4
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ))
+}
+
+function readRecent() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')
+    return Array.isArray(raw) ? raw.filter((s) => typeof s === 'string').slice(0, RECENT_MAX) : []
+  } catch (_) { return [] }
+}
+
+function writeRecent(list) {
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))) } catch (_) {}
+}
+
+/**
+ * THE TYPE MENU, AS A MODAL.
+ * The phone gets a bottom sheet because a thumb is at the bottom of a phone.
+ * A pointer is wherever it was last, so this centres - but it is the same list,
+ * the same radio semantics and the same Done, because those are the design and
+ * the sheet was only ever the delivery.
+ */
+function createTypeMenu({ onPick }) {
+  const scrim = document.createElement('div')
+  scrim.className = 'gsm-scrim'
+  scrim.hidden = true
+
+  const box = document.createElement('div')
+  box.className = 'gsm'
+  box.setAttribute('role', 'dialog')
+  box.setAttribute('aria-modal', 'true')
+  box.setAttribute('aria-label', 'Choose Search Type')
+
+  box.innerHTML =
+    '<div class="gsm__head">' +
+      '<h2 class="gsm__title">Choose Search Type</h2>' +
+      '<button type="button" class="gsm__close" aria-label="Close">' + icon('close') + '</button>' +
+    '</div>' +
+    '<div class="gsm__list" role="radiogroup" aria-label="Search type"></div>' +
+    '<div class="gsm__foot"><button type="button" class="gsm__done">Done</button></div>'
+
+  const list = box.querySelector('.gsm__list')
+  const doneBtn = box.querySelector('.gsm__done')
+  let chosen = null
+  let onClose = null
+
+  list.innerHTML = TYPES.map((t) => (
+    '<button type="button" class="gsm-opt" role="radio" aria-checked="false" data-key="' + t.key + '">' +
+      '<span class="gsm-opt__label"><b>' + esc(t.prefix) + '</b> - ' + esc(t.label) + '</span>' +
+      (t.has ? '' : '<span class="gsm-opt__none">no records yet</span>') +
+      '<span class="gsm-opt__dot" aria-hidden="true"></span>' +
+    '</button>'
+  )).join('')
+
+  function mark(key) {
+    chosen = key
+    for (const b of list.querySelectorAll('.gsm-opt')) {
+      const on = b.dataset.key === key
+      b.classList.toggle('is-on', on)
+      b.setAttribute('aria-checked', on ? 'true' : 'false')
+    }
+    doneBtn.disabled = !key
+  }
+
+  list.addEventListener('click', (e) => {
+    const b = e.target.closest('.gsm-opt')
+    if (b) mark(b.dataset.key)
+  })
+
+  function close() {
+    scrim.hidden = true
+    box.classList.remove('is-open')
+    const cb = onClose
+    onClose = null
+    if (cb) cb()
+  }
+
+  doneBtn.addEventListener('click', () => {
+    const key = chosen
+    close()
+    if (key) onPick(TYPES.find((t) => t.key === key))
+  })
+  box.querySelector('.gsm__close').addEventListener('click', close)
+  scrim.addEventListener('click', close)
+
+  /* Escape closes the menu and NOT the panel underneath it. Without the stop,
+     one Escape would dismiss both and the reader would lose the query they were
+     halfway through refining. */
+  box.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.stopPropagation(); close() }
+  })
+
+  scrim.append(box)
+  document.body.append(scrim)
+
+  return {
+    open(current, after) {
+      onClose = after || null
+      mark(current || null)
+      scrim.hidden = false
+      requestAnimationFrame(() => box.classList.add('is-open'))
+      const first = list.querySelector('.gsm-opt.is-on') || list.querySelector('.gsm-opt')
+      if (first) first.focus()
+    },
+    close,
+    get isOpen() { return !scrim.hidden },
+  }
+}
+
+/**
+ * @param opts
+ *   field      the `.search` element - the panel anchors to its row
+ *   input      the real input inside it
+ *   hint       the rotating placeholder's element, hidden while a token is set
+ *   getScope   () => ({ siteId, label }) - what "All Site" currently means
+ *   onNavigate (nav) => void - a result was chosen
+ */
+function createGlobalSearch({ field, input, hint, getScope, onNavigate }) {
+  const row = field.parentElement
+
+  /* THE TOKEN LIVES BEFORE THE INPUT, INSIDE THE FIELD. Not a separate bar
+     above it: the design draws one line reading "@animal Lion12223 x", and a
+     chip on its own row would have read as a filter applied TO the search
+     rather than as part of what was typed. */
+  const strip = document.createElement('span')
+  strip.className = 'search__tokens'
+  field.insertBefore(strip, input)
+
+  const clear = document.createElement('button')
+  clear.type = 'button'
+  clear.className = 'search__clear'
+  clear.setAttribute('aria-label', 'Clear search')
+  clear.innerHTML = icon('close')
+  field.append(clear)
+
+  const panel = document.createElement('div')
+  panel.className = 'gsp'
+  panel.hidden = true
+  panel.setAttribute('role', 'listbox')
+  panel.setAttribute('aria-label', 'Search results')
+  row.append(panel)
+
+  const live = document.createElement('p')
+  live.className = 'sr-only'
+  live.setAttribute('role', 'status')
+  live.setAttribute('aria-live', 'polite')
+  row.append(live)
+
+  let token = null      /* the committed type, or null */
+  let open = false
+  let cursor = -1       /* highlighted row, -1 for none */
+  let flat = []         /* every rendered result row, in visual order */
+
+  const menu = createTypeMenu({
+    onPick(t) {
+      token = t
+      input.value = ''
+      render()
+      input.focus()
+    },
+  })
+
+  /* ── the field ──────────────────────────────────────────────────────────*/
+
+  function syncField() {
+    strip.innerHTML = token
+      ? '<span class="search__token">' +
+          '<span class="search__token-txt">@' + esc(token.label.toLowerCase()) + '</span>' +
+          '<button type="button" class="search__token-x" aria-label="Remove ' +
+            esc(token.label) + ' filter">' + icon('close') + '</button>' +
+        '</span>'
+      : ''
+    field.classList.toggle('has-token', !!token)
+    field.classList.toggle('has-value', !!input.value)
+    if (hint) hint.hidden = !!token || !!input.value
+    input.setAttribute('aria-label', token ? 'Search ' + token.plural : input.getAttribute('aria-label') || 'Search')
+  }
+
+  strip.addEventListener('click', (e) => {
+    if (e.target.closest('.search__token-x')) { token = null; render(); input.focus() }
+  })
+
+  clear.addEventListener('click', () => {
+    input.value = ''
+    token = null
+    render()
+    input.focus()
+  })
+
+  /* ── rendering the panel ────────────────────────────────────────────────*/
+
+  function rail() {
+    const on = token ? token.key : ''
+    return '<div class="gsp-rail">' +
+      '<button type="button" class="gsp-rail__open" aria-label="Choose search type">' +
+        icon('sliders') + '</button>' +
+      '<span class="gsp-rail__sep" aria-hidden="true"></span>' +
+      TYPES.filter((t) => t.has).map((t) => (
+        '<button type="button" class="gsp-chip' + (on === t.key ? ' is-on' : '') +
+          '" data-type="' + t.key + '">' + esc(t.plural) + '</button>'
+      )).join('') +
+    '</div>'
+  }
+
+  function recentBlock() {
+    const list = readRecent()
+    if (!list.length) {
+      return '<div class="gsp-empty">' +
+        '<span class="gsp-empty__title">Search this Site</span>' +
+        '<span class="gsp-empty__note">A name, an enclosure code, a tag number ' +
+        'or a species. What you search will be remembered here.</span></div>'
+    }
+    return '<div class="gsp-recent">' +
+      '<div class="gsp-recent__head"><span>Recently searched items</span>' +
+        '<button type="button" class="gsp-recent__clear">Clear</button></div>' +
+      '<div class="gsp-recent__chips">' +
+        list.map((q) => (
+          '<button type="button" class="gsp-recent__chip" data-q="' + esc(q) + '">' +
+            '<span class="gsp-recent__clock" aria-hidden="true"></span>' + esc(q) + '</button>'
+        )).join('') +
+      '</div></div>'
+  }
+
+  /* The count pills under a species - M, F and the unknowns. Rendered only
+     where the number is non-zero, because a pill reading "UO - 0" is a fact
+     nobody needed and three of them crowd out the two that mattered. */
+  function pills(p) {
+    if (!p) return ''
+    const parts = []
+    if (p.M) parts.push('<span class="gsp-pill is-m">M - ' + p.M + '</span>')
+    if (p.F) parts.push('<span class="gsp-pill is-f">F - ' + p.F + '</span>')
+    if (p.UO) parts.push('<span class="gsp-pill is-u">UO - ' + p.UO + '</span>')
+    return parts.length ? '<span class="gsp-row__pills">' + parts.join('') + '</span>' : ''
+  }
+
+  function rowHTML(rec, i) {
+    const sub = rec.sub
+      ? '<span class="gsp-row__sub' + (rec.type === 'species' ? ' is-latin' : '') + '">' +
+          esc(rec.sub) + '</span>'
+      : ''
+    const meta = (rec.meta || []).length
+      ? '<span class="gsp-row__meta">' + rec.meta.map(esc).join('<i>&middot;</i>') + '</span>'
+      : ''
+    const count = rec.count != null
+      ? '<span class="gsp-row__count">' + rec.count + '</span>'
+      : '<span class="gsp-row__go" aria-hidden="true">' + icon('chev-right') + '</span>'
+
+    return '<button type="button" class="gsp-row" role="option" aria-selected="false" data-i="' + i + '">' +
+      '<span class="gsp-row__body">' +
+        '<span class="gsp-row__title">' + esc(rec.title) + '</span>' +
+        sub + meta + pills(rec.pills) +
+      '</span>' + count +
+    '</button>'
+  }
+
+  function render() {
+    syncField()
+
+    const q = input.value.trim()
+    const scope = getScope ? getScope() : null
+
+    /* NOTHING ASKED FOR YET. A type on its own is a question - "which animals" -
+       so it lists rather than waiting, which is what the design's own filter
+       chips imply. A bare field with no type has nothing to list but history. */
+    if (!q && !token) {
+      flat = []
+      cursor = -1
+      panel.innerHTML = rail() + recentBlock()
+      return
+    }
+
+    if (token && !token.has) {
+      flat = []
+      cursor = -1
+      panel.innerHTML = rail() +
+        '<div class="gsp-empty">' +
+          '<span class="gsp-empty__title">No ' + esc(token.plural.toLowerCase()) + ' on record</span>' +
+          '<span class="gsp-empty__note">This build has no ' + esc(token.label.toLowerCase()) +
+          ' data yet. The type is in the menu because the design asks for it, ' +
+          'not because there is something behind it.</span>' +
+        '</div>'
+      return
+    }
+
+    const groups = search(q, { type: token ? token.key : null, scope, cap: CAP })
+
+    flat = []
+    for (const g of groups) for (const r of g.rows) flat.push(r)
+    cursor = flat.length ? 0 : -1
+
+    if (!groups.length) {
+      panel.innerHTML = rail() +
+        '<div class="gsp-empty">' +
+          '<span class="gsp-empty__title">Nothing matches &ldquo;' + esc(q) + '&rdquo;</span>' +
+          '<span class="gsp-empty__note">Try a shorter term, or drop the type filter.</span>' +
+        '</div>'
+      live.textContent = 'No results for ' + q
+      return
+    }
+
+    let i = 0
+    let html = rail()
+    for (const g of groups) {
+      html += '<div class="gsp-group">' +
+        '<div class="gsp-group__head">' +
+          '<span>About ' + g.total + ' result' + (g.total === 1 ? '' : 's') +
+            ' in ' + esc(g.label) + '</span>' +
+          (g.total > g.rows.length
+            ? '<button type="button" class="gsp-group__all" data-type="' + g.key + '">See all</button>'
+            : '') +
+        '</div>' +
+        g.rows.map((r) => rowHTML(r, i++)).join('') +
+      '</div>'
+    }
+    panel.innerHTML = html
+    mark()
+
+    const total = groups.reduce((n, g) => n + g.total, 0)
+    live.textContent = total + ' result' + (total === 1 ? '' : 's') + ' for ' + q
+  }
+
+  function mark() {
+    const rows = panel.querySelectorAll('.gsp-row')
+    rows.forEach((el, i) => {
+      const on = i === cursor
+      el.classList.toggle('is-cursor', on)
+      el.setAttribute('aria-selected', on ? 'true' : 'false')
+      if (on) el.scrollIntoView({ block: 'nearest' })
+    })
+  }
+
+  /* ── opening and closing ────────────────────────────────────────────────*/
+
+  function show() {
+    if (open) return
+    open = true
+    panel.hidden = false
+    document.body.classList.add('is-searching')
+    render()
+    if (!prefersReducedMotion()) requestAnimationFrame(() => panel.classList.add('is-open'))
+    else panel.classList.add('is-open')
+  }
+
+  function hide() {
+    if (!open) return
+    open = false
+    panel.classList.remove('is-open')
+    panel.hidden = true
+    document.body.classList.remove('is-searching')
+    cursor = -1
+  }
+
+  function remember(q) {
+    const v = String(q || '').trim()
+    if (!v) return
+    const list = readRecent().filter((s) => s.toLowerCase() !== v.toLowerCase())
+    list.unshift(v)
+    writeRecent(list)
+  }
+
+  function choose(rec) {
+    if (!rec) return
+    remember(input.value.trim())
+    /* A species is an aggregate of enclosures across Sites - there is no one
+       page to land on, so it narrows the search instead of navigating. This is
+       the design's own behaviour: the species row carries a count, not a
+       chevron. */
+    if (!rec.nav) {
+      token = TYPES.find((t) => t.key === 'animal')
+      input.value = rec.title
+      render()
+      input.focus()
+      return
+    }
+    hide()
+    input.blur()
+    if (onNavigate) onNavigate(rec.nav)
+  }
+
+  /* ── events ─────────────────────────────────────────────────────────────*/
+
+  /* FOCUS IS NOT THE ONLY WAY IN. A click that lands on the field's padding
+     rather than on the input itself never focuses anything, and the reader who
+     aimed at the box and got nothing has been told the search is broken. The
+     two together also mean keyboard arrival opens the panel exactly as a click
+     does, which is the behaviour the design draws. */
+  input.addEventListener('focus', show)
+  field.addEventListener('click', () => { input.focus(); show() })
+
+  input.addEventListener('input', () => {
+    /* THE ONE TRIGGER. `@` typed into an empty field opens the menu and is not
+       itself searched for - see the note at the top of this file for why it is
+       one character and not eight prefixes. */
+    if (!token && input.value === '@') {
+      input.value = ''
+      menu.open(null, () => input.focus())
+      syncField()
+      return
+    }
+    render()
+    show()
+  })
+
+  /* Capture, so this runs before the Enter-acknowledgement wired in main.js:
+     once there is a result to open, opening it is what Enter means. */
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (input.value || token) { input.value = ''; token = null; render() }
+      else hide()
+      return
+    }
+    if (e.key === 'Backspace' && !input.value && token) {
+      token = null
+      render()
+      return
+    }
+    if (!open) return
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!flat.length) return
+      e.preventDefault()
+      cursor = e.key === 'ArrowDown'
+        ? (cursor + 1) % flat.length
+        : (cursor - 1 + flat.length) % flat.length
+      mark()
+      return
+    }
+    if (e.key === 'Enter' && cursor >= 0 && flat[cursor]) {
+      e.preventDefault()
+      e.stopImmediatePropagation()
+      choose(flat[cursor])
+    }
+  }, true)
+
+  panel.addEventListener('mousedown', (e) => {
+    /* The field must not lose focus to a click inside the panel, or the panel
+       closes on blur before the click ever lands. */
+    e.preventDefault()
+  })
+
+  panel.addEventListener('click', (e) => {
+    const openMenu = e.target.closest('.gsp-rail__open')
+    if (openMenu) { menu.open(token ? token.key : null, () => input.focus()); return }
+
+    const chip = e.target.closest('.gsp-chip')
+    if (chip) {
+      const key = chip.dataset.type
+      token = (token && token.key === key) ? null : TYPES.find((t) => t.key === key)
+      render()
+      input.focus()
+      return
+    }
+
+    const all = e.target.closest('.gsp-group__all')
+    if (all) {
+      token = TYPES.find((t) => t.key === all.dataset.type) || token
+      render()
+      input.focus()
+      return
+    }
+
+    const recentChip = e.target.closest('.gsp-recent__chip')
+    if (recentChip) {
+      input.value = recentChip.dataset.q
+      render()
+      input.focus()
+      return
+    }
+
+    if (e.target.closest('.gsp-recent__clear')) {
+      writeRecent([])
+      render()
+      return
+    }
+
+    const r = e.target.closest('.gsp-row')
+    if (r) {
+      cursor = Number(r.dataset.i)
+      choose(flat[cursor])
+    }
+  })
+
+  document.addEventListener('pointerdown', (e) => {
+    if (!open || menu.isOpen) return
+    if (e.target.closest('.search-row') || e.target.closest('.gsm-scrim')) return
+    hide()
+  })
+
+  syncField()
+
+  return {
+    open: show,
+    close: hide,
+    get isOpen() { return open },
+    /* The scope changed under us - a different Site means different answers. */
+    sync() { if (open) render(); else syncField() },
+  }
+}
+
+  __x.createGlobalSearch = createGlobalSearch;
+});
+
 __def('js/app.js', function (__x, __req) {
 /**
  * ANTZ COMMAND CENTRE · HOME
@@ -21807,6 +23014,7 @@ const { createSitesList } = __req('js/components/SitesList.js');
 const { createWorkspaceHeader } = __req('js/components/WorkspaceHeader.js');
 const { createWidgetDetail } = __req('js/components/WidgetDetail.js');
 const { createSearchHint, createSearchSubmit } = __req('js/components/SearchHint.js');
+const { createGlobalSearch } = __req('js/components/GlobalSearch.js');
 const { buildContext, detailFor, hasDetail } = __req('js/data/domainDetail.js');
 const { viewStore, setView, openHousing, setSite, setSection, setEnclosure, setLevel, setRole, goUp, goDown } =
   __req('js/state/viewStore.js');
@@ -22859,6 +24067,39 @@ createSearchSubmit({
   },
 })
 
+/**
+ * THE SEARCH SURFACE.
+ * ───────────────────────────────────────────────────────────────────────────
+ * The field was decorative until now — a rotating hint and an Enter that said
+ * something polite. This gives it an index to answer from. What belongs HERE
+ * rather than in the component is the two things only this file knows: what
+ * "this Site" currently means, and what to do when a row is chosen.
+ *
+ * SCOPE IS THE SITE, NOT THE LEVEL. Standing in an enclosure and searching for
+ * a section of the same Site has to find it — the design's own scope control
+ * says "All Site", one Site, not "this enclosure". Off the Site workspace
+ * there is no scope at all and the whole index answers.
+ */
+const globalSearch = createGlobalSearch({
+  field: document.querySelector('.search'),
+  input: searchInput,
+  hint: searchHint.el,
+  getScope() {
+    const st = viewStore.get()
+    return st.view === 'site' && st.siteId ? { siteId: st.siteId } : null
+  },
+  onNavigate(nav) {
+    /* A module is not a place in the hierarchy, so it lands on the home page
+       where the modules are. Everything else is a level, and the store's own
+       setters already work out the levels above the one being opened. */
+    if (nav.module) { setView('modules'); return }
+    if (viewStore.get().view !== 'site') setView('site')
+    if (nav.enclosureId) setEnclosure(nav.enclosureId)
+    else if (nav.sectionId) setSection(nav.sectionId)
+    else if (nav.siteId) setSite(nav.siteId)
+  },
+})
+
 const switcher = createWorkspaceSwitcher({
   root: document.getElementById('workspaceSwitch'),
   getView: () => viewStore.get().view,
@@ -22938,6 +24179,7 @@ function syncWorkspace(meta = {}) {
   searchInput.placeholder = ''
   searchInput.setAttribute('aria-label', onSite ? searchScope(st) : 'Search')
   searchHint.sync()
+  globalSearch.sync()
 
   /* Arriving back on the home page is an arrival too. Not at `init`, because
      the first paint of this grid has not happened yet at that point — it lands
@@ -23097,6 +24339,10 @@ window.addEventListener('orientationchange', onResize)
 Object.assign(window, {
   antz: {
     reset: resetLayout,
+    /* test hook: the search index and the live view, so verify_search.py can
+       read what the field is answering from without reaching into a closure. */
+    searchIndex: () => __req('js/data/searchIndex.js'),
+    view: () => viewStore.get(),
     /** Replay the entrance on the home grid — `antz.land({from:'center'})`. */
     land: (opts) => grid.land(opts),
     state: () => layoutStore.get(),

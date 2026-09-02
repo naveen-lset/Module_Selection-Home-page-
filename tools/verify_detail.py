@@ -407,7 +407,11 @@ with Chrome(width=1024, height=1000, reduced_motion=False) as c:
     check("no console errors while cycling", not c.errors(), str(c.errors()[:2]))
 
 
-# ── Enter is acknowledged, because there is no index to answer with ────────
+# ── Enter, now that there IS an index to answer with ──────────────────────
+# This block used to assert that Enter only ACKNOWLEDGED, because the field had
+# nothing to search. Global Search gave it something, so the contract moved: a
+# query with results OPENS the first one, and the acknowledgement is what a
+# query with no results still gets. Both halves are asserted below.
 ENTER = """(()=>{const i=document.querySelector('.search__input');i.focus();
   i.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));})()"""
 SET_VALUE = """(v=>{const i=document.querySelector('.search__input');i.value=v;
@@ -417,18 +421,28 @@ LIVE = "[...document.querySelectorAll('[aria-live]')].map(e=>e.textContent.trim(
 with Chrome(width=1024, height=1000, reduced_motion=False) as c:
     print("\npressing Enter in the search field")
     c.goto(URL)
-    c.eval(SET_VALUE + "('leopard')"); time.sleep(0.3)
-    c.eval(ENTER); time.sleep(0.1)
-    running = c.eval("document.querySelector('.search').getAnimations().length"
-                     " + document.querySelector('.search__icon').getAnimations().length")
-    check("a query is acknowledged in motion", running >= 2, f"{running} animations")
-    time.sleep(0.8)
+    # A term with results: Enter opens the top one and leaves the page there.
+    c.eval(SET_VALUE + "('leopard')"); time.sleep(0.4)
+    c.eval(ENTER); time.sleep(0.7)
+    got = c.eval("(()=>{const st=antz.view();return {view:st.view,level:st.level}})()")
+    check("a query with results opens the first of them",
+          got["view"] == "site" and got["level"] in ("site", "section", "enclosure"),
+          f"{got['view']}/{got['level']}")
     check("and the field is left exactly as it was found",
           c.eval("getComputedStyle(document.querySelector('.search')).transform") in ("none", "matrix(1, 0, 0, 1, 0, 0)")
           and c.eval("document.querySelector('.search').getAnimations().length") == 0,
           c.eval("getComputedStyle(document.querySelector('.search')).transform"))
+
+    # A term with none: the acknowledgement is still what Enter means.
+    c.eval(SET_VALUE + "('zzzqqq')"); time.sleep(0.4)
+    c.eval(ENTER); time.sleep(0.1)
+    running = c.eval("document.querySelector('.search').getAnimations().length"
+                     " + document.querySelector('.search__icon').getAnimations().length")
+    check("a query with nothing behind it is still acknowledged in motion",
+          running >= 2, f"{running} animations")
+    time.sleep(0.8)
     check("the live region says what was taken",
-          any("leopard" in t for t in c.eval(LIVE)), str(c.eval(LIVE)))
+          any("zzzqqq" in t for t in c.eval(LIVE)), str(c.eval(LIVE)))
 
     # An empty Enter is unfinished, not wrong: the HINT moves, not the field
     c.eval(SET_VALUE + "('')"); time.sleep(0.3)
