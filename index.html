@@ -351,6 +351,14 @@
   --ease-out:   cubic-bezier(.16, 1, .3, 1);
   --ease-sheet: cubic-bezier(.32, .72, 0, 1);
   --t-fast: 140ms; --t-base: 220ms; --t-slow: 320ms; --t-sheet: 420ms;
+  /* ANCHORED MENUS SHARE ONE DURATION. Profile menu, the three Site header
+     menus, the size popover, Choose Search Type and the search panel were four
+     components that each picked their own timing, and a set of dropdowns that
+     open at four different speeds reads as four different products. 200ms is
+     the figure the Animate UI / Radix dropdown ships as its default, and it is
+     slower than --t-fast on purpose: the extra 60ms is what makes a menu look
+     like it grew out of its button rather than appearing next to it. */
+  --t-menu: 200ms;
 
   /* ── 8 · type ──────────────────────────────────────────────────────────
      Three families, each doing one job, all as Figma specifies.
@@ -598,7 +606,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root { --t-fast: 0ms; --t-base: 0ms; --t-slow: 0ms; --t-sheet: 0ms; }
+  :root { --t-fast: 0ms; --t-base: 0ms; --t-slow: 0ms; --t-sheet: 0ms; --t-menu: 0ms; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
@@ -1151,10 +1159,11 @@ button { font: inherit; color: inherit; }
   background: var(--surface);
   box-shadow: var(--shadow-lift);
   opacity: 0;
-  translate: 0 -6px;
-  transition: opacity .16s ease, translate .16s ease;
+  transform: scale(.98) translateY(-4px);
+  transform-origin: top center;
+  transition: opacity var(--t-menu) var(--ease-out), transform var(--t-menu) var(--ease-out);
 }
-.gsp.is-open { opacity: 1; translate: 0 0; }
+.gsp.is-open { opacity: 1; transform: scale(1) translateY(0); }
 .gsp[hidden] { display: none !important; }
 
 /* THE ROW HAS TO OUTRANK THE PAGE WHILE IT IS OPEN. `.search-row` sits at
@@ -1166,7 +1175,7 @@ button { font: inherit; color: inherit; }
 body.is-searching .search-row { z-index: 60; }
 
 @media (prefers-reduced-motion: reduce) {
-  .gsp { transition: none; opacity: 1; translate: 0 0; }
+  .gsp { transition: none; opacity: 1; transform: none; }
 }
 
 /* ── the type rail ───────────────────────────────────────────────────────
@@ -1375,11 +1384,13 @@ body.is-searching .search-row { z-index: 60; }
   border-radius: var(--r-card);
   background: var(--surface);
   box-shadow: var(--shadow-lift);
-  opacity: 0; scale: .98;
-  transition: opacity .16s ease, scale .16s ease;
+  opacity: 0;
+  transform: scale(.95);
+  transform-origin: center;
+  transition: opacity var(--t-menu) var(--ease-out), transform var(--t-menu) var(--ease-out);
 }
-.gsm.is-open { opacity: 1; scale: 1; }
-@media (prefers-reduced-motion: reduce) { .gsm { transition: none; opacity: 1; scale: 1; } }
+.gsm.is-open { opacity: 1; transform: scale(1); }
+@media (prefers-reduced-motion: reduce) { .gsm { transition: none; opacity: 1; transform: none; } }
 
 .gsm__head {
   display: flex; align-items: center; justify-content: space-between;
@@ -3263,9 +3274,9 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
   backdrop-filter: blur(14px) saturate(1.1);
   opacity: 0;
-  transform: translateY(-6px) scale(.97);
+  transform: translateY(-4px) scale(.95);
   transform-origin: top center;
-  transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+  transition: opacity var(--t-menu) var(--ease-out), transform var(--t-menu) var(--ease-out);
 }
 .size-pop.is-open { opacity: 1; transform: translateY(0) scale(1); }
 .size-pop[hidden] { display: none !important; }
@@ -3308,9 +3319,16 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   outline: 1px solid rgba(31, 65, 91, .07);
   outline-offset: -1px;
   opacity: 0;
-  transform: scale(.96) translateY(-6px);
+  transform: scale(.95) translateY(-4px);
+  /* THE ORIGIN IS SET BY place(), NOT HERE. A menu grows out of the corner it
+     is anchored to, and this component is anchored three different ways — the
+     Siblings menu is left-aligned, the modules menu is centred over a veil, the
+     rest hang off the right. One hardcoded `top right` was correct for the
+     third case and visibly wrong for the other two, which is the difference
+     between a menu that unfolds from its button and one that swoops in from
+     off to the side. This value is only the fallback. */
   transform-origin: top right;
-  transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+  transition: opacity var(--t-menu) var(--ease-out), transform var(--t-menu) var(--ease-out);
 }
 .pmenu[hidden] { display: none; }
 .pmenu.is-open { opacity: 1; transform: scale(1) translateY(0); }
@@ -20635,7 +20653,7 @@ __def('js/components/ProfileMenu.js', function (__x, __req) {
  */
 
 const { icon } = __req('js/icons.js');
-const { menuEntry, capToViewport } = __req('js/components/PopMenu.js');
+const { menuEntry, capToViewport, menuOrigin } = __req('js/components/PopMenu.js');
 
 /**
  * @param {object} opts
@@ -20719,6 +20737,7 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
     /* This menu is four items on the home page and eighteen on a Site, so the
        cap is not optional any more. Shared with PopMenu — see capToViewport(). */
     capToViewport(menu, top, margin)
+    menuOrigin(menu, r)
   }
 
   function show() {
@@ -21002,6 +21021,39 @@ function capToViewport(menu, top, margin = 12) {
   menu.style.maxHeight = `${Math.max(180, window.innerHeight - top - margin)}px`
 }
 
+/**
+ * WHICH CORNER THE MENU GROWS OUT OF.
+ * ───────────────────────────────────────────────────────────────────────────
+ * A dropdown that scales up reads as unfolding FROM its button — but only if
+ * the corner it scales from is the corner nearest the button. Get it wrong and
+ * the same 200ms transition reads as the menu sliding in from somewhere else
+ * entirely, which is the tell that an animation was applied rather than
+ * designed.
+ *
+ * CSS cannot know this. The menu is placed by script, right-aligned or
+ * left-aligned depending on the caller, and then CLAMPED to the viewport — so
+ * on a narrow window a right-aligned menu can end up well to the left of its
+ * own anchor. The only honest answer is measured after placement: find where
+ * the anchor's centre falls along the menu's width, and grow from there.
+ *
+ * A centred menu is the exception. It is not anchored to anything on the page —
+ * it is a dialog over a veil — so it scales from its own middle.
+ */
+function menuOrigin(menu, anchorRect, { centred = false } = {}) {
+  if (centred) { menu.style.transformOrigin = 'center'; return }
+  const r = menu.getBoundingClientRect()
+  const w = r.width || menu.offsetWidth || 1
+  /* Where the anchor sits across the menu, 0 at the menu's left edge and 1 at
+     its right. Clamped, because a clamped menu can sit entirely to one side. */
+  const at = Math.max(0, Math.min(1, ((anchorRect.left + anchorRect.right) / 2 - r.left) / w))
+  /* X FIRST, THEN Y — and it has to be written that way. The two-value syntax
+     is `<x> <y>`, so `top 93%` puts a y-keyword in the x slot, which makes the
+     whole declaration invalid. The browser drops it silently and the element
+     keeps the stylesheet's `top right`, so the menu still animates, still looks
+     deliberate, and still grows from the wrong corner. Nothing throws. */
+  menu.style.transformOrigin = `${(at * 100).toFixed(1)}% 0%`
+}
+
 function createPopMenu({
   anchor, items, onSelect, label = 'Menu', align = 'right', getState,
   /* An extra class on the root, for a menu that needs its own measurements.
@@ -21114,6 +21166,7 @@ function createPopMenu({
     menu.style.top = `${top}px`
     menu.style.left = `${Math.round(left)}px`
     capToViewport(menu, top, margin)
+    menuOrigin(menu, r, { centred })
   }
 
   function show() {
@@ -21190,6 +21243,7 @@ function esc(s) {
   __x.createPopMenu = createPopMenu;
   __x.menuEntry = menuEntry;
   __x.capToViewport = capToViewport;
+  __x.menuOrigin = menuOrigin;
 });
 
 __def('js/components/WorkspaceHeader.js', function (__x, __req) {
