@@ -898,6 +898,22 @@ and 12 rows so lifting the cap does not silently resolve every span to 1×1.
 Vercel → Project → Settings → Git; it needs the Vercel GitHub App installed on
 the repo, which is a browser step.
 
+**⚠ Twelve new widget compositions are mocked up and waiting on a decision.**
+`mockups/widget-concepts.html` — a standalone page, this product's own tokens,
+cards at artboard size, the reference Site's real figures. Drawn from the four
+sheets in `References/Widgets_Reference/`; what is taken is the composition and
+never the styling. Each one names the existing layout you would otherwise reach
+for and why it falls short. **Two are decisions rather than proposals:**
+`setpoint` would be the first card in the product that WRITES (optimistic
+state, failure path, undo, a permission gate finer than the role chip), and
+`agenda` overlaps `timeline` closely enough to be a variant rather than a
+twenty-second entry in `LAYOUTS`. Nothing is wired to `derive()`, the picker or
+the packer. Eight of the twelve are 2x2, so adding them means REPLACING cards
+in the fifteen seeded defaults, not appending — the page notes this. Its own
+checks are `mock.checkOverflow()` and `mock.checkCollapsed()`, green at nine
+widths; the second one exists because the split bar shipped at zero height and
+every overflow assertion passed on it.
+
 **Worth doing next, and small.** The Sites listing has no filter or sort control
 — the ranking is fixed at worst-first. Four Sites do not need one; forty would,
 and the row template already carries every field a filter would key on.

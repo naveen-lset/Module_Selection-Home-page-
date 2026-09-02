@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widget Concepts · ANTZ Command Centre</title>
+
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  WIDGET CONCEPTS · twelve compositions the catalogue does not have
+  ═══════════════════════════════════════════════════════════════════════════
+
+  Source: References/Widgets_Reference/ — four sheets of iOS/Android home-screen
+  widgets. What is taken from them is the COMPOSITION, never the styling: no
+  reference card's palette, radius, shadow or type is copied. Every card below
+  is drawn with this product's own tokens, at the artboard's own card sizes
+  (179.2 × 164 for a 1×1, 374.4 wide, 344 tall for a 2×2), so a concept that
+  looks cramped here will look cramped in the app.
+
+  THIS IS A MOCKUP, NOT A BUILD. Nothing here is wired to derive(), the picker,
+  the packer or the saved layout. The figures are the reference Site's real
+  ones — Bannerghatta Safari, 412 ha, 12 sections, 48 enclosures, 86 staff,
+  42 species, 318 animals, health 87 — so the cards can be judged at the
+  density they would actually carry.
+
+  THE TEST EACH ONE HAS TO PASS is the brief's: looking at a page of them, you
+  should know they are different KINDS of card before reading a label. The
+  contact sheet at the top is that test. The annotation beside each concept
+  answers the second question — which existing layout would have done instead,
+  and why it would not.
+
+  Two are marked ⚠ because they are decisions rather than proposals. See them.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   1 · TOKENS — the subset this page needs, copied verbatim from index.html.
+   Copied rather than imported because the app is one file and a mockup that
+   reaches into it cannot be opened on its own. If a token here disagrees with
+   index.html, index.html is right.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --page-bg:
+    linear-gradient(180deg,
+      rgba(175, 239, 235, .5)   0%,
+      rgba(175, 239, 235, .275) 32.386%,
+      rgba(242, 255, 248, .5)   68.662%),
+    linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%);
+
+  --c-on-secondary-ctr: #1F415B;
+  --c-on-surface-var:   #44544A;
+  --c-neutral-2:        #7A8684;
+  --c-secondary-dark:   #00ABAB;
+  --c-tertiary:         #FA6140;
+
+  --ink:      var(--c-on-secondary-ctr);
+  --ink-head: var(--c-on-surface-var);
+  --ink-mute: var(--c-neutral-2);
+  --ink-2:    #52697A;
+  --on-dark:  #FFFFFF;
+  --surface:  #FFFFFF;
+
+  /* the eleven module gradients these concepts sit on, sampled off the Figma
+     artboard exactly as index.html has them */
+  --g-medical: linear-gradient(122.90619deg,
+    rgb(142,190,165) 6%, rgb(129,183,155) 15.8%, rgb(116,175,145) 25.6%,
+    rgb(103,168,134) 35.3%, rgb(90,160,123) 45.1%, rgb(77,153,114) 54.9%,
+    rgb(65,145,103) 64.7%, rgb(51,138,93) 74.4%, rgb(51,138,93) 84.2%, rgb(51,138,93) 94%);
+  --g-mortality: linear-gradient(123.16619deg,
+    rgb(251,153,132) 6%, rgb(251,149,128) 15.8%, rgb(251,146,123) 25.6%,
+    rgb(251,143,119) 35.3%, rgb(251,139,115) 45.1%, rgb(251,135,111) 54.9%,
+    rgb(251,132,107) 64.7%, rgb(251,128,102) 74.4%, rgb(251,128,102) 84.2%, rgb(251,128,102) 94%);
+  --g-pharmacy: linear-gradient(123.16619deg,
+    rgb(119,155,159) 6%, rgb(114,149,155) 15.8%, rgb(107,144,149) 25.6%,
+    rgb(100,138,143) 35.3%, rgb(93,131,138) 45.1%, rgb(86,126,133) 54.9%,
+    rgb(79,120,128) 64.7%, rgb(72,115,122) 74.4%, rgb(72,115,122) 84.2%, rgb(72,115,122) 94%);
+  --g-lab: linear-gradient(123.16619deg,
+    rgb(216,201,147) 6%, rgb(216,198,140) 15.8%, rgb(215,195,134) 25.6%,
+    rgb(214,192,128) 35.3%, rgb(213,188,122) 45.1%, rgb(212,185,117) 54.9%,
+    rgb(210,183,110) 64.7%, rgb(209,180,104) 74.4%, rgb(209,180,104) 84.2%, rgb(209,180,104) 94%);
+  --g-fetal: linear-gradient(123.16619deg,
+    rgb(244,147,164) 6%, rgb(245,141,160) 15.8%, rgb(246,134,155) 25.6%,
+    rgb(246,128,149) 35.3%, rgb(247,122,145) 45.1%, rgb(247,116,140) 54.9%,
+    rgb(248,110,135) 64.7%, rgb(248,103,129) 74.4%, rgb(248,103,129) 84.2%, rgb(248,103,129) 94%);
+  --g-eggs: linear-gradient(123.16619deg,
+    rgb(106,220,226) 6%, rgb(98,216,225) 15.8%, rgb(91,213,225) 25.6%,
+    rgb(83,209,224) 35.3%, rgb(74,205,223) 45.1%, rgb(66,200,222) 54.9%,
+    rgb(58,195,222) 64.7%, rgb(50,191,221) 74.4%, rgb(50,191,221) 84.2%, rgb(50,191,221) 94%);
+  --g-users: linear-gradient(123.16619deg,
+    rgb(123,147,160) 6%, rgb(117,141,155) 15.8%, rgb(109,135,150) 25.6%,
+    rgb(102,128,145) 35.3%, rgb(95,122,139) 45.1%, rgb(88,115,133) 54.9%,
+    rgb(81,109,128) 64.7%, rgb(74,103,123) 74.4%, rgb(74,103,122) 84.2%, rgb(74,103,122) 94%);
+  --g-parivesh: linear-gradient(123.16619deg,
+    rgb(108,231,223) 6%, rgb(101,230,221) 15.8%, rgb(92,229,220) 25.6%,
+    rgb(83,227,218) 35.3%, rgb(75,226,216) 45.1%, rgb(67,225,214) 54.9%,
+    rgb(58,223,212) 64.7%, rgb(50,222,211) 74.4%, rgb(50,222,211) 84.2%, rgb(50,222,211) 94%);
+  --g-followup: linear-gradient(123.16619deg,
+    rgb(119,155,159) 6%, rgb(114,149,155) 15.8%, rgb(107,144,149) 25.6%,
+    rgb(100,138,143) 35.3%, rgb(93,131,138) 45.1%, rgb(86,126,133) 54.9%,
+    rgb(79,120,128) 64.7%, rgb(72,115,122) 74.4%, rgb(72,115,122) 84.2%, rgb(72,115,122) 94%);
+  --g-species: linear-gradient(123.16619deg,
+    rgb(82,156,118) 6%, rgb(70,149,109) 15.8%, rgb(59,143,99) 25.6%,
+    rgb(47,136,90) 35.3%, rgb(35,129,81) 45.1%, rgb(23,122,72) 54.9%,
+    rgb(12,116,62) 64.7%, rgb(0,109,53) 74.4%, rgb(0,109,53) 84.2%, rgb(0,109,53) 94%);
+  --g-diet: linear-gradient(123.16619deg,
+    rgb(252,148,125) 6%, rgb(252,141,116) 15.8%, rgb(251,133,108) 25.6%,
+    rgb(251,126,99) 35.3%, rgb(251,119,90) 45.1%, rgb(251,112,81) 54.9%,
+    rgb(250,104,73) 64.7%, rgb(250,97,64) 74.4%, rgb(250,97,64) 84.2%, rgb(250,97,64) 94%);
+
+  --shadow-card: 0 1px 3px rgba(31,65,91,.06), 0 8px 24px -10px rgba(31,65,91,.14);
+  --shadow-lift: 0 4px 10px rgba(31,65,91,.10), 0 26px 56px -18px rgba(31,65,91,.32);
+
+  --r-card: 16px;
+  --r-pill: 999px;
+
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 20px;
+  --s6: 24px; --s7: 28px; --s8: 32px; --s10: 40px;
+
+  --ease:     cubic-bezier(.22,.61,.36,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --t-base:   220ms;
+  --t-slow:   320ms;
+
+  --font:     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-num: 'DM Sans', var(--font);
+
+  /* the artboard's own type scale at 1024, where these cards live */
+  --fs-card-title: 19px;
+  --fs-stat:       48px;
+  --fs-stat-sm:    34px;
+  --fs-metric:     27px;
+  --fs-body:       17px;
+  --fs-label:      15px;
+  --fs-micro:      13px;
+
+  /* the artboard grid: 5 columns of 179.2 with 16px gutters on 960 of
+     content, rows 164 tall. Measured off Figma node 55476:32828. */
+  --cell:   179.2px;
+  --gutter: 16px;
+  --row:    164px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2 · THE PAGE — chrome for reading the concepts, not part of the product
+   ═══════════════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  padding: 0 0 var(--s10);
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--page-bg) no-repeat;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1128px; margin: 0 auto; padding: 0 var(--s6); }
+
+.masthead { padding: var(--s10) 0 var(--s7); }
+.masthead__kicker {
+  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--c-secondary-dark); margin: 0 0 var(--s2);
+}
+.masthead h1 {
+  margin: 0 0 var(--s3); font-size: 40px; line-height: 1.1;
+  letter-spacing: -.02em; font-weight: 700;
+}
+.masthead p { margin: 0 0 var(--s3); max-width: 62ch; font-size: var(--fs-body); line-height: 1.6; color: var(--ink-2); }
+.masthead p:last-child { margin-bottom: 0; }
+.masthead code, .ann code, .note code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .88em; background: rgba(31,65,91,.07); padding: .1em .35em; border-radius: 4px;
+}
+
+.note {
+  border-left: 3px solid var(--c-secondary-dark);
+  padding: var(--s1) 0 var(--s1) var(--s4);
+  margin: 0 0 var(--s7);
+  font-size: var(--fs-label); line-height: 1.65; color: var(--ink-2);
+  max-width: 76ch;
+}
+.note strong { color: var(--ink); }
+.note--warn { border-left-color: var(--c-tertiary); }
+
+h2.sec {
+  margin: var(--s10) 0 var(--s2); font-size: 24px; letter-spacing: -.015em; font-weight: 700;
+}
+h2.sec + p.sub { margin: 0 0 var(--s6); font-size: var(--fs-label); color: var(--ink-mute); max-width: 70ch; line-height: 1.6; }
+
+/* ── the contact sheet ───────────────────────────────────────────────────
+   Four columns, not five. A 2-wide card tiles a four-column grid exactly, so
+   the sheet has no holes to explain; the CARDS are the same physical size
+   either way, because (768 − 3×16) ÷ 4 and (1024 − 4×16) ÷ 5 are both 179.2.
+   The app runs this band at 768px wide. */
+.sheet-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; margin-bottom: var(--s8); }
+.sheet {
+  display: grid;
+  grid-template-columns: repeat(4, var(--cell));
+  grid-auto-rows: var(--row);
+  grid-auto-flow: row dense;
+  gap: var(--gutter);
+  width: calc(4 * var(--cell) + 3 * var(--gutter));
+  margin: 0 auto;
+}
+
+/* ── a concept block ─────────────────────────────────────────────────────*/
+.concept { padding: var(--s7) 0; border-top: 1px solid rgba(31,65,91,.10); }
+.concept:first-of-type { border-top: none; }
+.concept__bar { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; margin: 0 0 var(--s5); }
+.concept__n {
+  font-family: var(--font-num); font-weight: 700; font-size: 15px;
+  color: var(--on-dark); background: var(--ink); border-radius: var(--r-pill);
+  min-width: 26px; height: 26px; display: inline-flex; align-items: center;
+  justify-content: center; padding: 0 7px; flex: none; align-self: center;
+}
+.concept__name { font-size: 22px; font-weight: 700; letter-spacing: -.015em; margin: 0; }
+.concept__id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+  color: var(--c-secondary-dark); font-weight: 600;
+}
+.concept__sizes { font-size: var(--fs-micro); color: var(--ink-mute); margin-left: auto; }
+.concept__flag {
+  font-size: var(--fs-micro); font-weight: 600; color: #A93B1E;
+  background: rgba(250,97,64,.12); border-radius: var(--r-pill); padding: 3px 10px;
+}
+
+.concept__body { display: flex; gap: var(--s7); align-items: flex-start; flex-wrap: wrap; }
+/* THE CARD IS DRAWN AT ARTBOARD SIZE AND NEVER RESIZED, because a concept
+   judged at 300px is not the concept. A `full` card is 765px wide, so on a
+   narrow screen the STAGE scrolls and the page does not — the page body must
+   never scroll horizontally, which is how a mockup starts lying about widths. */
+.stage { flex: 0 1 auto; min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+.stage > .card { flex: none; }
+.stage__caption { margin: var(--s3) 0 0; font-size: var(--fs-micro); color: var(--ink-mute); text-align: center; }
+
+.ann { flex: 1 1 380px; min-width: 300px; display: grid; gap: var(--s4); }
+/* `minmax(0, 1fr)` AND NOT `1fr`. A bare `1fr` is `minmax(auto, 1fr)`, whose
+   auto minimum is the track's min-content — the longest line of the <pre>
+   inside it. The page scrolled sideways by 160px at 900 and the <pre>'s own
+   `overflow-x: auto` never got a chance to do its job. */
+.ann__row { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: var(--s4); align-items: start; }
+.ann__k {
+  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-mute); padding-top: 2px;
+}
+.ann__v { font-size: var(--fs-label); line-height: 1.6; color: var(--ink-2); min-width: 0; }
+.ann__v strong { color: var(--ink); font-weight: 600; }
+.ann__v pre {
+  margin: 0; padding: var(--s3); background: var(--surface); border-radius: 10px;
+  box-shadow: var(--shadow-card); overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; line-height: 1.55;
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3 · THE CARD — base chrome, copied from cards.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+.card {
+  position: relative;
+  display: flex; flex-direction: column;
+  border: none; border-radius: var(--r-card);
+  overflow: hidden; isolation: isolate;
+  text-align: left; cursor: pointer;
+  padding: var(--s4);
+  font: inherit; color: var(--on-dark);
+  background: var(--card-bg, var(--g-users));
+  transition: box-shadow var(--t-base) var(--ease), transform var(--t-base) var(--ease-out);
+}
+.card[data-size='medium'] { padding: var(--s5); }
+.card[data-size='large'], .card[data-size='tall'], .card[data-size='full'] { padding: var(--s6); }
+@media (hover: hover) { .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); } }
+.card:active { transform: translateY(0) scale(.985); }
+
+/* the sheet places by span; a lone stage draws the card at its real pixel box */
+.card[data-size='small']  { grid-column: span 1; grid-row: span 1; }
+.card[data-size='medium'] { grid-column: span 2; grid-row: span 1; }
+.card[data-size='large'],
+.card[data-size='tall']   { grid-column: span 2; grid-row: span 2; }
+.card[data-size='full']   { grid-column: span 4; grid-row: span 2; }
+.stage .card[data-size='small']  { width: var(--cell);  height: var(--row); }
+.stage .card[data-size='medium'] { width: calc(2 * var(--cell) + var(--gutter)); height: var(--row); }
+.stage .card[data-size='large'],
+.stage .card[data-size='tall']   { width: calc(2 * var(--cell) + var(--gutter)); height: calc(2 * var(--row) + var(--gutter)); }
+.stage .card[data-size='full']   { width: calc(4 * var(--cell) + 3 * var(--gutter)); height: calc(2 * var(--row) + var(--gutter)); }
+
+/* the title line every data card opens with */
+.c-head {
+  position: relative; z-index: 2; display: flex; align-items: center;
+  gap: var(--s2); flex: none; min-width: 0; margin-bottom: var(--s3);
+}
+.c-head__icon { flex: none; width: 22px; height: 22px; display: block; }
+.c-head__icon svg { width: 100%; height: 100%; display: block; }
+.c-head__text {
+  font-size: var(--fs-card-title); font-weight: 600; line-height: 1.25;
+  letter-spacing: -.01em; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.c-head__chip {
+  margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700;
+  font-size: var(--fs-micro); font-variant-numeric: tabular-nums;
+  background: rgba(255,255,255,.22); border-radius: var(--r-pill); padding: 2px 9px;
+}
+
+/* shared numerals */
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4 · THE TWELVE COMPOSITIONS
+   Same idiom as LAYOUTS in index.html: one block per composition, each owning
+   its own DOM and its own CSS, none a variation of another. Visualisations are
+   white at an opacity, drawn straight onto the module's gradient — no pale
+   plate underneath, which is the line between a card that belongs to this
+   system and a dashboard tile dropped into it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · WINDOW · where we are inside a bounded period ──────────────────*/
+.l-window { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-window__dial { position: relative; flex: 1 1 auto; min-height: 0; display: flex; justify-content: center; padding-top: var(--s1); }
+.l-window__dial svg { width: 100%; height: 100%; max-height: 150px; overflow: visible; }
+.l-window__track { fill: none; stroke: rgba(255,255,255,.26); stroke-linecap: round; }
+.l-window__done  { fill: none; stroke: rgba(255,255,255,.92); stroke-linecap: round; }
+.l-window__now   { fill: #fff; stroke: rgba(0,0,0,.14); stroke-width: 1.5; }
+.l-window__read {
+  position: absolute; left: 0; right: 0; top: 46%; transform: translateY(-50%);
+  text-align: center; pointer-events: none;
+}
+.l-window__left { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-stat-sm); line-height: 1; letter-spacing: -.02em; }
+.l-window__of   { display: block; margin-top: 3px; font-size: var(--fs-micro); opacity: .82; }
+.l-window__ends { display: flex; justify-content: space-between; margin-top: calc(-1 * var(--s2)); font-size: var(--fs-micro); opacity: .82; }
+.l-window__ends span { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.l-window__foot {
+  margin-top: auto; padding-top: var(--s3); border-top: 1px solid rgba(255,255,255,.22);
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2);
+  font-size: var(--fs-label);
+}
+.l-window__foot b { font-weight: 600; }
+.l-window__foot i { font-style: normal; opacity: .82; font-size: var(--fs-micro); }
+
+/* ── 2 · PIPS · several things on the same small discrete scale ─────────*/
+.l-pips { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-pips__rows { display: flex; flex-direction: column; gap: var(--s4); flex: 1 1 auto; justify-content: center; }
+.l-pips__row { display: block; }
+.l-pips__line { display: flex; align-items: baseline; gap: var(--s2); margin-bottom: 7px; }
+.l-pips__name { font-size: var(--fs-label); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-pips__val { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-label); font-variant-numeric: tabular-nums; }
+.l-pips__strip { display: flex; gap: 3px; position: relative; }
+.l-pips__pip { flex: 1 1 0; height: 9px; border-radius: 2.5px; background: rgba(255,255,255,.24); }
+.l-pips__pip[data-on] { background: rgba(255,255,255,.95); }
+/* the minimum, drawn once, so a row that falls short says so without colour */
+.l-pips__min { position: absolute; top: -3px; bottom: -3px; width: 2px; background: rgba(0,0,0,.32); border-radius: 2px; }
+.l-pips__foot { margin-top: var(--s4); font-size: var(--fs-micro); opacity: .85; display: flex; gap: var(--s2); align-items: center; }
+.l-pips__key { width: 2px; height: 11px; background: rgba(0,0,0,.32); border-radius: 2px; flex: none; }
+
+/* ── 3 · SCORE · one index against the scale it is measured on ──────────*/
+.l-score { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-score__hero { display: flex; align-items: baseline; gap: var(--s2); flex: 1 1 auto; align-content: center; flex-wrap: wrap; }
+.l-score__value { font-family: var(--font-num); font-weight: 700; font-size: 82px; line-height: .88; letter-spacing: -.045em; }
+.l-score__of { font-size: var(--fs-body); opacity: .78; }
+.l-score__rail { position: relative; height: 30px; margin-top: var(--s3); }
+.l-score__ticks { position: absolute; inset: auto 0 8px; display: flex; justify-content: space-between; align-items: flex-end; height: 22px; }
+.l-score__tick { width: 1.5px; height: 7px; background: rgba(255,255,255,.4); border-radius: 1px; }
+.l-score__tick[data-major] { height: 15px; background: rgba(255,255,255,.68); }
+.l-score__mark {
+  position: absolute; bottom: 2px; width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.28); transform: translateX(-50%);
+}
+.l-score__ends { display: flex; justify-content: space-between; font-family: var(--font-num); font-size: var(--fs-micro); opacity: .78; }
+.l-score__foot { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid rgba(255,255,255,.22); font-size: var(--fs-label); }
+.l-score__foot i { font-style: normal; opacity: .8; }
+
+/* ── 4 · COMPARE · exactly two periods, and the change between them ─────*/
+.l-compare { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-compare__panes { display: flex; gap: var(--s3); align-items: flex-end; flex: 1 1 auto; min-height: 0; }
+.l-compare__pane {
+  flex: 1 1 0; border-radius: 12px; padding: var(--s3);
+  display: flex; flex-direction: column; justify-content: space-between;
+  background: rgba(255,255,255,.16); min-width: 0;
+}
+.l-compare__pane[data-now] { background: rgba(255,255,255,.34); }
+.l-compare__when { font-size: var(--fs-micro); opacity: .9; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+.l-compare__pct { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; }
+.l-compare__foot { margin-top: var(--s4); display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-label); }
+.l-compare__delta {
+  font-family: var(--font-num); font-weight: 700; font-size: var(--fs-label);
+  background: rgba(255,255,255,.26); border-radius: var(--r-pill); padding: 3px 10px; flex: none;
+}
+.l-compare__cap { opacity: .85; font-size: var(--fs-micro); min-width: 0; }
+
+/* ── 5 · BREACH · a threshold crossed, said in words ────────────────────*/
+.l-breach { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-breach__pill {
+  align-self: flex-start; font-size: var(--fs-micro); font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  background: rgba(0,0,0,.24); border-radius: var(--r-pill); padding: 4px 11px; margin-bottom: var(--s3);
+}
+.l-breach__say { font-size: 25px; font-weight: 700; line-height: 1.2; letter-spacing: -.02em; margin: 0; }
+.l-breach__line { margin-top: auto; padding-top: var(--s4); display: flex; align-items: baseline; justify-content: space-between; font-size: var(--fs-label); }
+.l-breach__line b { font-family: var(--font-num); font-weight: 700; }
+.l-breach__line i { font-style: normal; opacity: .84; font-size: var(--fs-micro); }
+.l-breach__bar { position: relative; margin-top: var(--s2); height: 22px; display: flex; gap: 3px; }
+.l-breach__cell { flex: 1 1 0; border-radius: 3px; background: rgba(255,255,255,.28); }
+.l-breach__cell[data-in]   { background: rgba(255,255,255,.9); }
+.l-breach__cell[data-over] { background: rgba(0,0,0,.34); }
+.l-breach__limit { position: absolute; top: -5px; bottom: -5px; width: 2px; background: #fff; border-radius: 2px; }
+.l-breach__limit::after {
+  content: ''; position: absolute; left: 50%; top: -5px; transform: translateX(-50%);
+  border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #fff;
+}
+.l-breach__legend { margin-top: var(--s2); font-size: var(--fs-micro); opacity: .86; }
+
+/* ── 6 · LAUNCHER · four destinations in one card ───────────────────────*/
+.l-launcher { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+/* TWO BY TWO, WHICH IS WHAT THE REFERENCE DRAWS. The first pass laid the four
+   tiles in one row across a `full` card: each tile came out 180 wide by 296
+   tall holding a 30px glyph and one word, and the card was mostly air. A `full`
+   card still gets one row — there the height is the same but the tiles are
+   wide, which is the shape that reads. */
+.l-launcher__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); flex: 1 1 auto; }
+.card[data-size='full'] .l-launcher__grid { grid-template-columns: repeat(4, 1fr); }
+.l-launcher__tile {
+  background: rgba(255,255,255,.17); border-radius: 12px; padding: var(--s4);
+  display: flex; flex-direction: column; justify-content: space-between; gap: var(--s3);
+  min-width: 0; transition: background var(--t-base) var(--ease);
+}
+@media (hover: hover) { .l-launcher__tile:hover { background: rgba(255,255,255,.28); } }
+.l-launcher__glyph { width: 30px; height: 30px; flex: none; }
+.l-launcher__glyph svg { width: 100%; height: 100%; display: block; }
+.l-launcher__name { font-size: var(--fs-body); font-weight: 600; line-height: 1.25; letter-spacing: -.01em; }
+@media (max-width: 820px) { .card[data-size='full'] .l-launcher__grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── 7 · ARRIVALS · what is due next, and how soon ──────────────────────*/
+.l-arr { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-arr__rows { display: flex; flex-direction: column; gap: var(--s2); flex: 1 1 auto; }
+.l-arr__row { display: flex; align-items: center; gap: var(--s3); border-radius: 12px; padding: var(--s2) var(--s3); background: rgba(255,255,255,.13); min-width: 0; }
+.l-arr__row[data-next] { background: rgba(255,255,255,.3); padding: var(--s3); }
+.l-arr__plate {
+  flex: none; width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,.24);
+  display: flex; align-items: center; justify-content: center;
+}
+.l-arr__row[data-next] .l-arr__plate { width: 36px; height: 36px; background: rgba(255,255,255,.36); }
+.l-arr__plate svg { width: 18px; height: 18px; display: block; }
+.l-arr__row[data-next] .l-arr__plate svg { width: 21px; height: 21px; }
+.l-arr__main { min-width: 0; flex: 1 1 auto; }
+.l-arr__name { display: block; font-size: var(--fs-label); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-arr__row[data-next] .l-arr__name { font-size: var(--fs-body); }
+.l-arr__where { display: block; font-size: var(--fs-micro); opacity: .82; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-arr__in { flex: none; text-align: right; }
+.l-arr__in b { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-label); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.l-arr__row[data-next] .l-arr__in b { font-size: var(--fs-metric); letter-spacing: -.02em; }
+.l-arr__in i { font-style: normal; font-size: 11px; opacity: .8; text-transform: uppercase; letter-spacing: .06em; }
+
+/* ── 8 · ROSTER · who is on, and how to reach them ──────────────────────*/
+.l-roster { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-roster__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); flex: 1 1 auto; align-content: center; }
+.l-roster__p { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
+.l-roster__av {
+  flex: none; position: relative; width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,.24); display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); letter-spacing: .02em;
+}
+.l-roster__av::after {
+  content: ''; position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px;
+  border-radius: 50%; background: #72E128; box-shadow: 0 0 0 2.5px rgba(0,0,0,.16);
+}
+.l-roster__p[data-off] .l-roster__av::after { background: rgba(255,255,255,.5); }
+.l-roster__who { min-width: 0; }
+.l-roster__name { display: block; font-size: var(--fs-label); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-roster__role { display: block; font-size: var(--fs-micro); opacity: .82; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-roster__foot { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid rgba(255,255,255,.22); font-size: var(--fs-label); }
+.l-roster__foot b { font-family: var(--font-num); font-weight: 700; }
+.l-roster__foot i { font-style: normal; opacity: .82; font-size: var(--fs-micro); }
+
+/* ── 9 · BARS · a period as the countable days it is made of ────────────*/
+.l-bars { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-bars__hero { display: flex; align-items: baseline; gap: var(--s2); }
+.l-bars__total { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-stat); line-height: 1; letter-spacing: -.035em; }
+.l-bars__unit { font-size: var(--fs-body); opacity: .82; }
+.l-bars__span { margin-left: auto; font-size: var(--fs-micro); opacity: .8; }
+.l-bars__plot { flex: 1 1 auto; min-height: 0; display: flex; align-items: flex-end; gap: 3px; margin: var(--s5) 0 var(--s3); border-bottom: 1px solid rgba(255,255,255,.28); padding-bottom: 2px; }
+.l-bars__bar { flex: 1 1 0; border-radius: 3px 3px 0 0; background: rgba(255,255,255,.42); min-width: 2px; }
+.l-bars__bar[data-recent] { background: rgba(255,255,255,.95); }
+.l-bars__facts { display: flex; gap: var(--s7); }
+.l-bars__fact b { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); }
+.l-bars__fact span { display: block; font-size: var(--fs-micro); opacity: .82; }
+
+/* ── 10 · SPLIT · what one capacity is made of, in a single row ─────────*/
+/* ── THE BAR HAD `height: 12px` AND RENDERED AT ZERO. ─────────────────────
+   The card's content wanted 143px of the 124 a medium card has inside its
+   padding, so the flex column shrank its items — and of the four, the bar is
+   the only one whose min-content height is 0, because its children are empty
+   <i> elements. So the bar absorbed the whole 19px overrun on its own and
+   vanished, while the card's scrollHeight stayed exactly equal to its
+   clientHeight and every overflow assertion passed.
+
+   Two fixes, and both are needed. `flex: none` on all four parts, so a future
+   overrun overflows visibly and the sweep catches it instead of one part
+   silently paying for it. And the budget actually adds up now:
+   32 head + 27 hero + 26 bar + 35 legend = 120 of 124.
+
+   THE HERO IS `--fs-metric` AND NOT `--fs-stat-sm` for that reason — 27px
+   rather than 34. A medium card showing a composition cannot also shout its
+   total; `stat` is the card that shouts. */
+.l-split { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.card[data-layout='split'] .c-head { margin-bottom: var(--s2); }
+.l-split__hero { flex: none; display: flex; align-items: baseline; gap: var(--s2); }
+.l-split__total { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; }
+.l-split__unit { font-size: var(--fs-label); opacity: .82; }
+.l-split__bar { flex: none; display: flex; gap: 2px; height: 10px; margin: var(--s2) 0; }
+.l-split__seg { border-radius: 3px; min-width: 3px; }
+.l-split__seg[data-i='0'] { background: rgba(255,255,255,.95); }
+.l-split__seg[data-i='1'] { background: rgba(255,255,255,.66); }
+.l-split__seg[data-i='2'] { background: rgba(255,255,255,.42); }
+.l-split__seg[data-i='3'] { background: rgba(255,255,255,.24); }
+.l-split__legend { flex: none; margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2px var(--s4); font-size: 12.5px; line-height: 1.3; }
+.l-split__key { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.l-split__dot { flex: none; width: 7px; height: 7px; border-radius: 50%; }
+.l-split__key[data-i='0'] .l-split__dot { background: rgba(255,255,255,.95); }
+.l-split__key[data-i='1'] .l-split__dot { background: rgba(255,255,255,.66); }
+.l-split__key[data-i='2'] .l-split__dot { background: rgba(255,255,255,.42); }
+.l-split__key[data-i='3'] .l-split__dot { background: rgba(255,255,255,.24); }
+.l-split__nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .88; }
+.l-split__n { margin-left: auto; font-family: var(--font-num); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ── 11 · SETPOINT · a value the card can change ────────────────────────*/
+.l-set { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-set__row { display: flex; align-items: center; gap: var(--s3); flex: 1 1 auto; }
+.l-set__read { flex: 1 1 auto; min-width: 0; }
+.l-set__value { display: flex; align-items: baseline; gap: 4px; }
+.l-set__value b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-stat-sm); line-height: 1; letter-spacing: -.03em; }
+.l-set__value span { font-size: var(--fs-body); opacity: .84; }
+.l-set__now { display: block; margin-top: 5px; font-size: var(--fs-micro); opacity: .84; }
+.l-set__btns { flex: none; display: flex; gap: var(--s2); }
+.l-set__btn {
+  width: 40px; height: 40px; border-radius: 50%; border: none; padding: 0;
+  background: rgba(255,255,255,.24); color: var(--on-dark); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--t-base) var(--ease);
+}
+.l-set__btn:hover { background: rgba(255,255,255,.38); }
+.l-set__btn:active { transform: scale(.94); }
+.l-set__btn svg { width: 20px; height: 20px; display: block; }
+
+/* ── 12 · AGENDA · the next commitments, urgency on the spine ───────────*/
+.l-agenda { display: flex; flex-direction: column; flex: 1 0 0; min-height: 0; }
+.l-agenda__items { display: flex; flex-direction: column; gap: var(--s4); flex: 1 1 auto; justify-content: center; }
+.l-agenda__item { display: flex; gap: var(--s3); min-width: 0; }
+.l-agenda__spine { flex: none; width: 3px; border-radius: 2px; background: rgba(255,255,255,.3); }
+.l-agenda__item[data-tone='alert'] .l-agenda__spine { background: #fff; }
+.l-agenda__item[data-tone='warn'] .l-agenda__spine { background: rgba(255,255,255,.6); }
+.l-agenda__body { min-width: 0; }
+.l-agenda__what { font-size: var(--fs-body); font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
+.l-agenda__when { display: block; margin-top: 4px; font-size: var(--fs-micro); opacity: .84; }
+.l-agenda__when b { font-family: var(--font-num); font-weight: 700; opacity: 1; }
+
+/* ── print ───────────────────────────────────────────────────────────────*/
+@media print {
+  body { background: #fff; }
+  .concept { break-inside: avoid; }
+  .card { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- the sprite: the domain glyphs, drawn exactly as icons.js draws them —
+     24×24, stroked, 1.75 weight, round caps, inheriting currentColor -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs id="sprite"></defs></svg>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="masthead__kicker">ANTZ Command Centre · module widgets</p>
+    <h1>Twelve compositions the catalogue does not have</h1>
+    <p>Drawn from the four reference sheets in <code>References/Widgets_Reference/</code>.
+    What is taken from them is the <strong>composition</strong> — the shape of the
+    argument a card makes — and never the styling. Every card below is this
+    product's own gradient, radius, shadow and type, at the artboard's own card
+    sizes, filled with the reference Site's real figures.</p>
+    <p>The catalogue has twenty-one layouts today. Each concept here answers a
+    question none of those twenty-one can, and the annotation beside it names
+    which one you would otherwise reach for and why it falls short.</p>
+  </header>
+
+  <p class="note"><strong>This is a mockup.</strong> Nothing is wired to
+  <code>derive()</code>, the picker, the packer or the saved layout — no
+  <code>supportedSizes</code> are enforced and no figure is computed. It exists
+  to be judged and cut down before any of it is built. Two concepts are marked
+  <strong>⚠</strong> because they are decisions rather than proposals: #11 would
+  be the first card in the product that <em>writes</em>, and #12 overlaps
+  <code>timeline</code> closely enough that you should pick one.</p>
+
+  <h2 class="sec">The contact sheet</h2>
+  <p class="sub">All twelve on one grid, at real card size, at the four-column
+  band. This is the brief's own test: before reading a single label, you should
+  be able to tell that these are different kinds of card.</p>
+
+  <div class="sheet-scroll"><div class="sheet" id="sheet"></div></div>
+
+  <h2 class="sec">The concepts</h2>
+  <p class="sub">One block each — the card at real size, then what it is for.</p>
+
+  <div id="concepts"></div>
+
+  <h2 class="sec">What this would cost to build</h2>
+  <p class="note"><strong>Twelve layouts is not twelve small jobs.</strong> Each
+  one needs an entry in <code>LAYOUTS</code>, a block of CSS, a row in
+  <code>LAYOUT_FILL</code>, real <code>data</code> on every widget that uses it,
+  a place in at least one of the fifteen seeded role defaults, and a line in the
+  overflow sweep at six widths. The last two are where the time goes: a
+  composition nobody's default page carries is a composition the picker can
+  offer and nobody will ever see, and the sweep is what stops a card being
+  shipped with its title ellipsed at 900px.</p>
+  <p class="note"><strong>The seed is the real constraint.</strong> Eight of
+  these twelve are 2×2. The Site defaults were re-cut last session into blocks
+  of ten cells precisely so two-row cards could land in them — but ten cells
+  hold one 2×2 and one 2×1 with a hole, or two 2×2 and a spare column. Adding
+  eight new 2×2 compositions to a page that already runs 46% <code>stat</code>
+  means <em>replacing</em> cards in those defaults, not appending. Pick four.</p>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SPRITE
+   The domain glyphs this page needs, copied from icons.js. A domain glyph is a
+   sprite symbol rather than an exported file because the Figma artboard has no
+   Site Workspace to export one from — and a sprite inherits currentColor,
+   which is what lets the same mark sit white on a gradient card here and
+   petrol in a rail row in the app.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const SPRITE = {
+  'd-husbandry':
+    '<path d="M4.2 2.8v6.4a2.2 2.2 0 0 0 2.2 2.2h1.4a2.2 2.2 0 0 0 2.2-2.2V2.8"/>' +
+    '<path d="M7.1 2.8v18.4"/>' +
+    '<path d="M19.8 14.6V2.8a4.4 4.4 0 0 0-4.4 4.4v5.2a2.2 2.2 0 0 0 2.2 2.2h2.2Zm0 0v6.6"/>',
+  'd-safety':
+    '<path d="M12 21.5c4.5-1.6 7.5-5 7.5-9.6V5.6L12 2.5 4.5 5.6v6.3c0 4.6 3 8 7.5 9.6Z"/>' +
+    '<path d="M12 8.2v4.4M12 16.3h.01"/>',
+  'd-assessment':
+    '<path d="M8.6 3.4H6.4a2 2 0 0 0-2 2v14.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2V5.4a2 2 0 0 0-2-2h-2.2"/>' +
+    '<rect x="8.6" y="1.9" width="6.8" height="3.4" rx="1.2"/>' +
+    '<path d="M8.4 11.4h3.2M8.4 15.4h5.6"/>' +
+    '<path d="m14.6 10.6 1.4 1.4 2.6-2.8"/>',
+  'd-space':
+    '<rect x="3" y="3" width="7.4" height="7.4" rx="1.6"/>' +
+    '<rect x="13.6" y="3" width="7.4" height="7.4" rx="1.6"/>' +
+    '<rect x="3" y="13.6" width="7.4" height="7.4" rx="1.6"/>' +
+    '<path d="M13.6 17.3h7.4M17.3 13.6v7.4"/>',
+  'd-risk':
+    '<path d="M3.2 18.4a9.4 9.4 0 1 1 17.6 0"/>' +
+    '<path d="m12 14.4 4.6-5.1"/><circle cx="12" cy="14.6" r="1.6"/>',
+  'd-animal':
+    '<path d="M12 13.2c-3 0-5.4 2-5.4 4.5 0 1.7 1.2 2.8 2.9 2.8.9 0 1.6-.3 2.5-.3s1.6.3 2.5.3c1.7 0 2.9-1.1 2.9-2.8 0-2.5-2.4-4.5-5.4-4.5Z"/>' +
+    '<ellipse cx="6.2" cy="10.2" rx="1.8" ry="2.2"/><ellipse cx="17.8" cy="10.2" rx="1.8" ry="2.2"/>' +
+    '<ellipse cx="10" cy="6" rx="1.7" ry="2.2"/><ellipse cx="14" cy="6" rx="1.7" ry="2.2"/>',
+  'd-veterinary':
+    '<path d="M12 3.4a8.6 8.6 0 0 0-8.6 8.6c0 4 3 7.2 6.2 8.4a2 2 0 0 0 1.5 0"/>' +
+    '<path d="M12 3.4a8.6 8.6 0 0 1 8.6 8.6c0 1.5-.4 2.9-1.1 4.1"/>' +
+    '<path d="M12 8.6v5.2M9.4 11.2h5.2"/>' +
+    '<circle cx="18.4" cy="19" r="2.6"/>',
+  'd-schedule':
+    '<path d="M8 2.4v3.6M16 2.4v3.6M3 9.6h18"/>' +
+    '<path d="M21 12.6V6.4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12.8a2 2 0 0 0 2 2h6.6"/>' +
+    '<circle cx="17.4" cy="17.4" r="4.1"/><path d="M17.4 15.5v2l1.4 1"/>',
+  'd-people':
+    '<circle cx="9" cy="8" r="3.3"/>' +
+    '<path d="M2.6 20.2a6.4 6.4 0 0 1 12.8 0"/>' +
+    '<path d="M16.4 5.4a3.3 3.3 0 0 1 0 6.4"/>' +
+    '<path d="M17.8 14.6a6.4 6.4 0 0 1 3.6 5.6"/>',
+  'd-inventory':
+    '<rect x="2.8" y="3.6" width="8.1" height="7.2" rx="1.5"/>' +
+    '<rect x="13.1" y="3.6" width="8.1" height="7.2" rx="1.5"/>' +
+    '<rect x="7.9" y="13.2" width="8.1" height="7.2" rx="1.5"/>',
+  'd-occupancy':
+    '<circle cx="8.4" cy="9.2" r="3"/><circle cx="16" cy="11" r="2.3"/>' +
+    '<path d="M2.8 20.2a5.6 5.6 0 0 1 11.2 0"/>' +
+    '<path d="M14.6 20.2a4.4 4.4 0 0 1 6.6-3.8"/>',
+  'd-environment':
+    '<path d="M12 2.8a5.4 5.4 0 0 0-3 9.9v5.1a3 3 0 0 0 6 0v-5.1a5.4 5.4 0 0 0-3-9.9Z"/>' +
+    '<path d="M12 7v7.6"/><circle cx="12" cy="17" r="1.5" fill="currentColor" stroke="none"/>' +
+    '<path d="M17.6 6.4h3.6M17.6 10.4h2.4M17.6 14.4h3.2"/>',
+  'd-work':
+    '<path d="M9 4.6h11M9 12h11M9 19.4h11"/>' +
+    '<path d="m3 4.9 1.2 1.2 2.2-2.5M3 12.3l1.2 1.2 2.2-2.5M3 19.7l1.2 1.2 2.2-2.5"/>',
+  plus:  '<path d="M5 12h14M12 5v14"/>',
+  minus: '<path d="M6 12h12"/>',
+}
+
+document.getElementById('sprite').innerHTML = Object.entries(SPRITE).map(([name, body]) =>
+  `<symbol id="i-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
+  `stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${body}</symbol>`).join('')
+
+const icon = (n, cls = '') => `<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+
+/** The title line every data card opens with — head() from ModuleCard.js. */
+const head = (c, chip) =>
+  `<span class="c-head"><span class="c-head__icon">${icon(c.sprite)}</span>` +
+  `<span class="c-head__text">${esc(c.title)}</span>` +
+  (chip ? `<span class="c-head__chip">${esc(chip)}</span>` : '') + `</span>`
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE ARC GEOMETRY, ONCE
+   `M15.36 70 A40 40 0 1 1 84.64 70` is the 240° sweep the existing `arc` and
+   `health` layouts already use. Its centre is (50,50) and its radius 40, so a
+   point at fraction f along it sits at 150° + 240f — which is how the WINDOW
+   composition puts a now-marker on the same path the value is drawn along,
+   without a second source of truth for where the arc is.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ARC_D = 'M15.36 70A40 40 0 1 1 84.64 70'
+function arcPoint(f) {
+  const t = (150 + 240 * Math.max(0, Math.min(1, f))) * Math.PI / 180
+  return [50 + 40 * Math.cos(t), 50 + 40 * Math.sin(t)]
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE TWELVE
+   Same signature as LAYOUTS in index.html: (card) => html. `card.data` is
+   shaped to the layout, exactly as a widget's `data` is today.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const L = {
+
+  /* 1 · WINDOW */
+  window: (c) => {
+    const d = c.data, f = d.elapsed / d.span
+    const [mx, my] = arcPoint(f)
+    return `<span class="l-window">${head(c)}` +
+      `<span class="l-window__dial">` +
+        `<svg viewBox="0 0 100 78" aria-hidden="true" focusable="false">` +
+          `<path class="l-window__track" d="${ARC_D}" pathLength="100" stroke-width="8"/>` +
+          `<path class="l-window__done" d="${ARC_D}" pathLength="100" stroke-width="8"` +
+          ` stroke-dasharray="${(f * 100).toFixed(1)} 100"/>` +
+          `<circle class="l-window__now" cx="${mx.toFixed(2)}" cy="${my.toFixed(2)}" r="5.4"/>` +
+        `</svg>` +
+        `<span class="l-window__read">` +
+          `<span class="l-window__left">${esc(d.left)}</span>` +
+          `<span class="l-window__of">${esc(d.leftLabel)}</span>` +
+        `</span>` +
+      `</span>` +
+      `<span class="l-window__ends"><span>${esc(d.from)}</span><span>${esc(d.to)}</span></span>` +
+      `<span class="l-window__foot"><b>${esc(d.foot)}</b><i>${esc(d.footNote)}</i></span>` +
+    `</span>`
+  },
+
+  /* 2 · PIPS */
+  pips: (c) => {
+    const d = c.data
+    return `<span class="l-pips">${head(c)}` +
+      `<span class="l-pips__rows">` +
+      d.rows.map((r) =>
+        `<span class="l-pips__row">` +
+          `<span class="l-pips__line"><span class="l-pips__name">${esc(r.text)}</span>` +
+          `<span class="l-pips__val">${r.n}/${d.of}</span></span>` +
+          `<span class="l-pips__strip">` +
+            Array.from({ length: d.of }, (_, i) =>
+              `<i class="l-pips__pip"${i < r.n ? ' data-on' : ''}></i>`).join('') +
+            /* the minimum sits between pip `min` and pip `min+1` */
+            `<i class="l-pips__min" style="left:calc(${(d.min / d.of * 100).toFixed(3)}% - 1px)"></i>` +
+          `</span>` +
+        `</span>`).join('') +
+      `</span>` +
+      `<span class="l-pips__foot"><i class="l-pips__key"></i>${esc(d.foot)}</span>` +
+    `</span>`
+  },
+
+  /* 3 · SCORE */
+  score: (c) => {
+    const d = c.data
+    const n = 41
+    return `<span class="l-score">${head(c)}` +
+      `<span class="l-score__hero">` +
+        `<span class="l-score__value">${esc(d.value)}</span>` +
+        `<span class="l-score__of">${esc(d.of)}</span>` +
+      `</span>` +
+      `<span class="l-score__rail">` +
+        `<span class="l-score__ticks">` +
+        Array.from({ length: n }, (_, i) =>
+          `<i class="l-score__tick"${i % 10 === 0 ? ' data-major' : ''}></i>`).join('') +
+        `</span>` +
+        `<span class="l-score__mark" style="left:${((d.pct / 100) * 100).toFixed(2)}%"></span>` +
+      `</span>` +
+      `<span class="l-score__ends"><span>${esc(d.min)}</span><span>${esc(d.max)}</span></span>` +
+      /* THE SEPARATOR IS NOT DECORATION. Without it the foot reads as one
+         sentence — "Up 4 since June 42 species assessed" — and the eye has to
+         back up to find where the first fact ended. Same middot the rest of
+         the product uses between two facts on one line. */
+      `<span class="l-score__foot"><b>${esc(d.move)}</b> <i>· ${esc(d.moveNote)}</i></span>` +
+    `</span>`
+  },
+
+  /* 4 · COMPARE */
+  compare: (c) => {
+    const d = c.data
+    return `<span class="l-compare">${head(c)}` +
+      `<span class="l-compare__panes">` +
+      d.panes.map((p, i) =>
+        `<span class="l-compare__pane"${i === d.panes.length - 1 ? ' data-now' : ''}` +
+        ` style="height:${(30 + (p.pct / 100) * 70).toFixed(1)}%">` +
+          `<span class="l-compare__when">${esc(p.when)}</span>` +
+          `<span class="l-compare__pct">${esc(p.value)}</span>` +
+        `</span>`).join('') +
+      `</span>` +
+      `<span class="l-compare__foot"><span class="l-compare__delta">${esc(d.delta)}</span>` +
+      `<span class="l-compare__cap">${esc(d.caption)}</span></span>` +
+    `</span>`
+  },
+
+  /* 5 · BREACH */
+  breach: (c) => {
+    const d = c.data
+    const cells = d.now
+    const limitAt = (d.limit / d.now) * 100
+    return `<span class="l-breach">${head(c)}` +
+      `<span class="l-breach__pill">${esc(d.pill)}</span>` +
+      `<p class="l-breach__say">${esc(d.say)}</p>` +
+      `<span class="l-breach__line"><b>${esc(d.nowLabel)}</b><i>${esc(d.limitLabel)}</i></span>` +
+      `<span class="l-breach__bar">` +
+        Array.from({ length: cells }, (_, i) =>
+          `<i class="l-breach__cell" ${i < d.limit ? 'data-in' : 'data-over'}></i>`).join('') +
+        `<i class="l-breach__limit" style="left:calc(${limitAt.toFixed(3)}% - 1px)"></i>` +
+      `</span>` +
+      `<span class="l-breach__legend">${esc(d.legend)}</span>` +
+    `</span>`
+  },
+
+  /* 6 · LAUNCHER */
+  launcher: (c) =>
+    `<span class="l-launcher">${head(c)}` +
+      `<span class="l-launcher__grid">` +
+      c.data.tiles.map((t) =>
+        `<span class="l-launcher__tile">` +
+          `<span class="l-launcher__glyph">${icon(t.sprite)}</span>` +
+          `<span class="l-launcher__name">${esc(t.name)}</span>` +
+        `</span>`).join('') +
+      `</span>` +
+    `</span>`,
+
+  /* 7 · ARRIVALS */
+  arrivals: (c) =>
+    `<span class="l-arr">${head(c, c.data.chip)}` +
+      `<span class="l-arr__rows">` +
+      c.data.rows.map((r, i) =>
+        `<span class="l-arr__row"${i === 0 ? ' data-next' : ''}>` +
+          `<span class="l-arr__plate">${icon(r.sprite)}</span>` +
+          `<span class="l-arr__main">` +
+            `<span class="l-arr__name">${esc(r.text)}</span>` +
+            `<span class="l-arr__where">${esc(r.where)}</span></span>` +
+          `<span class="l-arr__in"><b>${esc(r.in)}</b><i>${esc(r.unit)}</i></span>` +
+        `</span>`).join('') +
+      `</span>` +
+    `</span>`,
+
+  /* 8 · ROSTER */
+  roster: (c) =>
+    `<span class="l-roster">${head(c)}` +
+      `<span class="l-roster__grid">` +
+      c.data.people.map((p) =>
+        `<span class="l-roster__p"${p.off ? ' data-off' : ''}>` +
+          `<span class="l-roster__av">${esc(p.initials)}</span>` +
+          `<span class="l-roster__who">` +
+            `<span class="l-roster__name">${esc(p.name)}</span>` +
+            `<span class="l-roster__role">${esc(p.role)}</span></span>` +
+        `</span>`).join('') +
+      `</span>` +
+      `<span class="l-roster__foot"><b>${esc(c.data.foot)}</b> <i>${esc(c.data.footNote)}</i></span>` +
+    `</span>`,
+
+  /* 9 · BARS */
+  bars: (c) => {
+    const d = c.data, max = Math.max(...d.series)
+    return `<span class="l-bars">${head(c)}` +
+      `<span class="l-bars__hero">` +
+        `<span class="l-bars__total">${esc(d.total)}</span>` +
+        `<span class="l-bars__unit">${esc(d.unit)}</span>` +
+        `<span class="l-bars__span">${esc(d.span)}</span>` +
+      `</span>` +
+      `<span class="l-bars__plot">` +
+      d.series.map((v, i) =>
+        `<i class="l-bars__bar"${i >= d.series.length - d.recent ? ' data-recent' : ''}` +
+        ` style="height:${((v / max) * 100).toFixed(1)}%"></i>`).join('') +
+      `</span>` +
+      `<span class="l-bars__facts">` +
+      d.facts.map((f) =>
+        `<span class="l-bars__fact"><b>${esc(f.value)}</b><span>${esc(f.label)}</span></span>`).join('') +
+      `</span>` +
+    `</span>`
+  },
+
+  /* 10 · SPLIT */
+  split: (c) => {
+    const d = c.data, sum = d.parts.reduce((n, p) => n + p.n, 0) || 1
+    return `<span class="l-split">${head(c)}` +
+      `<span class="l-split__hero">` +
+        `<span class="l-split__total">${esc(d.total)}</span>` +
+        `<span class="l-split__unit">${esc(d.unit)}</span>` +
+      `</span>` +
+      `<span class="l-split__bar">` +
+      d.parts.map((p, i) =>
+        `<i class="l-split__seg" data-i="${i}" style="flex:${p.n} 1 0"></i>`).join('') +
+      `</span>` +
+      `<span class="l-split__legend">` +
+      d.parts.map((p, i) =>
+        `<span class="l-split__key" data-i="${i}"><i class="l-split__dot"></i>` +
+        `<span class="l-split__nm">${esc(p.label)}</span>` +
+        `<span class="l-split__n">${p.n}</span></span>`).join('') +
+      `</span>` +
+    `</span>`
+  },
+
+  /* 11 · SETPOINT */
+  setpoint: (c) => {
+    const d = c.data
+    return `<span class="l-set">${head(c)}` +
+      `<span class="l-set__row">` +
+        `<span class="l-set__read">` +
+          `<span class="l-set__value"><b>${esc(d.target)}</b><span>${esc(d.unit)}</span></span>` +
+          `<span class="l-set__now">${esc(d.now)}</span>` +
+        `</span>` +
+        `<span class="l-set__btns">` +
+          `<button class="l-set__btn" type="button" aria-label="Lower the target">${icon('minus')}</button>` +
+          `<button class="l-set__btn" type="button" aria-label="Raise the target">${icon('plus')}</button>` +
+        `</span>` +
+      `</span>` +
+    `</span>`
+  },
+
+  /* 12 · AGENDA */
+  agenda: (c) =>
+    `<span class="l-agenda">${head(c, c.data.chip)}` +
+      `<span class="l-agenda__items">` +
+      c.data.items.map((i) =>
+        `<span class="l-agenda__item" data-tone="${esc(i.tone || 'none')}">` +
+          `<i class="l-agenda__spine"></i>` +
+          `<span class="l-agenda__body">` +
+            `<span class="l-agenda__what">${esc(i.text)}</span>` +
+            `<span class="l-agenda__when"><b>${esc(i.when)}</b> · ${esc(i.where)}</span>` +
+          `</span>` +
+        `</span>`).join('') +
+      `</span>` +
+    `</span>`,
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE CONCEPTS
+   Figures are Bannerghatta Safari's own, from SITES[0] in index.html and the
+   Site widget catalogue: 12 sections, 48 enclosures of which 5 free and 2
+   restricted, 86 staff, 42 species, 318 animals, health 87, compliance 94%.
+   `decision` is the row in docs/framing-site-command-centre.md §4 that a card
+   has to serve — the test the framing document sets for any new widget.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const CONCEPTS = [
+  {
+    layout: 'window', title: 'Feeding Window', sprite: 'd-husbandry',
+    domain: 'd.husbandry', fill: '--g-medical', size: 'large',
+    sizes: 'large, tall · default large', decision: 'D2',
+    ref: 'Sheet 1 — the sleep ring, times printed at the segment ends; sheet 1 again — the San Francisco golden-hour arc with a dot at each end',
+    answers: 'Where are we inside a period that has a start and an end?',
+    instead: '<strong><code>progress</code></strong> gives a ratio and a track but names neither end, so “68%” of a feeding day could start at any hour. <strong><code>arc</code></strong> draws the sweep and prints a percentage in it, but has no marker, so it says how full and never how far along.',
+    shape: `data: {\n  from: '06:30', to: '18:00',\n  span: 690, elapsed: 470,   // minutes\n  left: '3 h 40', leftLabel: 'left today',\n  foot: '3 of 4 rounds done',\n  footNote: 'next 16:00',\n}`,
+    data: {
+      from: '06:30', to: '18:00', span: 690, elapsed: 470,
+      left: '3 h 40', leftLabel: 'left today',
+      foot: '3 of 4 rounds done', footNote: 'next 16:00',
+    },
+  },
+  {
+    layout: 'pips', title: 'Standards', sprite: 'd-safety',
+    domain: 'd.safety', fill: '--g-mortality', size: 'large',
+    sizes: 'medium, large · default large', decision: 'D4',
+    ref: 'Sheet 3 — Your Sustainability Statistics, each row scored out of ten in little segmented pips',
+    answers: 'How does each of several things score on one small, countable scale — and which of them falls short of the minimum?',
+    instead: '<strong><code>meters</code></strong> draws a continuous track per row, which reads as “how much of it is done”; a standard is not partly met, it is met or not, and eight of ten reads as eight <em>things</em>. <strong><code>status</code></strong> has the pass/fail sense but throws the count away.',
+    instead2: 'The minimum is a single black rule drawn once across every strip, so a row that falls short says so <em>without colour</em> — which matters, because a warn amber on a coral card is invisible and the palette is not open for renegotiation.',
+    shape: `data: {\n  of: 10, min: 6,\n  rows: [   // worst first, always\n    { text: 'Waste Handling', n: 4 },\n    { text: 'Air & Ventilation', n: 6 },\n    …\n  ],\n  foot: 'minimum 6 · 1 below standard',\n}`,
+    data: {
+      of: 10, min: 6, foot: 'minimum 6 · 1 below standard',
+      rows: [
+        { text: 'Waste Handling', n: 4 },
+        { text: 'Air & Ventilation', n: 6 },
+        { text: 'Water Quality', n: 7 },
+        { text: 'Enrichment', n: 9 },
+      ],
+    },
+  },
+  {
+    layout: 'score', title: 'Welfare Index', sprite: 'd-assessment',
+    domain: 'd.assessment', fill: '--g-lab', size: 'large',
+    sizes: 'medium, large · default large', decision: 'D6',
+    ref: 'Sheet 3 — YOUR ESG SCORE, one enormous numeral against a measured tick rail with a marker on it',
+    answers: 'One index, and the scale it is measured on, in the same glance.',
+    instead: '<strong><code>stat</code></strong> prints the number and no scale, so 78 could be out of 80 or out of 1000. <strong><code>arc</code></strong> implies the scale by sweep but cannot show a band or a threshold on it, and it costs a 2×2 to say one number.',
+    instead2: 'The rail is the point: a reader who has never seen this index before learns its range from the card rather than from training.',
+    shape: `data: {\n  value: '78', of: 'of 100', pct: 78,\n  min: '0', max: '100',\n  move: 'Up 4 since June',\n  moveNote: '42 species assessed',\n}`,
+    data: {
+      value: '78', of: 'of 100', pct: 78, min: '0', max: '100',
+      move: 'Up 4 since June', moveNote: '42 species assessed',
+    },
+  },
+  {
+    layout: 'compare', title: 'Inspections Passed', sprite: 'd-space',
+    domain: 'd.space', fill: '--g-parivesh', size: 'tall',
+    sizes: 'medium, tall · default tall', decision: 'D4',
+    ref: 'Sheet 3 — the two ESG panels, last month against this month, the height of each panel carrying the value',
+    answers: 'Did it move, and by how much — where there are exactly two periods and not a series?',
+    instead: '<strong><code>chart</code></strong> is a trend line, and a line drawn through two points is a lie about how much you know. <strong><code>metrics</code></strong> would put 78% and 94% side by side as two facts and leave the reader to do the subtraction the card exists to do.',
+    shape: `data: {\n  panes: [\n    { when: 'Last Month', value: '78%', pct: 78 },\n    { when: 'This Month', value: '94%', pct: 94 },\n  ],\n  delta: '+16 pts',\n  caption: '45 of 48 enclosures',\n}`,
+    data: {
+      panes: [
+        { when: 'Last Month', value: '78%', pct: 78 },
+        { when: 'This Month', value: '94%', pct: 94 },
+      ],
+      delta: '+16 pts', caption: '45 of 48 enclosures',
+    },
+  },
+  {
+    layout: 'breach', title: 'Quarantine', sprite: 'd-risk',
+    domain: 'd.risk', fill: '--g-fetal', size: 'large',
+    sizes: 'medium, large · default large', decision: 'D1',
+    ref: 'Sheet 3 — “You passed the water usage limit”: a pill, a sentence, current against limit, and a segmented bar with the limit marked',
+    answers: 'A limit has been crossed. Say so in words, and show by how much.',
+    instead: '<strong><code>attention</code></strong> counts things needing attention but has no notion of a <em>limit</em>, so “14” carries no fault. <strong><code>progress</code></strong> caps at 100% and therefore cannot draw an overrun at all — the one state this card exists for.',
+    instead2: 'The sentence is the design. Every other card in the product makes the reader infer the problem from a figure; this one states it, which is what section 10 of the brief asks of the Needs Attention family.',
+    shape: `data: {\n  pill: 'Over limit',\n  say: 'Quarantine is two pens over its limit.',\n  now: 14, limit: 12,\n  nowLabel: '14 pens in use',\n  limitLabel: 'limit 12',\n  legend: 'Two animals held in shared pens since Friday',\n}`,
+    data: {
+      pill: 'Over limit', say: 'Quarantine is two pens over its limit.',
+      now: 14, limit: 12, nowLabel: '14 pens in use', limitLabel: 'limit 12',
+      legend: 'Two animals held in shared pens since Friday',
+    },
+  },
+  {
+    layout: 'launcher', title: 'Animal Care', sprite: 'd-animal',
+    domain: 'd.animal', fill: '--g-species', size: 'large',
+    sizes: 'large, full · default large', decision: '— none',
+    ref: 'Sheet 4 — Shop By Category, four tinted tiles with a glyph and a name inside one card',
+    answers: 'Nothing. It is navigation, and the framing table is about decisions — judge it as four <code>door</code> cards that fit in the space of two.',
+    instead: '<strong><code>door</code></strong> is one destination per card, so this shelf costs four cells at small or eight at medium. <strong><code>actions</code></strong> is the right shape but its items are verbs — “Log Treatment” — and these are places.',
+    instead2: 'The reference card has a <em>View All</em> in its corner. It is deliberately not reproduced: the brief removed every “View X ›” in the product, and on a card whose four tiles are already the links it would be a fifth link to the same shelf.',
+    shape: `data: {\n  tiles: [\n    { name: 'Husbandry',  sprite: 'd-husbandry' },\n    { name: 'Veterinary', sprite: 'd-veterinary' },\n    { name: 'Welfare',    sprite: 'd-assessment' },\n    { name: 'Collection', sprite: 'd-animal' },\n  ],\n}`,
+    data: {
+      tiles: [
+        { name: 'Husbandry', sprite: 'd-husbandry' },
+        { name: 'Veterinary', sprite: 'd-veterinary' },
+        { name: 'Welfare', sprite: 'd-assessment' },
+        { name: 'Collection', sprite: 'd-animal' },
+      ],
+    },
+  },
+  {
+    layout: 'arrivals', title: 'Next Up', sprite: 'd-schedule',
+    domain: 'd.schedule', fill: '--g-pharmacy', size: 'tall',
+    sizes: 'medium, tall, large · default tall', decision: 'D2',
+    ref: 'Sheet 1 — the transit card, M7 in 2 min over M104 in 6, each row a route plate and a countdown',
+    answers: 'What is due next here, and how soon — as a countdown rather than a clock time?',
+    instead: '<strong><code>queue</code></strong> right-aligns a figure per row, but its figures are quantities; “22” meaning minutes in the same column shape that elsewhere means work orders is a trap. <strong><code>timeline</code></strong> runs the other way — it is dated entries that have already happened.',
+    instead2: 'The first row is the card. It is bigger, its plate is filled and its countdown is set at metric size, because the reference sheet is right that a list of four things due is really one thing due and three behind it.',
+    shape: `data: {\n  chip: '9 today',\n  rows: [\n    { text: 'Night Feed', where: 'Carnivore Block',\n      in: '22', unit: 'min', sprite: 'd-husbandry' },\n    …\n  ],\n}`,
+    data: {
+      chip: '9 today',
+      rows: [
+        { text: 'Night Feed', where: 'Carnivore Block', in: '22', unit: 'min', sprite: 'd-husbandry' },
+        /* NO UNIT ON THE MIDDLE ROWS. The first pass captioned them "THEN",
+           which is not a unit and reads as a word the layout forgot to fill
+           in. "1 h 10" already says what it is; only the hero row, whose
+           figure is a bare number, needs "min" under it. */
+        { text: 'Vet Round', where: 'Hospital', in: '1 h 10', unit: '', sprite: 'd-veterinary' },
+        { text: 'Gate Lock', where: 'Main Gate', in: '3 h', unit: '', sprite: 'd-safety' },
+        { text: 'Water Test', where: 'Pump House', in: '08:00', unit: 'tomorrow', sprite: 'd-environment' },
+      ],
+    },
+  },
+  {
+    layout: 'roster', title: 'On Duty', sprite: 'd-people',
+    domain: 'd.people', fill: '--g-users', size: 'large',
+    sizes: 'medium, large · default large', decision: 'D2',
+    ref: 'Sheet 1 — the contacts card, two people with a channel glyph and how long ago each was seen',
+    answers: 'Who is on this Site right now, and are the seats that matter covered?',
+    instead: '<strong><code>entity</code></strong> names one thing and this is four. <strong><code>recent</code></strong> lists objects with a timestamp, and a person is not an object you were last working on. <strong><code>metrics</code></strong> gives “41 on site”, which is the number and not the names.',
+    instead2: 'The reference uses photographs. These are initials, for the same reason <code>entity</code> blows up a glyph instead of reaching for a photo: the product has 86 staff at one Site and no portrait for any of them, so a card that needs a face is a card that will be wrong.',
+    shape: `data: {\n  people: [\n    { initials: 'RK', name: 'Ramesh Kumar',\n      role: 'Site In-charge' },\n    { initials: 'LN', name: 'Lakshmi N.',\n      role: 'Admin', off: true },\n    …\n  ],\n  foot: '41 on site', footNote: 'of 86 staff',\n}`,
+    data: {
+      people: [
+        { initials: 'RK', name: 'Ramesh Kumar', role: 'Site In-charge' },
+        { initials: 'AR', name: 'Anita Rao', role: 'Veterinarian' },
+        { initials: 'SB', name: 'Suresh Babu', role: 'Facility' },
+        { initials: 'LN', name: 'Lakshmi N.', role: 'Admin', off: true },
+      ],
+      foot: '41 on site', footNote: 'of 86 staff · 1 seat uncovered',
+    },
+  },
+  {
+    layout: 'bars', title: 'Feed Issued', sprite: 'd-inventory',
+    domain: 'd.inventory', fill: '--g-lab', size: 'full',
+    sizes: 'large, full · default full', decision: 'D8',
+    ref: 'Sheet 2 — the dark balance card, one figure over a strip of discrete bars rather than a curve',
+    answers: 'What did a period actually consist of, day by day, where the days are countable and pointable?',
+    instead: '<strong><code>chart</code></strong> is a smoothed line, and a line asserts continuity between its points — feed is issued in discrete daily rounds, so a line drawn through them claims something untrue about 3 a.m. <strong><code>bars</code></strong> lets a reader point at Tuesday.',
+    instead2: 'The last seven bars are at full opacity and the earlier twenty-three at 42%, so “this week against the month” needs no legend and no second card.',
+    shape: `data: {\n  total: '1,357', unit: 'kg', span: 'last 30 days',\n  series: [38, 41, 44, …],   // 30 daily figures\n  recent: 7,                 // drawn at full opacity\n  facts: [\n    { value: '45 kg', label: 'a day, average' },\n    { value: '61 kg', label: 'peak, 18th' },\n  ],\n}`,
+    data: {
+      total: '1,357', unit: 'kg', span: 'last 30 days', recent: 7,
+      series: [38, 41, 44, 39, 47, 52, 45, 40, 36, 43, 49, 55, 42, 38, 44,
+               46, 51, 61, 48, 40, 37, 42, 45, 50, 47, 43, 39, 44, 53, 58],
+      facts: [
+        { value: '45 kg', label: 'a day, average' },
+        { value: '61 kg', label: 'peak, 18th' },
+        { value: '3 days', label: 'above the plan' },
+      ],
+    },
+  },
+  {
+    layout: 'split', title: 'Enclosure Space', sprite: 'd-occupancy',
+    domain: 'd.occupancy', fill: '--g-species', size: 'medium',
+    sizes: 'medium, large · default medium', decision: 'D9',
+    ref: 'Sheet 2 — Device Storage, 345 GB as one segmented bar with a dot legend under it',
+    answers: 'What is one capacity made of — in a card one row high?',
+    instead: '<strong><code>ring</code></strong> answers exactly this question and needs a 2×2 to do it, because a donut plus a legend will not fit in 164px. At <code>medium</code> the catalogue currently has no composition that shows composition at all, which is why 46% of the Site cards are still a single figure.',
+    instead2: 'Same four white opacities as <code>ring</code> uses, and for the same reason: four hues would read as four categories with meanings of their own and would collide with whichever module the card belongs to.',
+    shape: `data: {\n  total: '48', unit: 'enclosures',\n  parts: [\n    { label: 'Occupied', n: 39 },\n    { label: 'Free', n: 5 },\n    { label: 'Quarantine', n: 2 },\n    { label: 'Restricted', n: 2 },\n  ],\n}`,
+    data: {
+      total: '48', unit: 'enclosures',
+      parts: [
+        { label: 'Occupied', n: 39 },
+        { label: 'Free', n: 5 },
+        { label: 'Quarantine', n: 2 },
+        { label: 'Restricted', n: 2 },
+      ],
+    },
+  },
+  {
+    layout: 'setpoint', title: 'Reptile House', sprite: 'd-environment',
+    domain: 'd.environment', fill: '--g-eggs', size: 'medium',
+    sizes: 'medium · default medium', decision: 'the ACTION half of D6',
+    flag: '⚠ a decision, not a proposal',
+    ref: 'Sheet 1 — the Temperature card with its − and + buttons; sheet 1 again — Room Lamp, a slider and a colour ramp on the card itself',
+    answers: 'A value I can change from the home page, without opening anything.',
+    instead: 'Nothing, and that is the point. <strong>Every one of the twenty-one layouts reads.</strong> <code>actions</code> comes closest and it navigates — its three verbs open a form somewhere else. This card would be the first in the product that <em>writes</em>.',
+    instead2: 'That is a product decision and not a design one, and it is worth being explicit about the cost: a card that mutates needs an optimistic state, a failure path, an undo, a permission gate finer than the role chip, and an answer to what happens when two people hold the same setpoint. Shipping the shape without those is how a prototype becomes a support ticket. <strong>Shown so it can be rejected on purpose rather than by omission.</strong>',
+    shape: `data: {\n  target: '28', unit: '°C',\n  now: 'Now 27.4 °C · in range',\n  step: 0.5, min: 22, max: 34,\n  writes: 'enclosure.env.target',   // ← the new thing\n}`,
+    data: { target: '28', unit: '°C', now: 'Now 27.4 °C · in range' },
+  },
+  {
+    layout: 'agenda', title: 'Today', sprite: 'd-work',
+    domain: 'd.work', fill: '--g-followup', size: 'large',
+    sizes: 'medium, large · default large', decision: 'D2',
+    flag: '⚠ overlaps timeline — pick one',
+    ref: 'Sheet 1 — the SCHEDULE card, entries down coloured spines with “In 5 min · Online” under each',
+    answers: 'What are the next two or three commitments, with the urgent one visibly urgent?',
+    instead: '<strong><code>timeline</code></strong> is the same skeleton pointed the other way: dated entries down a hairline, in the past, all at one weight. This is the future, three entries at most, with tone on the spine.',
+    instead2: 'Honestly assessed, this is <code>timeline</code> with a direction and a tone — the smallest new composition here, and the one most defensible as a <em>variant</em> of an existing layout rather than a twenty-second entry in <code>LAYOUTS</code>. If only one of these twelve is cut, cut this one.',
+    shape: `data: {\n  chip: '3 today',\n  items: [\n    { text: 'Tiger Enclosure Inspection',\n      when: 'In 5 min', where: 'Zone B', tone: 'alert' },\n    { text: 'Vaccination Round',\n      when: '11:00', where: 'Hospital', tone: 'warn' },\n    …\n  ],\n}`,
+    data: {
+      chip: '3 today',
+      items: [
+        { text: 'Tiger Enclosure Inspection', when: 'In 5 min', where: 'Zone B', tone: 'alert' },
+        { text: 'Vaccination Round', when: '11:00', where: 'Hospital', tone: 'warn' },
+        { text: 'Feed Delivery', when: '14:30', where: 'Main Gate' },
+      ],
+    },
+  },
+]
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RENDER
+   One source for both the contact sheet and the detail blocks, so a card can
+   never disagree with itself between the two.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function cardHTML(c) {
+  return `<div class="card" data-size="${c.size}" data-layout="${c.layout}"` +
+    ` style="--card-bg:var(${c.fill})">${L[c.layout](c)}</div>`
+}
+
+/* the sheet, in an order that keeps two identical gradients from touching —
+   `--g-pharmacy` and `--g-followup` are the same ramp in the token file */
+const SHEET_ORDER = ['window', 'pips', 'score', 'compare', 'breach', 'arrivals',
+                     'agenda', 'roster', 'launcher', 'split', 'setpoint', 'bars']
+const byLayout = Object.fromEntries(CONCEPTS.map((c) => [c.layout, c]))
+document.getElementById('sheet').innerHTML =
+  SHEET_ORDER.map((k) => cardHTML(byLayout[k])).join('')
+
+const SIZE_PX = {
+  small: '179 × 164', medium: '374 × 164',
+  large: '374 × 344', tall: '374 × 344', full: '765 × 344',
+}
+
+document.getElementById('concepts').innerHTML = CONCEPTS.map((c, i) => {
+  const row = (k, v) => `<div class="ann__row"><div class="ann__k">${k}</div><div class="ann__v">${v}</div></div>`
+  return `<section class="concept">` +
+    `<div class="concept__bar">` +
+      `<span class="concept__n">${i + 1}</span>` +
+      `<h3 class="concept__name">${esc(c.title)}</h3>` +
+      `<span class="concept__id">${esc(c.layout)}</span>` +
+      (c.flag ? `<span class="concept__flag">${esc(c.flag)}</span>` : '') +
+      `<span class="concept__sizes">${esc(c.sizes)}</span>` +
+    `</div>` +
+    `<div class="concept__body">` +
+      `<div class="stage">${cardHTML(c)}` +
+        `<p class="stage__caption">${esc(c.size)} · ${SIZE_PX[c.size]} · <code>${esc(c.domain)}</code> · <code>${esc(c.fill)}</code></p>` +
+      `</div>` +
+      `<div class="ann">` +
+        row('Answers', c.answers) +
+        row('Instead of', c.instead + (c.instead2 ? `<br><br>${c.instead2}` : '')) +
+        row('Decision', `<strong>${esc(c.decision)}</strong> — framing document §4`) +
+        row('From', esc(c.ref)) +
+        row('Data', `<pre>${esc(c.shape)}</pre>`) +
+      `</div>` +
+    `</div>` +
+  `</section>`
+}).join('')
+
+/* A hook for the verification sweep — the same shape antz.check*() uses, so a
+   later pass can assert this page rather than eyeball it. */
+window.mock = {
+  concepts: CONCEPTS,
+  /**
+   * Every visualisation that has collapsed to nothing.
+   *
+   * THE CHECK THE OVERFLOW SWEEP CANNOT BE. A flex item whose children are
+   * empty elements has a min-content height of 0, so when a column is
+   * over-budget that item absorbs the entire overrun and disappears — and the
+   * card's scrollHeight still equals its clientHeight, so every overflow
+   * assertion passes on a card with a missing bar. This is what happened to
+   * `split`. Anything drawn rather than written is asked its rendered height
+   * directly, which is the only question that catches it.
+   */
+  checkCollapsed() {
+    const DRAWN = ['.l-split__bar', '.l-split__seg', '.l-pips__strip', '.l-pips__pip',
+                   '.l-breach__bar', '.l-breach__cell', '.l-bars__plot', '.l-bars__bar',
+                   '.l-score__rail', '.l-score__ticks', '.l-compare__pane',
+                   '.l-window__dial', '.l-agenda__spine', '.l-launcher__tile',
+                   '.l-arr__plate', '.l-roster__av', '.l-set__btn']
+    const bad = []
+    for (const sel of DRAWN) {
+      for (const n of document.querySelectorAll(sel)) {
+        const r = n.getBoundingClientRect()
+        if (r.height < 2 || r.width < 2) {
+          bad.push([n.closest('.card').dataset.layout, sel, +r.width.toFixed(1), +r.height.toFixed(1)])
+        }
+      }
+    }
+    return bad
+  },
+
+  /**
+   * Every card that clips its own TEXT, at whatever width the page is.
+   *
+   * ONLY NODES THAT CARRY TEXT ARE ASKED. The first version asked every
+   * element and reported the breach card's limit marker at all six widths: a
+   * 2px rule whose ::after draws a 8px triangle above it, so its scrollWidth
+   * is 5 on a clientWidth of 2. That is the marker working. A sweep that
+   * cannot tell a decoration deliberately drawn outside its box from a label
+   * cut off inside one reports six failures a reader has to learn to ignore,
+   * which is how a check stops being read at all.
+   */
+  checkOverflow() {
+    const bad = []
+    for (const el of document.querySelectorAll('.card')) {
+      for (const n of el.querySelectorAll('*')) {
+        const text = (n.textContent || '').trim()
+        if (!text) continue
+        if (n.scrollWidth > n.clientWidth + 1 && getComputedStyle(n).textOverflow !== 'ellipsis') {
+          bad.push([el.dataset.layout, n.className, n.scrollWidth, n.clientWidth])
+        }
+      }
+      if (el.scrollHeight > el.clientHeight + 1) bad.push([el.dataset.layout, 'CARD HEIGHT', el.scrollHeight, el.clientHeight])
+    }
+    return bad
+  },
+}
+</script>
+</body>
+</html>
