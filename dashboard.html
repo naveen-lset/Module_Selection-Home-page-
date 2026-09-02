@@ -9,6 +9,11 @@
      artboard's display type; this surface does not, because the brief names one
      family and a second family loaded "just in case" is how a second family
      ends up on screen. -->
+<!-- A browser asks for /favicon.ico whether or not a page mentions one, and the
+     repo has none — so every load logged a 404 that had nothing to do with the
+     page. An inline SVG answers the request without adding a binary asset.
+     index.html has the same gap; it is a separate surface and left alone. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F515B'/%3E%3Ctext x='16' y='21' font-family='Inter,sans-serif' font-size='13' font-weight='600' fill='%23fff' text-anchor='middle'%3EAZ%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
