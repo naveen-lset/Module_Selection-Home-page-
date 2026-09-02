@@ -484,7 +484,34 @@ with Chrome(width=1024, height=1200, reduced_motion=False) as c:
           f"{got['running']} of {got['slots']} slots animating")
     check("as a cascade, not all at once", got["spread"] >= 6, f"{got['spread']} distinct delays")
     check("spread over a bounded span", 200 <= got["span"] <= 420, f"{got['span']}ms")
-    check("and it blurs to focus", got["blurring"] >= 8, f"{got['blurring']} blurring")
+
+    # ── THE BLUR HAS TO BE MEASURED ON A PAGE INSIDE ITS OWN BUDGET ────────
+    # `blurBudget` is 18 cards, because a filter costs a compositing pass per
+    # element per frame and thirty of them stutter on the iPad this is drawn
+    # for. The seeded page is 30 cards since the sixteen new compositions
+    # landed, so it correctly does NOT blur — and this assertion used to read
+    # the default page and fail on the budget doing its job.
+    #
+    # So the positive case gets a twelve-card page seeded through the same
+    # localStorage the product writes, and the drop at 30 is asserted straight
+    # after it. Both halves are the requirement; only one of them was checked.
+    check("the seeded page is past the blur budget, so it drops the blur",
+          got["blurring"] == 0 and got["slots"] > 18,
+          f"{got['slots']} slots, {got['blurring']} blurring")
+
+    SHORT = ['medical.default', 'hospital.photo', 'pharmacy.default', 'lab.default',
+             'medical.active', 'pharmacy.value', 'diet.compliance', 'users.today',
+             'security.cctv', 'approvals.now', 'followup.overdue', 'species.count']
+    c.eval("localStorage.setItem('antz.home.layout', JSON.stringify({version:5, savedAt:Date.now(), "
+           "cards:" + repr([{'uid': f'u{i}', 'variantId': v, 'size': 'small'} for i, v in enumerate(SHORT)]).replace("'", '"') + "}))")
+    c.goto(URL, settle=0.05)
+    short = c.eval(LAND % "#moduleGrid")
+    check("and a page inside the budget blurs to focus",
+          short["blurring"] >= 8 and short["slots"] <= 18,
+          f"{short['slots']} slots, {short['blurring']} blurring")
+    c.eval("localStorage.removeItem('antz.home.layout')")
+    c.goto(URL, settle=0.05)
+    got = c.eval(LAND % "#moduleGrid")
 
     # bottom-up: the last row starts first
     order = c.eval("""(() => {

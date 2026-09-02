@@ -390,6 +390,11 @@
   /* No Figma reference — the artboard has no one-row statistics card. Sized so
      a label row plus a figure clears a 132px content box with room to spare. */
   --fs-stat-sm: clamp(22px, 1.15rem + 1.2vw, 34px);
+  /* THE ONE-CELL FIGURE. Also no Figma reference — the artboard has no 1x1
+     data card at all, which is the gap the sixteen new compositions fill. 40 at
+     1024 is the largest a numeral can be and still leave a glyph above it and a
+     qualifier below it inside 132px. */
+  --fs-fig:     clamp(26px, 1.4rem + 1.3vw, 40px);
 
   /* THE TWO SIZES BETWEEN A HEADING AND A HEADLINE FIGURE.
      Figma has exactly one figure size, 44px, because the artboard has exactly
@@ -586,6 +591,7 @@
     /* no Figma reference — the artboard has no card that shows these */
     --fs-card-title: 17px;
     --fs-stat-sm:    30.69px;
+    --fs-fig:        40px;
     --fs-metric:     25.2px;
     --fs-metric-sm:  21.17px;
   }
@@ -2283,6 +2289,270 @@ body.is-editing .section-head {
   bottom: calc(var(--s5) / -2 - 3px);
   transform: translateY(50%) rotate(135deg);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SIXTEEN COMPOSITIONS, FROM mockups/widget-concepts.html
+   ══════════════════════════════════════════════════════════════════════════
+
+   WHAT THEY FIX, AND IT IS NOT MONOTONY. The module catalogue was already
+   well spread — eighteen layouts, the commonest at 10.5% — but measured, its
+   76 widgets offered `supportedSizes` of medium 63 times, large 70, tall 18,
+   full 4, and **small ZERO times**. Every data card in the catalogue was at
+   least two columns wide, so the only 1x1 cards the home page could hold were
+   the doors. That is the size problem the mockup was built to answer, and six
+   of these sixteen exist to answer it.
+
+   THE BOXES THESE ARE DRAWN FOR, measured off the artboard grid:
+
+     1x1   179.2 x 164, 16px padding  ->  147 x 132 of content
+     2x1   374.4 x 164, 20px padding  ->  334 x 124
+     2x2   374.4 x 344, 24px padding  ->  326 x 296
+
+   The mockup was authored at exactly those numbers, so these port with their
+   spacing intact rather than being re-tuned by eye.
+
+   A 1x1 CARD DROPS ITS TITLE TEXT AND KEEPS ITS GLYPH — see the rule at the
+   foot of this block. 147px will not hold a title, a figure and a qualifier,
+   and the glyph already names the module, which is exactly what `door` has
+   relied on since the artboard. That is the whole of the "more label than
+   content" complaint.
+
+   Visualisations are white at an opacity straight onto the module's gradient.
+   No pale plate underneath — that line is what separates a card belonging to
+   this system from a dashboard tile dropped into it.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1x1 · FIGURE · one number, as large as 132px allows ─────────────────── */
+.l-fig { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: flex-end; min-height: 0; }
+.l-fig__value {
+  font-family: var(--font-num); font-weight: 700; font-size: var(--fs-fig);
+  line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+  font-variation-settings: 'opsz' 14;
+}
+/* a rupee figure or a ratio needs the step down or it wraps at two columns */
+.l-fig__value[data-long] { font-size: var(--fs-stat-sm); }
+.l-fig__sub { flex: none; margin-top: var(--s1); font-size: var(--fs-micro); opacity: .84; line-height: 1.3; }
+.l-fig__sub[data-tone='warn']  { color: var(--c-warn); opacity: 1; font-weight: 550; }
+.l-fig__sub[data-tone='alert'] { color: var(--c-alert); opacity: 1; font-weight: 550; }
+
+/* ── 1x1 · DUO · two numbers that only mean something together ──────────── */
+.l-duo { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; gap: var(--s2); min-height: 0; }
+.l-duo__row { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
+.l-duo__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-duo__tag { font-size: 10px; letter-spacing: .04em; opacity: .82; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-duo__rule { flex: none; height: 1px; background: rgba(255, 255, 255, .3); }
+.l-duo__row[data-tone='alert'] .l-duo__value { color: var(--c-alert); }
+
+/* ── 1x1 · DIAL · a ring, the reading inside it, and nothing else ───────── */
+.l-dial { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-dial__body { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.l-dial__ring { position: relative; flex: none; width: 92px; height: 92px; }
+.l-dial__ring svg { width: 100%; height: 100%; display: block; }
+.l-dial__track { fill: none; stroke: rgba(255, 255, 255, .26); }
+.l-dial__value { fill: none; stroke: #fff; stroke-linecap: round; }
+.l-dial__read { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.l-dial__pct { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric-sm); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-dial__unit {
+  margin-top: 3px; font-size: 9.5px; opacity: .82;
+  /* 56% of the ring, which is the chord available at this vertical offset —
+     see the note in cards.js. Ellipsis is the guard, not the plan. */
+  max-width: 56%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── 1x1 · SPARK · a number over the run behind it ──────────────────────── */
+.l-spark { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: space-between; min-height: 0; }
+.l-spark__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-spark__plot { flex: none; display: flex; align-items: flex-end; gap: 2px; height: 42px; }
+.l-spark__bar { flex: 1 1 0; min-width: 2px; min-height: 2px; border-radius: 2px 2px 0 0; background: rgba(255, 255, 255, .5); }
+.l-spark__bar[data-last] { background: #fff; }
+
+/* ── 1x1 · STACK · composition at one cell ──────────────────────────────── */
+.l-stack { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-stack__body { flex: 1 1 auto; display: flex; align-items: stretch; gap: var(--s3); min-height: 0; }
+.l-stack__bar { flex: none; width: 24px; display: flex; flex-direction: column; gap: 2px; }
+.l-stack__seg { border-radius: 3px; min-height: 3px; }
+.l-stack__seg[data-i='0'] { background: rgba(255, 255, 255, .95); }
+.l-stack__seg[data-i='1'] { background: rgba(255, 255, 255, .7); }
+.l-stack__seg[data-i='2'] { background: rgba(255, 255, 255, .46); }
+.l-stack__seg[data-i='3'] { background: rgba(255, 255, 255, .26); }
+.l-stack__read { flex: 1 1 auto; min-width: 0; align-self: flex-end; }
+.l-stack__total { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-stack__caption { display: block; margin-top: var(--s1); font-size: var(--fs-micro); opacity: .84; }
+
+/* ── 1x1 · PULSE · a state said as a word, not a number ─────────────────── */
+.l-pulse { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; align-items: flex-start; justify-content: flex-end; min-height: 0; }
+.l-pulse__radar { position: absolute; z-index: 1; left: -28px; top: -28px; width: 132px; height: 132px; border-radius: var(--r-pill); border: 1.5px solid rgba(255, 255, 255, .2); pointer-events: none; }
+.l-pulse__radar::before, .l-pulse__radar::after { content: ''; position: absolute; border-radius: var(--r-pill); border: 1.5px solid rgba(255, 255, 255, .2); }
+.l-pulse__radar::before { inset: 22px; }
+.l-pulse__radar::after { inset: 44px; }
+.l-pulse__word { font-size: var(--fs-card); font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+.l-pulse__sub { margin-top: var(--s1); font-size: var(--fs-micro); opacity: .84; line-height: 1.3; }
+.l-pulse[data-tone='alert'] .l-pulse__word { color: var(--c-alert); }
+
+/* ── 2x1 · HEAT · cells shaded by value, and no labels at all ───────────── */
+.l-heat { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-heat__body { flex: 1 1 auto; display: flex; align-items: center; gap: var(--s4); min-height: 0; }
+.l-heat__grid {
+  flex: 1 1 auto; align-self: stretch; display: grid; gap: 3px; min-width: 0;
+  /* rows share the body's height, so the grid cannot outgrow the card */
+  grid-auto-rows: minmax(0, 1fr);
+  /* and a cap on the width keeps the cells near-square at two columns, where
+     a 2x1 card is much wider than it is at five */
+  max-width: 250px;
+}
+.l-heat__cell { border-radius: 3px; background: rgba(255, 255, 255, var(--a, .3)); }
+.l-heat__read { flex: none; text-align: right; }
+.l-heat__value { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric-sm); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-heat__caption { display: block; margin-top: var(--s1); font-size: var(--fs-micro); opacity: .84; }
+
+/* ── 2x1 · TREND · a figure and the discrete run it ends ────────────────── */
+.l-trend { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: flex-end; min-height: 0; }
+.l-trend__read { display: flex; align-items: baseline; gap: var(--s2); min-width: 0; }
+.l-trend__value { flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-trend__caption { font-size: var(--fs-micro); opacity: .84; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-trend__plot { flex: none; margin-top: var(--s2); height: 40px; display: flex; align-items: flex-end; gap: 2px; }
+.l-trend__bar { flex: 1 1 0; min-width: 1px; min-height: 2px; border-radius: 2px 2px 0 0; background: rgba(255, 255, 255, .4); }
+.l-trend__bar[data-last] { background: #fff; }
+
+/* ── 2x1 · STRIP · what one capacity is made of, in a single row ─────────
+   A donut needs 2x2. This is the same argument at 2x1, which is the size the
+   catalogue had no composition-shaped card at. */
+.l-strip { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; gap: var(--s2); min-height: 0; }
+.l-strip__read { display: flex; align-items: baseline; gap: var(--s2); }
+.l-strip__total { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-strip__unit { font-size: var(--fs-label); opacity: .84; }
+.l-strip__bar { flex: none; display: flex; gap: 2px; height: 10px; }
+.l-strip__seg { border-radius: 3px; min-width: 3px; }
+.l-strip__seg[data-i='0'] { background: rgba(255, 255, 255, .95); }
+.l-strip__seg[data-i='1'] { background: rgba(255, 255, 255, .6); }
+.l-strip__seg[data-i='2'] { background: rgba(255, 255, 255, .34); }
+.l-strip__keys { flex: none; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); }
+.l-strip__key { display: flex; align-items: center; gap: 5px; font-size: var(--fs-micro); }
+.l-strip__swatch { flex: none; width: 6px; height: 6px; border-radius: var(--r-pill); }
+.l-strip__key[data-i='0'] .l-strip__swatch { background: rgba(255, 255, 255, .95); }
+.l-strip__key[data-i='1'] .l-strip__swatch { background: rgba(255, 255, 255, .6); }
+.l-strip__key[data-i='2'] .l-strip__swatch { background: rgba(255, 255, 255, .34); }
+
+/* ── 2x1 · VS · one bar split from the middle, a count at each end ───────── */
+.l-vs { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: center; gap: var(--s2); min-height: 0; }
+.l-vs__line { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); }
+.l-vs__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric-sm); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-vs__value--b { opacity: .78; }
+.l-vs__bar { flex: none; display: flex; height: 12px; gap: 3px; }
+.l-vs__bar i:first-child { background: #fff; border-radius: 4px 0 0 4px; }
+.l-vs__bar i:last-child { background: rgba(255, 255, 255, .42); border-radius: 0 4px 4px 0; }
+.l-vs__tags { display: flex; justify-content: space-between; gap: var(--s2); font-size: var(--fs-micro); opacity: .84; }
+
+/* ── 2x1 · RAIL · a value against the scale it is measured on ─────────────
+   `stat` prints the number and no scale, so 78 could be out of 80 or 1000.
+   A reader who has never met this index learns its range from the card. */
+.l-rail { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: flex-end; min-height: 0; }
+.l-rail__read { display: flex; align-items: baseline; gap: var(--s2); min-width: 0; }
+.l-rail__value { flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.l-rail__caption { font-size: var(--fs-micro); opacity: .84; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-rail__scale { position: relative; flex: none; height: 26px; margin-top: var(--s1); }
+.l-rail__ticks { position: absolute; inset: auto 0 6px; display: flex; justify-content: space-between; align-items: flex-end; height: 18px; }
+.l-rail__ticks i { width: 1.5px; height: 6px; border-radius: 1px; background: rgba(255, 255, 255, .4); }
+.l-rail__ticks i[data-major] { height: 13px; background: rgba(255, 255, 255, .7); }
+.l-rail__mark { position: absolute; bottom: 1px; width: 12px; height: 12px; border-radius: var(--r-pill); background: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .26); transform: translateX(-50%); }
+
+/* ── 2x2 · LADDER · a total that is a ladder, not a sum ──────────────────
+   THE SMALLEST BAND IS FLOORED AT 22px AND THAT IS DELIBERATE. Eight critical
+   of 140 is 5.7%, which over 250px of band is a 14px sliver that clipped its
+   own count. The floor exaggerates the worst band by a few pixels and shortens
+   the four below it — the right direction to be wrong in on a card whose whole
+   job is to make eight critical cases impossible to miss. */
+.l-ladder { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-ladder__bands { flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px; min-height: 0; }
+.l-ladder__band { display: flex; align-items: center; gap: var(--s2); min-height: 22px; padding: 0 var(--s3); border-radius: 7px; overflow: hidden; }
+.l-ladder__count { flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.l-ladder__name { font-size: var(--fs-micro); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-ladder__band[data-i='0'] { background: #fff; color: var(--ink); }
+.l-ladder__band[data-i='1'] { background: rgba(255, 255, 255, .6); }
+.l-ladder__band[data-i='2'] { background: rgba(255, 255, 255, .4); }
+.l-ladder__band[data-i='3'] { background: rgba(255, 255, 255, .28); }
+.l-ladder__band[data-i='4'] { background: rgba(255, 255, 255, .18); }
+
+/* ── 2x2 · TAXA · a treemap whose block AREA is its share ────────────────
+   SIZED IN PERCENTAGES, NOT flex-grow. `flex: 21460 1 0` against
+   `flex: 34560 1 0` measured a 42.8/57.2 split where the factors say
+   38.3/61.7 — Chrome does not distribute free space in exact proportion at
+   those magnitudes. Percentages are exact arithmetic on a known containing
+   block, so the areas are the shares to two decimal places. */
+.l-taxa { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-taxa__map { flex: 1 1 auto; display: flex; min-height: 0; border-radius: 8px; overflow: hidden; }
+.l-taxa__col { flex: none; display: flex; flex-direction: column; min-width: 0; }
+.l-taxa__block { flex: none; display: flex; flex-direction: column; justify-content: flex-end; padding: var(--s2) var(--s3); min-width: 0; min-height: 0; overflow: hidden; }
+.l-taxa__map > .l-taxa__block { height: 100%; }
+.l-taxa__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); line-height: 1; font-variant-numeric: tabular-nums; }
+.l-taxa__name { font-size: 10px; opacity: .9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-taxa__block[data-i='0'] { background: rgba(255, 255, 255, .92); color: var(--ink); }
+.l-taxa__block[data-i='0'] .l-taxa__value { font-size: var(--fs-metric-sm); }
+.l-taxa__block[data-i='1'] { background: rgba(255, 255, 255, .5); }
+.l-taxa__block[data-i='2'] { background: rgba(255, 255, 255, .34); }
+.l-taxa__block[data-i='3'] { background: rgba(255, 255, 255, .24); }
+.l-taxa__block[data-i='4'] { background: rgba(255, 255, 255, .16); }
+
+/* ── 2x2 · SHELF · stock as shelves, with what expires drawn dark ────────
+   The fact a donut of the same data hides: which end of the shelf is going
+   out of date. */
+.l-shelf { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-shelf__rows { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: var(--s3); }
+.l-shelf__row { min-width: 0; }
+.l-shelf__line { display: flex; align-items: baseline; gap: var(--s2); margin-bottom: 5px; }
+.l-shelf__name { font-size: var(--fs-micro); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-shelf__count { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
+.l-shelf__pips { display: flex; gap: 3px; height: 13px; }
+.l-shelf__pips i { flex: 1 1 0; min-width: 2px; border-radius: 2px; background: rgba(255, 255, 255, .9); }
+.l-shelf__pips i[data-expiring] { background: rgba(0, 0, 0, .3); }
+.l-shelf__foot { flex: none; margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid rgba(255, 255, 255, .22); display: flex; align-items: center; gap: 7px; font-size: var(--fs-micro); opacity: .86; }
+.l-shelf__foot i { flex: none; width: 10px; height: 10px; border-radius: 2px; background: rgba(0, 0, 0, .3); }
+
+/* ── 2x2 · CLUTCH · one tile per clutch, each counting its own days ─────── */
+.l-clutch { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-clutch__grid { flex: 1 1 auto; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: var(--s2); min-height: 0; }
+.l-clutch__tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s1); padding: 6px; border-radius: 10px; background: rgba(255, 255, 255, .16); min-width: 0; min-height: 0; }
+.l-clutch__tile[data-due] { background: rgba(255, 255, 255, .42); }
+.l-clutch__egg { flex: none; width: 26px; height: 33px; }
+.l-clutch__egg svg { width: 100%; height: 100%; display: block; }
+.l-clutch__egg .l-clutch__shell { fill: none; stroke: rgba(255, 255, 255, .3); }
+.l-clutch__egg .l-clutch__done { fill: none; stroke: #fff; stroke-linecap: round; }
+.l-clutch__day { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
+
+/* ── 2x2 · MONTH · what is due is a date, so the card is a month ─────────
+   ROWS ARE A FIXED 40px, NOT `aspect-ratio: 1`. A square day cell makes its
+   height a function of the column width, which the card cannot negotiate:
+   five square rows of a 43px column need 232px and the grid has 219, so the
+   card overran by 2px at every width. */
+.l-month { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-month__grid {
+  flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(0, 1fr); gap: 4px;
+}
+.l-month__day { display: flex; align-items: center; justify-content: center; border-radius: 6px; background: rgba(255, 255, 255, .1); font-family: var(--font-num); font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.l-month__day[data-pad] { background: none; }
+.l-month__day[data-due] { background: rgba(255, 255, 255, .34); font-weight: 700; }
+.l-month__day[data-overdue] { background: #fff; color: var(--ink); font-weight: 700; }
+.l-month__day[data-today] { box-shadow: inset 0 0 0 1.5px #fff; }
+.l-month__foot { flex: none; margin-top: var(--s3); display: flex; gap: var(--s6); }
+.l-month__fact-value { display: block; font-family: var(--font-num); font-weight: 700; font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.l-month__fact-label { display: block; font-size: var(--fs-micro); opacity: .84; }
+
+/* ── THE 1x1 RULE · a one-cell card keeps its glyph and drops its title ──
+   147px of content will not hold a title line, a figure and a qualifier, and
+   the glyph already says which module this is — which is what `door` has
+   relied on since the artboard. The head is still rendered so the glyph and
+   the accessible name are unchanged; only the text is hidden. */
+.card[data-w='1'][data-h='1'] .c-head { margin-bottom: var(--s2); }
+.card[data-w='1'][data-h='1'] .c-head__text { display: none; }
+
+/* ONE ROW GIVES THE RING 116px TO 132px MINUS ITS TITLE LINE, so 78 is the
+   size that clears the narrowest of them with the glyph above it. `dial` is
+   only offered at small and medium, both of which are one row; the 92 in the
+   block above is what it would draw at 2x2 if it were ever offered there. */
+.card[data-h='1'] .l-dial__ring { width: 78px; height: 78px; }
+.card[data-h='1'] .l-dial__pct { font-size: var(--fs-metric-sm); }
+.card[data-w='1'] .l-heat__body { gap: var(--s2); }
 
 /* narrow cards */
 @container card (max-width: 300px) {
@@ -6110,6 +6380,13 @@ const LAYOUT_FILL = {
   progress: 'solid', timeline: 'solid', recent: 'solid',
   ring: 'solid', arc: 'solid', flow: 'solid', attention: 'solid',
   meters: 'solid', entity: 'solid', hierarchy: 'solid',
+  /* the sixteen from the widget-concepts mockup · all solid, because every one
+     of them draws its visualisation in white straight onto the module's own
+     gradient rather than on a plate of its own */
+  figure: 'solid', duo: 'solid', dial: 'solid', spark: 'solid',
+  stack: 'solid', pulse: 'solid', heat: 'solid', trend: 'solid',
+  strip: 'solid', vs: 'solid', rail: 'solid', ladder: 'solid',
+  taxa: 'solid', shelf: 'solid', clutch: 'solid', month: 'solid',
 }
 
 /* Every module's plain door, at the module's own gradient. */
@@ -7104,6 +7381,406 @@ const VARIANTS = [
     supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
     data: { actions: ['New Announcement', 'Send Message'] },
   },
+  /* ══ THIRTY-FOUR CARDS ON THE SIXTEEN NEW COMPOSITIONS ══════════════════
+     Every one is from `mockups/widget-concepts.html`, and every figure is out
+     of `docs/Modules.md Files/`.
+
+     TWENTY OF THEM OFFER `small`, WHICH NO CARD IN THIS CATALOGUE DID.
+     Measured before this pass: 63 offers of medium, 70 of large, 18 of tall,
+     4 of full and NONE of small — so the only single-cell cards the home page
+     could hold were the eighteen doors, and every statistic was at least two
+     columns wide whether it had two columns of content or not.
+
+     A SIGNATURE IS OFFERED AT ONE SIZE ONLY. `ladder`, `taxa`, `shelf`,
+     `clutch` and `month` have no smaller form that keeps their point — a
+     four-block treemap in 124px of height, or a month grid in one row, is not
+     a compressed version of the card, it is a different and worse card. The
+     picker offers exactly `supportedSizes`, so saying `['large']` is how the
+     catalogue declines to be resized rather than degrading quietly. ═════════ */
+
+  /* ── MEDICAL ─────────────────────────────────────────────────────────── */
+  {
+    id: 'medical.severity', moduleId: 'medical', name: 'Cases by Severity',
+    layout: 'ladder', purpose: 'ATTENTION',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'primary',
+    /* 140 cases are not a total, they are a ladder — and the eight critical
+       ones are 5.7% of it, which is why the band floor exists. */
+    data: {
+      title: 'Cases by Severity',
+      bands: [
+        { n: 8,  label: 'Critical' },
+        { n: 23, label: 'Serious' },
+        { n: 45, label: 'Stable' },
+        { n: 39, label: 'Recovering' },
+        { n: 25, label: 'Closed' },
+      ],
+    },
+  },
+  {
+    id: 'medical.active', moduleId: 'medical', name: 'Under Treatment',
+    layout: 'figure', purpose: 'ATTENTION',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Under Treatment', value: '1,186', sub: '47 critical', subTone: 'alert' },
+  },
+  {
+    id: 'medical.bysite', moduleId: 'medical', name: 'Health by Site',
+    layout: 'heat', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    /* ten sites as ten cells, already normalised 0..1 off a 56–80 range —
+       the widget that knows the domain knows its own floor and ceiling */
+    data: {
+      title: 'Health by Site', cols: 5,
+      cells: [0.37, 0.54, 0.92, 0.42, 0.67, 0.63, 0.42, 0, 0.71, 1],
+      value: '56', caption: 'lowest of 10 sites',
+    },
+  },
+
+  /* ── HOSPITAL ────────────────────────────────────────────────────────── */
+  {
+    id: 'hospital.care', moduleId: 'hospital', name: 'In Care',
+    layout: 'duo', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    /* two figures that only mean something together, so never one card each */
+    data: {
+      title: 'In Care',
+      rows: [{ value: '268', label: 'ISOLATION' }, { value: '742', label: 'QUARANTINE' }],
+    },
+  },
+  {
+    id: 'hospital.beds', moduleId: 'hospital', name: 'Ward Occupancy',
+    layout: 'strip', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: {
+      title: 'Ward Occupancy', total: '50', unit: 'beds',
+      parts: [
+        { label: 'Occupied', n: 41 },
+        { label: 'Isolation', n: 4 },
+        { label: 'Free', n: 5 },
+      ],
+    },
+  },
+
+  /* ── PHARMACY ────────────────────────────────────────────────────────── */
+  {
+    id: 'pharmacy.shelves', moduleId: 'pharmacy', name: 'Shelves',
+    layout: 'shelf', purpose: 'ATTENTION',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'secondary',
+    data: {
+      title: 'Shelves',
+      rows: [
+        { label: 'Medicine',        n: 55, expiring: 4 },
+        { label: 'Consumable',      n: 21, expiring: 2 },
+        { label: 'Controlled drug', n: 10, expiring: 0 },
+        { label: 'Vaccine',         n: 10, expiring: 3 },
+      ],
+      foot: '9 lines within 30 days of expiry',
+    },
+  },
+  {
+    id: 'pharmacy.value', moduleId: 'pharmacy', name: 'Stock Value',
+    layout: 'figure', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    /* the long-value step keeps a rupee figure on one line at one cell */
+    data: { title: 'Stock Value', value: '₹1.88cr', sub: 'pharmacy stock' },
+  },
+  {
+    id: 'pharmacy.orders', moduleId: 'pharmacy', name: 'Pending Orders',
+    layout: 'spark', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: { title: 'Pending Orders', value: '14', series: [6, 9, 7, 11, 8, 12, 14] },
+  },
+
+  /* ── LAB ─────────────────────────────────────────────────────────────── */
+  {
+    id: 'lab.pending', moduleId: 'lab', name: 'Results Pending',
+    layout: 'figure', purpose: 'ATTENTION',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Results Pending', value: '8', sub: '2 over 48 hrs', subTone: 'warn' },
+  },
+  {
+    id: 'lab.turnaround', moduleId: 'lab', name: 'Turnaround',
+    layout: 'trend', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: { title: 'Turnaround', value: '2.4', caption: 'days · average',
+            series: [3.1, 3.0, 2.9, 3.2, 2.8, 2.6, 2.7, 2.5, 2.4] },
+  },
+  {
+    id: 'lab.analyser', moduleId: 'lab', name: 'Analyser',
+    layout: 'pulse', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    /* a state said as a word · there is no useful number for "it is working" */
+    data: { title: 'Analyser', word: 'Online', sub: 'calibrated 06:10' },
+  },
+
+  /* ── SPECIES MANAGEMENT ──────────────────────────────────────────────── */
+  {
+    id: 'species.classes', moduleId: 'species', name: 'By Class',
+    layout: 'taxa', purpose: 'UNDERSTAND',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'primary',
+    /* the two smallest classes are grouped: a block too small to hold its own
+       label should not be drawn separately */
+    data: {
+      title: 'By Class',
+      parts: [
+        { label: 'Bird',             n: 21460, value: '21,460' },
+        { label: 'Mammal',           n: 18240, value: '18,240' },
+        { label: 'Reptile',          n: 9870,  value: '9,870' },
+        { label: 'Amphibian & fish', n: 6450,  value: '6,450' },
+      ],
+    },
+  },
+  {
+    id: 'species.sex', moduleId: 'species', name: 'Sex Ratio',
+    layout: 'vs', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'primary',
+    data: {
+      title: 'Sex Ratio',
+      a: { value: '46,120', label: 'Male',   n: 46120 },
+      b: { value: '48,310', label: 'Female', n: 48310 },
+    },
+  },
+  {
+    id: 'species.figure', moduleId: 'species', name: 'Species Count',
+    layout: 'figure', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Species', value: '2,143', sub: '486 subspecies' },
+  },
+
+  /* ── MORTALITY ───────────────────────────────────────────────────────── */
+  {
+    id: 'mortality.month', moduleId: 'mortality', name: 'This Month',
+    layout: 'trend', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'This Month', value: '289', caption: 'six months to August',
+            series: [246, 271, 258, 302, 281, 289] },
+  },
+  {
+    id: 'mortality.split', moduleId: 'mortality', name: 'By Cause',
+    layout: 'stack', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: {
+      title: 'By Cause', total: '26', caption: 'four causes',
+      parts: [{ n: 7 }, { n: 7 }, { n: 6 }, { n: 6 }],
+    },
+  },
+
+  /* ── FETAL DEATH ─────────────────────────────────────────────────────── */
+  {
+    id: 'fetal.target', moduleId: 'fetal', name: 'Breeding Target',
+    layout: 'dial', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { title: 'Breeding Target', pct: 45, value: '45%', unit: 'target' },
+  },
+  {
+    id: 'fetal.survival', moduleId: 'fetal', name: 'Neonatal Survival',
+    layout: 'rail', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    /* a rate against the scale it is measured on, so 75% needs no training */
+    data: { title: 'Neonatal Survival', value: '75%', pct: 75, caption: 'first 30 days' },
+  },
+
+  /* ── EGGS ────────────────────────────────────────────────────────────── */
+  {
+    id: 'eggs.incubating', moduleId: 'eggs', name: 'Incubating',
+    layout: 'clutch', purpose: 'MONITOR',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'secondary',
+    data: {
+      title: 'Incubating',
+      clutches: [
+        { day: 26, of: 28 }, { day: 12, of: 28 }, { day: 4,  of: 21 }, { day: 19, of: 21 },
+        { day: 8,  of: 30 }, { day: 22, of: 24 }, { day: 15, of: 28 }, { day: 2,  of: 26 },
+      ],
+    },
+  },
+  {
+    id: 'eggs.outcome', moduleId: 'eggs', name: 'Clutch Outcome',
+    layout: 'strip', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    data: {
+      title: 'Clutch Outcome', total: '54', unit: 'eggs set',
+      parts: [
+        { label: 'Hatched', n: 31 },
+        { label: 'Incubating', n: 15 },
+        { label: 'Infertile', n: 8 },
+      ],
+    },
+  },
+  {
+    id: 'eggs.pairs', moduleId: 'eggs', name: 'Breeding Pairs',
+    layout: 'spark', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Breeding Pairs', value: '54', series: [38, 42, 44, 47, 49, 51, 54] },
+  },
+
+  /* ── HOUSING ─────────────────────────────────────────────────────────── */
+  {
+    id: 'housing.enclosures', moduleId: 'housing', name: 'Enclosures',
+    layout: 'figure', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Enclosures', value: '1,840', sub: '1,596 occupied' },
+  },
+  {
+    id: 'housing.status', moduleId: 'housing', name: 'Enclosure Status',
+    layout: 'strip', purpose: 'MONITOR',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'primary',
+    data: {
+      title: 'Enclosure Status', total: '1,840', unit: 'enclosures',
+      parts: [
+        { label: 'Occupied', n: 1596, value: '1,596' },
+        { label: 'Vacant', n: 172 },
+        { label: 'Maintenance', n: 72 },
+      ],
+    },
+  },
+
+  /* ── DIET & KITCHEN ──────────────────────────────────────────────────── */
+  {
+    id: 'diet.compliance', moduleId: 'diet', name: 'Diet Compliance',
+    layout: 'dial', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Diet Compliance', pct: 81, value: '81%', unit: 'diet' },
+  },
+  {
+    id: 'diet.wastage', moduleId: 'diet', name: 'Feed Wastage',
+    layout: 'figure', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: { title: 'Feed Wastage', value: '12%', sub: 'down from 14%' },
+  },
+
+  /* ── FOLLOW UP ───────────────────────────────────────────────────────── */
+  {
+    id: 'followup.month', moduleId: 'followup', name: 'September',
+    layout: 'month', purpose: 'ATTENTION',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'primary',
+    /* what is due is a DATE, so the card is a month rather than a count */
+    data: {
+      title: 'September', pad: 1, days: 30, today: 2,
+      overdue: [1], due: [3, 4, 7, 16, 19, 22, 25, 28],
+      facts: [{ value: '8', label: 'overdue' }, { value: '23', label: 'due this month' }],
+    },
+  },
+  {
+    id: 'followup.overdue', moduleId: 'followup', name: 'Overdue',
+    layout: 'figure', purpose: 'ATTENTION',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Overdue', value: '8', sub: 'oldest 12 days', subTone: 'alert' },
+  },
+
+  /* ── PARIVESH ────────────────────────────────────────────────────────── */
+  {
+    id: 'parivesh.sop', moduleId: 'parivesh', name: 'SOP Acknowledgment',
+    layout: 'dial', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { title: 'SOP Ack', pct: 71, value: '71%', unit: 'SOPs' },
+  },
+  {
+    id: 'parivesh.permits', moduleId: 'parivesh', name: 'Live Permits',
+    layout: 'figure', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: { title: 'Live Permits', value: '13', sub: '2 renew in 30 days', subTone: 'warn' },
+  },
+
+  /* ── ADMINISTER ──────────────────────────────────────────────────────── */
+  {
+    id: 'administer.orders', moduleId: 'administer', name: 'Open Orders',
+    layout: 'figure', purpose: 'ACT',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { title: 'Open Orders', value: '58', sub: '22 awaiting you', subTone: 'warn' },
+  },
+  {
+    id: 'administer.clear', moduleId: 'administer', name: 'Escalations',
+    layout: 'pulse', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: { title: 'Escalations', word: 'All Clear', sub: 'none raised today' },
+  },
+
+  /* ── USERS ───────────────────────────────────────────────────────────── */
+  {
+    id: 'users.today', moduleId: 'users', name: 'Attendance Today',
+    layout: 'duo', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: {
+      title: 'Attendance',
+      rows: [{ value: '2,617', label: 'PRESENT' }, { value: '148', label: 'ABSENT', tone: 'alert' }],
+    },
+  },
+  {
+    id: 'users.headcount', moduleId: 'users', name: 'Headcount',
+    layout: 'figure', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { title: 'Headcount', value: '3,012', sub: '137 vacancies', subTone: 'warn' },
+  },
+  {
+    id: 'users.shifts', moduleId: 'users', name: 'Shift Mix',
+    layout: 'stack', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: {
+      title: 'Shift Mix', total: '250', caption: 'on shift',
+      parts: [{ n: 80 }, { n: 72 }, { n: 62 }, { n: 36 }],
+    },
+  },
+
+  /* ── SECURITY ────────────────────────────────────────────────────────── */
+  {
+    id: 'security.cctv', moduleId: 'security', name: 'Cameras Online',
+    layout: 'dial', purpose: 'ATTENTION',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Cameras', pct: 63, value: '63%', unit: '17/27' },
+  },
+  {
+    id: 'security.reports', moduleId: 'security', name: 'Theft Reports',
+    layout: 'figure', purpose: 'ATTENTION',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: { title: 'Theft Reports', value: '10', sub: '3 this week', subTone: 'warn' },
+  },
+
+  /* ── REPORTS ─────────────────────────────────────────────────────────── */
+  {
+    id: 'reports.score', moduleId: 'reports', name: 'Facility Score',
+    layout: 'dial', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { title: 'Facility Score', pct: 87, value: '87', unit: 'of 100' },
+  },
+  {
+    id: 'reports.spend', moduleId: 'reports', name: 'Spend by Department',
+    layout: 'trend', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'optional',
+    /* twelve departments · the shape only reads because the series has real
+       spread, and the baseline stays at zero */
+    data: { title: 'Departmental Spend', value: '₹443cr', caption: '12 departments',
+            series: [55, 86, 101, 49, 72, 38, 64, 91, 44, 58, 77, 33] },
+  },
+
+  /* ── APPROVALS ───────────────────────────────────────────────────────── */
+  {
+    id: 'approvals.now', moduleId: 'approvals', name: 'Pending Now',
+    layout: 'figure', purpose: 'ACT',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    data: { title: 'Pending', value: '22', sub: '4 over a week', subTone: 'alert' },
+  },
+  {
+    id: 'approvals.week', moduleId: 'approvals', name: 'This Week',
+    layout: 'duo', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: {
+      title: 'This Week',
+      rows: [{ value: '31', label: 'CLEARED' }, { value: '4', label: 'RETURNED' }],
+    },
+  },
+
+  /* ── COMMUNICATION ───────────────────────────────────────────────────── */
+  {
+    id: 'communication.alerts', moduleId: 'communication', name: 'High Alerts',
+    layout: 'figure', purpose: 'ATTENTION',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { title: 'High Alerts', value: '30', sub: '12 critical', subTone: 'alert' },
+  },
+  {
+    id: 'communication.reach', moduleId: 'communication', name: 'Delivery',
+    layout: 'pulse', purpose: 'MONITOR',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
+    data: { title: 'Delivery', word: 'Delivered', sub: '2,617 of 2,704 reached' },
+  },
 ]
 
 /** Fill in what every variation has in common so the catalogue states only
@@ -7355,6 +8032,39 @@ const DEFAULT_LAYOUT = [
 
   /* HOUSING · the door into the Site Command Centre, and nothing else. */
   { variantId: 'housing.default',     size: 'small'  },   /* NAVIGATE  */
+
+  /* ══ AND A SECOND BLOCK, ON THE SIXTEEN NEW COMPOSITIONS ════════════════
+     THE ARTBOARD'S TWENTY-FIVE CELLS ABOVE ARE UNTOUCHED. Figma drew five
+     rows and they are still those five rows in that order; this is appended
+     the way Housing was, because re-cutting a transcribed artboard to make
+     room for cards Figma has never seen is the wrong way round.
+
+     EXACTLY TWENTY-FIVE MORE CELLS, so it is five whole rows and the page
+     still ends flush: three 2x2 signatures, two 2x1, and nine 1x1. The nine
+     are the point of the whole pass — before it the catalogue could not offer
+     a single-cell data card at all, so a "small" home page card meant a door.
+
+     `priority: 'primary'` still means EXACTLY "on this list", in both
+     directions, and antz.checkDefaults() still asserts it. The count in that
+     rule is thirty, not sixteen. ═══════════════════════════════════════════ */
+  { variantId: 'medical.severity',    size: 'large'  },   /* ATTENTION  · ladder */
+  { variantId: 'species.classes',     size: 'large'  },   /* UNDERSTAND · taxa   */
+  { variantId: 'medical.active',      size: 'small'  },   /* ATTENTION  · figure */
+  { variantId: 'pharmacy.value',      size: 'small'  },   /* UNDERSTAND · figure */
+  { variantId: 'followup.month',      size: 'large'  },   /* ATTENTION  · month  */
+  { variantId: 'species.sex',         size: 'medium' },   /* UNDERSTAND · vs     */
+  { variantId: 'lab.pending',         size: 'small'  },   /* ATTENTION  · figure */
+  { variantId: 'housing.status',      size: 'medium' },   /* MONITOR    · strip  */
+  { variantId: 'diet.compliance',     size: 'small'  },   /* MONITOR    · dial   */
+  { variantId: 'users.today',         size: 'small'  },   /* MONITOR    · duo    */
+  { variantId: 'security.cctv',       size: 'small'  },   /* ATTENTION  · dial   */
+  { variantId: 'approvals.now',       size: 'small'  },   /* ACT        · figure */
+  { variantId: 'followup.overdue',    size: 'small'  },   /* ATTENTION  · figure */
+  { variantId: 'species.figure',      size: 'small'  },   /* UNDERSTAND · figure */
+  { variantId: 'mortality.split',     size: 'small'  },   /* UNDERSTAND · stack  */
+  { variantId: 'eggs.pairs',          size: 'small'  },   /* MONITOR    · spark  */
+  { variantId: 'lab.analyser',        size: 'small'  },   /* MONITOR    · pulse  */
+  { variantId: 'housing.enclosures',  size: 'small'  },   /* UNDERSTAND · figure */
 ]
 
 /**
@@ -16514,7 +17224,268 @@ const LAYOUTS = {
           `<span class="l-tree__value">${esc(l.value)}</span>` +
           `<span class="l-tree__label">${esc(l.label)}</span></span>`).join('') +
       `</span></span>`,
+  /* ══════════════════════════════════════════════════════════════════════
+     SIXTEEN MORE, FROM mockups/widget-concepts.html
+     ══════════════════════════════════════════════════════════════════════
+     Six at 1x1, five at 2x1, five at 2x2. The six at one cell are the point:
+     measured, the catalogue's 76 widgets offered `small` ZERO times, so the
+     only single-cell cards the home page could hold were the doors.
+
+     A 1x1 CARD STILL CALLS head(). The glyph and the accessible name are
+     unchanged; cards.css hides only the title TEXT at one cell, because 147px
+     will not hold a title, a figure and a qualifier and the glyph already
+     names the module. Hiding it in CSS rather than skipping the call means a
+     card resized from 2x1 to 1x1 keeps its identity and its label without the
+     renderer having to know its own span.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /** r = 15.9155 makes the circumference exactly 100, so a dash length IS a
+   *  percentage — the same trick `ring` and `arc` already use. */
+  dial: (mod, variant, data) => {
+    const pct = Math.max(0, Math.min(100, Number(data.pct) || 0))
+    return `<span class="l-dial">${head(mod, variant, data)}` +
+      `<span class="l-dial__body"><span class="l-dial__ring">` +
+        `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">` +
+          `<circle class="l-dial__track" cx="20" cy="20" r="15.9155" stroke-width="5"/>` +
+          `<circle class="l-dial__value" cx="20" cy="20" r="15.9155" stroke-width="5"` +
+          ` stroke-dasharray="${pct.toFixed(1)} 100" transform="rotate(-90 20 20)"/>` +
+        `</svg>` +
+        `<span class="l-dial__read"><span class="l-dial__pct">${esc(data.value ?? pct + '%')}</span>` +
+        (data.unit ? `<span class="l-dial__unit">${esc(data.unit)}</span>` : '') +
+        `</span>` +
+      `</span></span></span>`
+  },
+
+  /* FIGURE · the glyph is blown up behind it at 12%, the `entity` idiom, so a
+     one-cell card is not a number floating on a flat gradient. */
+  figure: (mod, variant, data) =>
+    glyph(mod, variant, 'card__mark') +
+    `<span class="l-fig">${head(mod, variant, data)}` +
+      `<span class="l-fig__value"${String(data.value).length > 5 ? ' data-long' : ''}>${esc(data.value)}</span>` +
+      (data.sub ? `<span class="l-fig__sub"${data.subTone ? ` data-tone="${esc(data.subTone)}"` : ''}>${esc(data.sub)}</span>` : '') +
+    `</span>`,
+
+  /* DUO · two figures that only mean something together, so never one card
+     each — isolation against quarantine, present against absent. */
+  duo: (mod, variant, data) =>
+    `<span class="l-duo">${head(mod, variant, data)}` +
+      (data.rows || []).slice(0, 2).map((r, i) =>
+        (i ? `<i class="l-duo__rule"></i>` : '') +
+        `<span class="l-duo__row"${r.tone ? ` data-tone="${esc(r.tone)}"` : ''}>` +
+          `<span class="l-duo__value">${esc(r.value)}</span>` +
+          `<span class="l-duo__tag">${esc(r.label)}</span></span>`).join('') +
+    `</span>`,
+
+  /* SPARK · a number and the run behind it, at one cell. */
+  spark: (mod, variant, data) =>
+    `<span class="l-spark">${head(mod, variant, data)}` +
+      `<span class="l-spark__value">${esc(data.value)}</span>` +
+      `<span class="l-spark__plot">${runBars(data.series, 'l-spark__bar')}</span>` +
+    `</span>`,
+
+  /* STACK · composition at 1x1, which nothing in the catalogue could do —
+     `ring` needs 2x2 for its legend and `meters` needs rows. */
+  stack: (mod, variant, data) =>
+    `<span class="l-stack">${head(mod, variant, data)}` +
+      `<span class="l-stack__body"><span class="l-stack__bar">` +
+      (data.parts || []).slice(0, 4).map((p, i) =>
+        `<i class="l-stack__seg" data-i="${i}" style="flex:${Math.max(0, Number(p.n) || 0)} 1 0"></i>`).join('') +
+      `</span>` +
+      `<span class="l-stack__read"><span class="l-stack__total">${esc(data.total)}</span>` +
+      (data.caption ? `<span class="l-stack__caption">${esc(data.caption)}</span>` : '') +
+      `</span></span></span>`,
+
+  /* PULSE · a state said as a word. There is no useful number for "nothing
+     has escalated", and a card that invents one is a card that lies. */
+  pulse: (mod, variant, data) =>
+    `<span class="l-pulse"${data.tone ? ` data-tone="${esc(data.tone)}"` : ''}>` +
+      `<i class="l-pulse__radar" aria-hidden="true"></i>` +
+      head(mod, variant, data) +
+      `<span class="l-pulse__word">${esc(data.word)}</span>` +
+      (data.sub ? `<span class="l-pulse__sub">${esc(data.sub)}</span>` : '') +
+    `</span>`,
+
+  /* HEAT · many things on one scale, with no labels at all — the eye finds
+     the dark cell without reading a name, and the range is the caption.
+     `cells` are 0..1 already normalised by the author, because the widget
+     that knows the domain knows what its own floor and ceiling are. */
+  heat: (mod, variant, data) =>
+    `<span class="l-heat">${head(mod, variant, data)}` +
+      `<span class="l-heat__body">` +
+        `<span class="l-heat__grid" style="grid-template-columns:repeat(${Math.max(1, Number(data.cols) || 5)},1fr)">` +
+        (data.cells || []).map((v) =>
+          `<i class="l-heat__cell" style="--a:${(0.16 + 0.8 * Math.max(0, Math.min(1, Number(v) || 0))).toFixed(3)}"></i>`).join('') +
+        `</span>` +
+        `<span class="l-heat__read"><span class="l-heat__value">${esc(data.value)}</span>` +
+        (data.caption ? `<span class="l-heat__caption">${esc(data.caption)}</span>` : '') +
+        `</span>` +
+      `</span></span>`,
+
+  /* TREND · discrete bars, not a line. A line asserts continuity between its
+     points; feed goes out in rounds and medicine is dispensed in doses, so a
+     curve drawn through them claims something untrue about 3 a.m. */
+  trend: (mod, variant, data) =>
+    `<span class="l-trend">${head(mod, variant, data)}` +
+      `<span class="l-trend__read"><span class="l-trend__value">${esc(data.value)}</span>` +
+      (data.caption ? `<span class="l-trend__caption">${esc(data.caption)}</span>` : '') +
+      `</span>` +
+      `<span class="l-trend__plot">${runBars(data.series, 'l-trend__bar', data.recent)}</span>` +
+    `</span>`,
+
+  /* STRIP · one capacity, its parts and a dot legend, in 124px. */
+  strip: (mod, variant, data) => {
+    const parts = (data.parts || []).slice(0, 3)
+    return `<span class="l-strip">${head(mod, variant, data)}` +
+      `<span class="l-strip__read"><span class="l-strip__total">${esc(data.total)}</span>` +
+      (data.unit ? `<span class="l-strip__unit">${esc(data.unit)}</span>` : '') +
+      `</span>` +
+      `<span class="l-strip__bar">${parts.map((p, i) =>
+        `<i class="l-strip__seg" data-i="${i}" style="flex:${Math.max(0, Number(p.n) || 0)} 1 0"></i>`).join('')}</span>` +
+      `<span class="l-strip__keys">${parts.map((p, i) =>
+        `<span class="l-strip__key" data-i="${i}"><i class="l-strip__swatch"></i>` +
+        `${esc(p.label)} ${esc(p.value ?? p.n)}</span>`).join('')}</span>` +
+    `</span>`
+  },
+
+  /* VS · one bar split from the middle. The only shape where "nearly even" is
+     instant — two figures side by side make the reader do the subtraction. */
+  vs: (mod, variant, data) =>
+    `<span class="l-vs">${head(mod, variant, data)}` +
+      `<span class="l-vs__line"><span class="l-vs__value">${esc(data.a.value)}</span>` +
+      `<span class="l-vs__value l-vs__value--b">${esc(data.b.value)}</span></span>` +
+      `<span class="l-vs__bar"><i style="flex:${Math.max(0, Number(data.a.n) || 0)} 1 0"></i>` +
+      `<i style="flex:${Math.max(0, Number(data.b.n) || 0)} 1 0"></i></span>` +
+      `<span class="l-vs__tags"><span>${esc(data.a.label)}</span><span>${esc(data.b.label)}</span></span>` +
+    `</span>`,
+
+  /* RAIL · a value against the scale it is measured on. */
+  rail: (mod, variant, data) => {
+    const pct = Math.max(0, Math.min(100, Number(data.pct) || 0))
+    return `<span class="l-rail">${head(mod, variant, data)}` +
+      `<span class="l-rail__read"><span class="l-rail__value">${esc(data.value)}</span>` +
+      (data.caption ? `<span class="l-rail__caption">${esc(data.caption)}</span>` : '') +
+      `</span>` +
+      `<span class="l-rail__scale"><span class="l-rail__ticks">` +
+      Array.from({ length: 33 }, (_, i) => `<i${i % 8 === 0 ? ' data-major' : ''}></i>`).join('') +
+      `</span><span class="l-rail__mark" style="left:${pct.toFixed(2)}%"></span></span>` +
+    `</span>`
+  },
+
+  /* LADDER · a total that is a ladder rather than a sum. Worst band first, and
+     band height is its share — floored at a legible 22px in cards.css. */
+  ladder: (mod, variant, data) =>
+    `<span class="l-ladder">${head(mod, variant, data)}` +
+      `<span class="l-ladder__bands">` +
+      (data.bands || []).slice(0, 5).map((b, i) =>
+        `<span class="l-ladder__band" data-i="${i}" style="flex:${Math.max(0, Number(b.n) || 0)} 1 0">` +
+          `<span class="l-ladder__count">${esc(b.n)}</span>` +
+          `<span class="l-ladder__name">${esc(b.label)}</span></span>`).join('') +
+      `</span></span>`,
+
+  /* TAXA · a treemap sized in percentages so each block's AREA is its share.
+     The largest class takes a column of proportional width; the rest stack in
+     the remainder at proportional heights, which makes every area exact.
+     GROUP THE TAIL. A block too small to hold its own label should not be
+     drawn separately — four is the most this box will label. */
+  taxa: (mod, variant, data) => {
+    const parts = (data.parts || []).slice(0, 4)
+    if (!parts.length) return `<span class="l-taxa">${head(mod, variant, data)}</span>`
+    const [big, ...rest] = parts
+    const total = parts.reduce((n, p) => n + (Number(p.n) || 0), 0) || 1
+    const restSum = total - (Number(big.n) || 0) || 1
+    const pc = (a, b) => (a / b * 100).toFixed(4) + '%'
+    const block = (p, i, style) =>
+      `<span class="l-taxa__block" data-i="${i}" style="${style}">` +
+        `<span class="l-taxa__value">${esc(p.value ?? p.n)}</span>` +
+        `<span class="l-taxa__name">${esc(p.label)}</span></span>`
+    return `<span class="l-taxa">${head(mod, variant, data)}` +
+      `<span class="l-taxa__map">` +
+        block(big, 0, `width:${pc(Number(big.n) || 0, total)}`) +
+        `<span class="l-taxa__col" style="width:${pc(restSum, total)}">` +
+        rest.map((p, i) => block(p, i + 1, `height:${pc(Number(p.n) || 0, restSum)}`)).join('') +
+        `</span>` +
+      `</span></span>`
+  },
+
+  /* SHELF · discrete pips per line, with the near-expiry end drawn dark.
+     Capped at twenty pips a row: past that they stop being countable and the
+     row is better read off its own figure. */
+  shelf: (mod, variant, data) =>
+    `<span class="l-shelf">${head(mod, variant, data)}` +
+      `<span class="l-shelf__rows">` +
+      (data.rows || []).slice(0, 4).map((r) => {
+        const total = Math.max(1, Number(r.n) || 0)
+        const n = Math.min(total, 20)
+        const raw = Math.max(0, Math.min(Number(r.expiring) || 0, total))
+        const exp = raw ? Math.max(1, Math.min(Math.round(raw / total * n), n)) : 0
+        return `<span class="l-shelf__row">` +
+          `<span class="l-shelf__line"><span class="l-shelf__name">${esc(r.label)}</span>` +
+          `<span class="l-shelf__count">${esc(r.n)}</span></span>` +
+          `<span class="l-shelf__pips">` +
+          Array.from({ length: n }, (_, i) => `<i${i >= n - exp ? ' data-expiring' : ''}></i>`).join('') +
+          `</span></span>`
+      }).join('') +
+      `</span>` +
+      (data.foot ? `<span class="l-shelf__foot"><i></i>${esc(data.foot)}</span>` : '') +
+    `</span>`,
+
+  /* CLUTCH · one tile per clutch, each counting its own days, and the ones
+     within three days of hatch are lit. */
+  clutch: (mod, variant, data) =>
+    `<span class="l-clutch">${head(mod, variant, data)}` +
+      `<span class="l-clutch__grid">` +
+      (data.clutches || []).slice(0, 8).map((c) => {
+        const of = Math.max(1, Number(c.of) || 1)
+        const day = Math.max(0, Math.min(Number(c.day) || 0, of))
+        return `<span class="l-clutch__tile"${day >= of - 3 ? ' data-due' : ''}>` +
+          `<span class="l-clutch__egg"><svg viewBox="0 0 26 33" aria-hidden="true" focusable="false">` +
+          `<ellipse class="l-clutch__shell" cx="13" cy="18" rx="10" ry="13" stroke-width="3"/>` +
+          `<ellipse class="l-clutch__done" cx="13" cy="18" rx="10" ry="13" stroke-width="3"` +
+          ` pathLength="100" stroke-dasharray="${(day / of * 100).toFixed(1)} 100"` +
+          ` transform="rotate(-90 13 18)"/></svg></span>` +
+          `<span class="l-clutch__day">${day}/${of}</span></span>`
+      }).join('') +
+      `</span></span>`,
+
+  /* MONTH · what is due is a date, so the card is a month. */
+  month: (mod, variant, data) => {
+    const days = Math.max(28, Math.min(Number(data.days) || 30, 31))
+    const due = new Set(data.due || [])
+    const over = new Set(data.overdue || [])
+    return `<span class="l-month">${head(mod, variant, data)}` +
+      `<span class="l-month__grid">` +
+      Array.from({ length: Math.max(0, Math.min(Number(data.pad) || 0, 6)) },
+        () => `<i class="l-month__day" data-pad></i>`).join('') +
+      Array.from({ length: days }, (_, i) => {
+        const d = i + 1
+        const flag = over.has(d) ? ' data-overdue' : (due.has(d) ? ' data-due' : '')
+        return `<i class="l-month__day"${flag}${d === data.today ? ' data-today' : ''}>${d}</i>`
+      }).join('') +
+      `</span>` +
+      `<span class="l-month__foot">${(data.facts || []).slice(0, 2).map((f) =>
+        `<span><span class="l-month__fact-value">${esc(f.value)}</span>` +
+        `<span class="l-month__fact-label">${esc(f.label)}</span></span>`).join('')}</span>` +
+    `</span>`
+  },
 }
+
+/**
+ * A run of bars scaled to its own maximum, for `spark` and `trend`.
+ *
+ * THE BASELINE IS ZERO AND STAYS ZERO. A series that spans 81 to 87 comes out
+ * as a flat-topped block, and the temptation is to truncate the axis so the
+ * shape appears — which is the oldest lie in the trade. The fix belongs to the
+ * CARD: a figure whose range is that narrow wants `rail` or `stat`, not bars.
+ */
+function runBars(series, cls, recent = 1) {
+  const nums = (series || []).map((v) => Math.max(0, Number(v) || 0))
+  if (!nums.length) return ''
+  const max = Math.max(...nums) || 1
+  return nums.map((v, i) =>
+    `<i class="${cls}"${i >= nums.length - recent ? ' data-last' : ''}` +
+    ` style="height:${((v / max) * 100).toFixed(1)}%"></i>`).join('')
+}
+
 
 /* Every string that reaches innerHTML goes through here. The data is local and
    trusted today, but a card that will one day render a keeper's free-text note
@@ -22511,6 +23482,141 @@ Object.assign(window, {
 
       if (problems.length) console.warn('[antz] hierarchy:\n  ' + problems.join('\n  '))
       else console.info('[antz] the hierarchy reconciles: 4 sites, 31 sections, 139 enclosures.')
+      return problems
+    },
+
+    /**
+     * ASSERT WHAT IS DRAWN RATHER THAN WRITTEN, on whatever is on screen.
+     *
+     * The overflow sweep in tools/verify.py reads the box every card and every
+     * text run occupies, and it is thorough — but two whole classes of defect
+     * pass it, and the sixteen new compositions can produce both.
+     *
+     * ONE · A COLLAPSED VISUALISATION. A flex item whose children are empty
+     * elements has a min-content height of 0, so when a column is over budget
+     * that item absorbs the entire overrun and disappears — and the card's
+     * scrollHeight still equals its clientHeight, so nothing reports it. The
+     * mockup shipped a segmented bar at zero height that way, on a card whose
+     * every assertion was green.
+     *
+     * TWO · THE INNER SQUARE OF A RING IS NOT ITS INNER CIRCLE. A dial's unit
+     * sits below the centre, where the chord is narrower than the diameter, so
+     * a label that measures comfortably inside the box can still be touching
+     * the stroke. Measured, "compliance" was 52px in a 63px inner diameter and
+     * grazing a 52px chord.
+     *
+     * Both are asked as geometry, not as a property read.
+     */
+    checkVisuals() {
+      const DRAWN = [
+        '.l-dial__ring', '.l-duo__rule', '.l-spark__plot', '.l-spark__bar',
+        '.l-stack__bar', '.l-stack__seg', '.l-pulse__radar', '.l-heat__grid',
+        '.l-heat__cell', '.l-trend__plot', '.l-trend__bar', '.l-strip__bar',
+        '.l-strip__seg', '.l-vs__bar', '.l-vs__bar i', '.l-rail__scale',
+        '.l-rail__mark', '.l-ladder__band', '.l-taxa__map', '.l-taxa__block',
+        '.l-shelf__pips', '.l-shelf__pips i', '.l-clutch__tile', '.l-clutch__egg',
+        '.l-month__grid', '.l-month__day',
+        /* and the compositions that were already here */
+        '.l-ring__dial', '.l-arc__dial', '.l-meters__track', '.l-progress__track',
+      ]
+      const problems = []
+
+      /**
+       * A SLOT WITH NO BOX IS NOT A CARD WITH A COLLAPSED VISUALISATION.
+       *
+       * The first run of this check reported three `progress` tracks drawing
+       * 0x0 at 768px and narrower, and the cards were innocent: the SLOTS
+       * around them measured 0x0 too. They are stale slots that antz.
+       * allVariants() leaves behind when it is called repeatedly at different
+       * widths — a debug helper, not a state any real page reaches, and
+       * invisible to the overflow sweep because 0 is never greater than 0.
+       *
+       * So an unplaced slot is reported as its own problem, once, rather than
+       * as one line per visualisation inside it. Three real findings hidden
+       * behind thirty spurious ones is how a check stops being read.
+       */
+      const orphans = new Set()
+      const placed = (n) => {
+        const slot = n.closest('.slot')
+        if (!slot) return true
+        const r = slot.getBoundingClientRect()
+        if (r.width >= 0.5 && r.height >= 0.5) return true
+        orphans.add(slot.dataset.uid || slot.dataset.variant || '?')
+        return false
+      }
+
+      for (const sel of DRAWN) {
+        for (const n of document.querySelectorAll(sel)) {
+          if (!placed(n)) continue
+          const r = n.getBoundingClientRect()
+          if (r.width < 0.5 || r.height < 0.5) {
+            const card = n.closest('.card')
+            problems.push(`${card ? card.dataset.variant : '?'} · ${sel} drew ` +
+              `${r.width.toFixed(1)}x${r.height.toFixed(1)}`)
+          }
+        }
+      }
+      if (orphans.size) {
+        problems.push(`${orphans.size} slot(s) in the DOM with no grid box — ` +
+          `stale output from antz.allVariants(), not a card defect`)
+      }
+
+      for (const ring of document.querySelectorAll('.l-dial__ring')) {
+        const unit = ring.querySelector('.l-dial__unit')
+        if (!unit || !unit.textContent.trim() || !placed(ring)) continue
+        const rb = ring.getBoundingClientRect(), ub = unit.getBoundingClientRect()
+        /* stroke-width 5 in a 40-unit viewBox, so the clear radius is
+           (width - 2 x stroke) / 2, and the chord at the label's own offset */
+        const clear = (rb.width - 2 * (5 / 40) * rb.width) / 2
+        const dy = Math.abs((ub.top + ub.height / 2) - (rb.top + rb.height / 2))
+        const chord = 2 * Math.sqrt(Math.max(0, clear * clear - dy * dy))
+        if (ub.width > chord - 2) {
+          const card = ring.closest('.card')
+          problems.push(`${card ? card.dataset.variant : '?'} · dial unit ` +
+            `"${unit.textContent.trim()}" is ${ub.width.toFixed(0)}px in a ` +
+            `${chord.toFixed(0)}px chord`)
+        }
+      }
+
+      /**
+       * A BAR RUN WHOSE BARS ARE ALL THE SAME HEIGHT IS PAINT, NOT A CHART.
+       *
+       * `runBars` scales from zero and stays there, which is the honest
+       * baseline — truncating the axis to manufacture variation is the oldest
+       * lie in the trade. The consequence is that a series spanning 81 to 87
+       * draws as a flat-topped block, and the fix belongs to the CARD: a
+       * figure with that little range wants `rail` or `stat`. This is the
+       * assertion that says so, in pixels, rather than a note nobody re-reads.
+       */
+      for (const plot of document.querySelectorAll('.l-trend__plot, .l-spark__plot')) {
+        if (!placed(plot)) continue
+        const bars = [...plot.children].map((b) => b.getBoundingClientRect().height)
+        if (bars.length < 3) continue
+        const hi = Math.max(...bars), lo = Math.min(...bars)
+        if (hi > 0 && (hi - lo) / hi < 0.08) {
+          const card = plot.closest('.card')
+          problems.push(`${card ? card.dataset.variant : '?'} · bar run spans only ` +
+            `${((hi - lo) / hi * 100).toFixed(1)}% of its height — too flat to read as bars`)
+        }
+      }
+
+      /* and a title glyph must sit ABOVE the picture, never beside it — the
+         axis bug that put the lock next to the CCTV ring */
+      for (const card of document.querySelectorAll('.card')) {
+        const h = card.querySelector(':scope > span > .c-head')
+        if (!h || !placed(card)) continue
+        const sib = h.nextElementSibling
+        if (!sib) continue
+        const hb = h.getBoundingClientRect(), sb = sib.getBoundingClientRect()
+        if (hb.width < 0.5 || sb.width < 0.5) continue
+        if (sb.top < hb.bottom - 1) {
+          problems.push(`${card.dataset.variant} · the title line sits BESIDE ` +
+            `${sib.className}, not above it`)
+        }
+      }
+
+      if (problems.length) console.warn('[antz] visuals:\n  ' + problems.join('\n  '))
+      else console.info('[antz] every visualisation on screen has a box, and every dial label fits its arc.')
       return problems
     },
   },

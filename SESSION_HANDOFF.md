@@ -898,6 +898,44 @@ and 12 rows so lifting the cap does not silently resolve every span to 1×1.
 Vercel → Project → Settings → Git; it needs the Vercel GitHub App installed on
 the repo, which is a browser step.
 
+**THE WIDGET CONCEPTS ARE NOW LIVE.** Sixteen of the mockup's compositions are
+built into `index.html` — six at 1x1 (`figure` `duo` `dial` `spark` `stack`
+`pulse`), five at 2x1 (`heat` `trend` `strip` `vs` `rail`) and five 2x2
+signatures (`ladder` `taxa` `shelf` `clutch` `month`) — plus 34 widgets that use
+them, taking `VARIANTS` from 76 to 110. LAYOUTS is 21 -> 37.
+
+**THE GAP THEY FILL WAS SIZE, NOT MONOTONY.** The catalogue was already well
+spread (eighteen layouts, commonest 10.5%) but measured, its 76 widgets offered
+`supportedSizes` of medium 63, large 70, tall 18, full 4 and **small ZERO** — so
+every data card was at least two columns wide and the only 1x1 cards the home
+page could hold were the doors. 28 widgets offer `small` now.
+
+**The seeded page is 34 cards / 55 cells / 11 flush rows**, up from 16 / 26.
+The artboard's 25 cells are untouched and in their original order; the new block
+is appended the way Housing was. Trimming it back is one array.
+
+**KNOWN CONSEQUENCE:** at 34 cards the page is past `blurBudget` (18), so the
+landing correctly keeps its rise and fade and DROPS THE BLUR. That is the budget
+working — a filter costs a compositing pass per element per frame and thirty of
+them stutter on the target iPad. `verify_detail.py` now asserts both halves: the
+seeded page drops it, and a twelve-card page still blurs.
+
+**`antz.checkVisuals()` is new and worth knowing about.** It asserts what is
+DRAWN rather than written, which the overflow sweep cannot: a collapsed
+visualisation (a flex item whose children are empty elements absorbs a whole
+overrun and disappears while scrollHeight still equals clientHeight), a dial
+label wider than the CHORD available at its own offset (the inner square of a
+ring is not its inner circle), a bar run too flat to read, and a title glyph
+sitting beside a visualisation instead of above it. It found four defects on its
+first runs and one pre-existing leak — `antz.allVariants()` leaves stale 0x0
+slots behind when called repeatedly at different widths, which it now names as a
+helper artefact rather than blaming the card.
+
+**Green:** `verify.py` (294 cards swept at six widths), `verify_detail.py`, and
+all six of `checkDefaults` `checkSiteDefaults` `checkModules` `checkDetail`
+`checkHierarchy` `checkVisuals`. The diff is **1,106 insertions and zero
+deletions** in `index.html` — nothing pre-existing was changed.
+
 **⚠ A SECOND mockup redesigns the SITE WORKSPACE on the Apple-widget
 brief, and it is the one with a live decision in it.**
 `mockups/site-workspace.html` — Mysuru Rescue Centre, a minimal identity-only
