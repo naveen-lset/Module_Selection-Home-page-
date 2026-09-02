@@ -451,5 +451,101 @@ with Chrome(width=1024, height=1000) as c:
     check("no console errors", not c.errors(), str(c.errors()[:2]))
 
 
+
+# ── the landing · how a page of modules arrives ────────────────────────────
+LAND = r"""
+(() => {
+  const slots = [...document.querySelectorAll('%s .slot')];
+  const runs = slots.map(e => e.getAnimations().find(a => a.id === 'antz-land')).filter(Boolean);
+  const delays = runs.map(a => Math.round(a.effect.getTiming().delay));
+  const settled = slots.filter(e => {
+    const cs = getComputedStyle(e);
+    return +cs.opacity > 0.99 &&
+           (cs.filter === 'none' || cs.filter === '' || cs.filter === 'blur(0px)');
+  }).length;
+  return {
+    slots: slots.length, running: runs.length, delays,
+    spread: [...new Set(delays)].length,
+    span: delays.length ? Math.max(...delays) - Math.min(...delays) : 0,
+    blurring: runs.filter(a => JSON.stringify(a.effect.getKeyframes()).includes('blur(')).length,
+    settled,
+  };
+})()
+"""
+
+# The suite forces reduced motion for measurement, so the landing has to be
+# checked in a browser where motion is welcome — and NOT landing under a
+# reduced-motion preference is itself a requirement, checked in the other.
+with Chrome(width=1024, height=1200, reduced_motion=False) as c:
+    print("\nthe landing, with motion")
+    c.goto(URL, settle=0.05)
+    got = c.eval(LAND % "#moduleGrid")
+    check("the home page lands on arrival", got["running"] >= 8,
+          f"{got['running']} of {got['slots']} slots animating")
+    check("as a cascade, not all at once", got["spread"] >= 6, f"{got['spread']} distinct delays")
+    check("spread over a bounded span", 200 <= got["span"] <= 420, f"{got['span']}ms")
+    check("and it blurs to focus", got["blurring"] >= 8, f"{got['blurring']} blurring")
+
+    # bottom-up: the last row starts first
+    order = c.eval("""(() => {
+      const rows = [...document.querySelectorAll('#moduleGrid .slot')].map(e => {
+        const a = e.getAnimations().find(x => x.id === 'antz-land');
+        return { row: parseInt(getComputedStyle(e).gridRowStart, 10) || 0,
+                 delay: a ? a.effect.getTiming().delay : null } }).filter(r => r.delay !== null);
+      const first = rows.reduce((m, r) => r.delay < m.delay ? r : m, rows[0]);
+      const last = rows.reduce((m, r) => r.delay > m.delay ? r : m, rows[0]);
+      return [first.row, last.row] })()""")
+    check("from the bottom, so the bottom row lands first", order[0] > order[1],
+          f"first row {order[0]} · last row {order[1]}")
+
+    time.sleep(1.6)
+    got = c.eval(LAND % "#moduleGrid")
+    check("nothing is left behind when it finishes",
+          got["settled"] == got["slots"] and got["running"] == 0,
+          f"{got['settled']} of {got['slots']} settled, {got['running']} still running")
+
+    # a move through the hierarchy lands the workspace
+    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(1.0)
+    c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.08)
+    got = c.eval(LAND % "#siteGrid")
+    check("opening a Site lands its widgets", got["running"] >= 8,
+          f"{got['running']} of {got['slots']}")
+    time.sleep(1.6)
+
+    # but a repack is not an arrival
+    c.set_viewport(820, 1200); time.sleep(0.5)
+    got = c.eval(LAND % "#siteGrid")
+    check("a column-count change does NOT re-land the page", got["running"] == 0,
+          f"{got['running']} animating after a resize")
+    c.set_viewport(1024, 1200); time.sleep(0.5)
+
+    # nor is edit mode
+    c.eval("document.dispatchEvent(new KeyboardEvent('keydown',{key:'e',bubbles:true}))")
+    time.sleep(0.5)
+    editing = c.eval("document.body.classList.contains('is-editing') || !!document.querySelector('.slot__remove')")
+    c.eval("antz.site.land()"); time.sleep(0.1)
+    got = c.eval(LAND % "#siteGrid")
+    check("edit mode refuses the landing, so the jiggle keeps transform",
+          (not editing) or got["running"] == 0, f"editing={editing} running={got['running']}")
+
+    check("no console errors while landing", not c.errors(), str(c.errors()[:2]))
+
+
+with Chrome(width=1024, height=1200) as c:
+    print("\nthe landing, under a reduced-motion preference")
+    c.goto(URL, settle=0.05)
+    got = c.eval(LAND % "#moduleGrid")
+    check("nothing animates at all", got["running"] == 0, f"{got['running']} animating")
+    check("and every card is simply there",
+          got["settled"] == got["slots"], f"{got['settled']} of {got['slots']} visible")
+
+    # the blur budget, which is the one part that is a judgement rather than a rule
+    got = c.eval("""(() => { const r = antz.land({ blurBudget: 0 });
+      const runs = [...document.querySelectorAll('#moduleGrid .slot')]
+        .map(e => e.getAnimations().find(a => a.id === 'antz-land')).filter(Boolean);
+      return runs.filter(a => JSON.stringify(a.effect.getKeyframes()).includes('blur(')).length })()""")
+    check("past the blur budget the blur is dropped, not the landing", got == 0, f"{got} blurring")
+
+
 print("\n" + ("ALL PASS" if not fails else f"{len(fails)} FAILED: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)

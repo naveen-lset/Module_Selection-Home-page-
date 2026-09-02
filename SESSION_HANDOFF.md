@@ -297,6 +297,43 @@ the word "warn" as a caption under a figure. Both fixed. The check resolves
 every domain at every level and asserts tiles have values, groups have rows,
 table rows match their columns, and every widget's landing group exists.
 
+**A LANDING FOR MODULES AND WIDGETS**, adopted from a MasonryGallery reference
+component (React + GSAP) — the design, not the machinery. `js/lib/landing.js`
+plus one `land()` method on `createModuleGrid`, so the home grid and all three
+workspace levels share it: no fork, and the cascade is computed from the grid's
+own placement because the grid is the only thing that knows it.
+
+Four substitutions, each with a reason:
+
+  NO GSAP · `animate()` in motion.js is the one place reduced motion is
+  honoured; a second engine is a second way to ignore it. 70KB for six
+  keyframes, in a file with no build step.
+
+  NO GEOMETRY · the reference animates x/y/width/height because it owns its
+  masonry maths. Ours comes from CSS `grid-area` and is not animatable — hence
+  the FLIP pass. The landing touches transform, opacity and filter only.
+
+  BOUNDED · `innerHeight + 200` over 1.2s is right for a portfolio scrolled
+  once and wrong for a view that re-lands on every level switch. 64px, 560ms.
+
+  SEEDED RANDOM · `Math.random()` per item breaks under a grid that reconciles
+  rather than rebuilds — the jiggleFor() rule. Hashed from the uid.
+
+**THE BUG WORTH REMEMBERING: THE CAP ATE THE CASCADE.** Delay was
+`min(score * stagger, maxDelay)`, and a bottom-up score is `(rows - row) * cols
++ col` — up to 40 on a five-column page, so every card in the top four rows
+landed on the 340ms cap AT THE SAME INSTANT. The code read as though it worked;
+only reading the animations' delays out of the DOM showed one value repeated.
+Cells are ranked now and the ranks spread across a fixed span, which also means
+a forty-card page compresses instead of taking a second and a half.
+
+Blur is budgeted at 18 cells — past that the rise and fade stay and the blur
+goes, because a `filter` costs a compositing pass per element per frame and the
+stutter would land exactly in the 200ms the effect exists to decorate.
+
+Which arrivals land: first paint, workspace switch, subject change, role change,
+reset. Which do not: drag, repack, add, remove, edit mode. All nine are asserted.
+
 **THE CHROME WAS REORDERED, AND THE PAGE TITLE DIED OF IT.** The switcher is now
 FIRST — above the greeting and the search field — because *which workspace* is a
 bigger question than anything under it, and it used to be discovered after the

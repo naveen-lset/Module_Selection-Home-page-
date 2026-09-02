@@ -16569,6 +16569,232 @@ function animate(el, keyframes, options) {
   __x.animate = animate;
 });
 
+__def('js/lib/landing.js', function (__x, __req) {
+/**
+ * THE LANDING · how a page of modules arrives
+ * ───────────────────────────────────────────────────────────────────────────
+ * Adopted from the MasonryGallery reference component (React + GSAP): a
+ * directional, staggered, blur-to-focus entrance. What is kept is the DESIGN —
+ * cards rise into place in reading order, sharpening as they land. What is not
+ * kept is any of its machinery, and the reasons are worth writing down because
+ * they are the whole of "adapt it to our system":
+ *
+ *   NO GSAP. This product is one file with no build step and nothing to
+ *   install, and it already has a motion layer — `animate()` in motion.js —
+ *   whose entire job is to be a no-op when the user has asked for less motion.
+ *   A second animation engine would double the ways an animation can ignore
+ *   that setting. 3.12.5 of GSAP is also 70KB to do what six keyframes do here.
+ *
+ *   NO ABSOLUTE LAYOUT. The reference positions every tile with x/y/width/
+ *   height and animates those four properties, because it owns its own masonry
+ *   maths. Ours does not: positions come from CSS `grid-area`, and the grid has
+ *   a whole FLIP pass built around the fact that grid placement is not
+ *   animatable. So the landing animates ONLY compositor properties —
+ *   transform, opacity, filter — and never touches geometry. Nothing it does
+ *   can invalidate a layout or fight the packer.
+ *
+ *   BOUNDED DISTANCES. The reference starts items at `window.innerHeight + 200`
+ *   and flies them in over 1.2s. That is right for a portfolio you scroll once
+ *   and wrong for an operating view that re-lands on every level switch: a
+ *   Manager moving Site → Section → Enclosure would sit through three
+ *   full-viewport flights a minute. 64px and 560ms reads as the same gesture at
+ *   a tenth of the cost, which is why `distance` is a number and not a viewport.
+ *
+ *   ORDER FROM THE GRID, NOT FROM THE ARRAY. GSAP staggers by array index. A
+ *   masonry array is in PLACEMENT order, not visual order — the packer puts a
+ *   tall card in column 1 and then fills up beside it, so index order zig-zags
+ *   back up the page. The stagger here is computed from each cell's row and
+ *   column, so the cascade follows the direction the cards are actually coming
+ *   from and reads as one movement.
+ *
+ *   RANDOM IS SEEDED. `animateFrom: 'random'` in the reference calls
+ *   Math.random() per item. This grid RECONCILES rather than rebuilds — the
+ *   same rule that governs jiggleFor() in ModuleGrid.js — so an unseeded random
+ *   would give a surviving card one direction and its replacement another, and
+ *   a second landing would contradict the first. Hashed from the uid, a card's
+ *   direction is a property of the card.
+ */
+
+const { animate, prefersReducedMotion } = __req('js/lib/motion.js');
+
+/** FNV-1a, the hash the rest of this product uses, for the same reason. */
+function hash(str) {
+  let h = 2166136261
+  for (let i = 0; i < String(str).length; i++) {
+    h ^= String(str).charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+const DIRS = ['bottom', 'top', 'left', 'right']
+
+/**
+ * Where a cell starts, in px of transform. `center` is the only one that has to
+ * look at the grid: it moves each card in from the middle, so the offset is the
+ * cell's own displacement from the centre of the block, normalised.
+ */
+function offsetFor(cell, from, distance, bounds) {
+  const dir = from === 'random' ? DIRS[hash(cell.uid) % DIRS.length] : from
+
+  if (dir === 'center') {
+    const cx = bounds.cols / 2
+    const cy = bounds.rows / 2
+    const dx = (cell.x + cell.w / 2) - cx
+    const dy = (cell.y + cell.h / 2) - cy
+    const len = Math.hypot(dx, dy) || 1
+    /* Toward the centre, so the block gathers rather than scatters. */
+    return { x: -(dx / len) * distance, y: -(dy / len) * distance }
+  }
+
+  switch (dir) {
+    case 'top':   return { x: 0, y: -distance }
+    case 'left':  return { x: -distance, y: 0 }
+    case 'right': return { x: distance, y: 0 }
+    case 'bottom':
+    default:      return { x: 0, y: distance }
+  }
+}
+
+/**
+ * The cascade. A landing from the bottom should start with the cards nearest
+ * the bottom of the block and travel up; from the left, with the leftmost. The
+ * secondary axis breaks ties so two cards on the same row never land together
+ * — which is what makes fifteen cards read as a sequence rather than a flash.
+ */
+function orderFor(cell, from, bounds) {
+  const row = cell.y
+  const col = cell.x
+  switch (from) {
+    case 'top':    return row * bounds.cols + col
+    case 'bottom': return (bounds.rows - row) * bounds.cols + col
+    case 'left':   return col * bounds.rows + row
+    case 'right':  return (bounds.cols - col) * bounds.rows + row
+    case 'center': return Math.round(Math.hypot(col - bounds.cols / 2, row - bounds.rows / 2) * 4)
+    default:       return row * bounds.cols + col
+  }
+}
+
+/**
+ * Land a set of grid cells.
+ *
+ * @param {Array} cells  {uid, el, x, y, w, h} — ModuleGrid's own placement
+ * @param {object} opts
+ *   from        'bottom' | 'top' | 'left' | 'right' | 'center' | 'random'
+ *   distance    px of travel                                    (64)
+ *   stagger     ms between consecutive cards                     (34)
+ *   maxDelay    cap on the cascade, so a big page still lands    (340)
+ *   duration    ms per card                                      (560)
+ *   ease        the product's own out-ease
+ *   blur        blur-to-focus on the way in                      (true)
+ *   blurAmount  px                                               (10)
+ *   scale       the size it starts at                            (0.965)
+ * @returns {Promise} resolved when the last card has landed
+ */
+function landCards(cells, opts = {}) {
+  const {
+    from = 'bottom',
+    distance = 64,
+    stagger = 34,
+    maxDelay = 340,
+    duration = 560,
+    ease = 'cubic-bezier(.16,1,.3,1)',
+    blur = true,
+    blurAmount = 10,
+    scale = 0.965,
+    /**
+     * BLUR IS THE EXPENSIVE HALF, AND IT IS BUDGETED.
+     *
+     * A `filter` forces its own compositing pass per element per frame. On the
+     * 12.9" iPad this product is drawn for, ten cards blurring is free and
+     * thirty is a visible drop in the first 200ms of a page — which is exactly
+     * the moment the effect exists to decorate. Past the budget the landing
+     * keeps its rise and its fade and drops the blur, because a slightly
+     * plainer entrance is better than a stuttering one.
+     */
+    blurBudget = 18,
+  } = opts
+
+  const list = (cells || []).filter((c) => c && c.el)
+  if (!list.length) return Promise.resolve()
+
+  /* Nothing to do, and nothing left behind: `animate()` is already a no-op
+     under a reduced-motion preference, and because no keyframe here is filled
+     forwards there is no residue to clean up. The cards simply appear. */
+  if (prefersReducedMotion()) return Promise.resolve()
+
+  const bounds = list.reduce((b, c) => ({
+    cols: Math.max(b.cols, c.x + c.w),
+    rows: Math.max(b.rows, c.y + c.h),
+  }), { cols: 1, rows: 1 })
+
+  const withBlur = blur && list.length <= blurBudget
+
+  /**
+   * THE CASCADE IS A RANK, NOT A SCORE.
+   * ─────────────────────────────────────────────────────────────────────────
+   * The first version multiplied each cell's positional score by `stagger` and
+   * capped the result — and the cap ate the effect. `orderFor` scores a
+   * bottom-up cascade as `(rows - row) * cols + col`, which on a five-column,
+   * eight-row page runs to 40; times 34ms that is 1.4s, so every card in the
+   * top four rows landed on the 340ms cap AT THE SAME INSTANT. Measured, the
+   * whole page had one delay and the cascade was gone — while the code read
+   * exactly as though it worked.
+   *
+   * So the scores are only used to ORDER the cells, and the delay comes from
+   * each cell's rank spread across a fixed span. Two consequences, both wanted:
+   * a fifteen-card page keeps its 34ms beat, and a forty-card page compresses
+   * into the same 340ms instead of taking a second and a half. The reference
+   * component does `index * stagger` with no cap at all, which is why its demo
+   * is ten tiles.
+   */
+  const ranked = list
+    .map((cell) => ({ cell, score: orderFor(cell, from, bounds) }))
+    .sort((a, b) => a.score - b.score)
+  const span = Math.min(maxDelay, Math.max(0, ranked.length - 1) * stagger)
+  const delayOf = new Map(ranked.map((r, rank) => [
+    r.cell.uid,
+    ranked.length > 1 ? (rank / (ranked.length - 1)) * span : 0,
+  ]))
+
+  const runs = list.map((cell) => {
+    const off = offsetFor(cell, from, distance, bounds)
+    const delay = delayOf.get(cell.uid) || 0
+
+    /* A landing in flight when the next one starts would compose two transforms
+       on one element and leave the card wherever the arithmetic fell. Cancelled
+       by id, so the edit-mode jiggle — which is CSS, and belongs to a mode this
+       never runs in — is not what gets cancelled by accident. */
+    for (const a of cell.el.getAnimations?.() || []) {
+      if (a.id === 'antz-land') a.cancel()
+    }
+
+    const anim = animate(
+      cell.el,
+      [
+        {
+          opacity: 0,
+          transform: `translate3d(${off.x}px, ${off.y}px, 0) scale(${scale})`,
+          ...(withBlur && { filter: `blur(${blurAmount}px)` }),
+        },
+        {
+          opacity: 1,
+          transform: 'translate3d(0, 0, 0) scale(1)',
+          ...(withBlur && { filter: 'blur(0px)' }),
+        },
+      ],
+      { duration, delay, easing: ease, fill: 'backwards' },
+    )
+    if (anim && 'id' in anim) anim.id = 'antz-land'
+    return anim.finished.catch(() => {})
+  })
+
+  return Promise.all(runs).then(() => {})
+}
+
+  __x.landCards = landCards;
+});
+
 __def('js/components/ModuleGrid.js', function (__x, __req) {
 /**
  * MODULE GRID
@@ -16604,6 +16830,7 @@ const { isCore: isCoreModule } = __req('js/state/layoutStore.js');
 const { renderCard } = __req('js/components/ModuleCard.js');
 const { icon } = __req('js/icons.js');
 const { animate } = __req('js/lib/motion.js');
+const { landCards } = __req('js/lib/landing.js');
 
 
 /**
@@ -16933,6 +17160,26 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize, isCore 
       return placed
         .map((p) => ({ ...p, el: slots.get(p.uid) }))
         .filter((p) => p.el)
+    },
+
+    /**
+     * THE LANDING · run the entrance over whatever is currently placed.
+     *
+     * It is a method on the GRID rather than something app.js does to the DOM,
+     * for the same reason the FLIP pass is: the grid is the only thing that
+     * knows where each card ended up, and the cascade is computed from those
+     * positions. See landing.js.
+     *
+     * NOT IN EDIT MODE. There the cards are already animating — the jiggle owns
+     * transform, and a landing would be composed on top of it and drop the card
+     * somewhere neither of them intended.
+     */
+    land(opts) {
+      if (editing) return Promise.resolve()
+      return landCards(
+        placed.map((p) => ({ ...p, el: slots.get(p.uid) })).filter((p) => p.el),
+        opts,
+      )
     },
 
     destroy() {
@@ -20872,9 +21119,13 @@ const profileMenu = createProfileMenu({
     if (id === 'reset') {
       if (onSite) {
         ws().resetWorkspace()
+        requestAnimationFrame(() => wsGrid.land())
         wsEdit.announce('Workspace reset to the default for your role.')
       } else {
         resetLayout()
+        /* A reset IS a new page — the arrangement the reader had is gone — so
+           it earns the entrance rather than a FLIP from the old positions. */
+        requestAnimationFrame(() => grid.land())
         edit.announce('Home page reset to the default arrangement.')
       }
     }
@@ -21666,6 +21917,11 @@ function searchScope(st) {
  */
 const SUBJECT_REASONS = new Set(['sites', 'site', 'section', 'enclosure', 'hash', 'init'])
 
+/* The arrivals that get an entrance. See the note where this is read. */
+const LAND_REASONS = new Set([
+  'init', 'view', 'sites', 'site', 'section', 'enclosure', 'hash', 'role', 'reset',
+])
+
 function syncWorkspace(meta = {}) {
   const st = viewStore.get()
   const onSite = st.view === 'site'
@@ -21712,6 +21968,11 @@ function syncWorkspace(meta = {}) {
   searchInput.setAttribute('aria-label', onSite ? searchScope(st) : 'Search')
   searchHint.sync()
 
+  /* Arriving back on the home page is an arrival too. Not at `init`, because
+     the first paint of this grid has not happened yet at that point — it lands
+     itself, at the foot of this file. */
+  if (!onSite && meta.reason === 'view') requestAnimationFrame(() => grid.land())
+
   if (meta.reason === 'role') {
     /* Every level's store, not just the live one — the user's arrangement at the
        other two depths is theirs too, and loading it lazily would mean the first
@@ -21748,7 +22009,36 @@ function syncWorkspace(meta = {}) {
   }
 
   wsHeader.render()
-  if (onSite) paintWorkspace({ animate: !SUBJECT_REASONS.has(meta.reason) })
+
+  /**
+   * THE LANDING · WHICH ARRIVALS EARN ONE.
+   * ─────────────────────────────────────────────────────────────────────────
+   * A landing is for a page that is NEW to the reader: the first paint, a
+   * workspace switch, a move through the hierarchy, a role change, a reset.
+   * Those are the moments where fifteen cards appear at once and the eye has no
+   * idea where to start, which is the whole problem the cascade solves.
+   *
+   * It is NOT for the rest, and the list of exclusions is the design:
+   *
+   *   a DRAG        the cards are following a finger; anything else is a fight
+   *   a REPACK      a column count change is the same page, reflowed — FLIP
+   *                 already moves each card from where it was, which is more
+   *                 informative than re-landing the lot
+   *   an ADD        the new card has its own arrival, and re-landing the page
+   *                 around it would hide the one thing that changed
+   *   a REMOVE      likewise: the survivors close the gap, they do not re-enter
+   *   EDIT MODE     the jiggle owns transform there — see grid.land()
+   *
+   * A dashboard that replays its entrance on every state change is a dashboard
+   * nobody can work in.
+   */
+  if (onSite) {
+    const landing = LAND_REASONS.has(meta.reason)
+    /* The landing owns the movement when it runs, so FLIP stands down: two
+       transforms composed on one slot is a card that ends up nowhere. */
+    paintWorkspace({ animate: !landing && !SUBJECT_REASONS.has(meta.reason) })
+    if (landing) wsGrid.land()
+  }
 }
 
 viewStore.subscribe((state, prev, meta) => {
@@ -21799,6 +22089,9 @@ layoutStore.subscribe(() => {
    mid-edit should come back to a readable home page. */
 setEditing(false)
 paint({ animate: false })
+/* AND THE HOME PAGE LANDS ON ARRIVAL. Same gesture, same library, one call —
+   the module grid and the workspace grid are the same component. */
+grid.land()
 
 /* ── responsive reflow ──────────────────────────────────────────────────── */
 
@@ -21833,6 +22126,8 @@ window.addEventListener('orientationchange', onResize)
 Object.assign(window, {
   antz: {
     reset: resetLayout,
+    /** Replay the entrance on the home grid — `antz.land({from:'center'})`. */
+    land: (opts) => grid.land(opts),
     state: () => layoutStore.get(),
     columns: currentColumns,
     /* test hook: put every variant on the grid at every size it declares, so a
@@ -21895,6 +22190,8 @@ Object.assign(window, {
       down: () => goDown(),
       role: (id) => setRole(id),
       reset: () => ws().resetWorkspace(),
+      /** The same, for whichever level is showing. */
+      land: (opts) => wsGrid.land(opts),
 
       /** What is under the current subject — for finding an id to drill into. */
       children() {

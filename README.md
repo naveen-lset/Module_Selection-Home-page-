@@ -2719,6 +2719,45 @@ confirm the figures move, the plurals agree and the empty states land.
 Species Management and Medical are non-removable. Everything else is the
 user's call.
 
+### The landing — how a page of modules arrives
+
+Adopted from a **MasonryGallery** reference component (React + GSAP): a
+directional, staggered, blur-to-focus entrance. The design is kept; none of the
+machinery is, and the four substitutions are the whole of "adapt it to our
+system".
+
+| Reference | Here | Why |
+|---|---|---|
+| GSAP 3.12 (~70KB) | `animate()` in `motion.js` | one file, no build step — and the existing motion layer is the one place `prefers-reduced-motion` is honoured. A second engine is a second way to ignore it |
+| animates `x/y/width/height` | animates **transform, opacity, filter** only | positions here come from CSS `grid-area`, which is not animatable — the grid has a whole FLIP pass built on that fact. The landing cannot invalidate a layout |
+| starts at `innerHeight + 200`, 1.2s | **64px, 560ms** | right for a portfolio scrolled once; wrong for an operating view that re-lands on every level switch. Same gesture, a tenth of the cost |
+| `stagger` × array index | a **rank** across a 340ms span | see below |
+| `Math.random()` per item | FNV hash of the card's uid | the grid *reconciles* rather than rebuilds — the same rule `jiggleFor()` follows. A card's direction is a property of the card, so a second landing agrees with the first |
+
+**The cascade is a rank, not a score.** The first version multiplied each cell's
+positional score by the stagger and capped the result — and the cap ate the
+effect: a bottom-up cascade scores `(rows − row) × cols + col`, which on a
+five-column, eight-row page runs to 40, so *every card in the top four rows
+landed on the 340ms cap at the same instant*. Measured, the whole page had one
+delay. Ranking the cells and spreading the ranks across a fixed span keeps a
+15-card page's 34ms beat and compresses a 40-card page into the same 340ms.
+
+**Blur is budgeted.** A `filter` forces its own compositing pass per element per
+frame; ten cards blurring is free on the 12.9" iPad this is drawn for, thirty is
+a visible stutter in the first 200ms — exactly the moment the effect exists to
+decorate. Past 18 cells the rise and the fade stay and the blur is dropped.
+
+**Which arrivals earn one** — and the exclusions are the design:
+
+| Lands | Does not land |
+|---|---|
+| first paint · workspace switch · Site/Section/Enclosure change · role change · reset | a **drag** (the cards are following a finger) · a **repack** (same page reflowed — FLIP is more informative) · an **add** (the new card has its own arrival; re-landing would hide the one thing that changed) · a **remove** · **edit mode** (the jiggle owns transform) |
+
+A dashboard that replays its entrance on every state change is a dashboard
+nobody can work in.
+
+Try it: `antz.land({ from: 'center' })`, `antz.site.land({ from: 'random' })`.
+
 ### The chrome, in the order the questions come
 
 The switcher moved to the **top of the page**, above the greeting and the search
