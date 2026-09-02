@@ -2530,11 +2530,13 @@ columns. `Collection`, and `Staff / Feed / Repairs / Power`.
 
 ## The Hospital glyph
 
-Replaced with the redrawn export. One line, because nothing else referenced the
-old file:
+Replaced with the redrawn export, and the file keeps the name. The drawing
+shipped for one session as `hospital.svg` — the only module glyph without the
+`m-` prefix the other fourteen carry — and was renamed onto the convention;
+the ward-block-and-cross original is in git history.
 
 ```
-icon: 'm-hospital.svg'   →   icon: 'hospital.svg'
+assets/icon/m-hospital.svg   the redrawn glyph, under the old name
 ```
 
 **`iconSize` stays at 38.** It is the size of the glyph's BOX on the Figma

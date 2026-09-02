@@ -7627,10 +7627,10 @@ const MODULES = [
   },
   {
     id: 'hospital',
-    /* REPLACED. `m-hospital.svg` was the ward-block-and-cross export; this is the
-       redrawn one, supplied separately. The old file is still in the repository
-       and in git history — nothing else referenced it, so this line is the whole
-       of the change.
+    /* REPLACED. The ward-block-and-cross export is gone; `m-hospital.svg` is now
+       the redrawn glyph, supplied separately. It shipped for one session as
+       `hospital.svg` — the only module glyph without the `m-` prefix — and was
+       renamed onto the convention; the old drawing is in git history.
 
        `iconSize` STAYS AT 38 AND THAT IS NOT AN OVERSIGHT. It is the size of the
        glyph's BOX on the Figma artboard, not the size of the file's canvas — the
@@ -7638,7 +7638,7 @@ const MODULES = [
        <img> fills the box either way. Following the file instead of the artboard
        would have quietly made this the only module glyph that is not the size
        Figma says it is. See the note on iconSize at the head of this file. */
-    icon: 'hospital.svg',
+    icon: 'm-hospital.svg',
     iconSize: 38,
     gradient: '--g-hospital',
     name: 'Hospital',

@@ -165,10 +165,12 @@ document already held a better shape than a single figure.
 
 ### And the Hospital glyph
 
-`m-hospital.svg` -> `hospital.svg`, one line. **`iconSize` stays at 38** — it is
-the glyph's box on the artboard, not the file's canvas, and following the file
-would have made Hospital the only module glyph that is not the size Figma says.
-The old file is now unreferenced and still in the repository.
+The redrawn export replaced the ward-block-and-cross one. **`iconSize` stays at
+38** — it is the glyph's box on the artboard, not the file's canvas, and
+following the file would have made Hospital the only module glyph that is not
+the size Figma says. It shipped for one session as `hospital.svg`; the seventh
+session renamed it back to `m-hospital.svg`, so the `m-` prefix holds across all
+fifteen and the old drawing lives only in git history.
 
 ### The header gave its controls back
 
