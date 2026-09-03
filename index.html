@@ -1999,12 +1999,18 @@ body.is-searching { overflow: hidden; }
   --hero-dwell: 6000ms;
   /* how far the cards behind show past the front card's right edge. Twice
      this must fit the page gutter: 32/24px on tablets, 16px on a phone. */
-  --peek: 12px;
-  --ann-h: 200px;
-  --ann-media: 38%;      /* the photograph's share of the card's width */
+  /* THE STACK, FROM NODE 152:4159 (the designer's pass of 3 Sep 2026). The
+     card behind is 872.7 of 960 wide (.909) and its right edge sits 4px past
+     the front card's; the one behind that is 763.6 wide (.795) and 10px past.
+     Both are centred on the front card's vertical middle. */
+  --peek-1: 4px;  --scale-1: .909;
+  --peek-2: 10px; --scale-2: .795;
+  --ann-h: 264px;
+  --ann-media: 365px;    /* the photograph's width */
   position: relative;
   height: var(--ann-h);
-  margin-bottom: var(--grid-gap);
+  /* 24 under the deck, from the node's Main Frame (gap 24) */
+  margin-bottom: var(--s6);
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
@@ -2024,15 +2030,28 @@ body.is-searching { overflow: hidden; }
               box-shadow var(--t-deck) var(--ease-deck);
 }
 .hero-stage .hero[data-pos='0']  { transform: translateX(0) scale(1); opacity: 1; z-index: 3; }
-.hero-stage .hero[data-pos='1']  { transform: translateX(var(--peek)) scale(.965); opacity: 1; z-index: 2; box-shadow: 0 2px 10px 0 rgba(76, 78, 100, .14); }
-.hero-stage .hero[data-pos='2']  { transform: translateX(calc(var(--peek) * 2)) scale(.93); opacity: 1; z-index: 1; box-shadow: none; }
-.hero-stage .hero[data-pos='hidden'] { transform: translateX(calc(var(--peek) * 2)) scale(.93); opacity: 0; z-index: 0; pointer-events: none; transition: none; }
+.hero-stage .hero[data-pos='1']  { transform: translateX(var(--peek-1)) scale(var(--scale-1)); opacity: 1; z-index: 2; box-shadow: 0 1.8px 9px 0 rgba(76, 78, 100, .10); }
+.hero-stage .hero[data-pos='2']  { transform: translateX(var(--peek-2)) scale(var(--scale-2)); opacity: 1; z-index: 1; box-shadow: 0 1.6px 8px 0 rgba(76, 78, 100, .10); }
+.hero-stage .hero[data-pos='hidden'] { transform: translateX(var(--peek-2)) scale(var(--scale-2)); opacity: 0; z-index: 0; pointer-events: none; transition: none; }
 /* the card that has just been the front: slides off to the left and fades */
 .hero-stage .hero.is-leaving  { transform: translateX(-8%) scale(.98); opacity: 0; z-index: 4; pointer-events: none; }
 /* and one coming back from the left, when the deck is stepped backwards */
 .hero-stage .hero.is-entering { transform: translateX(-8%) scale(.98); opacity: 0; z-index: 4; transition: none; }
 .hero-stage.is-dragging .hero { transition: none; }
 .hero-stage .hero[data-pos]:not([data-pos='0']) .hero__media { transform: none; }
+
+/* THE DWELL WITHOUT DOTS. Node 152:4159 draws no dots, so the six-second fill
+   that used to be the active dot runs on an invisible 1px element instead; the
+   deck still advances on its `animationend` and pauses with hover, focus,
+   a finger, or a hidden tab — nothing about the timing changed, only that it
+   is no longer drawn. The dots' rules below are kept for the day it is. */
+.hero-stage__dwell { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; transform-origin: 0 50%; transform: scaleX(0); animation: hero-dot-fill var(--hero-dwell) linear forwards; }
+/* :focus-visible, not :focus-within — a finger or a mouse on the stage leaves
+   it focused, and that must not stop the deck; only keyboard focus does */
+.hero-stage.is-dragging .hero-stage__dwell, .hero-stage:focus-visible .hero-stage__dwell, .hero-stage:has(:focus-visible) .hero-stage__dwell, body.is-hidden .hero-stage__dwell { animation-play-state: paused; }
+@media (hover: hover) { .hero-stage:hover .hero-stage__dwell { animation-play-state: paused; } }
+@media (prefers-reduced-motion: reduce) { .hero-stage__dwell { animation: none; } }
+.hero-stage:focus-visible { outline: 2px solid var(--c-add-primary); outline-offset: 4px; border-radius: 32px; }
 
 /* the dots: a translucent pill so they read on the estate photograph and on a
    white announcement alike */
@@ -2086,67 +2105,91 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   .hero-dot[aria-selected='true']::after { animation: none; transform: scaleX(1); }
 }
 
-/* ── the announcement card ── READABLE FIRST.
-   The first cut put a one-line title, a one-line body and two reaction pills
-   in a 204px card and truncated both lines with an ellipsis. This one is a
-   split card: the photograph on the left, the copy on white on the right with
-   a clear order to read it in — what kind of thing this is and how old,
-   the title (up to two lines), one line of the body, then who posted it and
-   the reactions on the floor. Type is Inter at 22 / 14 / 13 / 12; the only
-   colour on the white side is the announcement green on the label. */
+/* ── the announcement card ── NODE 159:3912, the designer's pass of 3 Sep 2026.
+   A white card with a 4px inset and a 32px radius. Inside it a tinted PANEL
+   — a 10% wash of the type's gradient, cyan→green for an announcement and
+   red→orange for something important — carrying a chip (the type's round
+   glyph and its word), a title set in the type's gradient, up to three lines
+   of body, and "who • when". The photograph, when there is one, sits on the
+   RIGHT at 365px with 28px outer corners, with a translucent like button in
+   its corner. Measured from the node, not the earlier build: chip 36 tall,
+   title 24 Medium, body 16/24, meta 14 Medium tracking .1. */
 .hero-stage .hero--slide {
-  display: grid;
-  grid-template-columns: var(--ann-media) minmax(0, 1fr);
-  padding: 0;
+  display: flex;
+  flex-direction: row;          /* .hero is a column; this card is not */
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 4px;
+  border-radius: 32px;
   background: #FFFFFF;
-  color: var(--ink);
+  color: var(--c-on-surface-var, #44544A);
+  box-shadow: 0 2px 10px 0 rgba(76, 78, 100, .05);
   cursor: default;
 }
+.ann__panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-radius: 30px 0 0 30px;
+  background: linear-gradient(-72deg, rgba(0, 175, 214, .1) 3.9%, rgba(55, 189, 105, .1) 108%);
+}
+.hero--slide.no-photo .ann__panel { border-radius: 30px; }
+.hero--slide[data-tone='important'] .ann__panel { background: linear-gradient(108deg, rgba(233, 51, 83, .1) 1.5%, rgba(250, 97, 64, .1) 96.9%); }
+.ann__copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; max-width: 531px; }
+.ann__chip {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 2px 12px 2px 2px; border-radius: var(--r-pill);
+  background: rgba(55, 189, 105, .1);
+  font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: uppercase; color: var(--c-on-surface-var, #44544A);
+}
+.hero--slide[data-tone='important'] .ann__chip { background: rgba(233, 51, 83, .1); }
+.ann__chip img { display: block; width: 32px; height: 32px; }
+.ann__text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ann__title {
+  font-size: 24px; line-height: normal; font-weight: 500; letter-spacing: 0;
+  background: linear-gradient(-44deg, #00AFD6 .6%, #37BD69 103%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.hero--slide[data-tone='important'] .ann__title { background-image: linear-gradient(143deg, #E93353 1.5%, #FA6140 96.9%); }
+.ann__body {
+  font-size: 16px; line-height: 24px; color: var(--c-on-surface-var, #44544A);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ann__meta { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-neutral-2, #7A8684); white-space: nowrap; overflow: hidden; }
+.ann__photo { position: relative; flex: none; width: var(--ann-media); border-radius: 0 28px 28px 0; overflow: hidden; }
+.ann__photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ann__like {
+  position: absolute; right: 17px; bottom: 16px;
+  width: 52px; height: 52px; padding: 0; border: none; border-radius: 18px;
+  display: grid; place-items: center;
+  background: rgba(255, 255, 255, .25);
+  box-shadow: 0 1.6px 13px 0 rgba(0, 0, 0, .05);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+.ann__like img { display: block; width: 24px; height: 24px; }
+.ann__like:hover { background: rgba(255, 255, 255, .4); }
+.ann__like:active { transform: scale(.96); }
+
+/* the two kinds the data no longer carries, kept drawable: see homeBanners.js */
 .hero-slide__media { position: relative; overflow: hidden; min-width: 0; }
-.hero-slide__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.hero-slide__badge {
-  position: absolute; left: 12px; top: 12px; z-index: 1;
-  display: inline-flex; align-items: center; gap: 5px;
-  height: 26px; padding: 0 9px; border-radius: var(--r-pill);
-  background: rgba(22, 55, 61, .72); color: #FFFFFF;
-  font-size: 12px; font-weight: 600;
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-}
-.hero-slide__badge .icon { width: 13px; height: 13px; }
-.hero-slide__copy {
-  display: flex; flex-direction: column; gap: 6px;
-  min-width: 0; padding: 16px 20px;
-}
+.hero-slide__copy { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 16px 20px; }
 .hero-slide__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.hero-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-  color: #1E7A44;
-}
+.hero-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #1E7A44; }
 .hero-chip .icon { width: 14px; height: 14px; }
+.hero-chip--ins { color: var(--petrol-800); }
+.hero-chip--on-dark { color: #FFFFFF; }
 .hero-slide__ago { font-size: 12px; font-weight: 500; color: var(--ink-3); white-space: nowrap; }
-.hero-slide__title {
-  font-size: 22px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; color: var(--ink);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.hero-slide__text {
-  font-size: 14px; line-height: 1.45; color: var(--ink-2);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
+.hero-slide__title { font-size: 22px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hero-slide__text { font-size: 14px; line-height: 1.45; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .hero-slide__foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
 .hero-slide__meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; min-width: 0; }
 .hero-slide__meta b { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
 .hero-slide__avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #F7C6A3, #E8865B); flex: none; }
-.hero-slide__react { display: flex; gap: 6px; flex: none; }
-.hero-react {
-  display: inline-flex; align-items: center; gap: 5px;
-  height: 28px; padding: 0 10px; border-radius: var(--r-pill);
-  background: var(--petrol-050); color: var(--ink-2); font-size: 13px; font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.hero-react .icon { width: 14px; height: 14px; }
-
-/* the two kinds the data no longer carries, kept drawable: see homeBanners.js */
 .hero-slide__stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 10px 14px 16px; background: linear-gradient(160deg, #F7FCFB, #E8F4F2); }
 .hero-stat { border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; }
 .hero-stat--nat { background: #E0F6F5; }
@@ -2155,7 +2198,8 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .hero-stat--nat b { color: #00AFD6; }
 .hero-stat--mor b { color: #E4432E; }
 .hero-stat span { font-size: 12px; color: var(--ink-2); }
-.hero-stage .hero--note { background: linear-gradient(118deg, #5CC6EE 0%, #2D9FD0 100%); color: #FFFFFF; }
+.hero-stage .hero--note { display: grid; grid-template-columns: 38% minmax(0, 1fr); padding: 0; border-radius: 24px; background: linear-gradient(118deg, #5CC6EE 0%, #2D9FD0 100%); color: #FFFFFF; }
+.hero-stage .hero--insight { display: grid; grid-template-columns: 38% minmax(0, 1fr); padding: 0; border-radius: 24px; }
 .hero--note .hero-chip, .hero--note .hero-slide__title, .hero--note .hero-slide__ago,
 .hero--note .hero-slide__meta, .hero--note .hero-slide__meta b, .hero--note .hero-slide__text { color: #FFFFFF; }
 .hero-slide__tags { display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 16px; }
@@ -2168,23 +2212,22 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .hero-slide__bang { position: absolute; right: 12px; top: 12px; width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, .9); color: #2D9FD0; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
 
 @media (min-width: 768px) and (max-width: 899px) {
-  .hero-stage { --ann-h: 184px; }
-  .hero-slide__title { font-size: 20px; }
-  .hero-slide__text { -webkit-line-clamp: 1; }
+  .hero-stage { --ann-h: 240px; --ann-media: 300px; }
+  .ann__title { font-size: 22px; }
+  .ann__body { -webkit-line-clamp: 2; font-size: 15px; line-height: 22px; }
 }
-/* a phone keeps the split — copy on white stays readable — with the photograph
-   a little narrower, smaller type, and no body line */
+/* a phone has no room for the photograph beside the copy: the panel takes
+   the whole card and the type comes down a step */
 @media (max-width: 767px) {
-  .hero-stage { --peek: 6px; --ann-h: 160px; --ann-media: 36%; }
-  .hero-slide__copy { padding: 12px 14px; gap: 4px; }
-  .hero-slide__title { font-size: 17px; }
-  .hero-slide__text, .hero-slide__badge { display: none; }
-  .hero-slide__meta { font-size: 12px; }
-  .hero-slide__avatar { width: 20px; height: 20px; }
-  .hero-react { height: 26px; padding: 0 8px; font-size: 12px; }
-  .hero-stat b { font-size: 22px; }
-  .hero-stat span { font-size: 11px; }
-  .hero-slide__bang { display: none; }
+  .hero-stage { --peek-1: 3px; --peek-2: 7px; --ann-h: 232px; }
+  .ann__photo { display: none; }
+  .ann__panel { border-radius: 30px; padding: 14px; }
+  .ann__copy { gap: 12px; }
+  .ann__chip { font-size: 11px; }
+  .ann__chip img { width: 28px; height: 28px; }
+  .ann__title { font-size: 20px; }
+  .ann__body { font-size: 14px; line-height: 20px; -webkit-line-clamp: 3; }
+  .ann__meta { font-size: 13px; }
 }
 
 /* ── 8 · modules section head ────────────────────────────────────────────
@@ -2224,41 +2267,38 @@ body.is-editing .section-head {
   overflow: visible;
   pointer-events: auto;
 }
-/* THE HOME PAGE'S HEADER IS VISIBLE AT REST (3 Sep 2026). It sits under the
-   announcements with the title on the left and, on the right, a Modules
-   control — the widgets glyph with its word, which opens Add Module — beside
-   Edit. 12px under it, then the Command Centre card. The Site Workspace's
-   header keeps the zero-height rule above; only #modulesHead changes. */
+/* THE HOME PAGE'S HEADER IS VISIBLE AT REST (3 Sep 2026). Node 152:4159's
+   Section Head: 47px tall (9px above and below a 24px Medium title), "Modules"
+   on the left, and on the right one action — the four-square grid glyph with
+   the word "Edit", 24px Medium in the file's OnSurface green #006D35 — that
+   enters Edit Modules. 16px under it, then the Command Centre card. An earlier
+   pass drew a Modules pill beside a small Edit link; the designer replaced
+   both with this. The Site Workspace's header keeps the zero-height rule
+   above; only #modulesHead changes. */
 .section-head--home {
-  height: 44px;
-  margin-bottom: var(--s3);
+  height: 47px;
+  margin-bottom: var(--s4);
   opacity: 1;
   overflow: visible;
   pointer-events: auto;
 }
 body.is-editing .section-head--home { margin-bottom: var(--s2); }
-.modules-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 var(--s4) 0 var(--s3);
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  color: var(--petrol-800);
-  font-size: var(--fs-label);
-  font-weight: 650;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
-              transform var(--t-fast) var(--ease);
+.section-head--home .section-head__title { font-size: 24px; font-weight: 500; letter-spacing: 0; color: var(--c-on-surface-var, #44544A); }
+.section-head--home .section-head__actions { gap: var(--s3); }
+/* the resting Edit: the node's glyph (assets/icon/edit-grid.svg, exported from
+   159:3755) and the word, no pill. The pencil the shared edit-mode component
+   draws is hidden here rather than changed, so the Site Workspace keeps it. */
+.section-head--home .link-btn:not(.link-btn--done) {
+  height: 29px; padding: 0; gap: 12px; border-radius: 0; background: transparent;
+  color: #006D35; font-size: 24px; font-weight: 500;
 }
-.modules-btn .icon { width: 17px; height: 17px; }
-.modules-btn:hover { background: var(--petrol-050); border-color: var(--petrol-200); }
-.modules-btn:active { transform: scale(.97); }
-/* in edit mode the header carries Add Module and Done instead */
-body.is-editing .modules-btn { display: none; }
+.section-head--home .link-btn:not(.link-btn--done) .icon { display: none; }
+.section-head--home .link-btn:not(.link-btn--done)::before {
+  content: ''; width: 20px; height: 20px; flex: none;
+  background: url('assets/icon/edit-grid.svg') center / 20px 20px no-repeat;
+}
+.section-head--home .link-btn:not(.link-btn--done):hover { background: transparent; opacity: .82; }
+
 .section-head__title {
   font-size: var(--fs-card);
   font-weight: 600;
@@ -6639,18 +6679,14 @@ body.is-site .card:active { transform: scale(.978); }
     <!-- ══ modules ═════════════════════════════════════════════════════
          The section head was zero-height at rest so the grid sat where the
          artboard puts it. Since 3 Sep 2026 it is a visible row under the
-         announcements: the title on the left, and on the right a Modules
-         control (icon and text, opens Add Module) beside Edit. The Command
-         Centre banner sits under the header at the module row's height, the
-         first card of the section, and the grid follows. -->
+         announcements: the title on the left and Edit on the right, drawn as
+         node 152:4159 draws them. The Command Centre banner sits under the
+         header at the module row's height, the first card of the section, and
+         the grid follows. -->
     <section aria-labelledby="modulesTitle">
       <div class="section-head section-head--home" id="modulesHead">
         <h2 class="section-head__title" id="modulesTitle">Modules</h2>
-        <div class="section-head__actions">
-          <button type="button" class="modules-btn" data-search-btn="modules" aria-label="Add Module">
-            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-widgets"/></svg><span>Modules</span>
-          </button>
-        </div>
+        <div class="section-head__actions"></div>
       </div>
     <a class="hero hero--estate" href="https://antz-command-centre-v5.vercel.app/"
        target="_blank" rel="noopener">
@@ -24429,16 +24465,26 @@ __def('js/data/homeBanners.js', function (__x, __req) {
  */
 const HOME_BANNERS = [
   {
-    id: 'ann-wild-dog', kind: 'announcement',
-    title: 'World African wild dog day', by: 'Kunal Singh', ago: '7d ago',
-    body: 'Did you know that African wild dogs are the ultimate team players?',
-    image: 'assets/img/species.jpg', attachments: 1, likes: 0, comments: 1,
+    id: 'ann-wild-dog', kind: 'announcement', tone: 'announcement',
+    title: 'World African wild dog day', by: 'Kunal Singh', date: '27 Aug 2026',
+    body: 'Did you know that African wild dogs are the ultimate team players? ' +
+          'Every hunt is shared, every pup is fed first, and no member of the pack is left behind.',
+    image: 'assets/img/species.jpg',
   },
   {
-    id: 'ann-orangutan', kind: 'announcement',
-    title: 'Did you know?', by: 'Kunal Singh', ago: '16d ago',
+    /* the designer's own sample card, node 159:4041: an IMPORTANT notice, no
+       photograph, the red→orange tint and its diamond glyph */
+    id: 'imp-safety', kind: 'announcement', tone: 'important',
+    title: 'Please follow all safety protocols carefully to ensure smooth and secure daily operations',
+    by: 'Vantara admin', date: '08 Apr 2025',
+    body: 'This is an important reminder regarding the strict adherence to all established guidelines, ' +
+          'protocols, and regulations across every section and enclosure.',
+  },
+  {
+    id: 'ann-orangutan', kind: 'announcement', tone: 'announcement',
+    title: 'Did you know?', by: 'Kunal Singh', date: '18 Aug 2026',
     body: 'The orangutan is one of humankind’s closest relatives — we share nearly 97% of the same DNA.',
-    image: 'assets/img/hero-leopard.jpg', imagePos: '50% 30%', attachments: 1, likes: 0, comments: 1,
+    image: 'assets/img/hero-leopard.jpg', imagePos: '50% 30%',
   },
 ]
   __x.HOME_BANNERS = HOME_BANNERS;
@@ -24485,26 +24531,25 @@ function renderSlide(item) {
     `<b>${esc(item.by)}</b></span>`
 
   if (item.kind === 'announcement') {
+    /* node 159:3912 — see the stylesheet at .hero--slide */
+    const tone = item.tone === 'important' ? 'important' : 'announcement'
+    el.dataset.tone = tone
+    if (!item.image) el.classList.add('no-photo')
     el.innerHTML =
-      `<div class="hero-slide__media">` +
-        `<img src="${esc(item.image)}" alt=""${item.imagePos ? ` style="object-position:${esc(item.imagePos)}"` : ''}>` +
-        (item.attachments ? `<span class="hero-slide__badge">${icon('paperclip')}${item.attachments} image${item.attachments === 1 ? '' : 's'}</span>` : '') +
-      `</div>` +
-      `<div class="hero-slide__copy">` +
-        `<div class="hero-slide__top">` +
-          `<span class="hero-chip hero-chip--ann">${icon('megaphone')}Announcement</span>` +
-          `<span class="hero-slide__ago">${esc(item.ago)}</span>` +
+      `<div class="ann__panel"><div class="ann__copy">` +
+        `<span class="ann__chip"><img src="assets/icon/ann-${tone}.svg" alt="">${tone === 'important' ? 'Important' : 'Announcement'}</span>` +
+        `<div class="ann__text">` +
+          `<h2 class="ann__title">${esc(item.title)}</h2>` +
+          `<p class="ann__body">${esc(item.body)}</p>` +
         `</div>` +
-        `<h2 class="hero-slide__title">${esc(item.title)}</h2>` +
-        `<p class="hero-slide__text">${esc(item.body)}</p>` +
-        `<div class="hero-slide__foot">` +
-          `<span class="hero-slide__meta"><span class="hero-slide__avatar"></span><b>${esc(item.by)}</b></span>` +
-          `<span class="hero-slide__react">` +
-            `<span class="hero-react">${icon('thumb')}${item.likes ?? 0}</span>` +
-            `<span class="hero-react">${icon('comment')}${item.comments ?? 0}</span>` +
-          `</span>` +
-        `</div>` +
-      `</div>`
+        `<div class="ann__meta"><span>${esc(item.by)}</span><span aria-hidden="true">•</span><span>${esc(item.date || item.ago || '')}</span></div>` +
+      `</div></div>` +
+      (item.image
+        ? `<div class="ann__photo">` +
+            `<img src="${esc(item.image)}" alt=""${item.imagePos ? ` style="object-position:${esc(item.imagePos)}"` : ''}>` +
+            `<button type="button" class="ann__like" aria-label="Like"><img src="assets/icon/ann-like.svg" alt=""></button>` +
+          `</div>`
+        : '')
   } else if (item.kind === 'insight') {
     el.innerHTML =
       `<div class="hero-slide__media hero-slide__stats">` +
@@ -24544,22 +24589,17 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   if (!n) { root.hidden = true; return null }
   const reduced = prefersReducedMotion()
 
-  /* ── dots ─────────────────────────────────────────────────────────────── */
-  const dots = document.createElement('div')
-  dots.className = 'hero-dots'
-  dots.setAttribute('role', 'tablist')
-  dots.setAttribute('aria-label', 'Banners')
-  const dotEls = slides.map((s, i) => {
-    const b = document.createElement('button')
-    b.type = 'button'
-    b.className = 'hero-dot'
-    b.setAttribute('role', 'tab')
-    b.setAttribute('aria-label', items[i].title)
-    b.addEventListener('click', () => go(i))
-    dots.append(b)
-    return b
-  })
-  root.append(dots)
+  /* ── the dwell ────────────────────────────────────────────────────────── */
+  /* Node 152:4159 draws no dots. The six-second fill that was the active dot
+     runs on this invisible element; restarting its animation is what marks a
+     new slide's dwell beginning. The stage is focusable so the arrow keys still
+     turn the deck, and it announces itself as a carousel. */
+  const dwell = document.createElement('span')
+  dwell.className = 'hero-stage__dwell'
+  dwell.setAttribute('aria-hidden', 'true')
+  root.append(dwell)
+  root.tabIndex = 0
+  const restartDwell = () => { dwell.style.animation = 'none'; void dwell.offsetWidth; dwell.style.animation = '' }
 
   /* ── state ────────────────────────────────────────────────────────────── */
   let active = 0
@@ -24572,10 +24612,8 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
       s.dataset.pos = k < PEEK ? String(k) : 'hidden'
       s.setAttribute('aria-hidden', String(k !== 0))
     })
-    dotEls.forEach((d, i) => {
-      d.setAttribute('aria-selected', String(i === active))
-      d.tabIndex = i === active ? 0 : -1
-    })
+    root.setAttribute('aria-label', `Announcements, ${active + 1} of ${n}: ${items[active].title}`)
+    restartDwell()
   }
 
   function go(to, dir) {
@@ -24614,7 +24652,7 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   }
 
   /* the dwell: see the stylesheet. The fill ends, the deck turns. */
-  dots.addEventListener('animationend', (e) => {
+  dwell.addEventListener('animationend', (e) => {
     if (e.animationName === 'hero-dot-fill' && !reduced) go(active + 1, true)
   })
 
@@ -24622,7 +24660,7 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   let drag = null
   let swallowClick = false
   root.addEventListener('pointerdown', (e) => {
-    if ((e.pointerType === 'mouse' && e.button !== 0) || e.target.closest('.hero-dots')) return
+    if ((e.pointerType === 'mouse' && e.button !== 0) || e.target.closest('.hero-dots, .ann__like')) return
     drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, moved: false }
   })
   root.addEventListener('pointermove', (e) => {
@@ -24638,13 +24676,15 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
     e.preventDefault()
     const w = root.clientWidth || 1
     const p = Math.min(1, Math.abs(drag.dx) / w)
-    const peek = parseFloat(getComputedStyle(root).getPropertyValue('--peek')) || 12
+    const cs = getComputedStyle(root)
+    const peek = parseFloat(cs.getPropertyValue('--peek-1')) || 4
+    const sc = parseFloat(cs.getPropertyValue('--scale-1')) || .909
     const cur = slides[active]
     cur.style.transform = `translateX(${drag.dx}px) scale(${1 - p * .02})`
     cur.style.opacity = String(1 - p * .3)
     if (drag.dx < 0) {
       const nx = slides[(active + 1) % n]
-      nx.style.transform = `translateX(${peek - peek * p}px) scale(${.965 + .035 * p})`
+      nx.style.transform = `translateX(${peek - peek * p}px) scale(${sc + (1 - sc) * p})`
     } else {
       const pv = slides[(active - 1 + n) % n]
       pv.style.zIndex = '4'
@@ -24678,7 +24718,6 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
     if (!step) return
     e.preventDefault()
     go(active + step, step > 0)
-    dotEls[active].focus()
   })
 
   place()
