@@ -1506,6 +1506,70 @@ button { font: inherit; color: inherit; }
 }
 .gsx-tag__tick .icon { width: 11px; height: 11px; }
 
+/* ══ THE SHEETS ON A LARGER SCREEN ═══════════════════════════════════════
+   `width: min(460px, 100%)` above is a phone measurement, and until now it
+   was the ONLY width these sheets had. On a 1280 screen that left a 460px
+   sheet on the bottom edge with ~410px of dead scrim either side of it —
+   and made the sheet needlessly TALL as well, because every control was
+   stacked in a column narrow enough to break thirty tags over eleven rows.
+
+   They stay bottom sheets: that is what the design's Global Search section
+   draws, and what verify_search.py asserts. What changes is the measurement
+   and, more importantly, what the extra width is SPENT on:
+
+     WIDTH      460 → 720 (tablet) → 960 (desktop).
+     ONE ROW    the scope control and Search Tags stop being two stacked
+                full-width blocks and share a row. That is most of the
+                height saving, and it is done with grid areas so no markup
+                moves and the DOM order the screen reader follows is intact.
+     CONTROLS   a segmented control and a pair of dialog buttons do NOT get
+                wider just because the dialog did. `flex: 1 0 0` would have
+                made Cancel and Done 450px each — two green banners, not
+                buttons. They take their natural width and the foot
+                right-aligns them.
+     TYPE LIST  eight radio rows go two-up rather than each stretching to
+                960px of mostly empty pill. */
+@media (min-width: 768px) {
+  .gsx-sheet { width: min(720px, 100%); }
+  .gsx-sheet__head,
+  .gsx-sheet__body { padding-inline: var(--s6); }
+  .gsx-sheet__foot { padding-inline: var(--s6); justify-content: flex-end; }
+
+  /* min-width rather than a fixed width, so the pair stays balanced when one
+     label is a word longer than the other. */
+  .gsx-btn { flex: 0 0 auto; min-width: 168px; padding-inline: var(--s7); }
+
+  /* Choose Search Type — two columns of four. */
+  .gsx-opts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s2) var(--s3);
+  }
+
+  /* Select Tags — scope control and tag search on row one, the tag box
+     spanning row two. The margin-bottom the stacked version used becomes the
+     grid's own gap, or the two would add up. */
+  .gsx-sheet--tags .gsx-sheet__body {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'tabs search' 'box box';
+    align-items: start;
+    gap: var(--s4);
+  }
+  .gsx-sheet--tags .gsx-tabs      { grid-area: tabs;   margin-bottom: 0; }
+  .gsx-sheet--tags .gsx-tagsearch { grid-area: search; margin-bottom: 0; }
+  .gsx-sheet--tags .gsx-tagbox    { grid-area: box; }
+  /* The tabs are a segmented control and size to their labels. Left at
+     `flex: 1 0 0` inside an `auto` column they collapse onto the text and the
+     control loses its two equal halves. 48px matches the field beside it —
+     42 against 48 reads as one of them being misaligned. */
+  .gsx-tab { flex: 0 0 auto; min-width: 152px; height: 48px; }
+}
+
+@media (min-width: 1024px) {
+  .gsx-sheet { width: min(960px, 100%); }
+}
+
 /* ── separation, now that the ground is white ────────────────────────────
    On the mint the field and the rails floated clear of the results on tone
    alone. On white they need edges, and hairlines are the right ones: a second
