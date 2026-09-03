@@ -1859,8 +1859,13 @@ body.is-searching { overflow: hidden; }
      height leaves. A centred column with a fixed gap draws the same two things
      in the middle and reads as a logo lockup. */
   justify-content: space-between;
-  height: var(--hero-h);
-  padding: 24px 44px;
+  /* THE MODULE ROW'S HEIGHT, NOT THE ARTBOARD'S 204. On 3 Sep 2026 the banner
+     became the first card of the Modules section — under the section header,
+     above the grid — and the ruling was "same height as the other module
+     cards". So it is --grid-row tall (164 / 156 / 148) and its mark and title
+     came down with it: 60px and a 36px ceiling, from 84 and 44. */
+  height: var(--grid-row);
+  padding: 20px 32px;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--shadow-hero);
@@ -1934,10 +1939,10 @@ body.is-searching { overflow: hidden; }
 .hero__row--top  { justify-content: flex-end; }
 .hero__row--foot { padding-right: var(--s8); }
 
-.hero__mark { flex: none; display: grid; place-items: center; width: 84px; height: 84px; }
+.hero__mark { flex: none; display: grid; place-items: center; width: 60px; height: 60px; }
 /* UPRIGHT. The mark was rotated -45deg to read as a diamond; the artboard
    draws it square, corner circles at the corners. */
-.hero__mark img { display: block; width: 84px; height: 84px; }
+.hero__mark img { display: block; width: 60px; height: 60px; }
 
 .hero__title {
   flex: 1 0 0;
@@ -1951,7 +1956,7 @@ body.is-searching { overflow: hidden; }
      The page caps at 1024, so the ramp has to hit its ceiling by then — the
      previous curve topped out at 40px on a 1180 screen and never showed the
      artboard's own figure at all. */
-  font-size: clamp(26px, 4.6vw, 44px);
+  font-size: clamp(24px, 3.4vw, 36px);
   font-weight: 600;
   letter-spacing: .88px;
   line-height: normal;
@@ -1964,7 +1969,7 @@ body.is-searching { overflow: hidden; }
      the 68px box around an 84px image. */
   .hero { padding: var(--s4) var(--s5); }
   .hero__row--foot { padding-right: 0; }
-  .hero__mark, .hero__mark img { width: 52px; height: 52px; }
+  .hero__mark, .hero__mark img { width: 44px; height: 44px; }
 }
 
 /* ── 7b · the banner deck ────────────────────────────────────────────────
@@ -1980,8 +1985,8 @@ body.is-searching { overflow: hidden; }
    as its front card so it cost the page nothing; the ruling that followed was
    that the Command Centre must stand on its own, and then that the
    announcements come FIRST, the banner under them. So the stage is the first
-   band under the search field, --ann-h tall with --grid-gap below, the hero
-   follows it, and the page is one announcement card taller than the artboard. The peeks live in the page gutter and touch nothing; the dots sit
+   band under the search field, --ann-h tall with --grid-gap below; the Modules
+   header and the Command Centre card follow it, then the grid. The peeks live in the page gutter and touch nothing; the dots sit
    inside the front card, centred under its photograph.
 
    THE DWELL IS THE DOT. The active dot is a bar that fills over six seconds;
@@ -1995,7 +2000,7 @@ body.is-searching { overflow: hidden; }
   /* how far the cards behind show past the front card's right edge. Twice
      this must fit the page gutter: 32/24px on tablets, 16px on a phone. */
   --peek: 12px;
-  --ann-h: 176px;
+  --ann-h: 200px;
   --ann-media: 38%;      /* the photograph's share of the card's width */
   position: relative;
   height: var(--ann-h);
@@ -2126,7 +2131,7 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 }
 .hero-slide__text {
   font-size: 14px; line-height: 1.45; color: var(--ink-2);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .hero-slide__foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
 .hero-slide__meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; min-width: 0; }
@@ -2163,13 +2168,14 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .hero-slide__bang { position: absolute; right: 12px; top: 12px; width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, .9); color: #2D9FD0; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
 
 @media (min-width: 768px) and (max-width: 899px) {
-  .hero-stage { --ann-h: 168px; }
+  .hero-stage { --ann-h: 184px; }
   .hero-slide__title { font-size: 20px; }
+  .hero-slide__text { -webkit-line-clamp: 1; }
 }
 /* a phone keeps the split — copy on white stays readable — with the photograph
    a little narrower, smaller type, and no body line */
 @media (max-width: 767px) {
-  .hero-stage { --peek: 6px; --ann-h: 148px; --ann-media: 36%; }
+  .hero-stage { --peek: 6px; --ann-h: 160px; --ann-media: 36%; }
   .hero-slide__copy { padding: 12px 14px; gap: 4px; }
   .hero-slide__title { font-size: 17px; }
   .hero-slide__text, .hero-slide__badge { display: none; }
@@ -2218,6 +2224,41 @@ body.is-editing .section-head {
   overflow: visible;
   pointer-events: auto;
 }
+/* THE HOME PAGE'S HEADER IS VISIBLE AT REST (3 Sep 2026). It sits under the
+   announcements with the title on the left and, on the right, a Modules
+   control — the widgets glyph with its word, which opens Add Module — beside
+   Edit. 12px under it, then the Command Centre card. The Site Workspace's
+   header keeps the zero-height rule above; only #modulesHead changes. */
+.section-head--home {
+  height: 44px;
+  margin-bottom: var(--s3);
+  opacity: 1;
+  overflow: visible;
+  pointer-events: auto;
+}
+body.is-editing .section-head--home { margin-bottom: var(--s2); }
+.modules-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 var(--s4) 0 var(--s3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--petrol-800);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+              transform var(--t-fast) var(--ease);
+}
+.modules-btn .icon { width: 17px; height: 17px; }
+.modules-btn:hover { background: var(--petrol-050); border-color: var(--petrol-200); }
+.modules-btn:active { transform: scale(.97); }
+/* in edit mode the header carries Add Module and Done instead */
+body.is-editing .modules-btn { display: none; }
 .section-head__title {
   font-size: var(--fs-card);
   font-weight: 600;
@@ -6595,6 +6636,22 @@ body.is-site .card:active { transform: scale(.978); }
       <div class="hero-stage__deck"></div>
     </div>
 
+    <!-- ══ modules ═════════════════════════════════════════════════════
+         The section head was zero-height at rest so the grid sat where the
+         artboard puts it. Since 3 Sep 2026 it is a visible row under the
+         announcements: the title on the left, and on the right a Modules
+         control (icon and text, opens Add Module) beside Edit. The Command
+         Centre banner sits under the header at the module row's height, the
+         first card of the section, and the grid follows. -->
+    <section aria-labelledby="modulesTitle">
+      <div class="section-head section-head--home" id="modulesHead">
+        <h2 class="section-head__title" id="modulesTitle">Modules</h2>
+        <div class="section-head__actions">
+          <button type="button" class="modules-btn" data-search-btn="modules" aria-label="Add Module">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-widgets"/></svg><span>Modules</span>
+          </button>
+        </div>
+      </div>
     <a class="hero hero--estate" href="https://antz-command-centre-v5.vercel.app/"
        target="_blank" rel="noopener">
       <span class="hero__media" aria-hidden="true"></span>
@@ -6613,15 +6670,6 @@ body.is-site .card:active { transform: scale(.978); }
         <span class="sr-only"> (opens in a new tab)</span>
       </span>
     </a>
-
-    <!-- ══ modules ═════════════════════════════════════════════════════
-         The section head is the one element not on the artboard: the resting
-         home page has no way into edit mode, so this provides it. -->
-    <section aria-labelledby="modulesTitle">
-      <div class="section-head" id="modulesHead">
-        <h2 class="section-head__title" id="modulesTitle">Modules</h2>
-        <div class="section-head__actions"></div>
-      </div>
       <div id="moduleGrid"></div>
     </section>
 
