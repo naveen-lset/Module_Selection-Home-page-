@@ -8121,7 +8121,11 @@ const VARIANTS = [
        biggest card was the one composition on it drawn as a plain fill.
        `fill: 'image'` because LAYOUT_FILL maps `timeline` to solid. */
     image: 'followup.jpg', fill: 'image', wash: 'rgba(0, 0, 0, .2)',
-    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'primary',
+    /* OFF THE DEFAULT PAGE FOR NOW (3 Sep 2026): "Hide Follow Up, in its place
+       the modules below move up." `secondary`, so checkDefaults() agrees with
+       the seed list; the card is still in the catalogue and one Add Module
+       away. Putting it back is `primary` here and one line in DEFAULT_CARDS. */
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'secondary',
     data: {
       /* The artboard's head is `Follow Up` with the month on the right. */
       title: 'Follow Up', aside: 'March',
@@ -9160,7 +9164,7 @@ const KEY = 'antz.home.layout'
    before and wonders why nothing changed. It cost me three rounds of measuring
    a page I had cleared localStorage on while the real browser showed the old
    one. */
-const VERSION = 6
+const VERSION = 7
 
 /**
  * The cards a fresh install starts with.
@@ -9188,7 +9192,11 @@ const DEFAULT_LAYOUT = [
                   Reports · Parivesh · Housing
        UNDERSTAND Species Statistics
        ATTENTION  Pending Approvals
-       MONITOR    Follow Up Task Queue
+
+     FOLLOW UP'S TASK QUEUE WAS HERE, a 2×2 in row 3, until 3 Sep 2026 — hidden
+     for now on the user's ruling, and the cards after it pack up into its
+     place. VERSION went 6 → 7 with it, so a saved layout still carrying the
+     card is dropped rather than shown for ever (see the note above VERSION).
 
      `priority: 'primary'` in the catalogue means EXACTLY "one of these sixteen"
      — there is no third state and no exception list, so the rule can be checked
@@ -9249,16 +9257,19 @@ const DEFAULT_LAYOUT = [
   { variantId: 'housing.default',     size: 'small'  },   /* NAVIGATE  */
   { variantId: 'pharmacy.default',    size: 'small'  },   /* NAVIGATE  */
   { variantId: 'audit.default',       size: 'small'  },   /* NAVIGATE  */
-  { variantId: 'followup.queue',      size: 'tall'   },   /* MONITOR   */
   { variantId: 'lab.default',         size: 'small'  },   /* NAVIGATE  */
   { variantId: 'approvals.pending',   size: 'medium' },   /* ATTENTION */
   { variantId: 'mortality.default',   size: 'small'  },   /* NAVIGATE  */
   { variantId: 'eggs.default',        size: 'small'  },   /* NAVIGATE  */
   { variantId: 'administer.default',  size: 'small'  },   /* NAVIGATE  */
   { variantId: 'users.default',       size: 'small'  },   /* NAVIGATE  */
+  /* Parivesh ahead of Security and Reports since Follow Up came out: with 21
+     cells in five columns a fifth row is unavoidable, but this order fills
+     row 4 edge to edge and leaves only Reports below, where the old order
+     left a hole at the end of row 4 and Parivesh alone under it. */
+  { variantId: 'parivesh.wide',       size: 'medium' },   /* NAVIGATE  */
   { variantId: 'security.default',    size: 'small'  },   /* NAVIGATE  */
   { variantId: 'reports.default',     size: 'small'  },   /* NAVIGATE  */
-  { variantId: 'parivesh.wide',       size: 'medium' },   /* NAVIGATE  */
 
   /* ══ AND NOTHING ELSE ═══════════════════════════════════════════════════
      A SECOND BLOCK OF EIGHTEEN USED TO FOLLOW, on the compositions a later
