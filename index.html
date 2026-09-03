@@ -1128,8 +1128,8 @@ button { font: inherit; color: inherit; }
   gap: var(--s2);
 }
 
-/* ══ the two round controls beside the field ══════════════════════════════
-   Node 135:4461 and 135:4476: 64x64, white, fully round, on the same
+/* ══ the round control beside the field ═══════════════════════════════════
+   Node 135:4461: 64x64, white, fully round, on the same
    `0 2px 16px rgba(0,0,0,.05)` shadow the field now carries. Square by
    construction — `flex: none` with width AND height off --search-h — so the
    pair keeps its circles when the field shrinks at 767px and the height token
@@ -1153,12 +1153,8 @@ button { font: inherit; color: inherit; }
 /* The house press convention, same as .btn-primary and .icon-btn. */
 .search-btn:active { transform: scale(.94); }
 .search-btn__icon { display: block; pointer-events: none; }
-/* Below the tablet breakpoint the row would run out of width for a field AND
-   two 54px circles, so the scan control goes and Add Module stays — the grid
-   button is the one that changes the page. */
-@media (max-width: 599px) {
-  .search-btn[data-search-btn='scan'] { display: none; }
-}
+/* One control now, so it stays at every width. (When there were two, the scan
+   control gave way below 600px so the field kept its room.) */
 
 .search {
   position: relative;
@@ -2267,35 +2263,36 @@ body.is-editing .section-head {
   overflow: visible;
   pointer-events: auto;
 }
-/* THE HOME PAGE'S HEADER IS VISIBLE AT REST (3 Sep 2026). Node 152:4159's
-   Section Head: 47px tall (9px above and below a 24px Medium title), "Modules"
-   on the left, and on the right one action — the four-square grid glyph with
-   the word "Edit", 24px Medium in the file's OnSurface green #006D35 — that
-   enters Edit Modules. 16px under it, then the Command Centre card. An earlier
-   pass drew a Modules pill beside a small Edit link; the designer replaced
-   both with this. The Site Workspace's header keeps the zero-height rule
-   above; only #modulesHead changes. */
+/* THE HOME PAGE'S HEADER IS VISIBLE AT REST (3 Sep 2026). Node 154:4224, as
+   the designer left it that evening: a 24px row with "Modules" at 20px Medium
+   on the left and, bottom-aligned on the right, one action — the four-square
+   grid glyph at 16px, a 12px gap, and the word "Edit" at 16px Medium in the
+   file's OnSurface green #006D35 — that enters Edit Modules. 16px under it,
+   then the Command Centre card. In edit mode the shared rule above makes the
+   row 44px for Add Module and Done. The Site Workspace's header keeps the
+   zero-height rest state; only #modulesHead changes. */
 .section-head--home {
-  height: 47px;
+  height: 24px;
+  align-items: flex-end;
   margin-bottom: var(--s4);
   opacity: 1;
   overflow: visible;
   pointer-events: auto;
 }
-body.is-editing .section-head--home { margin-bottom: var(--s2); }
-.section-head--home .section-head__title { font-size: 24px; font-weight: 500; letter-spacing: 0; color: var(--c-on-surface-var, #44544A); }
+body.is-editing .section-head--home { align-items: center; margin-bottom: var(--s2); }
+.section-head--home .section-head__title { font-size: 20px; font-weight: 500; letter-spacing: 0; line-height: 24px; color: var(--c-on-surface-var, #44544A); }
 .section-head--home .section-head__actions { gap: var(--s3); }
 /* the resting Edit: the node's glyph (assets/icon/edit-grid.svg, exported from
    159:3755) and the word, no pill. The pencil the shared edit-mode component
    draws is hidden here rather than changed, so the Site Workspace keeps it. */
 .section-head--home .link-btn:not(.link-btn--done) {
-  height: 29px; padding: 0; gap: 12px; border-radius: 0; background: transparent;
-  color: #006D35; font-size: 24px; font-weight: 500;
+  height: 19px; padding: 0; gap: 12px; border-radius: 0; background: transparent;
+  color: #006D35; font-size: 16px; font-weight: 500; line-height: 19px;
 }
 .section-head--home .link-btn:not(.link-btn--done) .icon { display: none; }
 .section-head--home .link-btn:not(.link-btn--done)::before {
-  content: ''; width: 20px; height: 20px; flex: none;
-  background: url('assets/icon/edit-grid.svg') center / 20px 20px no-repeat;
+  content: ''; width: 16px; height: 16px; flex: none;
+  background: url('assets/icon/edit-grid.svg') center / 16px 16px no-repeat;
 }
 .section-head--home .link-btn:not(.link-btn--done):hover { background: transparent; opacity: .82; }
 
@@ -6625,10 +6622,9 @@ body.is-site .card:active { transform: scale(.978); }
             aria-label="Scan to find a record">
       <img class="search-btn__icon" src="assets/icon/scan.svg" alt="" width="28" height="28">
     </button>
-    <button type="button" class="search-btn" data-search-btn="modules"
-            aria-label="Add a module">
-      <img class="search-btn__icon" src="assets/icon/grid.svg" alt="" width="24" height="24">
-    </button>
+    <!-- THE GRID BUTTON IS GONE (3 Sep 2026, evening). It opened Add Module; the
+         designer's frame draws the scan control alone beside the field, and
+         Edit in the Modules header is now the way into Add Module. -->
   </div>
 
   <div class="main-frame">
