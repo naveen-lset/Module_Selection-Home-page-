@@ -184,39 +184,42 @@ with Chrome(width=1024, height=1200) as c:
     st = nav_state(c)
     check("a fresh visitor lands on the home page", st["onSite"] is False, str(st))
 
-    # THE TAB IS THE DOOR TO THE SITES.
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
+    # THE SWITCHER IS GONE, AND HOUSING IS THE DOOR NOW.
+    # This section used to click `.wswitch__tab[1]` — the "Site Command Centre"
+    # tab. Figma node 135:4436 draws no tabs and the brief asked for them out,
+    # so the tab is not a thing to assert about any more. What matters instead
+    # is that removing it did not orphan four levels of Site: the Housing card
+    # in the grid is now the ONLY entrance, which makes it load-bearing rather
+    # than a convenience, and that is what these checks defend.
+    check("the workspace switcher really is gone",
+          c.eval("!document.querySelector('.wswitch, .wswitch-row, #workspaceSwitch')"))
+
+    def open_housing():
+        c.eval("""(() => { for (const card of document.querySelectorAll('#moduleGrid .card'))
+            if ((card.dataset.variant||'').startsWith('housing')) { card.click(); return } })()""")
+        time.sleep(0.9)
+
+    open_housing()
     st = nav_state(c)
-    check("the Site Command Centre tab opens the Sites listing",
+    check("the Housing card opens the Sites listing",
           st["listing"] and st["level"] == "sites", f"level={st['level']} listing={st['listing']}")
     check("with every Site on it", st["rows"] == 4, f"{st['rows']} rows")
     check("and the hash following", st["hash"] == "#sites", st["hash"])
 
-    # choosing one opens it, and the tab brings you back out
+    # choosing one opens it
     c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.8)
     st = nav_state(c)
     check("choosing a Site opens its workspace", st["level"] == "site" and st["cards"] >= 8, str(st))
-    sel = c.eval("[...document.querySelectorAll('.wswitch__tab')].map(t => t.getAttribute('aria-selected'))")
-    check("the Site tab is already selected in a Site", sel == ["false", "true"], str(sel))
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
-    st = nav_state(c)
-    check("tapping the already-selected tab goes back out to the listing",
-          st["listing"] and st["level"] == "sites", str(st))
 
-    # from deeper in the hierarchy too
+    # THE WAY BACK OUT IS NOW ESCAPE AND THE HASH, not a tab. Worth asserting
+    # from the deepest level, because the tab used to be the one control that
+    # came all the way out in a single press and nothing replaced that.
     c.eval("location.hash='#enclosure/car.2'"); time.sleep(0.9)
-    check("an enclosure is reachable", nav_state(c)["level"] == "enclosure")
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
+    check("an enclosure is still reachable", nav_state(c)["level"] == "enclosure")
+    c.eval("location.hash='#sites'"); time.sleep(0.9)
     st = nav_state(c)
-    check("and the tab comes all the way back out to the listing",
+    check("and the listing is still reachable from the deepest level",
           st["listing"] and st["level"] == "sites", str(st))
-
-    # Housing on the home page is the other door to the same place
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][0].click()"); time.sleep(0.7)
-    c.eval("""(() => { for (const card of document.querySelectorAll('#moduleGrid .card'))
-        if ((card.dataset.variant||'').startsWith('housing')) { card.click(); return } })()""")
-    time.sleep(0.9)
-    check("the Housing tile still opens the listing", nav_state(c)["listing"] is True)
 
     # and the ways back up are unchanged
     c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.8)
@@ -313,14 +316,24 @@ with Chrome(width=1024, height=1366) as c:
     print("\nthe page chrome")
     c.goto(URL)
     order = c.eval("[...document.querySelector('.page').children].map(e => e.className || e.id)")
-    check("the switcher is above the greeting and the search field",
-          order.index("wswitch-row") < order.index("home-header") < order.index("search-row"),
+    # THE GREETING IS FIRST NOW. It used to come second, under a switcher row
+    # that owned the top of the page; node 135:4436 opens on the greeting and
+    # the brief removed the tabs, so the order the artboard draws is
+    # greeting → search row → main frame, and the switcher is not in it.
+    check("the greeting is first, then the search row, then the page",
+          order.index("home-header") < order.index("search-row") < order.index("main-frame"),
           " → ".join(order))
+    check("and nothing is left where the switcher was",
+          not any("wswitch" in str(k) for k in order), " → ".join(order))
 
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(0.9)
+    # Into a Site the way the design gets there — the Housing card.
+    c.eval("""(() => { for (const card of document.querySelectorAll('#moduleGrid .card'))
+        if ((card.dataset.variant||'').startsWith('housing')) { card.click(); return } })()""")
+    time.sleep(0.9)
+    c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.8)
     greet = c.eval("""(() => { const g = document.querySelector('.greeting');
         return [getComputedStyle(g).opacity, g.textContent.replace(/\\s+/g,' ').trim()] })()""")
-    check("the greeting shows in the Site Command Centre too",
+    check("the greeting shows in the Site workspace too",
           greet[0] == "1" and "Good Morning" in greet[1], str(greet))
     check("and no page title is drawn over it",
           c.eval("getComputedStyle(document.querySelector('.home-header'), '::before').content") in ("none", "normal", '""'),
@@ -515,30 +528,44 @@ with Chrome(width=1024, height=1200, reduced_motion=False) as c:
     check("as a cascade, not all at once", got["spread"] >= 6, f"{got['spread']} distinct delays")
     check("spread over a bounded span", 200 <= got["span"] <= 420, f"{got['span']}ms")
 
-    # ── THE BLUR HAS TO BE MEASURED ON A PAGE INSIDE ITS OWN BUDGET ────────
+    # ── BOTH HALVES OF THE BUDGET, AND THE SEEDED PAGE SWAPPED SIDES ───────
     # `blurBudget` is 18 cards, because a filter costs a compositing pass per
     # element per frame and thirty of them stutter on the iPad this is drawn
-    # for. The seeded page is 30 cards since the sixteen new compositions
-    # landed, so it correctly does NOT blur — and this assertion used to read
-    # the default page and fail on the budget doing its job.
+    # for. The requirement is two-sided: under the budget the landing blurs to
+    # focus, over it the blur is dropped and the landing survives.
     #
-    # So the positive case gets a twelve-card page seeded through the same
-    # localStorage the product writes, and the drop at 30 is asserted straight
-    # after it. Both halves are the requirement; only one of them was checked.
-    check("the seeded page is past the blur budget, so it drops the blur",
-          got["blurring"] == 0 and got["slots"] > 18,
+    # THE SEEDED PAGE USED TO PROVE THE DROP AND NOW PROVES THE BLUR. It was 30
+    # cards, then 35; matching Figma node 135:4436 exactly cut it to 17, which
+    # is inside the budget — so the default page now blurs, and asserting that
+    # it does not was asserting the old page rather than the rule. The rule is
+    # unchanged; which side of it the default page sits on is what moved.
+    #
+    # So the seeded page carries the positive case, and the drop gets a page
+    # seeded past the budget through the same localStorage the product writes.
+    check("the seeded page is inside the blur budget, so it blurs to focus",
+          got["blurring"] >= 8 and got["slots"] <= 18,
           f"{got['slots']} slots, {got['blurring']} blurring")
 
-    SHORT = ['medical.default', 'hospital.photo', 'pharmacy.default', 'lab.default',
-             'medical.active', 'pharmacy.value', 'diet.compliance', 'users.today',
-             'security.cctv', 'approvals.now', 'followup.overdue', 'species.count']
-    c.eval("localStorage.setItem('antz.home.layout', JSON.stringify({version:5, savedAt:Date.now(), "
-           "cards:" + repr([{'uid': f'u{i}', 'variantId': v, 'size': 'small'} for i, v in enumerate(SHORT)]).replace("'", '"') + "}))")
+    # Nineteen doors — every module's `.default`, all of which support `small`,
+    # so the page is past 18 without depending on any one composition existing.
+    LONG = ['medical.default', 'hospital.default', 'species.default', 'pharmacy.default',
+            'lab.default', 'diet.default', 'followup.default', 'mortality.default',
+            'fetal.default', 'eggs.default', 'administer.default', 'users.default',
+            'security.default', 'housing.default', 'parivesh.default',
+            'approvals.default', 'reports.default', 'communication.default',
+            'audit.default']
+    # THE VERSION IS ASKED FOR, NOT ASSUMED. Pinning `version: 5` here meant
+    # that the moment the constant went to 6 this seed became unreadable, the
+    # page fell back to the 17-card default, and the assert below would have
+    # been measuring the default page while claiming to measure a long one.
+    ver = c.eval("antz.layoutVersion()")
+    c.eval("localStorage.setItem('antz.home.layout', JSON.stringify({version:" + str(ver) + ", savedAt:Date.now(), "
+           "cards:" + repr([{'uid': f'u{i}', 'variantId': v, 'size': 'small'} for i, v in enumerate(LONG)]).replace("'", '"') + "}))")
     c.goto(URL, settle=0.05)
-    short = c.eval(LAND % "#moduleGrid")
-    check("and a page inside the budget blurs to focus",
-          short["blurring"] >= 8 and short["slots"] <= 18,
-          f"{short['slots']} slots, {short['blurring']} blurring")
+    long_ = c.eval(LAND % "#moduleGrid")
+    check("and a page past the budget drops the blur, not the landing",
+          long_["blurring"] == 0 and long_["slots"] > 18 and long_["running"] >= 8,
+          f"{long_['slots']} slots, {long_['blurring']} blurring, {long_['running']} landing")
     c.eval("localStorage.removeItem('antz.home.layout')")
     c.goto(URL, settle=0.05)
     got = c.eval(LAND % "#moduleGrid")
@@ -561,8 +588,11 @@ with Chrome(width=1024, height=1200, reduced_motion=False) as c:
           got["settled"] == got["slots"] and got["running"] == 0,
           f"{got['settled']} of {got['slots']} settled, {got['running']} still running")
 
-    # a move through the hierarchy lands the workspace
-    c.eval("[...document.querySelectorAll('.wswitch__tab')][1].click()"); time.sleep(1.0)
+    # a move through the hierarchy lands the workspace. Via the Housing card,
+    # since the tab that used to do this went with node 135:4436.
+    c.eval("""(() => { for (const card of document.querySelectorAll('#moduleGrid .card'))
+        if ((card.dataset.variant||'').startsWith('housing')) { card.click(); return } })()""")
+    time.sleep(1.0)
     c.eval("document.querySelectorAll('.site-row')[0].click()"); time.sleep(0.08)
     got = c.eval(LAND % "#siteGrid")
     check("opening a Site lands its widgets", got["running"] >= 8,

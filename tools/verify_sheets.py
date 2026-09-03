@@ -316,14 +316,15 @@ with Chrome(width=1280, height=1400, reduced_motion=True) as c:
         .map(name);
       return { scrollW: de.scrollWidth, clientW: de.clientWidth,
                scrollsX: de.scrollWidth > de.clientWidth,
-               cols: getComputedStyle(document.querySelector('.wswitch')).gridTemplateColumns,
                worst: [...new Set(off)].slice(0, 4) };
     })()""")
     check("the page does not scroll sideways",
           not got["scrollsX"], f"scrollWidth {got['scrollW']} vs client {got['clientW']}")
     check("and nothing sticks out past the viewport", not got["worst"], str(got["worst"]))
-    check("the switcher's columns can shrink below min-content", "0px" not in got["cols"] or True,
-          got["cols"])
+    # The switcher this used to inspect was removed with Figma node 135:4436.
+    # Its `minmax(0, 1fr)` fix went with it, and the horizontal-scroll bug it
+    # fixed cannot recur because the element no longer exists — so the assert
+    # above (the page does not scroll sideways) is the whole check now.
     c.set_viewport(1280, 1400)
     time.sleep(0.4)
 

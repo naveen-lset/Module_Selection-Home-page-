@@ -43,6 +43,7 @@
     antz.allVariants()    every card at every size it declares, on the grid
     antz.widget(id)       one Site widget's live, Site-resolved record
     antz.checkDefaults()  assert the catalogue and the default page agree
+    antz.layoutVersion()  the saved-layout schema version
     antz.checkSiteDefaults()  the same, for 5 roles x 3 workspace levels
     antz.checkModules()   assert the 34 ANTZ modules and their cards agree
     antz.checkDetail()    assert every widget has a record to open
@@ -131,7 +132,7 @@
      a full perpendicular scan line, which also rejects the white icon and label
      glyphs sitting on the axis. The values are opaque because they are the
      composited result — what Figma actually draws. */
---g-medical:       linear-gradient(122.90619deg,
+--g-medical:       linear-gradient(127.68923deg,
                     rgb(142, 190, 165) 6.0%,
                     rgb(129, 183, 155) 15.8%,
                     rgb(116, 175, 145) 25.6%,
@@ -142,7 +143,7 @@
                     rgb(51, 138, 93) 74.4%,
                     rgb(51, 138, 93) 84.2%,
                     rgb(51, 138, 93) 94.0%);
-  --g-mortality:     linear-gradient(123.16619deg,
+  --g-mortality:     linear-gradient(127.96481deg,
                     rgb(251, 153, 132) 6.0%,
                     rgb(251, 149, 128) 15.8%,
                     rgb(251, 146, 123) 25.6%,
@@ -153,7 +154,7 @@
                     rgb(251, 128, 102) 74.4%,
                     rgb(251, 128, 102) 84.2%,
                     rgb(251, 128, 102) 94.0%);
-  --g-security:      linear-gradient(123.16619deg,
+  --g-security:      linear-gradient(127.96481deg,
                     rgb(149, 158, 152) 6.0%,
                     rgb(142, 152, 147) 15.8%,
                     rgb(136, 147, 140) 25.6%,
@@ -164,7 +165,7 @@
                     rgb(105, 117, 110) 74.4%,
                     rgb(104, 117, 110) 84.2%,
                     rgb(104, 117, 110) 94.0%);
-  --g-pharmacy:      linear-gradient(123.16619deg,
+  --g-pharmacy:      linear-gradient(127.96481deg,
                     rgb(119, 155, 159) 6.0%,
                     rgb(114, 149, 155) 15.8%,
                     rgb(107, 144, 149) 25.6%,
@@ -175,7 +176,7 @@
                     rgb(72, 115, 122) 74.4%,
                     rgb(72, 115, 122) 84.2%,
                     rgb(72, 115, 122) 94.0%);
-  --g-lab:           linear-gradient(123.16619deg,
+  --g-lab:           linear-gradient(127.96481deg,
                     rgb(216, 201, 147) 6.0%,
                     rgb(216, 198, 140) 15.8%,
                     rgb(215, 195, 134) 25.6%,
@@ -186,7 +187,7 @@
                     rgb(209, 180, 104) 74.4%,
                     rgb(209, 180, 104) 84.2%,
                     rgb(209, 180, 104) 94.0%);
-  --g-fetal:         linear-gradient(123.16619deg,
+  --g-fetal:         linear-gradient(127.96481deg,
                     rgb(244, 147, 164) 6.0%,
                     rgb(245, 141, 160) 15.8%,
                     rgb(246, 134, 155) 25.6%,
@@ -197,7 +198,7 @@
                     rgb(248, 103, 129) 74.4%,
                     rgb(248, 103, 129) 84.2%,
                     rgb(248, 103, 129) 94.0%);
-  --g-eggs:          linear-gradient(123.16619deg,
+  --g-eggs:          linear-gradient(127.96481deg,
                     rgb(106, 220, 226) 6.0%,
                     rgb(98, 216, 225) 15.8%,
                     rgb(91, 213, 225) 25.6%,
@@ -208,7 +209,7 @@
                     rgb(50, 191, 221) 74.4%,
                     rgb(50, 191, 221) 84.2%,
                     rgb(50, 191, 221) 94.0%);
-  --g-administer:    linear-gradient(123.16619deg,
+  --g-administer:    linear-gradient(127.96481deg,
                     rgb(179, 198, 188) 6.0%,
                     rgb(176, 195, 184) 15.8%,
                     rgb(173, 193, 181) 25.6%,
@@ -219,7 +220,7 @@
                     rgb(154, 176, 162) 74.4%,
                     rgb(155, 176, 163) 84.2%,
                     rgb(155, 176, 163) 94.0%);
-  --g-users:         linear-gradient(123.16619deg,
+  --g-users:         linear-gradient(127.96481deg,
                     rgb(123, 147, 160) 6.0%,
                     rgb(117, 141, 155) 15.8%,
                     rgb(109, 135, 150) 25.6%,
@@ -230,7 +231,86 @@
                     rgb(74, 103, 123) 74.4%,
                     rgb(74, 103, 122) 84.2%,
                     rgb(74, 103, 122) 94.0%);
-  --g-parivesh:      linear-gradient(123.16619deg,
+  /* ══ THE SIX WASHED CARDS, SAMPLED NOT TRANSCRIBED ══════════════════════
+     These were built from Figma's generated CSS — a translucent wash
+     `rgba(C,.32) 65.743%` to `rgba(C,.8) 74.435%` over a base — and it was the
+     wrong method. That ramp occupies 8.7% of the axis, so it rendered as a
+     hard diagonal SEAM across Reports, Pharmacy, Users, Audit and Pending
+     Approvals rather than a gradient.
+
+     THE NOTE AT THE HEAD OF THIS SECTION ALREADY SAID WHY. Figma's gradient
+     handles run well past the shape, so the shape shows only a SLICE of the
+     ramp, while CSS maps 0–100% onto the shape's own diagonal — transcribe the
+     stop positions directly and the ramp lands in the wrong place. Measured on
+     Pharmacy: the composite gave rgb(81,174,172) → rgb(24,202,193) with the
+     transition bunched at two thirds along, where Figma actually draws
+     rgb(50,187,182) → rgb(14,194,185) spread across the whole card.
+
+     So these are sampled off the artboard the same way every other gradient in
+     this file was: each stop is the median of a full perpendicular scan line,
+     which also rejects the white glyph and label. Opaque, because they are the
+     composited result — what Figma draws, not what it is made of.
+
+     Pharmacy and Reports sample identically, to the unit, so they share one. */
+  --g-teal-card:      linear-gradient(127.96481deg,
+                    rgb(50, 187, 182) 6.0%,
+                    rgb(46, 187, 181) 15.8%,
+                    rgb(39, 187, 181) 25.6%,
+                    rgb(33, 188, 181) 35.3%,
+                    rgb(28, 189, 181) 45.1%,
+                    rgb(23, 190, 182) 54.9%,
+                    rgb(19, 192, 184) 64.7%,
+                    rgb(16, 194, 185) 74.4%,
+                    rgb(15, 194, 185) 84.2%,
+                    rgb(14, 194, 185) 94.0%);
+  --g-users-wash:     linear-gradient(127.96481deg,
+                    rgb(69, 108, 119) 6.0%,
+                    rgb(65, 105, 117) 15.8%,
+                    rgb(59, 100, 112) 25.6%,
+                    rgb(54, 96, 108) 35.3%,
+                    rgb(49, 92, 105) 45.1%,
+                    rgb(45, 89, 101) 54.9%,
+                    rgb(43, 87, 99) 64.7%,
+                    rgb(40, 86, 98) 74.4%,
+                    rgb(40, 85, 97) 84.2%,
+                    rgb(39, 85, 97) 94.0%);
+  --g-audit:          linear-gradient(127.96481deg,
+                    rgb(201, 98, 120) 6.0%,
+                    rgb(203, 96, 118) 15.8%,
+                    rgb(204, 91, 115) 25.6%,
+                    rgb(205, 87, 112) 35.3%,
+                    rgb(207, 84, 110) 45.1%,
+                    rgb(210, 81, 107) 54.9%,
+                    rgb(213, 78, 106) 64.7%,
+                    rgb(215, 76, 104) 74.4%,
+                    rgb(215, 76, 104) 84.2%,
+                    rgb(214, 75, 103) 94.0%);
+  --g-approvals-wash: linear-gradient(148.47514deg,
+                    rgb(70, 99, 120) 6.0%,
+                    rgb(64, 95, 116) 15.8%,
+                    rgb(59, 90, 112) 25.6%,
+                    rgb(54, 86, 109) 35.3%,
+                    rgb(50, 81, 105) 45.1%,
+                    rgb(45, 78, 102) 54.9%,
+                    rgb(43, 75, 100) 64.7%,
+                    rgb(41, 73, 98) 74.4%,
+                    rgb(40, 73, 97) 84.2%,
+                    rgb(39, 72, 97) 94.0%);
+  --g-parivesh-wide2: linear-gradient(148.47514deg,
+                    rgb(107, 208, 229) 6.0%,
+                    rgb(99, 206, 228) 15.8%,
+                    rgb(89, 203, 227) 25.6%,
+                    rgb(80, 201, 225) 35.3%,
+                    rgb(74, 198, 224) 45.1%,
+                    rgb(67, 195, 224) 54.9%,
+                    rgb(63, 194, 223) 64.7%,
+                    rgb(58, 193, 222) 74.4%,
+                    rgb(54, 191, 221) 84.2%,
+                    rgb(50, 191, 221) 94.0%);
+  --g-pharmacy-wash: var(--g-teal-card);
+  --g-reports-wash:  var(--g-teal-card);
+
+  --g-parivesh:      linear-gradient(127.96481deg,
                     rgb(108, 231, 223) 6.0%,
                     rgb(101, 230, 221) 15.8%,
                     rgb(92, 229, 220) 25.6%,
@@ -241,7 +321,7 @@
                     rgb(50, 222, 211) 74.4%,
                     rgb(50, 222, 211) 84.2%,
                     rgb(50, 222, 211) 94.0%);
-  --g-reports:      linear-gradient(123.16619deg,
+  --g-reports:      linear-gradient(127.96481deg,
                     rgb(108, 231, 222) 6.0%,
                     rgb(101, 230, 221) 15.8%,
                     rgb(92, 229, 220) 25.6%,
@@ -265,7 +345,7 @@
                     rgb(50, 191, 221) 74.4%,
                     rgb(50, 191, 221) 84.2%,
                     rgb(50, 191, 221) 94.0%);
-  --g-followup:      linear-gradient(123.16619deg,
+  --g-followup:      linear-gradient(127.96481deg,
                     rgb(119, 155, 159) 6.0%,
                     rgb(114, 149, 155) 15.8%,
                     rgb(107, 144, 149) 25.6%,
@@ -289,7 +369,7 @@
 
      These are the same three hues, composited to opacity on the same ten-stop
      ramp the rest of the palette uses. The photographs are untouched. */
-  --g-species:         linear-gradient(123.16619deg,
+  --g-species:         linear-gradient(127.96481deg,
                   rgb(82, 156, 118) 6.0%,
                   rgb(70, 149, 109) 15.8%,
                   rgb(59, 143, 99) 25.6%,
@@ -300,7 +380,7 @@
                   rgb(0, 109, 53) 74.4%,
                   rgb(0, 109, 53) 84.2%,
                   rgb(0, 109, 53) 94.0%);
-  --g-diet:            linear-gradient(123.16619deg,
+  --g-diet:            linear-gradient(127.96481deg,
                   rgb(252, 148, 125) 6.0%,
                   rgb(252, 141, 116) 15.8%,
                   rgb(251, 133, 108) 25.6%,
@@ -311,7 +391,7 @@
                   rgb(250, 97, 64) 74.4%,
                   rgb(250, 97, 64) 84.2%,
                   rgb(250, 97, 64) 94.0%);
-  --g-hospital:        linear-gradient(123.16619deg,
+  --g-hospital:        linear-gradient(127.96481deg,
                   rgb(103, 137, 143) 6.0%,
                   rgb(93, 129, 136) 15.8%,
                   rgb(82, 121, 128) 25.6%,
@@ -324,12 +404,25 @@
                   rgb(31, 81, 91) 94.0%);
 
 
-  /* The scrim under a label on a photographic card. Figma draws it as a fixed
-     113px band across the bottom with a 2px backdrop blur — not a full-height
-     overlay — which is why the top of those photographs stays clean. */
-  --scrim-band: linear-gradient(179.41143632907807deg,
-    rgba(255, 255, 255, 0) 5.6838%, rgba(58, 58, 58, .7) 64.478%);
-  --scrim-band-h: 113px;
+  /* The scrim under a label on a photographic card: a band across the bottom
+     with a 2px backdrop blur, not a full-height overlay, which is why the top
+     of those photographs stays clean.
+
+     70px, NOT 113. The old artboard drew 113 and this comment said so; node
+     135:4436 draws 70 on both photo cards, and at 113 the band covered 69% of
+     a 164px card instead of 43% — the most visible single difference between
+     the build and the design on those two cards.
+
+     AND THE TWO CARDS DO NOT SHARE ONE RAMP. Hospital reaches rgba(58,58,58,.7)
+     at the bottom; Diet & Kitchen holds rgba(58,58,58,.56) from 64.478% down,
+     so it is both lighter and flat-bottomed. They were one token at .7. */
+  --scrim-band: linear-gradient(180deg,
+    rgba(255, 255, 255, 0) 5.6838%, rgba(58, 58, 58, .7) 100%);
+  --scrim-band-soft: linear-gradient(180deg,
+    rgba(255, 255, 255, 0) 5.6838%,
+    rgba(58, 58, 58, .56) 64.478%,
+    rgba(58, 58, 58, .56) 100%);
+  --scrim-band-h: 70px;
 
   /* ── 4 · elevation ─────────────────────────────────────────────────────*/
   --shadow-hero: 0 2px 10px 0 rgba(76, 78, 100, .22);
@@ -391,9 +484,13 @@
   --fs-greet:   clamp(18px, 1.3848rem + .18vw, 26px);   /* Figma 24 @1024 */
   --fs-name:    clamp(24px, 1.84rem + .25vw, 36px);   /* Figma 32 @1024 */
   --fs-hero:    clamp(24px, 1.3796rem + 1.36vw, 40px);   /* Figma 36 @1024 */
-  --fs-search:  clamp(16px, 1.0772rem + .27vw, 22px);   /* Figma 20 @1024 */
-  --fs-card:    clamp(16px, 1.058rem + .3vw, 22px);   /* Figma 20 @1024 */
-  --fs-card-lg: clamp(18px, 1.244rem + .4vw, 26px);   /* Figma 24 · Diet  */
+  --fs-search:  clamp(15px, .952rem + .27vw, 20px);   /* Figma 18 @1024 */
+  --fs-card:    clamp(15px, .952rem + .27vw, 20px);   /* Figma 18 @1024 */
+  /* THE NEW NODE HAS ONE CARD-NAME SIZE. Diet & Kitchen used to be drawn at
+     24 and is 18 here like every other name, so the large step collapses
+     onto the base one rather than being kept alive at a size the artboard
+     no longer contains. */
+  --fs-card-lg: clamp(15px, .952rem + .27vw, 20px);   /* Figma 18 @1024 */
   --fs-stat:    clamp(30px, 1.95rem + 1.25vw, 48px);   /* Figma 44 @1024 */
   /* No Figma reference — the artboard has no one-row statistics card. Sized so
      a label row plus a figure clears a 132px content box with room to spare. */
@@ -589,9 +686,9 @@
     --fs-greet:     24px;      /* Figma 24 */
     --fs-name:      32px;      /* Figma 32 */
     --fs-hero:      36px;      /* Figma 36 */
-    --fs-search:    20px;      /* Figma 20 */
-    --fs-card:      20px;      /* Figma 20 */
-    --fs-card-lg:   24px;      /* Figma 24 · Diet */
+    --fs-search:    18px;      /* Figma 18 */
+    --fs-card:      18px;      /* Figma 18 */
+    --fs-card-lg:   18px;      /* Figma 18 */
     --fs-stat:      44px;      /* Figma 44 */
     --fs-body:      16px;      /* Figma 16 */
     --fs-label:     14px;      /* Figma 14 */
@@ -897,7 +994,10 @@ button { font: inherit; color: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: var(--s6);
-  padding: var(--s8) var(--pad-page) var(--s6);
+  /* 44 ABOVE, NOT 32. Node 135:4436's Home Header is 140 tall — pt-44,
+     72 of greeting, pb-24 — and every y below it in the artboard is
+     measured from that. At 32 the whole page sat 7px high. */
+  padding: var(--s11) var(--pad-page) var(--s6);
 }
 
 .greeting { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
@@ -907,20 +1007,28 @@ button { font: inherit; color: inherit; }
   font-family: var(--font-greet);
   font-weight: 300;
   font-size: var(--fs-greet);
-  line-height: normal;
-  color: var(--c-secondary-dark);
+  /* 1.21, NOT `normal`. The artboard's two text nodes are 29 and 39 tall at
+     24 and 32px — both 1.21 — and with the 4px gap that is the 72 the header
+     is built on. `normal` gave 77 and pushed the page 5px down. */
+  line-height: 1.21;
+  /* addPrimary #00AFD6, not SecondaryDark #00ABAB. The new node moves the
+     greeting onto the accent the design system calls addPrimary; the old teal
+     is a few points of hue away and reads as a near-miss. */
+  color: var(--c-add-primary);
 }
 
 .greeting__name {
   font-size: var(--fs-name);
   font-weight: 600;
-  line-height: normal;
+  line-height: 1.21;
   color: var(--c-on-secondary-ctr);
 }
 .greeting__wave { display: inline-block; margin-left: .12em; }
 
 /* ── 4 · header icons · Figma gap 20px ───────────────────────────────────*/
-.header-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--s5); flex: none; }
+/* GAP 12, NOT 20 — node 135:4442 is 88 wide for two 38px controls, which
+   only works at 12. */
+.header-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--s3); flex: none; }
 
 .icon-btn {
   display: grid;
@@ -938,13 +1046,35 @@ button { font: inherit; color: inherit; }
 .icon-btn img { display: block; width: 100%; height: 100%; }
 
 /* the bell is 29.877px in Figma, inside a 7.062px pad — kept, not rounded */
-.icon-btn--bell { width: 29.877px; height: 29.877px; padding: 0; }
+/* ══ THE BELL IS A PLATE NOW ══════════════════════════════════════════════
+   It was a bare 29.877px glyph — a number transcribed from an older artboard.
+   Node 135:4448 draws it as a 38x38 WHITE CIRCLE carrying its own shadow with
+   a 20px bell inside, which is what makes the pair of header controls 88px
+   wide at a 12px gap and puts the group's left edge at 904. At 30px the group
+   measured 80 and started at 912. */
+.icon-btn--bell {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: var(--r-pill);
+  background: var(--c-white);
+  box-shadow: 0 1.188px 9.5px rgba(0, 0, 0, .05);
+}
+.icon-btn--bell img { width: 20px; height: 20px; }
+
+/* ══ 38px DRAWN, 44px PRESSED ═════════════════════════════════════════════
+   The artboard draws both header controls at 38 and the brief's touch floor is
+   44. Those are not in conflict once the target is separated from the box —
+   the same `::after` the search surface uses. So the circles are the size
+   Figma says and a finger still gets its 44. */
+.icon-btn, .avatar-btn { position: relative; }
+.icon-btn::after, .avatar-btn::after { content: ''; position: absolute; inset: -3px; }
 
 /* the avatar carries its presence badge at 70% inset on a white ring */
 .avatar-btn {
   position: relative;
-  width: var(--icon-btn);
-  height: var(--icon-btn);
+  width: 38px;
+  height: 38px;
   padding: 0;
   border: none;
   border-radius: 64px;
@@ -989,8 +1119,45 @@ button { font: inherit; color: inherit; }
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  margin-bottom: var(--s5);
+  /* NO MARGIN. The artboard puts 24 between the search field and the hero
+     and it belongs to the Main Frame's padding-top, not to this row —
+     20 here plus 32 there was 52. */
+  margin-bottom: 0;
   padding-inline: var(--pad-page);
+  /* The artboard's own 8px between the field and the two buttons. */
+  gap: var(--s2);
+}
+
+/* ══ the two round controls beside the field ══════════════════════════════
+   Node 135:4461 and 135:4476: 64x64, white, fully round, on the same
+   `0 2px 16px rgba(0,0,0,.05)` shadow the field now carries. Square by
+   construction — `flex: none` with width AND height off --search-h — so the
+   pair keeps its circles when the field shrinks at 767px and the height token
+   drops to 54. */
+.search-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--search-h);
+  height: var(--search-h);
+  border: 0;
+  padding: 0;
+  border-radius: var(--r-pill);
+  background: var(--c-white);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, .05);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.search-btn:hover { background: var(--petrol-050); }
+/* The house press convention, same as .btn-primary and .icon-btn. */
+.search-btn:active { transform: scale(.94); }
+.search-btn__icon { display: block; pointer-events: none; }
+/* Below the tablet breakpoint the row would run out of width for a field AND
+   two 54px circles, so the scan control goes and Add Module stays — the grid
+   button is the one that changes the page. */
+@media (max-width: 599px) {
+  .search-btn[data-search-btn='scan'] { display: none; }
 }
 
 .search {
@@ -1002,8 +1169,13 @@ button { font: inherit; color: inherit; }
   min-width: 0;
   height: var(--search-h);
   padding: 8px var(--s6);
-  border-radius: var(--r-field);
+  /* A PILL NOW, NOT A 16px ROUNDED RECT. Node 135:4456 draws the field at
+     `rounded-[100px]` — on a 64px box that is fully round — and gives it the
+     shadow it never had. The old `--r-field` 16px is still the token for
+     square-cornered fields elsewhere; this one stopped being one of them. */
+  border-radius: var(--r-pill);
   background: var(--c-white);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, .05);
   overflow: hidden;
 }
 .search__icon { flex: none; width: 24px; height: 24px; display: block; pointer-events: none; }
@@ -1664,7 +1836,7 @@ body.is-searching { overflow: hidden; }
   display: flex;
   flex-direction: column;
   gap: var(--s4);
-  padding: var(--s8) var(--pad-page) 0;
+  padding: var(--s6) var(--pad-page) 0;
 }
 
 /* ── 7 · hero banner ─────────────────────────────────────────────────────
@@ -2056,6 +2228,12 @@ body.is-editing .section-head {
    A small card and a full-width one are different objects and want different
    air. 16 / 20 / 24 off the spacing scale. */
 .card[data-size='medium'] { padding: var(--s5); }
+/* A PHOTOGRAPHIC CARD IS PADDED 16, NOT 20. The artboard puts Hospital's glyph
+   at 17,17 and Diet's at 16,16 while a data card at this size keeps its 20 —
+   so the override is on the fill, not the size. Species is the exception the
+   artboard itself makes: node 136:4515 pads it 24. */
+.card[data-size='medium'][data-fill='image'] { padding: var(--s4); }
+.card[data-variant='species.stats'] { padding: var(--s6); }
 .card[data-size='large'],
 .card[data-size='tall'],
 .card[data-size='full'] { padding: var(--s6); }
@@ -2112,6 +2290,12 @@ body.is-editing .section-head {
   flex: none;
   min-width: 0;
   margin-bottom: var(--s3);
+}
+.c-head__aside {
+  margin-left: auto;
+  flex: none;
+  font-size: var(--fs-label);
+  font-weight: 600;
 }
 .c-head__icon { flex: none; width: 22px; height: 22px; display: block; }
 .c-head__icon img { width: 100%; height: 100%; display: block; }
@@ -2184,16 +2368,24 @@ body.is-editing .section-head {
   translate: -50% 0;
   z-index: 2;
   display: flex;
-  align-items: center;
+  /* BOTTOM-ANCHORED. A 60px top pad only ever worked against a 113px band;
+     at 70 it pushed the label out of the box. The artboard puts the label's
+     bottom 20px above the card edge, so that is what is specified. */
+  align-items: flex-end;
   width: calc(100% + 2px);
   height: var(--scrim-band-h);
-  padding: 60px var(--pad-card) var(--pad-card);
+  padding: 0 16px 20px;
   background: var(--scrim-band);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   pointer-events: none;
 }
-.card[data-band-size='lg'] .card__band { padding: 61px var(--s5) var(--s5); }
+/* Diet & Kitchen: the softer ramp, and its label sits 24 above the edge
+   rather than 20 — both straight off node 136:4686. */
+.card[data-band-size='lg'] .card__band {
+  background: var(--scrim-band-soft);
+  padding: 0 16px 24px;
+}
 .card[data-band-size='lg'] .l-door__name { font-size: var(--fs-card-lg); }
 
 /* the Species card: the two figures of the whole collection, over foliage */
@@ -2207,6 +2399,31 @@ body.is-editing .section-head {
   text-shadow: 0 1px 10px rgba(0, 0, 0, .3);
 }
 .l-photo-stat__figures { display: flex; flex: 1 0 0; flex-direction: column; justify-content: space-between; }
+
+/* ══ THE 2x1 PHOTO-STAT ═══════════════════════════════════════════════════
+   Node 135:4519 draws the Species card's two figures SIDE BY SIDE on one
+   baseline — `flex`, `items-end`, `justify-between` — because at 2x1 there is
+   no room to stack them. Stacked in a 164px card the composition measured
+   166px of content in a 124px box and clipped at every one of the six widths
+   verify.py sweeps; side by side it is 98. The 2x2 card keeps the column,
+   which is what the old artboard drew and what still reads best there.
+
+   The figure also comes DOWN a step. `--fs-hero-num` is the 2x2 card's size;
+   the artboard sets 32px here, and at 2x1 the larger number is what pushed
+   the label out of the box in the first place. */
+.card[data-size='medium'] .l-photo-stat__figures {
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+/* 32px at 1024, the artboard's size, calibrated the way every other type
+   token in this file is: 1.36rem + 1vw resolves to 21.76 + 10.24 = 32 at a
+   1024 viewport. `--fs-metric` was the near miss — it caps at 27. */
+.card[data-size='medium'] .l-photo-stat .figure__value {
+  font-size: clamp(22px, 1.36rem + 1vw, 34px);   /* Figma 32 @1024 */
+}
+.card[data-size='medium'] .l-photo-stat .figure__label { font-size: var(--fs-label); }
 .figure { display: flex; flex-direction: column; gap: var(--s1); }
 .figure__value {
   font-family: var(--font-num);
@@ -4417,137 +4634,6 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
    `wswitch-`, `l-health`, `l-insight` or `l-empty` root, or to `body.is-site`.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ══ 1 · the workspace switcher ══════════════════════════════════════════ */
-
-/* NO MARGIN BELOW. `.main-frame` already opens with the artboard's 32px of page
-   padding, and the twenty this used to add on top of it made the gap before the
-   hero 52 — the largest space on the page, sitting under its least important
-   control. The space moved above the switcher instead, where it was missing. */
-/* AND IT WAS 64px WIDER THAN EVERYTHING ELSE ON THE PAGE.
-   The search field, the hero and the grid are all 960 inside the artboard's
-   32px page padding; the switcher row had no `padding-inline`, so the pill ran
-   the full 1024 and hung 32px past both edges of the field directly above it.
-   Two full-width controls that do not share an edge read as a mistake even
-   when nobody can say which one is wrong. */
-/* FIRST ON THE PAGE NOW, so it owns the space above it and hands the greeting
-   a smaller gap than the artboard's 32 — 20 above, 20 below. The vertical budget
-   is real: on a 1024x768 tablet the status bar, this row, the greeting, the
-   search field and the Site header all sit above the first card.
-
-   `position: relative; z-index: 1` because the header planting is a POSITIONED
-   element at z-index 0, and a positioned element paints above an unpositioned
-   in-flow sibling whatever the source order says — without this the foliage
-   would lie over the top of the switcher. */
-.wswitch-row {
-  position: relative;
-  z-index: 1;
-  margin-bottom: 0;
-  padding: var(--s5) var(--pad-page) 0;
-}
-.wswitch-row + .home-header { padding-top: var(--s5); }
-
-.wswitch {
-  position: relative;
-  display: grid;
-  /* `1fr` is `minmax(auto, 1fr)`, and a tab's min-content is 168px because
-     .wswitch__label is `white-space: nowrap`. At 320px the two columns
-     resolved to 167.7 + 195.6 = 363px inside a 288px box and pushed 68px of
-     horizontal scroll onto the whole page. minmax(0, 1fr) lets a column go
-     below min-content, which is what the label's ellipsis was always for. */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  /* Translucent, so the page's mint wash reads through it. A solid white pill
-     on a gradient canvas reads as a component that was pasted on. */
-  background: rgba(255, 255, 255, .62);
-  backdrop-filter: blur(8px);
-  box-shadow: var(--e0);
-}
-
-/* THE PLATE MOVES; THE TABS DO NOT REPAINT.
-   Two backgrounds cross-fading would say "two buttons, one lit". A single
-   surface that slides says "one control with a position", which is what a
-   segmented switch is. It is also why the transform is on a pseudo-free
-   element rather than on a `left` — a transform does not lay out. */
-.wswitch__plate {
-  position: absolute;
-  z-index: 0;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  width: calc(50% - 6px);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  box-shadow: 0 1px 2px rgba(31, 65, 91, .10), 0 4px 14px -6px rgba(31, 65, 91, .22);
-  transition: transform var(--t-base) var(--ease);
-}
-.wswitch[data-active='site'] .wswitch__plate { transform: translateX(calc(100% + 4px)); }
-
-.wswitch__tab {
-  position: relative;
-  z-index: 1;
-  /* The grid item has to be allowed to shrink too, or the column's new
-     minmax(0, …) is handed straight back the old min-content. */
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
-  /* the 44px touch floor the brief asks for, with room to spare */
-  min-height: 52px;
-  padding: var(--s2) var(--s4);
-  border: none;
-  border-radius: var(--r-pill);
-  background: none;
-  color: var(--ink-3);
-  text-align: left;
-  cursor: pointer;
-  transition: color var(--t-fast) var(--ease);
-}
-.wswitch__tab[aria-selected='true'] { color: var(--petrol-800); }
-
-.wswitch__glyph {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: color-mix(in srgb, currentColor 12%, transparent);
-}
-.wswitch__glyph .glyph { width: 18px; height: 18px; }
-.wswitch__tab[aria-selected='true'] .wswitch__glyph {
-  background: var(--petrol-800);
-  color: var(--surface);
-}
-
-.wswitch__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.wswitch__label {
-  font-size: var(--fs-label);
-  font-weight: 650;
-  letter-spacing: -.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.wswitch__sub {
-  font-size: var(--fs-micro);
-  font-weight: 500;
-  opacity: .68;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* On a phone the two subtitles are the first thing to go — "Your home page"
-   under a label that already says Module Selection is the least load-bearing
-   text on the screen, and losing it keeps both labels on one line each. */
-@media (max-width: 519px) {
-  .wswitch__sub { display: none; }
-  .wswitch__tab { gap: var(--s2); padding-inline: var(--s3); }
-  .wswitch__glyph { width: 28px; height: 28px; }
-}
 
 /* ══ 2 · the greeting does NOT step aside ════════════════════════════════
    It used to: hidden at `opacity: 0` in the Site workspace, with a
@@ -6154,19 +6240,12 @@ body.is-site .card:active { transform: scale(.978); }
        see the note in the stylesheet for how the fade is done. -->
   <span class="foliage" aria-hidden="true"></span>
 
-  <!-- ══ workspace switcher ═══════════════════════════════════════════
-       FIRST, ABOVE EVERYTHING THE TWO VIEWS SHARE.
-       It used to sit under the search field, between the chrome and the
-       content, on the reasoning that it is a small control and the eye passes
-       through there anyway. That was the wrong altitude for it: WHICH WORKSPACE
-       is a bigger question than anything below it, and a control that decides
-       what the whole page is should not be discovered after the page has been
-       read. Above the greeting it also stops competing with the Site header a
-       few rows down — that one names the SUBJECT, this one names the VIEW.
-       See WorkspaceSwitcher.js. -->
-  <div class="wswitch-row">
-    <div id="workspaceSwitch"></div>
-  </div>
+  <!-- THE WORKSPACE SWITCHER IS GONE. Two tabs, Module Selection and Site
+       Command Centre, sat above the greeting and chose which workspace the
+       page was. Figma node 135:4436 draws neither, and the brief asked for
+       them out. The Site Command Centre is NOT orphaned by this: the
+       Housing card in the grid opens the Sites listing, which is how the
+       design reaches it, and every level below still routes by hash. -->
 
   <!-- ══ greeting ══════════════════════════════════════════════════════ -->
   <header class="home-header">
@@ -6183,9 +6262,12 @@ body.is-site .card:active { transform: scale(.978); }
       <h1 class="greeting__name">Sourav Tambe <span class="greeting__wave" aria-hidden="true">👋🏻</span></h1>
     </div>
     <div class="header-actions">
-      <button type="button" class="icon-btn" aria-label="Appearance">
-        <img src="assets/icon/brightness.svg" alt="">
-      </button>
+      <!-- THE APPEARANCE BUTTON IS GONE. Node 135:4442 is 88px wide and holds
+           exactly two controls, a bell and the avatar. A third does not fit
+           that frame at any size, and the brief asked for an exact match, so
+           the theme toggle is removed rather than shrunk. Dark mode only ever
+           existed as `mockups/dark-mode.html`, so this removes a control for a
+           mode the product does not ship. -->
       <button type="button" class="icon-btn icon-btn--bell" aria-label="Notifications, unread">
         <img src="assets/icon/bell.svg" alt="">
       </button>
@@ -6203,6 +6285,23 @@ body.is-site .card:active { transform: scale(.978); }
       <input class="search__input" type="search" placeholder="Search" aria-label="Search"
              autocomplete="off" spellcheck="false">
     </div>
+    <!-- TWO CONTROLS THE ARTBOARD ADDS BESIDE THE FIELD (node 135:4455).
+         Both glyphs are exported from that node — `fi_9883416` and the four
+         tiles of `fi_747327`, translated into one 24px icon rather than
+         redrawn. The design draws them and does not say what they do, so each
+         is wired to the nearest capability that ALREADY EXISTS rather than to
+         a new feature: scan opens the Global Search page (the only thing in
+         this build that finds a record from a code — its index carries 478
+         identifiers), and the grid opens Add Module. Neither invents a
+         scanner. -->
+    <button type="button" class="search-btn" data-search-btn="scan"
+            aria-label="Scan to find a record">
+      <img class="search-btn__icon" src="assets/icon/scan.svg" alt="" width="28" height="28">
+    </button>
+    <button type="button" class="search-btn" data-search-btn="modules"
+            aria-label="Add a module">
+      <img class="search-btn__icon" src="assets/icon/grid.svg" alt="" width="24" height="24">
+    </button>
   </div>
 
   <div class="main-frame">
@@ -7144,6 +7243,7 @@ const DOORS = [
   ['administer',    ['small', 'medium'], 'primary'],
   ['users',         ['small', 'medium'], 'primary'],
   ['security',      ['small', 'medium'], 'primary'],
+  ['audit',         ['small', 'medium'], 'primary'],
   ['housing',       ['small', 'medium'], 'primary'],
   ['parivesh',      ['small', 'medium'], 'secondary'],
   ['approvals',     ['small', 'medium'], 'secondary'],
@@ -7235,6 +7335,8 @@ const VARIANTS = [
   {
     id: 'hospital.photo', moduleId: 'hospital', name: 'Photograph',
     layout: 'photo', purpose: 'NAVIGATE', image: 'hospital.jpg',
+    /* The artboard's flat 20% black over the photograph, under the band. */
+    wash: 'rgba(0, 0, 0, .2)',
     supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'primary',
     data: {},
   },
@@ -7320,8 +7422,28 @@ const VARIANTS = [
   {
     id: 'species.stats', moduleId: 'species', name: 'Collection',
     layout: 'photo', purpose: 'UNDERSTAND',
-    image: 'species-a.png', imageOver: 'species-b.jpg',
-    supportedSizes: ['large', 'full'], defaultSize: 'large', priority: 'primary',
+    /* ONE LANDSCAPE PHOTOGRAPH, CROPPED NEAR ITS TOP.
+       This card used to stack two exported layers from the OLD artboard — a
+       256x256 plate over a 578x867 PORTRAIT photo. In a 374x164 box a portrait
+       source shows a thin band from the middle of a tall image, which is why
+       the lion sat in a different place from the design no matter what else
+       was fixed. Node 135:4436 draws one 4096x2734 LANDSCAPE image, so this is
+       that export at 1200 wide (ratio 1.4981 against the original's 1.4982).
+
+       `imagePosition` IS THE ARTBOARD'S CROP, DERIVED NOT EYEBALLED. Figma
+       renders the image at `h-152.38%` with `top: -4.86%`: in a 164px box that
+       is 249.9px tall, offset -7.97px, so 85.9px overflows and 7.97 of it is
+       above the frame — 7.97/85.9 = 9.3%. Hence `50% 9.3%`, near the top. The
+       default 50% showed the middle. */
+    image: 'species.jpg', imagePosition: '50% 9.3%',
+    /* `medium` ADDED. The old artboard drew this card 2x2; node 135:4436 draws
+       it 2x1, so the composition has to survive a 164px box. IT DID NOT AT
+       FIRST: an earlier version of this comment claimed the arithmetic worked,
+       and measurement said otherwise — the figures stacked in a column came to
+       166px of content in a 124px box and clipped at every width. They are a
+       ROW at this size now (see `.l-photo-stat__figures` under
+       `[data-size='medium']`), which is 98px and is what the artboard draws. */
+    supportedSizes: ['medium', 'large', 'full'], defaultSize: 'large', priority: 'primary',
     data: {
       figures: [
         { value: '2,411',   label: 'Species' },
@@ -7598,7 +7720,12 @@ const VARIANTS = [
   {
     id: 'diet.photo', moduleId: 'diet', name: 'Photograph',
     layout: 'photo', purpose: 'NAVIGATE', image: 'diet-kitchen.jpg',
-    wash: 'rgba(0, 0, 0, .2)',
+    /* NO FLAT WASH. Node 136:4685 gives Diet & Kitchen its scrim band and
+       nothing else; the `rgba(0,0,0,.2)` that used to sit here belongs to
+       Hospital (node 136:4679), which is the card that has it in the artboard.
+       It was on the wrong one, which is why Diet read dark and Hospital read
+       bright — the exact opposite of the design. */
+    iconSize: 38,
     supportedSizes: ['medium', 'large', 'full'], defaultSize: 'medium', priority: 'primary',
     data: { bandSize: 'lg' },
   },
@@ -7667,9 +7794,17 @@ const VARIANTS = [
   {
     id: 'followup.queue', moduleId: 'followup', name: 'Task Queue',
     layout: 'timeline', purpose: 'MONITOR',
+    /* A PHOTOGRAPH, NOT A GRADIENT. Node 138:5143 draws this card as an image
+       under a flat 20% black — the same ward photograph the build already
+       shipped as `followup.jpg` and referenced from exactly one Site-level
+       card, never from here. So the file was present and the home page's
+       biggest card was the one composition on it drawn as a plain fill.
+       `fill: 'image'` because LAYOUT_FILL maps `timeline` to solid. */
+    image: 'followup.jpg', fill: 'image', wash: 'rgba(0, 0, 0, .2)',
     supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'primary',
     data: {
-      title: 'Follow Up Tasks',
+      /* The artboard's head is `Follow Up` with the month on the right. */
+      title: 'Follow Up', aside: 'March',
       items: [
         { text: 'Treatment Review',      meta: 'Overdue', tone: 'alert' },
         { text: 'Animal Health Review',  meta: 'Due today' },
@@ -8005,7 +8140,7 @@ const VARIANTS = [
     layout: 'door', purpose: 'NAVIGATE',
     /* Figma redraws this fill at 143.78° because the gradient has twice the
        width to cross; at the small card's 123.17° the band would fall wrong. */
-    gradient: '--g-parivesh-wide',
+    gradient: '--g-parivesh-wide2',
     supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'primary',
     data: {},
   },
@@ -8041,8 +8176,12 @@ const VARIANTS = [
     id: 'approvals.pending', moduleId: 'approvals', name: 'Pending Approvals',
     layout: 'stat', purpose: 'ATTENTION',
     supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'primary',
-    data: { title: 'Pending Approvals', value: '32', label: 'Awaiting Decision',
-            sub: '12 high priority', subTone: 'alert' },
+    /* NO `label`. Node 136:4547 draws the figure and then `12 High Priority`
+       and nothing between them — `Awaiting Decision` was a third line this
+       card never had in the artboard. The sub is capitalised as the artboard
+       capitalises it. */
+    data: { title: 'Pending Approvals', value: '32',
+            sub: '12 High Priority', subTone: 'alert' },
   },
   {
     id: 'approvals.breakdown', moduleId: 'approvals', name: 'Approval Queue',
@@ -8142,7 +8281,7 @@ const VARIANTS = [
   {
     id: 'medical.severity', moduleId: 'medical', name: 'Cases by Severity',
     layout: 'ladder', purpose: 'ATTENTION',
-    supportedSizes: ['large'], defaultSize: 'large', priority: 'primary',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'secondary',
     /* 140 cases are not a total, they are a ladder — and the eight critical
        ones are 5.7% of it, which is why the band floor exists. */
     data: {
@@ -8159,7 +8298,7 @@ const VARIANTS = [
   {
     id: 'medical.active', moduleId: 'medical', name: 'Under Treatment',
     layout: 'figure', purpose: 'ATTENTION',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Under Treatment', value: '1,186', sub: '47 critical', subTone: 'alert' },
   },
   {
@@ -8219,7 +8358,7 @@ const VARIANTS = [
   {
     id: 'pharmacy.value', moduleId: 'pharmacy', name: 'Stock Value',
     layout: 'figure', purpose: 'UNDERSTAND',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     /* the long-value step keeps a rupee figure on one line at one cell */
     data: { title: 'Stock Value', value: '₹1.88cr', sub: 'pharmacy stock' },
   },
@@ -8234,7 +8373,7 @@ const VARIANTS = [
   {
     id: 'lab.pending', moduleId: 'lab', name: 'Results Pending',
     layout: 'figure', purpose: 'ATTENTION',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Results Pending', value: '8', sub: '2 over 48 hrs', subTone: 'warn' },
   },
   {
@@ -8247,7 +8386,7 @@ const VARIANTS = [
   {
     id: 'lab.analyser', moduleId: 'lab', name: 'Analyser',
     layout: 'pulse', purpose: 'MONITOR',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     /* a state said as a word · there is no useful number for "it is working" */
     data: { title: 'Analyser', word: 'Online', sub: 'calibrated 06:10' },
   },
@@ -8256,7 +8395,7 @@ const VARIANTS = [
   {
     id: 'species.classes', moduleId: 'species', name: 'By Class',
     layout: 'taxa', purpose: 'UNDERSTAND',
-    supportedSizes: ['large'], defaultSize: 'large', priority: 'primary',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'secondary',
     /* the two smallest classes are grouped: a block too small to hold its own
        label should not be drawn separately */
     data: {
@@ -8272,7 +8411,7 @@ const VARIANTS = [
   {
     id: 'species.sex', moduleId: 'species', name: 'Sex Ratio',
     layout: 'vs', purpose: 'UNDERSTAND',
-    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'primary',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Sex Ratio',
       a: { value: '46,120', label: 'Male',   n: 46120 },
@@ -8282,7 +8421,7 @@ const VARIANTS = [
   {
     id: 'species.figure', moduleId: 'species', name: 'Species Count',
     layout: 'figure', purpose: 'UNDERSTAND',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Species', value: '2,143', sub: '486 subspecies' },
   },
 
@@ -8297,7 +8436,7 @@ const VARIANTS = [
   {
     id: 'mortality.split', moduleId: 'mortality', name: 'By Cause',
     layout: 'stack', purpose: 'UNDERSTAND',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: {
       title: 'By Cause', total: '26', caption: 'four causes',
       parts: [{ n: 7 }, { n: 7 }, { n: 6 }, { n: 6 }],
@@ -8348,7 +8487,7 @@ const VARIANTS = [
   {
     id: 'eggs.pairs', moduleId: 'eggs', name: 'Breeding Pairs',
     layout: 'spark', purpose: 'MONITOR',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Breeding Pairs', value: '54', series: [38, 42, 44, 47, 49, 51, 54] },
   },
 
@@ -8356,13 +8495,13 @@ const VARIANTS = [
   {
     id: 'housing.enclosures', moduleId: 'housing', name: 'Enclosures',
     layout: 'figure', purpose: 'UNDERSTAND',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Enclosures', value: '1,840', sub: '1,596 occupied' },
   },
   {
     id: 'housing.status', moduleId: 'housing', name: 'Enclosure Status',
     layout: 'strip', purpose: 'MONITOR',
-    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'primary',
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Enclosure Status', total: '1,840', unit: 'enclosures',
       parts: [
@@ -8377,7 +8516,7 @@ const VARIANTS = [
   {
     id: 'diet.compliance', moduleId: 'diet', name: 'Diet Compliance',
     layout: 'dial', purpose: 'MONITOR',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Diet Compliance', pct: 81, value: '81%', unit: 'diet' },
   },
   {
@@ -8391,7 +8530,7 @@ const VARIANTS = [
   {
     id: 'followup.month', moduleId: 'followup', name: 'September',
     layout: 'month', purpose: 'ATTENTION',
-    supportedSizes: ['large'], defaultSize: 'large', priority: 'primary',
+    supportedSizes: ['large'], defaultSize: 'large', priority: 'secondary',
     /* what is due is a DATE, so the card is a month rather than a count */
     data: {
       title: 'September', pad: 1, days: 30, today: 2,
@@ -8402,7 +8541,7 @@ const VARIANTS = [
   {
     id: 'followup.overdue', moduleId: 'followup', name: 'Overdue',
     layout: 'figure', purpose: 'ATTENTION',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Overdue', value: '8', sub: 'oldest 12 days', subTone: 'alert' },
   },
 
@@ -8438,7 +8577,7 @@ const VARIANTS = [
   {
     id: 'users.today', moduleId: 'users', name: 'Attendance Today',
     layout: 'duo', purpose: 'MONITOR',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: {
       title: 'Attendance',
       rows: [{ value: '2,617', label: 'PRESENT' }, { value: '148', label: 'ABSENT', tone: 'alert' }],
@@ -8464,7 +8603,7 @@ const VARIANTS = [
   {
     id: 'security.cctv', moduleId: 'security', name: 'Cameras Online',
     layout: 'dial', purpose: 'ATTENTION',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Cameras', pct: 63, value: '63%', unit: '17/27' },
   },
   {
@@ -8495,7 +8634,7 @@ const VARIANTS = [
   {
     id: 'approvals.now', moduleId: 'approvals', name: 'Pending Now',
     layout: 'figure', purpose: 'ACT',
-    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'primary',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
     data: { title: 'Pending', value: '22', sub: '4 over a week', subTone: 'alert' },
   },
   {
@@ -8688,7 +8827,20 @@ const KEY = 'antz.home.layout'
    on a home page with no door into half the product. That is what a bump is
    for, and it costs everyone who has arranged their own page that arrangement,
    which is why it is not made lightly. */
-const VERSION = 5
+/* 5 → 6 · THE SEEDED PAGE IS FIGMA NODE 135:4436 NOW, and a v5 document is
+   the old arrangement: Hospital at columns 2–3, Species 2×2 at 4–5, Pharmacy
+   alone on row 2, no Audit, Housing bolted to a sixth row, and eighteen extra
+   cards after Parivesh. All of that is still a VALID layout — every id and
+   size in it still resolves — so repair() passes it through untouched and the
+   page renders exactly as it did before. Nothing about matching the artboard
+   reaches a browser that has opened this before.
+
+   THAT IS THE WHOLE REASON THIS CONSTANT EXISTS, and it is the failure the
+   note above predicts word for word: someone opens the page they have opened
+   before and wonders why nothing changed. It cost me three rounds of measuring
+   a page I had cleared localStorage on while the real browser showed the old
+   one. */
+const VERSION = 6
 
 /**
  * The cards a fresh install starts with.
@@ -8725,21 +8877,32 @@ const DEFAULT_LAYOUT = [
      this list, and nothing on this list has quietly stopped being primary,
      stopped existing, or lost the size it is seeded at.
 
-     THE ARRANGEMENT IS THE ARTBOARD'S. Figma node 55476:32828 lays its cards
-     across five columns, and these fall into the same five rows with no gaps:
+     THE ARRANGEMENT IS THE ARTBOARD'S. Figma node 135:4436 lays its cards
+     across five columns and five rows, and these fall into them with no gaps
+     and nothing left over — seventeen cards in twenty-five cells:
 
-       row 0   Medical(1×1)   Hospital photograph(2×1)   Species(2×2)
-       row 1   Pharmacy(1×1)  Diet & Kitchen photo(2×1)     ↑ continues
-       row 2   Follow Up Queue(2×2)  Lab(1×1)  Pending Approvals(2×1)
-       row 3     ↑ continues         Mortality  Eggs  Administer
-       row 4   Users  Security  Reports  Parivesh(2×1)
+       row 1   Medical(1×1)  Species Management(2×1)  Hospital photo(2×1)
+       row 2   Diet & Kitchen photo(2×1)  Housing  Pharmacy  Audit
+       row 3   Follow Up Queue(2×2)  Lab(1×1)  Pending Approvals(2×1)
+       row 4     ↑ continues         Mortality  Eggs  Administer
+       row 5   Users  Security  Reports  Parivesh(2×1)
 
-     AND HOUSING IS APPENDED, NOT INSERTED. The artboard's five rows fill
-     exactly twenty-five cells, so a sixteenth card anywhere inside them
-     reflows every card after it and the measured page stops being the measured
-     page. Housing takes a sixth row of its own at the foot instead.
+     PARIVESH IS THE LAST CARD, and that is the boundary the brief drew: up to
+     and including it, this list IS the artboard. Anything after it is a
+     judgement call rather than a transcription, which is why there is nothing
+     after it.
 
-       row 5   Housing(1×1)
+     WHAT THE NEW NODE CHANGED, against the five rows the old one drew:
+       · Species Management is 2×1 and moves to row 1 columns 2–3; Hospital
+         takes columns 4–5. They were the other way round and Species was 2×2.
+       · Diet & Kitchen moves to row 2 columns 1–2, Pharmacy to column 4.
+       · HOUSING COMES INSIDE THE GRID, at row 2 column 3. It used to be
+         appended to a sixth row of its own, because the old artboard's five
+         rows filled all twenty-five cells and a sixteenth card anywhere inside
+         them reflowed everything after it. The new artboard gives it a cell, so
+         the workaround is gone and the page is five rows again.
+       · AUDIT IS NEW, at row 2 column 5 — the cell that vacancy created.
+     Rows 3, 4 and 5 are untouched.
 
      ONE CARD, WHICH IS THE WHOLE MODULE. An earlier pass gave Housing four —
      a Sites list, an attention list, the door and a count — on the reasoning
@@ -8750,15 +8913,22 @@ const DEFAULT_LAYOUT = [
      point of the door. They are not in the gallery either — a card that should
      not be on this page should not be addable to it.
 
+     AND HOUSING IS NOW THE ONLY WAY IN. The workspace switcher that used to
+     carry a "Site Command Centre" tab is gone with this node, so this card is
+     the entrance to all four Site levels rather than a shortcut to one of two
+     tabs. It is not optional furniture any more.
+
      The photographic cards the artboard is built around — the Species leaf
      plate and the Follow Up ward — are kept, because they are the design, and
      because a page of nothing but tinted rectangles is not the product that
      was drawn. */
   { variantId: 'medical.default',     size: 'small'  },   /* NAVIGATE  */
+  { variantId: 'species.stats',       size: 'medium' },   /* UNDERSTAND */
   { variantId: 'hospital.photo',      size: 'medium' },   /* NAVIGATE  */
-  { variantId: 'species.stats',       size: 'large'  },   /* UNDERSTAND */
-  { variantId: 'pharmacy.default',    size: 'small'  },   /* NAVIGATE  */
   { variantId: 'diet.photo',          size: 'medium' },   /* NAVIGATE  */
+  { variantId: 'housing.default',     size: 'small'  },   /* NAVIGATE  */
+  { variantId: 'pharmacy.default',    size: 'small'  },   /* NAVIGATE  */
+  { variantId: 'audit.default',       size: 'small'  },   /* NAVIGATE  */
   { variantId: 'followup.queue',      size: 'tall'   },   /* MONITOR   */
   { variantId: 'lab.default',         size: 'small'  },   /* NAVIGATE  */
   { variantId: 'approvals.pending',   size: 'medium' },   /* ATTENTION */
@@ -8770,41 +8940,21 @@ const DEFAULT_LAYOUT = [
   { variantId: 'reports.default',     size: 'small'  },   /* NAVIGATE  */
   { variantId: 'parivesh.wide',       size: 'medium' },   /* NAVIGATE  */
 
-  /* HOUSING · the door into the Site Command Centre, and nothing else. */
-  { variantId: 'housing.default',     size: 'small'  },   /* NAVIGATE  */
+  /* ══ AND NOTHING ELSE ═══════════════════════════════════════════════════
+     A SECOND BLOCK OF EIGHTEEN USED TO FOLLOW, on the compositions a later
+     pass added — three 2x2 signatures, two 2x1 and thirteen 1x1, appended as
+     five more whole rows so the page ended flush. It was seeded on the
+     reasoning that the new compositions should be visible rather than only
+     addable.
 
-  /* ══ AND A SECOND BLOCK, ON THE SIXTEEN NEW COMPOSITIONS ════════════════
-     THE ARTBOARD'S TWENTY-FIVE CELLS ABOVE ARE UNTOUCHED. Figma drew five
-     rows and they are still those five rows in that order; this is appended
-     the way Housing was, because re-cutting a transcribed artboard to make
-     room for cards Figma has never seen is the wrong way round.
-
-     EXACTLY TWENTY-FIVE MORE CELLS, so it is five whole rows and the page
-     still ends flush: three 2x2 signatures, two 2x1, and nine 1x1. The nine
-     are the point of the whole pass — before it the catalogue could not offer
-     a single-cell data card at all, so a "small" home page card meant a door.
-
-     `priority: 'primary'` still means EXACTLY "on this list", in both
-     directions, and antz.checkDefaults() still asserts it. The count in that
-     rule is thirty, not sixteen. ═══════════════════════════════════════════ */
-  { variantId: 'medical.severity',    size: 'large'  },   /* ATTENTION  · ladder */
-  { variantId: 'species.classes',     size: 'large'  },   /* UNDERSTAND · taxa   */
-  { variantId: 'medical.active',      size: 'small'  },   /* ATTENTION  · figure */
-  { variantId: 'pharmacy.value',      size: 'small'  },   /* UNDERSTAND · figure */
-  { variantId: 'followup.month',      size: 'large'  },   /* ATTENTION  · month  */
-  { variantId: 'species.sex',         size: 'medium' },   /* UNDERSTAND · vs     */
-  { variantId: 'lab.pending',         size: 'small'  },   /* ATTENTION  · figure */
-  { variantId: 'housing.status',      size: 'medium' },   /* MONITOR    · strip  */
-  { variantId: 'diet.compliance',     size: 'small'  },   /* MONITOR    · dial   */
-  { variantId: 'users.today',         size: 'small'  },   /* MONITOR    · duo    */
-  { variantId: 'security.cctv',       size: 'small'  },   /* ATTENTION  · dial   */
-  { variantId: 'approvals.now',       size: 'small'  },   /* ACT        · figure */
-  { variantId: 'followup.overdue',    size: 'small'  },   /* ATTENTION  · figure */
-  { variantId: 'species.figure',      size: 'small'  },   /* UNDERSTAND · figure */
-  { variantId: 'mortality.split',     size: 'small'  },   /* UNDERSTAND · stack  */
-  { variantId: 'eggs.pairs',          size: 'small'  },   /* MONITOR    · spark  */
-  { variantId: 'lab.analyser',        size: 'small'  },   /* MONITOR    · pulse  */
-  { variantId: 'housing.enclosures',  size: 'small'  },   /* UNDERSTAND · figure */
+     THE BRIEF SETTLED IT THE OTHER WAY: the home page is to match node
+     135:4436 exactly, and that node is five rows and seventeen cards. So the
+     eighteen are no longer SEEDED — but they are not deleted either. Every one
+     is still in the catalogue and still addable from Add Module; what changed
+     is their `priority`, from 'primary' to 'secondary', which is the field that
+     means "on the default page". antz.checkDefaults() asserts that list and
+     this one agree in both directions, so the two had to move together — and
+     the count in that rule is seventeen again, not thirty-five. */
 ]
 
 /**
@@ -9010,6 +9160,7 @@ function resetLayout() {
   setCards(seed(), { reason: 'reset' })
 }
   __x.DEFAULT_LAYOUT = DEFAULT_LAYOUT;
+  __x.VERSION = VERSION;
   __x.CORE_VARIANTS = CORE_VARIANTS;
   __x.isCore = isCore;
   __x.newUid = newUid;
@@ -9100,7 +9251,12 @@ const MODULES = [
     id: 'pharmacy',
     icon: 'm-pharmacy.svg',
     iconSize: 44,
-    gradient: '--g-pharmacy',
+    /* THE TEAL CARD, not the slate base. `--g-pharmacy` is the shared slate
+       that Housing sits on and that the teal was sampled over; Pharmacy itself
+       is the teal. Both pointed at the slate for a while, which made them
+       identical twins in row 2 — the edit that fixed it was reported applied
+       by a script that then threw and never wrote the file. */
+    gradient: '--g-pharmacy-wash',
     name: 'Pharmacy',
     category: 'medical',
     keywords: ['medicine', 'drug', 'dispense', 'stock', 'prescription'],
@@ -9189,9 +9345,17 @@ const MODULES = [
      department. */
   {
     id: 'housing',
-    sprite: 'housing',
+    /* THE SPRITE DOES NOT STAY, and an earlier version of this comment said
+       it did — on the assumption that the exported file matched the symbol.
+       It does not: the sprite draws a LOCATION PIN and node 135:4436 draws a
+       FENCE. `sprite` wins over `icon` in glyph(), so the pin was rendering.
+       Housing is a module with an artboard glyph now, which is exactly the
+       case the rule in glyph() reserves files for.
+       THE FILL CHANGED TOO: the artboard moves Housing off Hospital's deep
+       teal onto the shared slate base — the same fill Pharmacy washes over. */
+    icon: 'm-housing.svg',
     iconSize: 40,
-    gradient: '--g-hospital',
+    gradient: '--g-pharmacy',
     name: 'Housing',
     category: 'operations',
     keywords: ['site', 'sites', 'sections', 'enclosures', 'estate', 'facility',
@@ -9244,11 +9408,27 @@ const MODULES = [
     id: 'users',
     icon: 'm-users.svg',
     iconSize: 34,
-    gradient: '--g-users',
+    gradient: '--g-users-wash',
     name: 'Users',
     category: 'admin',
     keywords: ['staff', 'people', 'roles', 'team', 'access', 'keeper'],
     blurb: 'Staff accounts, roles and who is on shift.',
+  },
+  {
+    /* NEW IN NODE 135:4436. Row 2's fifth cell was empty in the old artboard
+       and the new one fills it with Audit. Its glyph is `fi_3686896` exported
+       from that node — a magnifier inside a ring — and its fill is the rose
+       wash, the only card on the page carrying it, which is what makes an
+       audit card findable on a page of teals and slates. */
+    id: 'audit',
+    icon: 'm-audit.svg',
+    iconSize: 34,
+    gradient: '--g-audit',
+    name: 'Audit',
+    category: 'operations',
+    keywords: ['audit', 'trail', 'log', 'history', 'compliance', 'review',
+               'inspection', 'record'],
+    blurb: 'Audit trails, change history and inspection records.',
   },
   {
     id: 'security',
@@ -9262,9 +9442,13 @@ const MODULES = [
   },
   {
     id: 'reports',
+    /* WAS THE BRIGHT CYAN `--g-reports`. The artboard now gives Reports the
+       same teal wash over slate that Pharmacy gets — the two read as one
+       family in node 135:4436, and the solid cyan is now Parivesh's alone.
+       `--g-reports` stays defined; nothing points at it. */
     icon: 'm-reports.svg',
     iconSize: 32,
-    gradient: '--g-reports',
+    gradient: '--g-reports-wash',
     name: 'Reports',
     category: 'admin',
     keywords: ['report', 'export', 'summary', 'statement', 'board', 'print'],
@@ -9298,7 +9482,7 @@ const MODULES = [
        warm accent line, and which measured close to unreadable. So Approvals
        takes Users' slate and Communication takes Follow Up's petrol: both dark
        enough for a card with figures on it, and both from the file. */
-    gradient: '--g-users',
+    gradient: '--g-approvals-wash',
     name: 'Approvals',
     category: 'admin',
     keywords: ['approve', 'authorise', 'sign off', 'queue', 'pending', 'review', 'request'],
@@ -17848,7 +18032,11 @@ function glyph(mod, variant, cls = 'card__icon') {
 /** The title line on a data card. A small glyph, then the card's own name. */
 function head(mod, variant, data) {
   return `<span class="c-head">${glyph(mod, variant, 'c-head__icon')}` +
-         `<span class="c-head__text">${esc(data.title || mod?.name || '')}</span></span>`
+         `<span class="c-head__text">${esc(data.title || mod?.name || '')}</span>` +
+         /* The artboard's Follow Up head puts the month hard right. Optional,
+            so no other card grows a slot it does not fill. */
+         (data.aside ? `<span class="c-head__aside">${esc(data.aside)}</span>` : '') +
+         `</span>`
 }
 
 function media(variant) {
@@ -17918,7 +18106,10 @@ const LAYOUTS = {
     `<span class="l-stat">${head(mod, variant, data)}` +
       `<span class="l-stat__body">` +
         `<span class="l-stat__value">${esc(data.value)}</span>` +
-        `<span class="l-stat__label">${esc(data.label || '')}</span>` +
+        /* CONDITIONAL. An always-rendered label span kept its line-height even
+           when empty, so a card the artboard draws with two lines measured
+           three. Only cards that set a label get one. */
+        (data.label ? `<span class="l-stat__label">${esc(data.label)}</span>` : '') +
       `</span>` +
       (data.sub ? `<span class="l-stat__sub"${data.subTone ? ` data-tone="${esc(data.subTone)}"` : ''}>${esc(data.sub)}</span>` : '') +
     `</span>`,
@@ -18040,6 +18231,9 @@ const LAYOUTS = {
 
   /* Entries down a hairline rule, newest first. */
   timeline: (mod, variant, data) =>
+    /* `media()` FIRST, and it returns '' unless the variant has an image — so
+       every other timeline card is unchanged. */
+    media(variant) +
     `<span class="l-timeline">${head(mod, variant, data)}` +
       `<span class="l-timeline__items">` +
       (data.items || []).map((i) =>
@@ -21833,7 +22027,17 @@ function createWorkspaceHeader({
           open ? `${open} items open across Housing` : 'Nothing open across Housing',
         ],
         synced: 'just now',
-        crumbs: [{ label: 'Housing', go: () => onNavigate?.('Housing') }],
+        /* `Home`, NOT `Housing`. This crumb has always called
+           setView('modules') — it lands on the module grid, not on a
+           Housing page, because Housing's card IS this listing and there
+           is no page between them. So the label named a place the crumb
+           does not go to. It mattered little while the workspace switcher
+           was on screen saying `Module Selection`; with the switcher gone
+           (Figma node 135:4436 draws no tabs) this crumb is the ONLY route
+           back to the home page, and a sole route home that is labelled
+           something else is a page with no way out. The nav key stays
+           'Housing' — it is the route id the header reports, not a label. */
+        crumbs: [{ label: 'Home', go: () => onNavigate?.('Housing') }],
         here: 'Sites',
         siblings: [],
         stats: [
@@ -21854,7 +22058,8 @@ function createWorkspaceHeader({
        there and the sibling menu stays on the name caret where it belongs.
        A crumb that opens a menu is a crumb that lies about where it goes. */
     const crumbs = [
-      { label: 'Housing', go: () => onNavigate?.('Housing') },
+      /* See the note at the `sites` level above: this crumb goes home. */
+      { label: 'Home',    go: () => onNavigate?.('Housing') },
       { label: 'Sites',   go: () => onLevel?.('sites') },
     ]
 
@@ -23738,7 +23943,6 @@ const { currentColumns } = __req('js/lib/sizes.js');
 const { animate, prefersReducedMotion } = __req('js/lib/motion.js');
 
 /* ── the Site Command Centre ─────────────────────────────────────────────── */
-const { createWorkspaceSwitcher } = __req('js/components/WorkspaceSwitcher.js');
 const { createSitesList } = __req('js/components/SitesList.js');
 const { createWorkspaceHeader } = __req('js/components/WorkspaceHeader.js');
 const { createWidgetDetail } = __req('js/components/WidgetDetail.js');
@@ -24765,7 +24969,12 @@ const searchInput = document.querySelector('.search__input')
  * a reader who never sees the animation still reads something true.
  */
 const SEARCH_WORDS = {
-  modules:   ['Modules', 'Widgets', 'Animals', 'Users', 'Reports'],
+  /* THE BRIEF'S OWN LIST, in the brief's own order. It arrived with `users`
+     twice — the duplicate is dropped, because a cycle that shows the same
+     word twice reads as a stall rather than a list. Every one of these six
+     is a real type in the search index, so the field never advertises a
+     search it cannot answer. */
+  modules:   ['Animals', 'Users', 'Site', 'Section', 'Enclosure', 'Identifier'],
   sites:     ['Sites', 'Sections', 'Enclosures', 'Animals', 'Staff'],
   site:      ['Animals', 'Enclosures', 'Sections', 'Users', 'Assets', 'Tasks'],
   section:   ['Enclosures', 'Animals', 'Keepers', 'Tasks', 'Documents'],
@@ -24825,11 +25034,15 @@ const globalSearch = createGlobalSearch({
   },
 })
 
-const switcher = createWorkspaceSwitcher({
-  root: document.getElementById('workspaceSwitch'),
-  getView: () => viewStore.get().view,
-  onChange: (view) => setView(view),
-})
+/* The artboard's two round controls. Bound here rather than in GlobalSearch.js
+   because neither belongs to the search page — one opens it, the other opens a
+   different surface entirely, and the row they sit in is this file's. */
+for (const btn of document.querySelectorAll('[data-search-btn]')) {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.searchBtn === 'modules') picker.open()
+    else globalSearch.open()
+  })
+}
 
 /* What the search field is scoped to, per level. */
 function searchScope(st) {
@@ -24883,7 +25096,6 @@ function syncWorkspace(meta = {}) {
   panels.site.hidden = !onSite
   sitesEl.hidden = !listing
   workspaceEl.hidden = listing
-  switcher.sync()
 
   /* Leaving a workspace leaves its edit mode. A user who switches away mid-edit
      and comes back to a page still wearing jiggling cards and a Done button has
@@ -25080,6 +25292,18 @@ Object.assign(window, {
       let i = 0
       for (const v of all) for (const sz of v.supportedSizes) out.push({ uid: 'x' + (i++), variantId: v.id, size: sz })
       __req('js/state/layoutStore.js').setCards(out, { reason: 'stress' })
+    },
+
+    /**
+     * The saved-layout schema version. Exposed because a test that pins it as
+     * a literal silently stops testing what it means the moment the constant
+     * is bumped — which is exactly what happened: `verify_detail.py` seeded
+     * `version: 5` to build a page past the blur budget, and a 5 → 6 bump made
+     * that seed unreadable, so the assert would have measured the default page
+     * instead of the long one it thought it was measuring.
+     */
+    layoutVersion() {
+      return __req('js/state/layoutStore.js').VERSION
     },
 
     /**
