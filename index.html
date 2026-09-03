@@ -1976,11 +1976,13 @@ body.is-searching { overflow: hidden; }
    Insights and the latest Note, rendered by js/components/HeroBanners.js from
    js/data/homeBanners.js.
 
-   NOTHING UNDER IT MOVES. The stage is the hero's own box — --hero-h tall with
-   --grid-gap below — so the artboard's arithmetic (32 + 204 + 16 + rows) still
-   holds. The dots sit inside the card at its foot, where the artboard's own
-   'Egg Module' hero drew its carousel dots. The peeks live in the 32px gutter
-   and touch nothing.
+   ITS OWN BAND, SINCE THE SAME AFTERNOON. The deck first held the estate banner
+   as its front card so it cost the page nothing; the ruling that followed was
+   that the Command Centre must stay put, above, and the announcements slide
+   beneath it. So the stage is a second band under the hero, --ann-h tall with
+   --grid-gap below, and the page is one announcement card taller than the
+   artboard. The peeks live in the page gutter and touch nothing; the dots sit
+   inside the front card, centred under its photograph.
 
    THE DWELL IS THE DOT. The active dot is a bar that fills over six seconds;
    the deck advances on that animation's `animationend`, not on a timer. So
@@ -1993,17 +1995,19 @@ body.is-searching { overflow: hidden; }
   /* how far the cards behind show past the front card's right edge. Twice
      this must fit the page gutter: 32/24px on tablets, 16px on a phone. */
   --peek: 12px;
+  --ann-h: 176px;
+  --ann-media: 38%;      /* the photograph's share of the card's width */
   position: relative;
-  height: var(--hero-h);
+  height: var(--ann-h);
   margin-bottom: var(--grid-gap);
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
 }
 .hero-stage__deck { position: absolute; inset: 0; }
-/* a photograph and a link are both natively draggable, and a native drag
-   cancels the pointer gesture — the swipe died with a `dragstart` on the image */
-.hero-stage img, .hero-stage a { -webkit-user-drag: none; user-drag: none; }
+/* a photograph is natively draggable, and a native drag cancels the pointer
+   gesture — the swipe died with a `dragstart` on the image */
+.hero-stage img { -webkit-user-drag: none; user-drag: none; }
 .hero-stage .hero {
   position: absolute;
   inset: 0;
@@ -2029,7 +2033,7 @@ body.is-searching { overflow: hidden; }
    white announcement alike */
 .hero-dots {
   position: absolute;
-  left: 50%;
+  left: calc(var(--ann-media) / 2);
   bottom: 10px;
   translate: -50% 0;
   z-index: 5;
@@ -2077,13 +2081,17 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   .hero-dot[aria-selected='true']::after { animation: none; transform: scaleX(1); }
 }
 
-/* ── the slides ── picture left, copy right, the way the phone's cards read
-   once they are given the width. White on the announcement so the photograph
-   carries the colour; the Note keeps the phone's blue so it is recognisable
-   across devices; the Key Insights slide is the phone's two tiles. */
+/* ── the announcement card ── READABLE FIRST.
+   The first cut put a one-line title, a one-line body and two reaction pills
+   in a 204px card and truncated both lines with an ellipsis. This one is a
+   split card: the photograph on the left, the copy on white on the right with
+   a clear order to read it in — what kind of thing this is and how old,
+   the title (up to two lines), one line of the body, then who posted it and
+   the reactions on the floor. Type is Inter at 22 / 14 / 13 / 12; the only
+   colour on the white side is the announcement green on the label. */
 .hero-stage .hero--slide {
   display: grid;
-  grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+  grid-template-columns: var(--ann-media) minmax(0, 1fr);
   padding: 0;
   background: #FFFFFF;
   color: var(--ink);
@@ -2092,87 +2100,84 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .hero-slide__media { position: relative; overflow: hidden; min-width: 0; }
 .hero-slide__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero-slide__badge {
-  position: absolute; left: 16px; top: 16px; z-index: 1;
-  display: inline-flex; align-items: center; gap: 6px;
-  height: 28px; padding: 0 10px; border-radius: var(--r-pill);
+  position: absolute; left: 12px; top: 12px; z-index: 1;
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 26px; padding: 0 9px; border-radius: var(--r-pill);
   background: rgba(22, 55, 61, .72); color: #FFFFFF;
   font-size: 12px; font-weight: 600;
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
-.hero-slide__badge .icon { width: 14px; height: 14px; }
+.hero-slide__badge .icon { width: 13px; height: 13px; }
 .hero-slide__copy {
-  display: flex; flex-direction: column; justify-content: center; gap: 6px;
-  min-width: 0; padding: 20px 24px 34px;
+  display: flex; flex-direction: column; gap: 6px;
+  min-width: 0; padding: 16px 20px;
 }
+.hero-slide__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .hero-chip {
-  align-self: flex-start;
   display: inline-flex; align-items: center; gap: 6px;
-  height: 24px; padding: 0 10px 0 8px; border-radius: var(--r-pill);
   font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: #1E7A44;
 }
-.hero-chip .icon { width: 13px; height: 13px; }
-.hero-chip--ann { background: #E5F5EC; color: #1E7A44; }
-.hero-chip--ins { background: var(--petrol-050); color: var(--petrol-800); }
-.hero-chip--on-dark { background: rgba(255, 255, 255, .2); color: #FFFFFF; }
+.hero-chip .icon { width: 14px; height: 14px; }
+.hero-slide__ago { font-size: 12px; font-weight: 500; color: var(--ink-3); white-space: nowrap; }
 .hero-slide__title {
-  font-size: 24px; line-height: 1.15; font-weight: 700; letter-spacing: -.015em; color: inherit;
+  font-size: 22px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; color: var(--ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.hero-slide__text {
+  font-size: 14px; line-height: 1.45; color: var(--ink-2);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.hero-slide__meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; }
-.hero-slide__meta b { font-weight: 500; color: var(--ink); }
-.hero-slide__meta i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }
-.hero-slide__avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #F7C6A3, #E8865B); flex: none; }
-.hero-slide__text { font-size: 14px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hero-slide__foot { display: flex; gap: 6px; margin-top: 2px; }
+.hero-slide__foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.hero-slide__meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; min-width: 0; }
+.hero-slide__meta b { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
+.hero-slide__avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #F7C6A3, #E8865B); flex: none; }
+.hero-slide__react { display: flex; gap: 6px; flex: none; }
 .hero-react {
   display: inline-flex; align-items: center; gap: 5px;
   height: 28px; padding: 0 10px; border-radius: var(--r-pill);
-  background: var(--petrol-050); color: var(--ink-2); font-size: 13px; font-weight: 500;
+  background: var(--petrol-050); color: var(--ink-2); font-size: 13px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .hero-react .icon { width: 14px; height: 14px; }
 
-.hero-slide__stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 12px 16px 20px; background: linear-gradient(160deg, #F7FCFB, #E8F4F2); }
-.hero-stat { border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; }
+/* the two kinds the data no longer carries, kept drawable: see homeBanners.js */
+.hero-slide__stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 10px 14px 16px; background: linear-gradient(160deg, #F7FCFB, #E8F4F2); }
+.hero-stat { border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; }
 .hero-stat--nat { background: #E0F6F5; }
 .hero-stat--mor { background: #FDECEA; }
-.hero-stat b { font-size: 34px; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hero-stat b { font-size: 30px; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
 .hero-stat--nat b { color: #00AFD6; }
 .hero-stat--mor b { color: #E4432E; }
-.hero-stat span { font-size: 13px; color: var(--ink-2); }
-
+.hero-stat span { font-size: 12px; color: var(--ink-2); }
 .hero-stage .hero--note { background: linear-gradient(118deg, #5CC6EE 0%, #2D9FD0 100%); color: #FFFFFF; }
+.hero--note .hero-chip, .hero--note .hero-slide__title, .hero--note .hero-slide__ago,
 .hero--note .hero-slide__meta, .hero--note .hero-slide__meta b, .hero--note .hero-slide__text { color: #FFFFFF; }
-.hero-slide__tags { display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 20px 20px 34px 24px; }
+.hero-slide__tags { display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 16px; }
 .hero-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.hero-tags span { height: 26px; padding: 0 10px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .2); display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; }
-.hero-site { display: flex; align-items: center; gap: 10px; }
-.hero-site__a { flex: none; width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, .28); display: grid; place-items: center; font-family: Georgia, serif; font-style: italic; font-size: 17px; }
-.hero-site b { display: block; font-size: 14px; font-weight: 600; }
-.hero-site small { display: block; font-size: 12px; opacity: .9; }
-.hero-slide__bang { position: absolute; right: 16px; top: 16px; width: 32px; height: 32px; border-radius: 9px; background: rgba(255, 255, 255, .9); color: #2D9FD0; display: grid; place-items: center; font-weight: 700; font-size: 18px; }
+.hero-tags span { height: 24px; padding: 0 9px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .2); display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; }
+.hero-site { display: flex; align-items: center; gap: 8px; }
+.hero-site__a { flex: none; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .28); display: grid; place-items: center; font-family: Georgia, serif; font-style: italic; font-size: 15px; }
+.hero-site b { display: block; font-size: 13px; font-weight: 600; }
+.hero-site small { display: block; font-size: 11px; opacity: .9; }
+.hero-slide__bang { position: absolute; right: 12px; top: 12px; width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, .9); color: #2D9FD0; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
 
 @media (min-width: 768px) and (max-width: 899px) {
-  .hero-slide__text { display: none; }
-  .hero-slide__title { font-size: 22px; }
-  .hero-slide__copy { padding-bottom: 30px; }
-}
-/* a phone has no room for two columns: the photograph goes behind the copy,
-   the tiles and tags become a row above it */
-@media (max-width: 767px) {
-  .hero-stage { --peek: 6px; }
-  .hero-stage .hero--slide { grid-template-columns: minmax(0, 1fr); }
+  .hero-stage { --ann-h: 168px; }
   .hero-slide__title { font-size: 20px; }
-  .hero-slide__copy { padding: 8px 20px 30px; gap: 4px; }
-  .hero-slide__text, .hero-slide__foot, .hero-slide__badge { display: none; }
-  .hero--announcement .hero-slide__media { position: absolute; inset: 0; }
-  .hero--announcement .hero-slide__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .12) 0%, rgba(0, 0, 0, .72) 100%); }
-  .hero--announcement .hero-slide__copy { position: relative; z-index: 1; justify-content: flex-end; color: #FFFFFF; }
-  .hero--announcement .hero-slide__meta, .hero--announcement .hero-slide__meta b { color: #FFFFFF; }
-  .hero--insight, .hero--note { grid-template-rows: minmax(0, 1fr) auto; }
-  .hero-slide__stats { padding: 12px 20px 0; background: none; }
-  .hero-stat b { font-size: 24px; }
+}
+/* a phone keeps the split — copy on white stays readable — with the photograph
+   a little narrower, smaller type, and no body line */
+@media (max-width: 767px) {
+  .hero-stage { --peek: 6px; --ann-h: 148px; --ann-media: 36%; }
+  .hero-slide__copy { padding: 12px 14px; gap: 4px; }
+  .hero-slide__title { font-size: 17px; }
+  .hero-slide__text, .hero-slide__badge { display: none; }
+  .hero-slide__meta { font-size: 12px; }
+  .hero-slide__avatar { width: 20px; height: 20px; }
+  .hero-react { height: 26px; padding: 0 8px; font-size: 12px; }
+  .hero-stat b { font-size: 22px; }
   .hero-stat span { font-size: 11px; }
-  .hero-slide__tags { flex-direction: row; align-items: center; justify-content: space-between; padding: 14px 20px 0; }
   .hero-slide__bang { display: none; }
 }
 
@@ -6578,8 +6583,6 @@ body.is-site .card:active { transform: scale(.978); }
          every other link should say so, and the only readers who cannot see it
          happen are the ones being told here — the span is visually hidden, so
          the banner is unchanged to the eye. -->
-    <div class="hero-stage" id="heroStage" aria-roledescription="carousel" aria-label="Home banners">
-    <div class="hero-stage__deck">
     <a class="hero hero--estate" href="https://antz-command-centre-v5.vercel.app/"
        target="_blank" rel="noopener">
       <span class="hero__media" aria-hidden="true"></span>
@@ -6598,9 +6601,16 @@ body.is-site .card:active { transform: scale(.978); }
         <span class="sr-only"> (opens in a new tab)</span>
       </span>
     </a>
-    <!-- the Announcement, Key Insights and Note slides are appended here by
-         js/components/HeroBanners.js, from js/data/homeBanners.js -->
-    </div>
+
+    <!-- ══ announcements ═══════════════════════════════════════════════
+         A deck of announcement cards under the banner — the front card full
+         size, the next peeking out behind it to the right. The slides are
+         rendered here by js/components/HeroBanners.js from
+         js/data/homeBanners.js. The Command Centre banner above used to be
+         the deck's first card; on 3 Sep 2026 it came out to stand on its own
+         ("Command Centre card above the announcement slider"). -->
+    <div class="hero-stage" id="heroStage" aria-roledescription="carousel" aria-label="Announcements">
+      <div class="hero-stage__deck"></div>
     </div>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
@@ -24411,8 +24421,8 @@ function renderSlide(item) {
   el.setAttribute('aria-roledescription', 'slide')
   el.setAttribute('aria-label', item.title)
   const meta = (withAvatar) =>
-    `<div class="hero-slide__meta">${withAvatar ? '<span class="hero-slide__avatar"></span>' : ''}` +
-    `<b>${esc(item.by)}</b><i></i>${esc(item.ago)}</div>`
+    `<span class="hero-slide__meta">${withAvatar ? '<span class="hero-slide__avatar"></span>' : ''}` +
+    `<b>${esc(item.by)}</b></span>`
 
   if (item.kind === 'announcement') {
     el.innerHTML =
@@ -24421,13 +24431,18 @@ function renderSlide(item) {
         (item.attachments ? `<span class="hero-slide__badge">${icon('paperclip')}${item.attachments} image${item.attachments === 1 ? '' : 's'}</span>` : '') +
       `</div>` +
       `<div class="hero-slide__copy">` +
-        `<span class="hero-chip hero-chip--ann">${icon('megaphone')}Announcement</span>` +
+        `<div class="hero-slide__top">` +
+          `<span class="hero-chip hero-chip--ann">${icon('megaphone')}Announcement</span>` +
+          `<span class="hero-slide__ago">${esc(item.ago)}</span>` +
+        `</div>` +
         `<h2 class="hero-slide__title">${esc(item.title)}</h2>` +
-        meta(true) +
         `<p class="hero-slide__text">${esc(item.body)}</p>` +
         `<div class="hero-slide__foot">` +
-          `<span class="hero-react">${icon('thumb')}${item.likes ?? 0}</span>` +
-          `<span class="hero-react">${icon('comment')}${item.comments ?? 0}</span>` +
+          `<span class="hero-slide__meta"><span class="hero-slide__avatar"></span><b>${esc(item.by)}</b></span>` +
+          `<span class="hero-slide__react">` +
+            `<span class="hero-react">${icon('thumb')}${item.likes ?? 0}</span>` +
+            `<span class="hero-react">${icon('comment')}${item.comments ?? 0}</span>` +
+          `</span>` +
         `</div>` +
       `</div>`
   } else if (item.kind === 'insight') {
@@ -24436,7 +24451,7 @@ function renderSlide(item) {
         item.stats.map((x) => `<div class="hero-stat hero-stat--${esc(x.tone)}"><b>${esc(x.n)}</b><span>${esc(x.label)}</span></div>`).join('') +
       `</div>` +
       `<div class="hero-slide__copy">` +
-        `<span class="hero-chip hero-chip--ins">${icon('trend')}${esc(item.label)}</span>` +
+        `<div class="hero-slide__top"><span class="hero-chip hero-chip--ins">${icon('trend')}${esc(item.label)}</span></div>` +
         `<h2 class="hero-slide__title">${esc(item.title)}</h2>` +
         `<p class="hero-slide__text">${esc(item.body)}</p>` +
       `</div>`
@@ -24449,9 +24464,10 @@ function renderSlide(item) {
           `<span><b>${esc(item.site)}</b><small>${esc(item.place)}</small></span></div>` +
       `</div>` +
       `<div class="hero-slide__copy">` +
-        `<span class="hero-chip hero-chip--on-dark">${icon('note')}Note</span>` +
+        `<div class="hero-slide__top"><span class="hero-chip hero-chip--on-dark">${icon('note')}Note</span>` +
+          `<span class="hero-slide__ago">${esc(item.ago)}</span></div>` +
         `<h2 class="hero-slide__title">${esc(item.title)}</h2>` +
-        meta(false) +
+        `<div class="hero-slide__foot">${meta(false)}</div>` +
       `</div>`
   }
   return el
@@ -24460,10 +24476,12 @@ function renderSlide(item) {
 function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   if (!root) return null
   const deck = root.querySelector('.hero-stage__deck')
-  const front = deck.querySelector('.hero')       // the estate banner, slide one, from the HTML
-  const slides = [front, ...items.map(renderSlide)]
-  for (const s of slides.slice(1)) deck.append(s)
+  /* every slide is rendered from data. The estate banner was the deck's front
+     card for an afternoon; it stands above the deck now, see the HTML. */
+  const slides = items.map(renderSlide)
+  for (const s of slides) deck.append(s)
   const n = slides.length
+  if (!n) { root.hidden = true; return null }
   const reduced = prefersReducedMotion()
 
   /* ── dots ─────────────────────────────────────────────────────────────── */
@@ -24476,7 +24494,7 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
     b.type = 'button'
     b.className = 'hero-dot'
     b.setAttribute('role', 'tab')
-    b.setAttribute('aria-label', i === 0 ? 'Antz Command Centre' : items[i - 1].title)
+    b.setAttribute('aria-label', items[i].title)
     b.addEventListener('click', () => go(i))
     dots.append(b)
     return b
@@ -24493,7 +24511,6 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
       const k = (i - active + n) % n
       s.dataset.pos = k < PEEK ? String(k) : 'hidden'
       s.setAttribute('aria-hidden', String(k !== 0))
-      if (s.tagName === 'A') s.tabIndex = k === 0 ? 0 : -1
     })
     dotEls.forEach((d, i) => {
       d.setAttribute('aria-selected', String(i === active))
@@ -24589,10 +24606,10 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   }
   root.addEventListener('pointerup', release)
   root.addEventListener('pointercancel', release)
-  /* the estate banner is a link; a swipe that starts on it is not a click on it */
+  /* a swipe is not a click on whatever it started over */
   root.addEventListener('click', (e) => { if (swallowClick) { e.preventDefault(); e.stopPropagation() } }, true)
-  /* and neither the link nor a slide's photograph may start a native drag,
-     which would fire pointercancel and end the swipe a few pixels in */
+  /* and a slide's photograph may not start a native drag, which would fire
+     pointercancel and end the swipe a few pixels in */
   root.addEventListener('dragstart', (e) => e.preventDefault())
 
   /* ── keys ─────────────────────────────────────────────────────────────── */
@@ -24666,8 +24683,8 @@ const LEVEL_NOUN = { sites: 'Site', site: 'Site', section: 'Section', enclosure:
 
 mountIconSprite()
 
-/* ── the banner deck ────────────────────────────────────────────────────
-   The hero, with the announcement, insight and note slides behind it. */
+/* ── the announcement deck ──────────────────────────────────────────────
+   Under the hero: the announcements as a deck of cards. */
 const { createHeroBanners } = __req('js/components/HeroBanners.js')
 createHeroBanners({ root: document.getElementById('heroStage') })
 
