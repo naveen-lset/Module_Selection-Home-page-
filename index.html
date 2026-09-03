@@ -1978,10 +1978,10 @@ body.is-searching { overflow: hidden; }
 
    ITS OWN BAND, SINCE THE SAME AFTERNOON. The deck first held the estate banner
    as its front card so it cost the page nothing; the ruling that followed was
-   that the Command Centre must stay put, above, and the announcements slide
-   beneath it. So the stage is a second band under the hero, --ann-h tall with
-   --grid-gap below, and the page is one announcement card taller than the
-   artboard. The peeks live in the page gutter and touch nothing; the dots sit
+   that the Command Centre must stand on its own, and then that the
+   announcements come FIRST, the banner under them. So the stage is the first
+   band under the search field, --ann-h tall with --grid-gap below, the hero
+   follows it, and the page is one announcement card taller than the artboard. The peeks live in the page gutter and touch nothing; the dots sit
    inside the front card, centred under its photograph.
 
    THE DWELL IS THE DOT. The active dot is a bar that fills over six seconds;
@@ -6583,6 +6583,18 @@ body.is-site .card:active { transform: scale(.978); }
          every other link should say so, and the only readers who cannot see it
          happen are the ones being told here — the span is visually hidden, so
          the banner is unchanged to the eye. -->
+    <!-- ══ announcements ═══════════════════════════════════════════════
+         A deck of announcement cards above the banner — the front card full
+         size, the next peeking out behind it to the right. The slides are
+         rendered here by js/components/HeroBanners.js from
+         js/data/homeBanners.js. The Command Centre banner used to be the
+         deck's first card; on 3 Sep 2026 it came out to stand on its own, and
+         the ruling that followed put the announcements FIRST, the banner under
+         them ("First Announcements, under Command Centre"). -->
+    <div class="hero-stage" id="heroStage" aria-roledescription="carousel" aria-label="Announcements">
+      <div class="hero-stage__deck"></div>
+    </div>
+
     <a class="hero hero--estate" href="https://antz-command-centre-v5.vercel.app/"
        target="_blank" rel="noopener">
       <span class="hero__media" aria-hidden="true"></span>
@@ -6601,17 +6613,6 @@ body.is-site .card:active { transform: scale(.978); }
         <span class="sr-only"> (opens in a new tab)</span>
       </span>
     </a>
-
-    <!-- ══ announcements ═══════════════════════════════════════════════
-         A deck of announcement cards under the banner — the front card full
-         size, the next peeking out behind it to the right. The slides are
-         rendered here by js/components/HeroBanners.js from
-         js/data/homeBanners.js. The Command Centre banner above used to be
-         the deck's first card; on 3 Sep 2026 it came out to stand on its own
-         ("Command Centre card above the announcement slider"). -->
-    <div class="hero-stage" id="heroStage" aria-roledescription="carousel" aria-label="Announcements">
-      <div class="hero-stage__deck"></div>
-    </div>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
          The section head is the one element not on the artboard: the resting
