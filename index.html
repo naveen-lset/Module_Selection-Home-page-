@@ -1136,7 +1136,7 @@ button { font: inherit; color: inherit; }
 .gsx__scope::after { content: ''; position: absolute; inset: -6px 0; }
 .gsx__scope {
   display: inline-flex; align-items: center; gap: 4px;
-  border: 0; padding: 6px 10px; border-radius: var(--r-pill);
+  border: 0; padding: 8px 12px; border-radius: var(--r-pill);
   background: none;
   color: var(--petrol-600);
   font: inherit; font-size: var(--fs-body); font-weight: 600;
@@ -1183,8 +1183,8 @@ button { font: inherit; color: inherit; }
 .gsx__mic svg { width: 20px; height: 20px; }
 
 .gsx-token {
-  display: inline-flex; align-items: center; gap: 2px;
-  height: 30px; padding-inline: 10px 4px;
+  display: inline-flex; align-items: center; gap: var(--s1);
+  height: 30px; padding-inline: var(--s3) var(--s1);
   border-radius: var(--r-pill);
   background: var(--petrol-050); color: var(--petrol-700);
   font-size: var(--fs-label); font-weight: 600; white-space: nowrap;
@@ -1281,7 +1281,7 @@ button { font: inherit; color: inherit; }
 .gsx-row__thumb[data-tint='3'] { background: #7A6B9E; }
 .gsx-row__thumb[data-tint='4'] { background: #5E8A96; }
 
-.gsx-row__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 0 0; }
+.gsx-row__body { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; flex: 1 0 0; }
 .gsx-row__title {
   font-size: var(--fs-body); font-weight: 600; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1292,7 +1292,7 @@ button { font: inherit; color: inherit; }
   font-size: var(--fs-micro); color: var(--ink-3);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.gsx-row__meta i { font-style: normal; padding-inline: 6px; opacity: .55; }
+.gsx-row__meta i { font-style: normal; padding-inline: var(--s1); opacity: .55; }
 .gsx-row__count {
   flex: none; font-size: var(--fs-metric-sm); font-weight: 650;
   color: var(--ink); font-variant-numeric: tabular-nums;
@@ -1300,9 +1300,9 @@ button { font: inherit; color: inherit; }
 .gsx-row__go { flex: none; display: grid; place-items: center; color: var(--ink-4); }
 .gsx-row__go .icon { width: 18px; height: 18px; }
 
-.gsx-row__pills, .gsx-row__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.gsx-row__pills, .gsx-row__tags { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s1); }
 .gsx-pill {
-  padding: 2px 8px; border-radius: 6px;
+  padding: var(--s1) var(--s2); border-radius: 6px;
   font-size: var(--fs-micro); font-weight: 600;
   color: var(--petrol-800); font-variant-numeric: tabular-nums;
 }
@@ -1311,7 +1311,7 @@ button { font: inherit; color: inherit; }
 .gsx-pill.is-u { background: var(--c-warn); }
 
 .gsx-tagdot {
-  padding: 2px 8px; border-radius: var(--r-pill);
+  padding: var(--s1) var(--s2); border-radius: var(--r-pill);
   font-size: var(--fs-micro); font-weight: 550;
 }
 .gsx-tagdot.is-care  { background: #FDE6DC; color: #8A4326; }
@@ -1332,7 +1332,7 @@ button { font: inherit; color: inherit; }
 .gsx-recent__clear:hover { text-decoration: underline; }
 .gsx-recent__chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
 .gsx-recent__chip {
-  display: inline-flex; align-items: center; gap: 7px;
+  display: inline-flex; align-items: center; gap: var(--s2);
   height: 36px; padding-inline: var(--s3);
   border: 1px solid var(--line-2); border-radius: var(--r-pill);
   background: var(--c-white); color: var(--ink);
@@ -1350,7 +1350,7 @@ button { font: inherit; color: inherit; }
 }
 
 .gsx-empty {
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex; flex-direction: column; gap: var(--s1);
   padding: var(--s6) var(--s5);
 }
 .gsx-empty__title { font-size: var(--fs-body); font-weight: 600; color: var(--ink); }
@@ -1440,7 +1440,7 @@ button { font: inherit; color: inherit; }
 .gsx-opts { display: flex; flex-direction: column; gap: var(--s2); }
 .gsx-opt {
   display: flex; align-items: center; gap: var(--s3);
-  padding: 14px var(--s4);
+  padding: var(--s4);
   border: 1px solid var(--line); border-radius: 12px;
   background: var(--petrol-050); color: var(--ink);
   font: inherit; font-size: var(--fs-body); text-align: left; cursor: pointer;
@@ -1518,8 +1518,10 @@ button { font: inherit; color: inherit; }
 .gsx-tag { position: relative; }
 .gsx-tag::after { content: ''; position: absolute; inset: -6px 0; }
 .gsx-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  height: 32px; padding-inline: 12px;
+  /* gap snapped from 6px. The tick is an icon beside a label, so the rule is
+     4 or 8, and 8 is what the tag box's head and the cloud's column gap use. */
+  display: inline-flex; align-items: center; gap: var(--s2);
+  height: 32px; padding-inline: var(--s3);
   border: 0; border-radius: var(--r-pill);
   font: inherit; font-size: var(--fs-label); cursor: pointer;
   transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
@@ -1616,14 +1618,14 @@ button { font: inherit; color: inherit; }
   display: flex;
   align-items: center;
   gap: var(--s6);
-  padding: 10px var(--s5);
+  padding: var(--s3) var(--s5);
   box-shadow: inset 0 1px 0 var(--line);
   background: #FAFCFC;
 }
 .gsx__key {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--s2);
   font-size: var(--fs-label);
   color: var(--ink-2);
 }
@@ -1632,7 +1634,7 @@ button { font: inherit; color: inherit; }
   place-items: center;
   min-width: 24px;
   height: 24px;
-  padding-inline: 5px;
+  padding-inline: var(--s1);
   border-radius: 7px;
   background: var(--c-white);
   box-shadow: 0 1px 0 rgba(31, 65, 91, .10), inset 0 0 0 1px var(--line-2);
