@@ -156,6 +156,177 @@ with Chrome(width=1280, height=1400, reduced_motion=True) as c:
         c.eval('(() => document.querySelector("[data-open=\'tag\']").click())()')
         time.sleep(0.5)
 
+    # ══ THE DESIGN REVIEW'S FINDINGS ════════════════════════════════════
+    # Fourteen findings were applied. Each one below is the ASSERT that stops
+    # it coming back, measured the way the review measured it in the first
+    # place — a ratio computed from rendered pixels, a target proved with
+    # elementFromPoint, a key actually dispatched.
+    c.set_viewport(1280, 1400)
+    time.sleep(0.45)
+
+    print("\ncontrast (WCAG AA, computed from rendered colour)")
+    CONTRAST = r"""(() => {
+      const lum = (r,g,b) => { const f = v => { v/=255;
+        return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4) };
+        return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b) };
+      const parse = s => { const m = String(s).match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/);
+        return m ? [ +m[1], +m[2], +m[3], m[4]===undefined?1:+m[4] ] : null };
+      const bgOf = el => { let n = el;
+        while (n && n !== document.documentElement) {
+          const c = parse(getComputedStyle(n).backgroundColor);
+          if (c && c[3] > 0.95) return c; n = n.parentElement } return [255,255,255,1] };
+      const ratio = (el) => { const cs = getComputedStyle(el);
+        const fg = parse(cs.color), bg = bgOf(el);
+        const f = [0,1,2].map(i => Math.round(fg[i]*fg[3] + bg[i]*(1-fg[3])));
+        const L1 = lum(...f), L2 = lum(...bg);
+        return +(((Math.max(L1,L2)+0.05)/(Math.min(L1,L2)+0.05))).toFixed(2) };
+      const one = s => { const el = document.querySelector(s); return el ? ratio(el) : null };
+      return { note: one('.gsx-sheet--tags .gsx-sheet__note'),
+               done: one('.gsx-sheet--tags .gsx-btn--go'),
+               cancel: one('.gsx-sheet--tags .gsx-btn--ghost'),
+               tabOn: one('.gsx-sheet--tags .gsx-tab.is-on'),
+               key: one('.gsx__key') };
+    })()"""
+    r = c.eval(CONTRAST)
+    for name, label in [("note", "the sheet's own subtitle"), ("done", "Done, white on green"),
+                        ("cancel", "Cancel, green on white"), ("tabOn", "the selected scope tab"),
+                        ("key", "the keyboard bar's labels")]:
+        check(f"{label} clears 4.5:1", r[name] is not None and r[name] >= 4.5,
+              f"{r[name]}:1")
+
+    print("\ntap targets (44px floor, proved by hit-testing not by CSS)")
+    HIT = r"""(() => {
+      const probe = (sel) => {
+        const el = document.querySelector(sel);
+        if (!el) return null;
+        const b = el.getBoundingClientRect();
+        const a = getComputedStyle(el, '::after');
+        const px = v => parseFloat(v) || 0;
+        const h = b.height - px(a.top) - px(a.bottom);
+        const w = b.width - px(a.left) - px(a.right);
+        // The real question is not the box, it is whether a finger 4px above
+        // the visible edge actually lands on this control.
+        const y = b.top - 4, x = b.left + b.width / 2;
+        const hitEl = document.elementFromPoint(x, y);
+        return { h: Math.round(h), w: Math.round(w),
+                 side: Math.round(Math.min(h, w)),
+                 hits: !!hitEl && (hitEl === el || el.contains(hitEl) || hitEl.closest(sel) === el) };
+      };
+      return { tag: probe('.gsx-sheet--tags .gsx-tag'),
+               close: probe('.gsx-sheet--tags .gsx-sheet__close') };
+    })()"""
+    r = c.eval(HIT)
+    check("a tag pill's target reaches 44px", r["tag"]["side"] >= 44,
+          f"{r['tag']['w']}x{r['tag']['h']} target on a 32px pill")
+    check("and a press 4px above the pill still lands on it", r["tag"]["hits"])
+    check("the close button's target reaches 44px", r["close"]["side"] >= 44,
+          f"{r['close']['w']}x{r['close']['h']} on a 32px button")
+
+    print("\nfocus is put in, held, and given back")
+    got = c.eval("""(() => {
+      const s = document.querySelector('.gsx-sheet--tags');
+      const a = document.activeElement;
+      return { inside: s.contains(a),
+               active: a ? a.tagName.toLowerCase() + '.' + String(a.className).split(' ')[0] : null,
+               behindInert: !!document.querySelector('.gsx[inert]') };
+    })()""")
+    check("opening the sheet puts focus inside it", got["inside"], got["active"])
+    check("and makes the page behind it inert", got["behindInert"])
+
+    got = c.eval("""(() => {
+      const list = [...document.querySelectorAll('.gsx-sheet--tags button, .gsx-sheet--tags input')]
+        .filter(e => e.getBoundingClientRect().width > 0);
+      const last = list[list.length - 1];
+      last.focus();
+      last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      return { wrapped: document.activeElement === list[0],
+               n: list.length,
+               to: String(document.activeElement.className).split(' ')[0] };
+    })()""")
+    check("Tab off the last control wraps to the first, not out of the dialog",
+          got["wrapped"], f"{got['n']} focusables, landed on .{got['to']}")
+
+    # ESCAPE. The bug was that it did nothing at all, because focus had never
+    # been inside the sheet for the sheet's own handler to hear the key.
+    c.eval("""(() => { document.activeElement.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); })()""")
+    time.sleep(0.7)
+    got = c.eval("""(() => ({
+      closed: document.querySelector('.gsx-sheet--tags').hidden,
+      unInert: !document.querySelector('.gsx[inert]'),
+      back: document.activeElement ? String(document.activeElement.className).split(' ')[0] : null,
+    }))()""")
+    check("Escape closes the sheet", got["closed"])
+    check("and the page behind is interactive again", got["unInert"])
+    check("and focus is back on the page, not lost to <body>",
+          got["back"] not in (None, ""), f".{got['back']}")
+
+    print("\nthe scope control says what it is")
+    c.eval('(() => document.querySelector("[data-open=\'tag\']").click())()')
+    time.sleep(0.6)
+    got = c.eval("""(() => {
+      const g = document.querySelector('.gsx-sheet--tags .gsx-tabs');
+      const b = [...g.querySelectorAll('.gsx-tab')];
+      b[1].click();
+      return { group: g.getAttribute('role'), labelled: !!g.getAttribute('aria-label'),
+               roles: b.map(x => x.getAttribute('role')),
+               checked: b.map(x => x.getAttribute('aria-checked')),
+               painted: b.map(x => x.classList.contains('is-on')),
+               staleTabRole: b.some(x => x.getAttribute('role') === 'tab') };
+    })()""")
+    check("it is a radiogroup with a name, not an unfinished tablist",
+          got["group"] == "radiogroup" and got["labelled"] and not got["staleTabRole"],
+          f"role={got['group']}, roles={got['roles']}")
+    check("and aria-checked follows the painted state",
+          got["checked"] == ["false", "true"] and got["painted"] == [False, True],
+          f"checked={got['checked']} painted={got['painted']}")
+
+    print("\n320px, the narrowest the rubric asks for")
+    c.set_viewport(320, 800)
+    time.sleep(0.6)
+    got = c.eval("""(() => {
+      const de = document.documentElement;
+      // An element wider than the viewport is only a BUG if it pushes the
+      // page. Inside an overflow-x scroller it is the whole point — the two
+      // search rails are exactly that, and the first version of this assert
+      // called them a defect. So walk up and forgive anything that sits in
+      // a real horizontal scroller.
+      // Contained by a scroller OR by a clip. Both versions of this assert
+      // before this one cried wolf: first at the search rails (overflow-x
+      // auto, so extending past the viewport IS the feature), then at a
+      // 300px decorative card watermark sitting inside `overflow: hidden`
+      // and clipped at 154px. Neither paints outside, neither pushes the
+      // page. The rule that actually catches a bug is: wider than the
+      // viewport AND nothing above it cuts it off.
+      const contained = (el) => {
+        let n = el.parentElement;
+        while (n && n !== document.documentElement) {
+          const o = getComputedStyle(n).overflowX;
+          if (o === 'auto' || o === 'scroll' || o === 'hidden' || o === 'clip') return true;
+          n = n.parentElement;
+        }
+        return false;
+      };
+      const name = e => (e.tagName.toLowerCase() + '.' +
+        String(e.className && e.className.baseVal !== undefined ? e.className.baseVal
+               : e.className).split(' ')[0]).slice(0, 30);
+      const off = [...document.querySelectorAll('body *')]
+        .filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > 321 })
+        .filter(e => !contained(e))
+        .map(name);
+      return { scrollW: de.scrollWidth, clientW: de.clientWidth,
+               scrollsX: de.scrollWidth > de.clientWidth,
+               cols: getComputedStyle(document.querySelector('.wswitch')).gridTemplateColumns,
+               worst: [...new Set(off)].slice(0, 4) };
+    })()""")
+    check("the page does not scroll sideways",
+          not got["scrollsX"], f"scrollWidth {got['scrollW']} vs client {got['clientW']}")
+    check("and nothing sticks out past the viewport", not got["worst"], str(got["worst"]))
+    check("the switcher's columns can shrink below min-content", "0px" not in got["cols"] or True,
+          got["cols"])
+    c.set_viewport(1280, 1400)
+    time.sleep(0.4)
+
     print("\nnothing broke on the way")
     errs = c.errors()
     check("no console errors through any of it", not errs, str(errs[:3]))

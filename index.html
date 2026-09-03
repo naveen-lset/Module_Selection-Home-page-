@@ -1122,6 +1122,8 @@ button { font: inherit; color: inherit; }
   gap: var(--s3);
   padding: var(--s4) var(--s5) var(--s2);
 }
+.gsx__back { position: relative; }
+.gsx__back::after { content: ''; position: absolute; inset: -2px; }
 .gsx__back {
   display: grid; place-items: center;
   width: 40px; height: 40px;
@@ -1130,6 +1132,8 @@ button { font: inherit; color: inherit; }
 }
 .gsx__back:hover { background: var(--petrol-050); }
 .gsx__back .icon { width: 22px; height: 22px; }
+.gsx__scope { position: relative; }
+.gsx__scope::after { content: ''; position: absolute; inset: -6px 0; }
 .gsx__scope {
   display: inline-flex; align-items: center; gap: 4px;
   border: 0; padding: 6px 10px; border-radius: var(--r-pill);
@@ -1213,6 +1217,10 @@ button { font: inherit; color: inherit; }
 .gsx__railbtn .icon, .gsx__railbtn svg { width: 18px; height: 18px; }
 .gsx__railsep { flex: none; width: 1px; height: 22px; background: var(--line); }
 
+/* Not in the review list, found while measuring the others: the rail chips
+   are the same 32px defect on the same surface, so they get the same fix. */
+.gsx-chip { position: relative; }
+.gsx-chip::after { content: ''; position: absolute; inset: -6px 0; }
 .gsx-chip {
   flex: none; height: 32px; padding-inline: var(--s3);
   border: 1px solid var(--line-2); border-radius: var(--r-pill);
@@ -1346,7 +1354,7 @@ button { font: inherit; color: inherit; }
   padding: var(--s6) var(--s5);
 }
 .gsx-empty__title { font-size: var(--fs-body); font-weight: 600; color: var(--ink); }
-.gsx-empty__note { font-size: var(--fs-label); color: var(--ink-3); max-width: 52ch; }
+.gsx-empty__note { font-size: var(--fs-label); color: var(--ink-2); max-width: 52ch; }
 
 /* ══ THE TWO SHEETS ══════════════════════════════════════════════════════
    Same translateY(100%) at --t-sheet as the module picker and the widget
@@ -1383,9 +1391,11 @@ button { font: inherit; color: inherit; }
   padding: var(--s6) var(--s5) var(--s4);
   box-shadow: inset 0 -1px 0 var(--line);
 }
-.gsx-sheet__titles { display: flex; flex-direction: column; gap: 2px; }
+.gsx-sheet__titles { display: flex; flex-direction: column; gap: var(--s1); }
 .gsx-sheet__title { margin: 0; font-size: var(--fs-title); font-weight: 600; color: var(--ink); }
-.gsx-sheet__note { font-size: var(--fs-label); color: var(--ink-3); }
+.gsx-sheet__note { font-size: var(--fs-label); color: var(--ink-2); }
+.gsx-sheet__close { position: relative; }
+.gsx-sheet__close::after { content: ''; position: absolute; inset: -6px; }
 .gsx-sheet__close {
   display: grid; place-items: center; width: 32px; height: 32px;
   border: 0; padding: 0; border-radius: var(--r-pill);
@@ -1412,11 +1422,17 @@ button { font: inherit; color: inherit; }
   border: 0; border-radius: 12px;
   font: inherit; font-size: var(--fs-body); font-weight: 600; cursor: pointer;
 }
-.gsx-btn--go { background: #2FA860; color: var(--c-white); }
-.gsx-btn--go:hover { background: #278B4F; }
+/* #1E7A44, not the artboard's #2FA860. White on that green measured
+   3.05:1 against the 4.5:1 body-text floor, in BOTH directions — as a
+   fill under white text and as text on white. #1E7A44 is 5.35:1 both
+   ways and is the same hue, dropped in value. Scoped to .gsx-* on
+   purpose: the token is untouched, so this is a contained revert if the
+   Figma palette wins again. */
+.gsx-btn--go { background: #1E7A44; color: var(--c-white); }
+.gsx-btn--go:hover { background: #19693A; }
 .gsx-btn--ghost {
-  background: var(--c-white); color: #2FA860;
-  box-shadow: inset 0 0 0 1px #B7E3C6;
+  background: var(--c-white); color: #1E7A44;
+  box-shadow: inset 0 0 0 1px #A9D9BC;
 }
 .gsx-btn--ghost:hover { background: #F2FBF5; }
 
@@ -1453,7 +1469,7 @@ button { font: inherit; color: inherit; }
   font: inherit; font-size: var(--fs-body); cursor: pointer;
   transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
-.gsx-tab.is-on { background: #2FA860; color: var(--c-white); font-weight: 600; }
+.gsx-tab.is-on { background: #1E7A44; color: var(--c-white); font-weight: 600; }
 
 .gsx-tagsearch { position: relative; margin-bottom: var(--s4); }
 .gsx-tagsearch .icon {
@@ -1482,9 +1498,25 @@ button { font: inherit; color: inherit; }
   color: var(--ink); font-size: var(--fs-body); font-weight: 600;
 }
 .gsx-tagbox__head svg { width: 20px; height: 20px; color: var(--ink-2); }
-.gsx-tagbox__list { display: flex; flex-wrap: wrap; gap: 8px; }
+.gsx-tagbox__list { display: flex; flex-wrap: wrap; gap: 12px 8px; }
 .gsx-tagbox__none { margin: 0; font-size: var(--fs-label); color: var(--ink-3); }
 
+
+/* ══ THE 44px TOUCH FLOOR, WITHOUT MOVING A PIXEL ════════════════════════
+   Measured smallest sides on this surface: the tag pills 32px, the sheet's
+   close button 32×32, the scope control 32px, the back arrow 40px, the rail
+   chips 32px. All under the 44px floor, and every one of them is drawn at
+   that size in the artboard — so the target grows and the PILL DOES NOT.
+   A transparent `::after` inside the button is still the button as far as a
+   pointer is concerned, so this buys the target for free.
+
+   Vertical only (`inset: -6px 0`) wherever the element is already wide
+   enough, because extending sideways would overlap the neighbour: the pills
+   sit in an 8px-gap cloud, and two 6px extensions either side of an 8px gap
+   would fight over 4px of it. The tag cloud's row gap goes 8 → 12 for the
+   same reason, so no extension overlaps another at all. */
+.gsx-tag { position: relative; }
+.gsx-tag::after { content: ''; position: absolute; inset: -6px 0; }
 .gsx-tag {
   display: inline-flex; align-items: center; gap: 6px;
   height: 32px; padding-inline: 12px;
@@ -1502,7 +1534,7 @@ button { font: inherit; color: inherit; }
 .gsx-tag__tick {
   display: grid; place-items: center;
   width: 17px; height: 17px; border-radius: 50%;
-  background: #2FA860; color: var(--c-white);
+  background: #1E7A44; color: var(--c-white);
 }
 .gsx-tag__tick .icon { width: 11px; height: 11px; }
 
@@ -1593,7 +1625,7 @@ button { font: inherit; color: inherit; }
   align-items: center;
   gap: 7px;
   font-size: var(--fs-label);
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 .gsx__key kbd {
   display: grid;
@@ -1609,7 +1641,9 @@ button { font: inherit; color: inherit; }
   color: var(--ink-2);
   line-height: 1;
 }
-.gsx__key kbd.is-word { font-size: 10px; font-weight: 600; letter-spacing: .02em; }
+/* Was an off-scale 10px. The other kbd is --fs-micro and there is no
+   reason for ESC to be the one word smaller than the arrows beside it. */
+.gsx__key kbd.is-word { font-weight: 600; letter-spacing: .02em; }
 
 /* A phone has no keyboard to tell anyone about. */
 @media (max-width: 620px) { .gsx__keys { display: none; } }
@@ -4413,7 +4447,12 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 .wswitch {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* `1fr` is `minmax(auto, 1fr)`, and a tab's min-content is 168px because
+     .wswitch__label is `white-space: nowrap`. At 320px the two columns
+     resolved to 167.7 + 195.6 = 363px inside a 288px box and pushed 68px of
+     horizontal scroll onto the whole page. minmax(0, 1fr) lets a column go
+     below min-content, which is what the label's ellipsis was always for. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--line);
@@ -4447,6 +4486,9 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 .wswitch__tab {
   position: relative;
   z-index: 1;
+  /* The grid item has to be allowed to shrink too, or the column's new
+     minmax(0, …) is handed straight back the old min-content. */
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: var(--s3);
@@ -23054,16 +23096,40 @@ function createSheet({ title, note, className = '' }) {
   const foot = sheet.querySelector('.gsx-sheet__foot')
   let onClose = null
   let open = false
+  let restore = null      /* what held focus before the sheet opened */
+  let inerted = []        /* only what WE made inert comes back */
+
+  /* `aria-modal="true"` was the only thing being said, and saying it is not
+     doing it. Measured: on open, document.activeElement was still the search
+     page's own input — OUTSIDE the sheet, behind the scrim. Two bugs fall out
+     of that one fact:
+       · Tab walked straight out of the dialog into the results behind it.
+       · Escape did NOTHING. The handler below is bound to the sheet, so with
+         focus never inside the sheet the key never reached it — the shortcut
+         the design implies was dead.
+     The module picker and the widget record sheet in this same file already
+     trap focus this way. This is that pattern, not a new one. */
+  const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  const focusables = () => [...sheet.querySelectorAll(FOCUSABLE)]
+    .filter((el) => !el.disabled && el.getBoundingClientRect().width > 0)
 
   function show(after) {
     if (open) return
     open = true
     onClose = after || null
+    restore = document.activeElement
+    for (const el of [...document.body.children]) {
+      if (el === sheet || el === scrim || el.hasAttribute('inert')) continue
+      el.setAttribute('inert', '')
+      inerted.push(el)
+    }
     scrim.hidden = false
     sheet.hidden = false
     requestAnimationFrame(() => {
       scrim.classList.add('is-open')
       sheet.classList.add('is-open')
+      const first = focusables()[0]
+      if (first) first.focus()
     })
   }
 
@@ -23072,6 +23138,8 @@ function createSheet({ title, note, className = '' }) {
     open = false
     scrim.classList.remove('is-open')
     sheet.classList.remove('is-open')
+    for (const el of inerted) el.removeAttribute('inert')
+    inerted = []
     const done = () => {
       if (open) return
       sheet.hidden = true
@@ -23079,6 +23147,11 @@ function createSheet({ title, note, className = '' }) {
     }
     sheet.addEventListener('transitionend', done, { once: true })
     setTimeout(done, 520)
+    /* Back where it came from, and BEFORE the callback: every caller that
+       wants focus somewhere else of its own accord still wins. */
+    const back = restore
+    restore = null
+    if (back && back.focus) back.focus()
     const cb = onClose
     onClose = null
     if (cb) cb()
@@ -23090,7 +23163,13 @@ function createSheet({ title, note, className = '' }) {
      also close the search page, and the reader would lose the query they were
      part-way through refining. */
   sheet.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { e.stopPropagation(); close() }
+    if (e.key === 'Escape') { e.stopPropagation(); close(); return }
+    if (e.key !== 'Tab') return
+    const list = focusables()
+    if (!list.length) return
+    const first = list[0], last = list[list.length - 1]
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
   })
 
   return { el: sheet, body, foot, show, close, get isOpen() { return open } }
@@ -23225,9 +23304,18 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
   let tagQuery = ''
 
   tagSheet.body.innerHTML =
-    '<div class="gsx-tabs" role="tablist">' +
-      '<button type="button" class="gsx-tab is-on" role="tab" data-scope="public">Public Tags</button>' +
-      '<button type="button" class="gsx-tab" role="tab" data-scope="private">Private Tags</button>' +
+    /* NOT a tablist. It was announced as one and never finished the job —
+       no aria-selected on either tab, no aria-controls, and no element with
+       role="tabpanel" anywhere in the sheet, so a screen reader said "tab"
+       and could not say which one was current. It is also the wrong role:
+       Public/Private FILTERS one list, it does not swap between two panels.
+       A radiogroup is what that is, and it is what the Choose Search Type
+       sheet beside it already uses — one pattern on the surface, not two. */
+    '<div class="gsx-tabs" role="radiogroup" aria-label="Tag visibility">' +
+      '<button type="button" class="gsx-tab is-on" role="radio" aria-checked="true"' +
+        ' data-scope="public">Public Tags</button>' +
+      '<button type="button" class="gsx-tab" role="radio" aria-checked="false"' +
+        ' data-scope="private">Private Tags</button>' +
     '</div>' +
     '<div class="gsx-tagsearch">' + icon('search') +
       '<input type="text" placeholder="Search Tags" aria-label="Search tags" autocomplete="off">' +
@@ -23268,7 +23356,9 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
     if (tab) {
       tagScope = tab.dataset.scope
       for (const b of tagSheet.body.querySelectorAll('.gsx-tab')) {
-        b.classList.toggle('is-on', b === tab)
+        const on = b === tab
+        b.classList.toggle('is-on', on)
+        b.setAttribute('aria-checked', on ? 'true' : 'false')
       }
       renderTagSheet()
       return
