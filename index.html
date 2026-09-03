@@ -3890,9 +3890,12 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 .sheet {
   position: fixed;
   z-index: calc(var(--z-sheet) + 1);
-  left: 0;
-  right: 0;
-  bottom: 0;
+  /* 4px off the left, right and bottom edges rather than flush with them
+     (asked for on 3 Sep 2026). A sheet that no longer touches the edge has
+     to be rounded on all four corners, or the bottom pair read as a cut. */
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
   height: 92dvh;
   display: grid;
   /* `minmax(0, 1fr)`, not `1fr`. A grid column sized `auto`/`1fr` takes its
@@ -3904,7 +3907,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   grid-template-areas:
     'head'
     'side';
-  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  border-radius: var(--r-sheet);
   background: linear-gradient(180deg, #FFFFFF 0%, #F7FCFB 100%);
   box-shadow: 0 -8px 60px -12px rgba(10, 38, 44, .34);
   overflow: hidden;
@@ -4047,46 +4050,77 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   pointer-events: none;
 }
 
-/* Sticky, so you always know which category the row under your finger is in
-   while scrolling seventeen of them. */
-.mod-rail__heading {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: var(--s3) var(--s2) 5px;
-  background: linear-gradient(180deg, #FBFEFE 72%, rgba(251, 254, 254, 0) 100%);
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-.mod-rail__heading:first-child { padding-top: var(--s2); }
+/* ONE FLAT LIST, ORDERED BY THE CURATOR.
+   The category headings (MEDICAL, ANIMAL MANAGEMENT, OPERATIONS …) came out on
+   3 Sep 2026: the rail is a single list of modules with no sections, and the
+   curator arranges it. Each row carries two side controls — a pin, which lifts
+   the module to the top of the list, and a grip that drags the row up or down.
+   A <button> cannot hold other buttons, so the row is a wrapper: the tab button
+   (icon and name) and the two controls sit side by side inside it, and the
+   hover and selected fills belong to the wrapper so they cover all three.
 
-/* 44px rows, not 50. Seventeen modules and four headings is 850px of rail;
-   trimming six pixels a row is the difference between two modules below the
-   fold and five. The rail scrolls either way — but a list you can nearly see
-   the end of reads as a list, and one you cannot reads as a hole. */
+   44px rows, not 50. Seventeen modules is 748px of rail; trimming six pixels a
+   row is the difference between two modules below the fold and five. */
+.mod-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding-right: 2px;
+  border-radius: 8px;
+  transition: background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.mod-item:hover { background: var(--petrol-050); }
+/* The artboard's own selected fill. Lighter than the petrol-100 that was here,
+   which is the point: this rail is a list of eighteen rows and the selected one
+   has to read as "you are here" without becoming the loudest thing on a panel
+   whose actual subject is the previews to its right. */
+.mod-item.is-selected { background: #E8F4F2; }
+/* The row in hand lifts off the list while it is being dragged. */
+.mod-item.is-dragging {
+  position: relative;
+  z-index: 2;
+  background: #FFFFFF;
+  box-shadow: 0 8px 24px -8px rgba(10, 38, 44, .32);
+}
+.mod-rail.is-reordering { user-select: none; -webkit-user-select: none; }
+
 .mod-row {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
   min-width: 0;
-  padding: 5px 10px 5px 8px;
+  padding: 5px 4px 5px 8px;
   border: none;
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
   text-align: left;
-  transition: background var(--t-fast) var(--ease);
 }
-.mod-row:hover { background: var(--petrol-050); }
-/* The artboard's own selected fill. Lighter than the petrol-100 that was here,
-   which is the point: this rail is a list of eighteen rows and the selected one
-   has to read as "you are here" without becoming the loudest thing on a panel
-   whose actual subject is the previews to its right. */
-.mod-row[aria-selected='true'] { background: #E8F4F2; }
+
+/* The side controls: 32px wide, the full 44px of the row tall, so a finger
+   has the whole row height to land on and the pair still costs the name only
+   64px. Ink-2 rather than ink-3 — controls hold to AA, the exception granted
+   to module fills does not reach them. */
+.mod-item__ctl {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+.mod-item__ctl .icon { width: 17px; height: 17px; }
+.mod-item__ctl:hover { color: var(--ink); background: rgba(31, 81, 91, .08); }
+.mod-pin.is-pinned { color: var(--c-on-primary-ctr, #1F515B); }
+.mod-grip { cursor: grab; touch-action: none; }
+.mod-grip:active, .mod-item.is-dragging .mod-grip { cursor: grabbing; }
 
 .mod-row__icon {
   flex: none;
@@ -4108,11 +4142,6 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* THE CHEVRON IS GONE. It promised navigation — a row that opens somewhere —
-   and these rows do not navigate; they change what the pane beside them shows.
-   The design has no chevron for that reason, and the selected fill already
-   says which row is live. */
-.mod-row__chev { display: none; }
 
 /* ── the widget pane ──────────────────────────────────────────────────────*/
 /* The gallery pane takes focus when the sheet opens, so that Escape reaches
@@ -4542,7 +4571,10 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 
   .sheet {
     height: 86dvh;
-    grid-template-columns: 240px minmax(0, 1fr);
+    /* 272, not 240. The rows grew a pin and a grip on 3 Sep 2026 — 64px of
+       controls — and at 240 the names paid for them: "Diet & Kitchen" became
+       "Diet & K…" and "Administer" "Adminis…". */
+    grid-template-columns: 272px minmax(0, 1fr);
     grid-template-areas:
       'head    head'
       'side    body';
@@ -4564,7 +4596,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 
   /* the bar starts at the gallery's left edge, so the rail stays usable while
      it is up — you can keep browsing modules with a widget already chosen */
-  .sheet__foot { left: 240px; }
+  .sheet__foot { left: 272px; }
   .widget__meta { max-width: 250px; }
 }
 
@@ -6718,6 +6750,13 @@ const PATHS = {
   'arrow-right':'<path d="M4.5 12h15m-6.5-7 7 7-7 7"/>',
   bell:        '<path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/>',
   contrast:    '<circle cx="12" cy="12" r="9.2"/><path d="M12 2.8a9.2 9.2 0 0 1 0 18.4Z" fill="currentColor" stroke="none"/>',
+  /* A push pin, for the module rail. Two glyphs rather than a CSS fill: the
+     sprite writes fill="none" on every <symbol>, and an attribute set on the
+     symbol itself is not something a rule on the <svg> outside can override. */
+  'pin-push':
+    '<path d="M9 3h6l-.6 6.4 2.6 2.4V14H7v-2.2l2.6-2.4L9 3Z"/><path d="M12 14v7"/>',
+  'pin-push-on':
+    '<path d="M9 3h6l-.6 6.4 2.6 2.4V14H7v-2.2l2.6-2.4L9 3Z" fill="currentColor"/><path d="M12 14v7"/>',
   grip:        '<circle cx="9" cy="6" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.15" fill="currentColor" stroke="none"/>',
   alert:       '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9.2v4.2M12 17.2h.01"/>',
   clock:       '<circle cx="12" cy="12" r="9.2"/><path d="M12 6.8V12l3.4 2"/>',
@@ -20332,6 +20371,10 @@ __def('js/components/ModulePickerBottomSheet.js', function (__x, __req) {
  * module is a click, not a navigation, so moving between them costs nothing
  * and no module is ever more than a scroll from being seen.
  *
+ * The list is FLAT — no category headings, no pinned section over an "others"
+ * section — and the curator orders it: every row has a grip to drag it up or
+ * down and a pin that lifts it to the top. See renderRail().
+ *
  * On a phone there is not room for both at once, so the rail is the sheet and
  * the widgets slide in over it — which is exactly what iOS does at that width.
  * It is the same two panes; only one of them is on screen at a time.
@@ -20619,40 +20662,194 @@ function createModulePicker({ onAdd, source = MODULE_SOURCE }) {
     searchInput.focus()
   })
 
-  /* ── the rail · every module, always ─────────────────────────────────── */
+  /* ── the rail · every module, always, in the curator's order ──────────── */
+
+  /**
+   * THE RAIL IS ONE FLAT LIST AND THE CURATOR OWNS ITS ORDER.
+   *
+   * There were category headings here — MEDICAL, ANIMAL MANAGEMENT, OPERATIONS,
+   * ADMINISTRATION — and the ask on 3 Sep 2026 was to take them out: no
+   * sections, not even a "pinned" one above an "others". Instead each row has a
+   * grip to drag it up or down and a pin that lifts it to the top. Both write
+   * to one array of ids, saved per catalogue, so the rail comes back the way it
+   * was left. Anything the catalogue gains that the saved order does not know
+   * is appended; anything it lost is dropped.
+   */
+  const railKey = () => `antz.picker.rail.${src.id}${src.revision != null ? ':' + src.revision : ''}`
+  let order = []               // group ids, top to bottom
+  let pinned = new Set()
+  let orderFor = undefined
+
+  function loadOrder() {
+    if (orderFor === src.revision && order.length) return
+    orderFor = src.revision
+    let saved = null
+    try { saved = JSON.parse(localStorage.getItem(railKey()) || 'null') } catch { saved = null }
+    const ids = src.groups.map((g) => g.id)
+    const known = new Set(ids)
+    order = Array.isArray(saved?.order) ? saved.order.filter((id) => known.has(id)) : []
+    for (const id of ids) if (!order.includes(id)) order.push(id)
+    pinned = new Set((Array.isArray(saved?.pinned) ? saved.pinned : []).filter((id) => known.has(id)))
+  }
+
+  function saveOrder() {
+    try { localStorage.setItem(railKey(), JSON.stringify({ order, pinned: [...pinned] })) } catch { /* nothing to do */ }
+  }
+
+  function orderedGroups() {
+    loadOrder()
+    const byId = new Map(src.groups.map((g) => [g.id, g]))
+    return order.map((id) => byId.get(id)).filter(Boolean)
+  }
+
+  const visibleIds = () => orderedGroups().filter((m) => hits(m.id).length).map((m) => m.id)
+
+  /* Pinning lifts the module to the end of whatever run of pinned rows sits at
+     the top; unpinning drops it to just below that run. Neither is a section —
+     dragging can still put any row anywhere — it is only where the pin puts it. */
+  function togglePin(id) {
+    loadOrder()
+    if (pinned.has(id)) pinned.delete(id); else pinned.add(id)
+    order = order.filter((x) => x !== id)
+    let at = 0
+    while (at < order.length && pinned.has(order[at])) at++
+    order.splice(at, 0, id)
+    saveOrder()
+    renderRail()
+    rail.querySelector(`.mod-item[data-item="${id}"] .mod-pin`)?.focus()
+  }
+
+  /* The visible rows may be a search's subset of the list. Their new sequence
+     is written back into the slots that subset already occupied, so the rows a
+     search is hiding keep their places. */
+  function commitVisible(seq) {
+    const set = new Set(seq)
+    const slots = []
+    order.forEach((id, i) => { if (set.has(id)) slots.push(i) })
+    const next = order.slice()
+    slots.forEach((slot, k) => { next[slot] = seq[k] })
+    order = next
+    saveOrder()
+    renderRail()
+  }
+
+  function moveBy(id, step) {
+    const seq = visibleIds()
+    const i = seq.indexOf(id)
+    const j = i + step
+    if (i < 0 || j < 0 || j >= seq.length) return
+    seq.splice(i, 1)
+    seq.splice(j, 0, id)
+    commitVisible(seq)
+  }
 
   function renderRail() {
+    const keep = rail.scrollTop
     rail.replaceChildren()
-    let any = false
+    const mods = orderedGroups().filter((m) => hits(m.id).length)
+    if (!mods.length) { rail.append(emptyState()); return }
+    for (const mod of mods) rail.append(railItem(mod))
+    rail.scrollTop = keep
+  }
 
-    for (const cat of src.categories) {
-      const mods = src.groups.filter((m) => src.categoryOf(m) === cat.id && hits(m.id).length)
-      if (!mods.length) continue
-      any = true
+  function railItem(mod) {
+    const on = mod.id === activeId
+    const isPinned = pinned.has(mod.id)
 
-      const heading = document.createElement('div')
-      heading.className = 'mod-rail__heading'
-      heading.textContent = cat.name
-      rail.append(heading)
+    const item = document.createElement('div')
+    item.className = 'mod-item' + (on ? ' is-selected' : '')
+    item.dataset.item = mod.id
 
-      for (const mod of mods) {
-        const row = document.createElement('button')
-        row.type = 'button'
-        row.className = 'mod-row'
-        row.setAttribute('role', 'tab')
-        row.setAttribute('aria-selected', String(mod.id === activeId))
-        row.tabIndex = mod.id === activeId ? 0 : -1
-        row.dataset.module = mod.id
-        row.innerHTML =
-          groupTile(mod, 'mod-row__icon') +
-          `<span class="mod-row__name">${esc(mod.name)}</span>` +
-          `${icon('chev-right', 'icon mod-row__chev')}`
-        row.addEventListener('click', () => selectModule(mod.id))
-        rail.append(row)
+    const row = document.createElement('button')
+    row.type = 'button'
+    row.className = 'mod-row'
+    row.setAttribute('role', 'tab')
+    row.setAttribute('aria-selected', String(on))
+    row.tabIndex = on ? 0 : -1
+    row.dataset.module = mod.id
+    row.innerHTML =
+      groupTile(mod, 'mod-row__icon') +
+      `<span class="mod-row__name">${esc(mod.name)}</span>`
+    row.addEventListener('click', () => selectModule(mod.id))
+
+    const pin = document.createElement('button')
+    pin.type = 'button'
+    pin.className = 'mod-item__ctl mod-pin' + (isPinned ? ' is-pinned' : '')
+    pin.setAttribute('aria-pressed', String(isPinned))
+    pin.setAttribute('aria-label', `${isPinned ? 'Unpin' : 'Pin'} ${mod.name}`)
+    pin.title = isPinned ? 'Unpin' : 'Pin to top'
+    pin.innerHTML = icon(isPinned ? 'pin-push-on' : 'pin-push')
+    pin.addEventListener('click', () => togglePin(mod.id))
+
+    const grip = document.createElement('button')
+    grip.type = 'button'
+    grip.className = 'mod-item__ctl mod-grip'
+    grip.setAttribute('aria-label', `Move ${mod.name} — drag, or use the arrow keys`)
+    grip.title = 'Drag to reorder'
+    grip.innerHTML = icon('grip')
+    grip.addEventListener('pointerdown', (e) => startDrag(e, item))
+    grip.addEventListener('keydown', (e) => {
+      const step = { ArrowDown: 1, ArrowUp: -1 }[e.key]
+      if (!step) return
+      e.preventDefault()
+      e.stopPropagation()
+      moveBy(mod.id, step)
+      rail.querySelector(`.mod-item[data-item="${mod.id}"] .mod-grip`)?.focus()
+    })
+
+    item.append(row, pin, grip)
+    return item
+  }
+
+  /**
+   * DRAG TO REORDER.
+   * The row in hand is moved in the DOM as the pointer crosses the midpoints of
+   * its neighbours — no ghost, no placeholder, the list simply is the preview —
+   * and the new sequence is committed on release. `touch-action: none` on the
+   * grip is what stops the rail scrolling instead of the row moving.
+   *
+   * The move and release listeners are on the WINDOW, not the grip, and there
+   * is deliberately no pointer capture. Moving a node with after()/before() is
+   * a remove and a re-insert, and a disconnected element loses its capture —
+   * so a captured grip received exactly one crossing and then nothing, and the
+   * row stayed one step from where it started with `is-dragging` still on it.
+   */
+  function startDrag(e, item) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    e.preventDefault()
+    const pointerId = e.pointerId
+    const items = () => [...rail.querySelectorAll('.mod-item')]
+    let moved = false
+    item.classList.add('is-dragging')
+    rail.classList.add('is-reordering')
+
+    const onMove = (ev) => {
+      if (ev.pointerId !== pointerId) return
+      const y = ev.clientY
+      for (const other of items()) {
+        if (other === item) continue
+        const r = other.getBoundingClientRect()
+        const mid = r.top + r.height / 2
+        const follows = !!(item.compareDocumentPosition(other) & Node.DOCUMENT_POSITION_FOLLOWING)
+        if (follows && y > mid) { other.after(item); moved = true }
+        else if (!follows && y < mid) { other.before(item); moved = true }
       }
+      const rr = rail.getBoundingClientRect()
+      if (y < rr.top + 28) rail.scrollTop -= 8
+      else if (y > rr.bottom - 28) rail.scrollTop += 8
     }
-
-    if (!any) rail.append(emptyState())
+    const onUp = (ev) => {
+      if (ev.pointerId !== pointerId) return
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      item.classList.remove('is-dragging')
+      rail.classList.remove('is-reordering')
+      if (moved) commitVisible(items().map((el) => el.dataset.item))
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
   }
 
   function selectModule(id) {
@@ -20664,6 +20861,7 @@ function createModulePicker({ onAdd, source = MODULE_SOURCE }) {
       const on = row.dataset.module === id
       row.setAttribute('aria-selected', String(on))
       row.tabIndex = on ? 0 : -1
+      row.closest('.mod-item')?.classList.toggle('is-selected', on)
     }
     renderDetail()
     body.scrollTop = 0
@@ -20672,6 +20870,8 @@ function createModulePicker({ onAdd, source = MODULE_SOURCE }) {
   /* Arrow keys walk the rail, which is what a keyboard user will try on
      something marked up as a vertical tablist. */
   rail.addEventListener('keydown', (e) => {
+    /* the pin and grip have their own keys; arrows there are not a selection */
+    if (e.target.closest?.('.mod-item__ctl')) return
     const step = { ArrowDown: 1, ArrowUp: -1 }[e.key]
     if (!step) return
     e.preventDefault()
