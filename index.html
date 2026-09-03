@@ -1967,6 +1967,212 @@ body.is-searching { overflow: hidden; }
   .hero__mark, .hero__mark img { width: 52px; height: 52px; }
 }
 
+/* ── 7b · the banner deck ────────────────────────────────────────────────
+   3 Sep 2026. The hero is now the FRONT CARD OF A DECK. Behind it, in the
+   right-hand page gutter, the next two slides peek out 12px and 24px, scaled
+   down towards their right edge — the construction JioHotstar's home uses, and
+   the one the user pointed at. Slide one is the estate banner exactly as the
+   artboard draws it; behind it come the newest Announcement, this month's Key
+   Insights and the latest Note, rendered by js/components/HeroBanners.js from
+   js/data/homeBanners.js.
+
+   NOTHING UNDER IT MOVES. The stage is the hero's own box — --hero-h tall with
+   --grid-gap below — so the artboard's arithmetic (32 + 204 + 16 + rows) still
+   holds. The dots sit inside the card at its foot, where the artboard's own
+   'Egg Module' hero drew its carousel dots. The peeks live in the 32px gutter
+   and touch nothing.
+
+   THE DWELL IS THE DOT. The active dot is a bar that fills over six seconds;
+   the deck advances on that animation's `animationend`, not on a timer. So
+   pausing the fill — hover, focus, a finger on the card, a hidden tab — pauses
+   the advance with it, and the two can never drift apart. */
+.hero-stage {
+  --t-deck: 560ms;
+  --ease-deck: cubic-bezier(.22, .61, .36, 1);
+  --hero-dwell: 6000ms;
+  /* how far the cards behind show past the front card's right edge. Twice
+     this must fit the page gutter: 32/24px on tablets, 16px on a phone. */
+  --peek: 12px;
+  position: relative;
+  height: var(--hero-h);
+  margin-bottom: var(--grid-gap);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hero-stage__deck { position: absolute; inset: 0; }
+.hero-stage .hero {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  margin: 0;
+  transform-origin: 100% 50%;
+  will-change: transform, opacity;
+  transition: transform var(--t-deck) var(--ease-deck), opacity var(--t-deck) var(--ease-deck),
+              box-shadow var(--t-deck) var(--ease-deck);
+}
+.hero-stage .hero[data-pos='0']  { transform: translateX(0) scale(1); opacity: 1; z-index: 3; }
+.hero-stage .hero[data-pos='1']  { transform: translateX(var(--peek)) scale(.965); opacity: 1; z-index: 2; box-shadow: 0 2px 10px 0 rgba(76, 78, 100, .14); }
+.hero-stage .hero[data-pos='2']  { transform: translateX(calc(var(--peek) * 2)) scale(.93); opacity: 1; z-index: 1; box-shadow: none; }
+.hero-stage .hero[data-pos='hidden'] { transform: translateX(calc(var(--peek) * 2)) scale(.93); opacity: 0; z-index: 0; pointer-events: none; transition: none; }
+/* the card that has just been the front: slides off to the left and fades */
+.hero-stage .hero.is-leaving  { transform: translateX(-8%) scale(.98); opacity: 0; z-index: 4; pointer-events: none; }
+/* and one coming back from the left, when the deck is stepped backwards */
+.hero-stage .hero.is-entering { transform: translateX(-8%) scale(.98); opacity: 0; z-index: 4; transition: none; }
+.hero-stage.is-dragging .hero { transition: none; }
+.hero-stage .hero[data-pos]:not([data-pos='0']) .hero__media { transform: none; }
+
+/* the dots: a translucent pill so they read on the estate photograph and on a
+   white announcement alike */
+.hero-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  translate: -50% 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(22, 55, 61, .28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.hero-dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .55);
+  overflow: hidden;
+  cursor: pointer;
+  transition: width var(--t-base) var(--ease), background var(--t-base) var(--ease);
+}
+/* a 6px dot is not a 44px target; the tap area is grown without growing the dot */
+.hero-dot::before { content: ''; position: absolute; inset: -12px -6px; }
+.hero-dot[aria-selected='true'] { width: 22px; background: rgba(255, 255, 255, .35); }
+.hero-dot[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #FFFFFF;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  animation: hero-dot-fill var(--hero-dwell) linear forwards;
+}
+@keyframes hero-dot-fill { to { transform: scaleX(1); } }
+.hero-stage.is-dragging .hero-dot::after,
+.hero-stage:focus-within .hero-dot::after,
+body.is-hidden .hero-dot::after { animation-play-state: paused; }
+@media (hover: hover) { .hero-stage:hover .hero-dot::after { animation-play-state: paused; } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-stage .hero { transition: opacity var(--t-base) var(--ease); }
+  .hero-dot[aria-selected='true']::after { animation: none; transform: scaleX(1); }
+}
+
+/* ── the slides ── picture left, copy right, the way the phone's cards read
+   once they are given the width. White on the announcement so the photograph
+   carries the colour; the Note keeps the phone's blue so it is recognisable
+   across devices; the Key Insights slide is the phone's two tiles. */
+.hero-stage .hero--slide {
+  display: grid;
+  grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+  padding: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  cursor: default;
+}
+.hero-slide__media { position: relative; overflow: hidden; min-width: 0; }
+.hero-slide__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-slide__badge {
+  position: absolute; left: 16px; top: 16px; z-index: 1;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 10px; border-radius: var(--r-pill);
+  background: rgba(22, 55, 61, .72); color: #FFFFFF;
+  font-size: 12px; font-weight: 600;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.hero-slide__badge .icon { width: 14px; height: 14px; }
+.hero-slide__copy {
+  display: flex; flex-direction: column; justify-content: center; gap: 6px;
+  min-width: 0; padding: 20px 24px 34px;
+}
+.hero-chip {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 24px; padding: 0 10px 0 8px; border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.hero-chip .icon { width: 13px; height: 13px; }
+.hero-chip--ann { background: #E5F5EC; color: #1E7A44; }
+.hero-chip--ins { background: var(--petrol-050); color: var(--petrol-800); }
+.hero-chip--on-dark { background: rgba(255, 255, 255, .2); color: #FFFFFF; }
+.hero-slide__title {
+  font-size: 24px; line-height: 1.15; font-weight: 700; letter-spacing: -.015em; color: inherit;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hero-slide__meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; }
+.hero-slide__meta b { font-weight: 500; color: var(--ink); }
+.hero-slide__meta i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }
+.hero-slide__avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #F7C6A3, #E8865B); flex: none; }
+.hero-slide__text { font-size: 14px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hero-slide__foot { display: flex; gap: 6px; margin-top: 2px; }
+.hero-react {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 10px; border-radius: var(--r-pill);
+  background: var(--petrol-050); color: var(--ink-2); font-size: 13px; font-weight: 500;
+}
+.hero-react .icon { width: 14px; height: 14px; }
+
+.hero-slide__stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 12px 16px 20px; background: linear-gradient(160deg, #F7FCFB, #E8F4F2); }
+.hero-stat { border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; }
+.hero-stat--nat { background: #E0F6F5; }
+.hero-stat--mor { background: #FDECEA; }
+.hero-stat b { font-size: 34px; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hero-stat--nat b { color: #00AFD6; }
+.hero-stat--mor b { color: #E4432E; }
+.hero-stat span { font-size: 13px; color: var(--ink-2); }
+
+.hero-stage .hero--note { background: linear-gradient(118deg, #5CC6EE 0%, #2D9FD0 100%); color: #FFFFFF; }
+.hero--note .hero-slide__meta, .hero--note .hero-slide__meta b, .hero--note .hero-slide__text { color: #FFFFFF; }
+.hero-slide__tags { display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 20px 20px 34px 24px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.hero-tags span { height: 26px; padding: 0 10px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .2); display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; }
+.hero-site { display: flex; align-items: center; gap: 10px; }
+.hero-site__a { flex: none; width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, .28); display: grid; place-items: center; font-family: Georgia, serif; font-style: italic; font-size: 17px; }
+.hero-site b { display: block; font-size: 14px; font-weight: 600; }
+.hero-site small { display: block; font-size: 12px; opacity: .9; }
+.hero-slide__bang { position: absolute; right: 16px; top: 16px; width: 32px; height: 32px; border-radius: 9px; background: rgba(255, 255, 255, .9); color: #2D9FD0; display: grid; place-items: center; font-weight: 700; font-size: 18px; }
+
+@media (min-width: 768px) and (max-width: 899px) {
+  .hero-slide__text { display: none; }
+  .hero-slide__title { font-size: 22px; }
+  .hero-slide__copy { padding-bottom: 30px; }
+}
+/* a phone has no room for two columns: the photograph goes behind the copy,
+   the tiles and tags become a row above it */
+@media (max-width: 767px) {
+  .hero-stage { --peek: 6px; }
+  .hero-stage .hero--slide { grid-template-columns: minmax(0, 1fr); }
+  .hero-slide__title { font-size: 20px; }
+  .hero-slide__copy { padding: 8px 20px 30px; gap: 4px; }
+  .hero-slide__text, .hero-slide__foot, .hero-slide__badge { display: none; }
+  .hero--announcement .hero-slide__media { position: absolute; inset: 0; }
+  .hero--announcement .hero-slide__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .12) 0%, rgba(0, 0, 0, .72) 100%); }
+  .hero--announcement .hero-slide__copy { position: relative; z-index: 1; justify-content: flex-end; color: #FFFFFF; }
+  .hero--announcement .hero-slide__meta, .hero--announcement .hero-slide__meta b { color: #FFFFFF; }
+  .hero--insight, .hero--note { grid-template-rows: minmax(0, 1fr) auto; }
+  .hero-slide__stats { padding: 12px 20px 0; background: none; }
+  .hero-stat b { font-size: 24px; }
+  .hero-stat span { font-size: 11px; }
+  .hero-slide__tags { flex-direction: row; align-items: center; justify-content: space-between; padding: 14px 20px 0; }
+  .hero-slide__bang { display: none; }
+}
+
 /* ── 8 · modules section head ────────────────────────────────────────────
    NOT IN THE ARTBOARD, AND THEREFORE NOT IN THE RESTING PAGE.
 
@@ -6369,7 +6575,9 @@ body.is-site .card:active { transform: scale(.978); }
          every other link should say so, and the only readers who cannot see it
          happen are the ones being told here — the span is visually hidden, so
          the banner is unchanged to the eye. -->
-    <a class="hero" href="https://antz-command-centre-v5.vercel.app/"
+    <div class="hero-stage" id="heroStage" aria-roledescription="carousel" aria-label="Home banners">
+    <div class="hero-stage__deck">
+    <a class="hero hero--estate" href="https://antz-command-centre-v5.vercel.app/"
        target="_blank" rel="noopener">
       <span class="hero__media" aria-hidden="true"></span>
       <span class="hero__scrim" aria-hidden="true"></span>
@@ -6387,6 +6595,10 @@ body.is-site .card:active { transform: scale(.978); }
         <span class="sr-only"> (opens in a new tab)</span>
       </span>
     </a>
+    <!-- the Announcement, Key Insights and Note slides are appended here by
+         js/components/HeroBanners.js, from js/data/homeBanners.js -->
+    </div>
+    </div>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
          The section head is the one element not on the artboard: the resting
@@ -6757,6 +6969,13 @@ const PATHS = {
     '<path d="M9 3h6l-.6 6.4 2.6 2.4V14H7v-2.2l2.6-2.4L9 3Z"/><path d="M12 14v7"/>',
   'pin-push-on':
     '<path d="M9 3h6l-.6 6.4 2.6 2.4V14H7v-2.2l2.6-2.4L9 3Z" fill="currentColor"/><path d="M12 14v7"/>',
+  /* the banner deck's slides */
+  megaphone:   '<path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V5l-4 4H5a2 2 0 0 0-2 2Z"/><path d="M14 9.5a3 3 0 0 1 0 5"/><path d="M17 7a6.5 6.5 0 0 1 0 10"/>',
+  thumb:       '<path d="M7 11v9H4v-9h3Z"/><path d="M7 11l4-7c1.5 0 2.5 1 2.5 2.5V10h5a2 2 0 0 1 2 2.3l-1 6A2 2 0 0 1 17.5 20H7"/>',
+  comment:     '<path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-3.9A8 8 0 1 1 20 12Z"/>',
+  trend:       '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  note:        '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  paperclip:   '<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.2 3.2 0 0 1 4.5 4.5L10 17.5a1.4 1.4 0 0 1-2-2l7.5-7.5"/>',
   grip:        '<circle cx="9" cy="6" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.15" fill="currentColor" stroke="none"/>',
   alert:       '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9.2v4.2M12 17.2h.01"/>',
   clock:       '<circle cx="12" cy="12" r="9.2"/><path d="M12 6.8V12l3.4 2"/>',
@@ -24114,6 +24333,282 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
   __x.createGlobalSearch = createGlobalSearch;
 });
 
+__def('js/data/homeBanners.js', function (__x, __req) {
+/**
+ * THE BANNER DECK'S CONTENT
+ * ───────────────────────────────────────────────────────────────────────────
+ * What sits behind the estate banner on the home page. Three kinds, which are
+ * the three things the phone's home feed shows (mockups/Announcement & Notes,
+ * 3 Sep 2026): an ANNOUNCEMENT with an author, a body and an image; the
+ * month's KEY INSIGHTS as two figures; a NOTE with its tags and its site. The
+ * copy here is the phone's copy, verbatim — there is no announcements service
+ * in this prototype, so this is the seed the deck reads until there is.
+ *
+ * Order is display order. The estate banner is always slide one and is not in
+ * this list; it is in the HTML, exactly as the artboard draws it.
+ */
+const HOME_BANNERS = [
+  {
+    id: 'ann-wild-dog', kind: 'announcement',
+    title: 'World African wild dog day', by: 'Kunal Singh', ago: '7d ago',
+    body: 'Did you know that African wild dogs are the ultimate team players?',
+    image: 'assets/img/species.jpg', attachments: 1, likes: 0, comments: 1,
+  },
+  {
+    id: 'ins-month', kind: 'insight',
+    label: 'Key Insights · This month', title: '01 Sep – 03 Sep 2026',
+    body: 'Births and deaths across the collection so far this month.',
+    stats: [{ n: 0, label: 'Natality', tone: 'nat' }, { n: 0, label: 'Mortality', tone: 'mor' }],
+  },
+  {
+    id: 'note-carpentry', kind: 'note',
+    title: 'Carpentry', by: 'Sowmya 09', ago: '10d ago',
+    tags: ['Nest Box', 'Enrichment', 'New Structure'],
+    site: 'Bhitarkanika', place: 'Adirampattinam',
+  },
+  {
+    id: 'ann-orangutan', kind: 'announcement',
+    title: 'Did you know?', by: 'Kunal Singh', ago: '16d ago',
+    body: 'The orangutan is one of humankind’s closest relatives — we share nearly 97% of the same DNA.',
+    image: 'assets/img/hero-leopard.jpg', imagePos: '50% 30%', attachments: 1, likes: 0, comments: 1,
+  },
+]
+  __x.HOME_BANNERS = HOME_BANNERS;
+});
+
+__def('js/components/HeroBanners.js', function (__x, __req) {
+/**
+ * THE BANNER DECK
+ * ───────────────────────────────────────────────────────────────────────────
+ * The home hero as a deck of cards, the way JioHotstar's home draws its
+ * banner: the front card full size, the next two peeking out behind it to the
+ * right, each a step smaller. Advancing slides the front card off to the left
+ * while the one behind it grows into its place. It moves on its own every six
+ * seconds, on a swipe, on a dot, or on the arrow keys.
+ *
+ * WHAT IS DELIBERATELY NOT HERE. No timer. The dwell is the active dot's fill
+ * animation and the deck advances on its `animationend` — see the stylesheet
+ * note at `.hero-stage`. Pausing the one pauses the other, by construction.
+ *
+ * Also no destinations yet. The prototype has no announcement, insight or
+ * note pages to open, and a button that goes nowhere is worse than no button,
+ * so the slides carry the content and its reactions and nothing that
+ * pretends. When a route exists, `onOpen(item)` is where it plugs in.
+ */
+const { HOME_BANNERS } = __req('js/data/homeBanners.js');
+const { icon } = __req('js/icons.js');
+const { prefersReducedMotion } = __req('js/lib/motion.js');
+
+const PEEK = 3          // front card + the two behind it are positioned; the rest are hidden
+const SWIPE = .18       // fraction of the width a drag must cover to turn the deck
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
+function renderSlide(item) {
+  const el = document.createElement('article')
+  el.className = `hero hero--slide hero--${item.kind}`
+  el.setAttribute('role', 'group')
+  el.setAttribute('aria-roledescription', 'slide')
+  el.setAttribute('aria-label', item.title)
+  const meta = (withAvatar) =>
+    `<div class="hero-slide__meta">${withAvatar ? '<span class="hero-slide__avatar"></span>' : ''}` +
+    `<b>${esc(item.by)}</b><i></i>${esc(item.ago)}</div>`
+
+  if (item.kind === 'announcement') {
+    el.innerHTML =
+      `<div class="hero-slide__media">` +
+        `<img src="${esc(item.image)}" alt=""${item.imagePos ? ` style="object-position:${esc(item.imagePos)}"` : ''}>` +
+        (item.attachments ? `<span class="hero-slide__badge">${icon('paperclip')}${item.attachments} image${item.attachments === 1 ? '' : 's'}</span>` : '') +
+      `</div>` +
+      `<div class="hero-slide__copy">` +
+        `<span class="hero-chip hero-chip--ann">${icon('megaphone')}Announcement</span>` +
+        `<h2 class="hero-slide__title">${esc(item.title)}</h2>` +
+        meta(true) +
+        `<p class="hero-slide__text">${esc(item.body)}</p>` +
+        `<div class="hero-slide__foot">` +
+          `<span class="hero-react">${icon('thumb')}${item.likes ?? 0}</span>` +
+          `<span class="hero-react">${icon('comment')}${item.comments ?? 0}</span>` +
+        `</div>` +
+      `</div>`
+  } else if (item.kind === 'insight') {
+    el.innerHTML =
+      `<div class="hero-slide__media hero-slide__stats">` +
+        item.stats.map((x) => `<div class="hero-stat hero-stat--${esc(x.tone)}"><b>${esc(x.n)}</b><span>${esc(x.label)}</span></div>`).join('') +
+      `</div>` +
+      `<div class="hero-slide__copy">` +
+        `<span class="hero-chip hero-chip--ins">${icon('trend')}${esc(item.label)}</span>` +
+        `<h2 class="hero-slide__title">${esc(item.title)}</h2>` +
+        `<p class="hero-slide__text">${esc(item.body)}</p>` +
+      `</div>`
+  } else {
+    el.innerHTML =
+      `<div class="hero-slide__media hero-slide__tags">` +
+        `<span class="hero-slide__bang" aria-hidden="true">!</span>` +
+        `<div class="hero-tags">${(item.tags || []).map((t) => `<span>${esc(t)}</span>`).join('')}</div>` +
+        `<div class="hero-site"><span class="hero-site__a" aria-hidden="true">a</span>` +
+          `<span><b>${esc(item.site)}</b><small>${esc(item.place)}</small></span></div>` +
+      `</div>` +
+      `<div class="hero-slide__copy">` +
+        `<span class="hero-chip hero-chip--on-dark">${icon('note')}Note</span>` +
+        `<h2 class="hero-slide__title">${esc(item.title)}</h2>` +
+        meta(false) +
+      `</div>`
+  }
+  return el
+}
+
+function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
+  if (!root) return null
+  const deck = root.querySelector('.hero-stage__deck')
+  const front = deck.querySelector('.hero')       // the estate banner, slide one, from the HTML
+  const slides = [front, ...items.map(renderSlide)]
+  for (const s of slides.slice(1)) deck.append(s)
+  const n = slides.length
+  const reduced = prefersReducedMotion()
+
+  /* ── dots ─────────────────────────────────────────────────────────────── */
+  const dots = document.createElement('div')
+  dots.className = 'hero-dots'
+  dots.setAttribute('role', 'tablist')
+  dots.setAttribute('aria-label', 'Banners')
+  const dotEls = slides.map((s, i) => {
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'hero-dot'
+    b.setAttribute('role', 'tab')
+    b.setAttribute('aria-label', i === 0 ? 'Antz Command Centre' : items[i - 1].title)
+    b.addEventListener('click', () => go(i))
+    dots.append(b)
+    return b
+  })
+  root.append(dots)
+
+  /* ── state ────────────────────────────────────────────────────────────── */
+  let active = 0
+  let leaving = null      // the card animating off; place() leaves it alone until it lands
+
+  function place() {
+    slides.forEach((s, i) => {
+      if (s === leaving) return
+      const k = (i - active + n) % n
+      s.dataset.pos = k < PEEK ? String(k) : 'hidden'
+      s.setAttribute('aria-hidden', String(k !== 0))
+      if (s.tagName === 'A') s.tabIndex = k === 0 ? 0 : -1
+    })
+    dotEls.forEach((d, i) => {
+      d.setAttribute('aria-selected', String(i === active))
+      d.tabIndex = i === active ? 0 : -1
+    })
+  }
+
+  function go(to, dir) {
+    const next = (to + n) % n
+    if (next === active || n < 2) return
+    const forward = dir ?? (((next - active + n) % n) <= n / 2)
+    const old = slides[active]
+    if (!reduced) {
+      if (forward) {
+        /* the front card leaves to the left; when it has gone it is dropped
+           behind the deck without a transition */
+        leaving = old
+        old.dataset.pos = 'leaving'
+        old.classList.add('is-leaving')
+        let landed = false
+        const land = () => {
+          if (landed) return
+          landed = true
+          old.classList.remove('is-leaving')
+          if (leaving === old) leaving = null
+          place()
+        }
+        old.addEventListener('transitionend', land, { once: true })
+        setTimeout(land, 700)
+      } else {
+        /* stepping back: the returning card starts off to the left, then
+           takes the front in one transition */
+        const inc = slides[next]
+        inc.classList.add('is-entering')
+        void inc.offsetWidth
+        inc.classList.remove('is-entering')
+      }
+    }
+    active = next
+    place()
+  }
+
+  /* the dwell: see the stylesheet. The fill ends, the deck turns. */
+  dots.addEventListener('animationend', (e) => {
+    if (e.animationName === 'hero-dot-fill' && !reduced) go(active + 1, true)
+  })
+
+  /* ── swipe ────────────────────────────────────────────────────────────── */
+  let drag = null
+  let swallowClick = false
+  root.addEventListener('pointerdown', (e) => {
+    if ((e.pointerType === 'mouse' && e.button !== 0) || e.target.closest('.hero-dots')) return
+    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, moved: false }
+  })
+  root.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return
+    drag.dx = e.clientX - drag.x0
+    if (!drag.moved) {
+      /* a vertical gesture is a page scroll, not a swipe; leave it alone */
+      if (Math.abs(drag.dx) < 8 || Math.abs(drag.dx) < Math.abs(e.clientY - drag.y0)) return
+      drag.moved = true
+      root.classList.add('is-dragging')
+      try { root.setPointerCapture(drag.id) } catch { /* fine without */ }
+    }
+    e.preventDefault()
+    const w = root.clientWidth || 1
+    const p = Math.min(1, Math.abs(drag.dx) / w)
+    const peek = parseFloat(getComputedStyle(root).getPropertyValue('--peek')) || 12
+    const cur = slides[active]
+    cur.style.transform = `translateX(${drag.dx}px) scale(${1 - p * .02})`
+    cur.style.opacity = String(1 - p * .3)
+    if (drag.dx < 0) {
+      const nx = slides[(active + 1) % n]
+      nx.style.transform = `translateX(${peek - peek * p}px) scale(${.965 + .035 * p})`
+    } else {
+      const pv = slides[(active - 1 + n) % n]
+      pv.style.zIndex = '4'
+      pv.style.opacity = String(p)
+      pv.style.transform = `translateX(${-8 + 8 * p}%) scale(${.98 + .02 * p})`
+    }
+  })
+  const release = (e) => {
+    if (!drag || e.pointerId !== drag.id) return
+    const d = drag
+    drag = null
+    root.classList.remove('is-dragging')
+    for (const s of slides) { s.style.transform = ''; s.style.opacity = ''; s.style.zIndex = '' }
+    if (!d.moved) return
+    swallowClick = true
+    setTimeout(() => { swallowClick = false }, 0)
+    const w = root.clientWidth || 1
+    if (Math.abs(d.dx) > w * SWIPE) go(active + (d.dx < 0 ? 1 : -1), d.dx < 0)
+  }
+  root.addEventListener('pointerup', release)
+  root.addEventListener('pointercancel', release)
+  /* the estate banner is a link; a swipe that starts on it is not a click on it */
+  root.addEventListener('click', (e) => { if (swallowClick) { e.preventDefault(); e.stopPropagation() } }, true)
+
+  /* ── keys ─────────────────────────────────────────────────────────────── */
+  root.addEventListener('keydown', (e) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key]
+    if (!step) return
+    e.preventDefault()
+    go(active + step, step > 0)
+    dotEls[active].focus()
+  })
+
+  place()
+  return { go, get active() { return active }, root }
+}
+  __x.createHeroBanners = createHeroBanners;
+});
+
 __def('js/app.js', function (__x, __req) {
 /**
  * ANTZ COMMAND CENTRE · HOME
@@ -24169,6 +24664,11 @@ const { ROLES, getRole, permits, defaultsFor } = __req('js/data/roles.js');
 const LEVEL_NOUN = { sites: 'Site', site: 'Site', section: 'Section', enclosure: 'Enclosure' }
 
 mountIconSprite()
+
+/* ── the banner deck ────────────────────────────────────────────────────
+   The hero, with the announcement, insight and note slides behind it. */
+const { createHeroBanners } = __req('js/components/HeroBanners.js')
+createHeroBanners({ root: document.getElementById('heroStage') })
 
 /* A continuous animation on a page nobody is looking at is pure cost. The
    jiggle is paused in CSS off this class rather than being torn down, so
