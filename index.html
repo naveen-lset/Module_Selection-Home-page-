@@ -2001,6 +2001,9 @@ body.is-searching { overflow: hidden; }
   -webkit-user-select: none;
 }
 .hero-stage__deck { position: absolute; inset: 0; }
+/* a photograph and a link are both natively draggable, and a native drag
+   cancels the pointer gesture — the swipe died with a `dragstart` on the image */
+.hero-stage img, .hero-stage a { -webkit-user-drag: none; user-drag: none; }
 .hero-stage .hero {
   position: absolute;
   inset: 0;
@@ -24346,6 +24349,13 @@ __def('js/data/homeBanners.js', function (__x, __req) {
  *
  * Order is display order. The estate banner is always slide one and is not in
  * this list; it is in the HTML, exactly as the artboard draws it.
+ *
+ * ANNOUNCEMENTS ONLY, 3 Sep 2026. The deck first shipped with a Key Insights
+ * slide and a Note slide behind the announcements; the user's ruling the same
+ * afternoon was "Show only Command Centre & Announcements". The two entries
+ * came out of this list and nothing else changed: HeroBanners.js still knows
+ * how to draw an `insight` and a `note`, so bringing either back is one entry
+ * here, not a rebuild.
  */
 const HOME_BANNERS = [
   {
@@ -24353,18 +24363,6 @@ const HOME_BANNERS = [
     title: 'World African wild dog day', by: 'Kunal Singh', ago: '7d ago',
     body: 'Did you know that African wild dogs are the ultimate team players?',
     image: 'assets/img/species.jpg', attachments: 1, likes: 0, comments: 1,
-  },
-  {
-    id: 'ins-month', kind: 'insight',
-    label: 'Key Insights · This month', title: '01 Sep – 03 Sep 2026',
-    body: 'Births and deaths across the collection so far this month.',
-    stats: [{ n: 0, label: 'Natality', tone: 'nat' }, { n: 0, label: 'Mortality', tone: 'mor' }],
-  },
-  {
-    id: 'note-carpentry', kind: 'note',
-    title: 'Carpentry', by: 'Sowmya 09', ago: '10d ago',
-    tags: ['Nest Box', 'Enrichment', 'New Structure'],
-    site: 'Bhitarkanika', place: 'Adirampattinam',
   },
   {
     id: 'ann-orangutan', kind: 'announcement',
@@ -24593,6 +24591,9 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   root.addEventListener('pointercancel', release)
   /* the estate banner is a link; a swipe that starts on it is not a click on it */
   root.addEventListener('click', (e) => { if (swallowClick) { e.preventDefault(); e.stopPropagation() } }, true)
+  /* and neither the link nor a slide's photograph may start a native drag,
+     which would fire pointercancel and end the swipe a few pixels in */
+  root.addEventListener('dragstart', (e) => e.preventDefault())
 
   /* ── keys ─────────────────────────────────────────────────────────────── */
   root.addEventListener('keydown', (e) => {
