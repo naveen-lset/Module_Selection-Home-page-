@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAB &amp; More Actions · three concepts for the tablet corner · ANTZ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sour+Gummy:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  FAB & MORE ACTIONS · ANTZ · a mockup, 4 September 2026
+  ═══════════════════════════════════════════════════════════════════════════
+
+  THE ASK, in the user's words: a FAB in the right corner of the home page,
+  with animation; on tap the background blurs and a set of actions appears
+  with the priority the chat reference shows — one big primary tile and
+  smaller pills beside it; and for TABLET, a new idea rather than a phone
+  layout copied across.
+
+  WHAT THE TWO RECORDINGS ACTUALLY DO, read frame by frame off
+  References/Animetions & App Strcutres rather than remembered:
+
+    Zomato, tapping the assistant FAB (05.4s → 08.2s)
+      a colour wash BLOOMS out of the button's own position; the feed behind
+      goes progressively blurred and desaturated INTO that wash rather than
+      being covered by a panel; a lattice of dots holds the middle for ~0.6s;
+      then the whole thing settles into the destination screen.
+
+    Zomato, the filter sheet (26.8s)
+      the page behind scales back to ≈.94 and keeps its rounded corners, and
+      the trigger is replaced by a FLOATING CIRCULAR ✕ sitting above the
+      sheet — the same move the chat reference makes with its tab bar.
+
+    Swiggy, the bottom chrome (whole clip)
+      the navigation is a floating translucent PILL, not a bar welded to the
+      edge, with the create action inset into it and a trailing green chip.
+      Concept 3 borrows the shape and drops the permanence.
+
+  WHAT IS DELIBERATELY NOT COPIED. Both apps are impulse surfaces and colour
+  is their appetite. Ours is a command centre: the chrome may be delightful,
+  the content stays sober. So the bloom is the product's own teal, the action
+  colours are the module gradients already on the page, and nothing about the
+  overlay competes with a card that is trying to say an animal is bleeding.
+
+  THREE CONCEPTS, ONE PAGE, so the choice is made by pressing rather than by
+  reading. All three share one engine: the same veil, the same blur ramp, the
+  same ✕ morph, the same spring. Only the ARRANGEMENT of the actions differs,
+  which is the only thing actually in question.
+
+    1  CORNER BLOOM   the chat reference, adapted. Big primary tile + two
+                      pills, anchored to the corner the thumb is already in.
+    2  QUARTER ARC    tablet-native: the actions fan out on a quarter circle
+                      around the FAB, highest priority nearest the thumb.
+    3  SUMMONED DOCK  Swiggy's floating pill, but it only exists while it is
+                      wanted — the FAB grows leftwards into a labelled dock.
+
+  PRIORITY IS POSITION, NOT DECORATION. In every concept the ranking is the
+  same and it is expressed three ways at once: size, colour weight, and
+  distance from the resting thumb. P1 is a tile, P2–P3 are filled pills, P4 is
+  glass. Turn on "priority labels" to see the ranks the layout is encoding.
+
+  THE ACTIONS ARE THE PRODUCT'S OWN VERBS, lifted from the widget catalogue in
+  index.html (`data.actions`) rather than invented for a mockup:
+  Record Observation, New Case, Report Incident, New Announcement.
+
+  CONCEPT 3 SHIPPED, 4 September 2026. The Summoned Dock is live in
+  index.html — css/quick-actions.css, js/data/quickActions.js and
+  js/components/QuickActionsDock.js. Two things changed on the way in, both
+  because the real action list is SIXTEEN and not the four this page argues
+  with: the dock is a grid (8 x 2 in landscape, 4 x 4 in portrait, the only
+  two ways sixteen makes full rows), and the reveal is a clip-path wipe rather
+  than `scaleX`, which visibly smears sixteen labels where it was invisible on
+  one row of four. The sixteen are the mobile app's own Quick Actions sheet,
+  References/IMG_2226.HEIC.
+
+  Concepts 1 and 2 are kept as they were — this page is the record of what the
+  choice was between, and it stops being that the moment it is edited to agree
+  with the outcome.
+-->
+<style>
+:root {
+  --font:       'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-greet: 'Sour Gummy', 'Comic Sans MS', var(--font);
+  --font-num:   'DM Sans', var(--font);
+
+  /* ── the product's palette, as index.html declares it ──────────────── */
+  --c-secondary-dark:   #00ABAB;
+  --c-on-secondary-ctr: #1F415B;
+  --c-on-surface-var:   #44544A;
+  --c-neutral-2:        #7A8684;
+  --c-secondary:        #00D6C9;
+  --c-add-primary:      #00AFD6;
+  --c-tertiary:         #FA6140;
+  --c-white:            #FFFFFF;
+
+  --ink:      var(--c-on-secondary-ctr);
+  --ink-3:    var(--c-neutral-2);
+  --sig:      var(--c-add-primary);
+  --ui-link:  #007A95;
+  --surface:  #FFFFFF;
+  --line:     rgba(31, 65, 91, .10);
+  --petrol-800: #1F515B;
+  --petrol-900: #16373D;
+
+  --page-bg:
+    linear-gradient(180deg,
+      rgba(175, 239, 235, .5)   0%,
+      rgba(175, 239, 235, .275) 32.386%,
+      rgba(242, 255, 248, .5)   68.662%),
+    linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%);
+
+  --e1: 0 1px 3px rgba(31, 65, 91, .06), 0 8px 24px -10px rgba(31, 65, 91, .14);
+  --e2: 0 2px 6px rgba(31, 65, 91, .08), 0 18px 40px -14px rgba(31, 65, 91, .22);
+
+  --ease:       cubic-bezier(.22, .61, .36, 1);
+  --ease-out:   cubic-bezier(.16, 1, .3, 1);
+  --ease-sheet: cubic-bezier(.32, .72, 0, 1);
+  --t-fast: 140ms; --t-base: 220ms; --t-slow: 320ms; --t-sheet: 420ms;
+
+  /* every module gradient, sampled off the artboard — copied verbatim from
+     index.html so the page under the blur is the real one, not an impression
+     of it. A blur is only honest over the colours it will actually meet. */
+  --g-medical: linear-gradient(127.68923deg, rgb(142, 190, 165) 6.0%, rgb(129, 183, 155) 15.8%, rgb(116, 175, 145) 25.6%, rgb(103, 168, 134) 35.3%, rgb(90, 160, 123) 45.1%, rgb(77, 153, 114) 54.9%, rgb(65, 145, 103) 64.7%, rgb(51, 138, 93) 74.4%, rgb(51, 138, 93) 84.2%, rgb(51, 138, 93) 94.0%);
+  --g-mortality: linear-gradient(127.96481deg, rgb(251, 153, 132) 6.0%, rgb(251, 149, 128) 15.8%, rgb(251, 146, 123) 25.6%, rgb(251, 143, 119) 35.3%, rgb(251, 139, 115) 45.1%, rgb(251, 135, 111) 54.9%, rgb(251, 132, 107) 64.7%, rgb(251, 128, 102) 74.4%, rgb(251, 128, 102) 84.2%, rgb(251, 128, 102) 94.0%);
+  --g-security: linear-gradient(127.96481deg, rgb(149, 158, 152) 6.0%, rgb(142, 152, 147) 15.8%, rgb(136, 147, 140) 25.6%, rgb(130, 140, 134) 35.3%, rgb(124, 135, 128) 45.1%, rgb(118, 129, 122) 54.9%, rgb(111, 123, 116) 64.7%, rgb(105, 117, 110) 74.4%, rgb(104, 117, 110) 84.2%, rgb(104, 117, 110) 94.0%);
+  --g-pharmacy: linear-gradient(127.96481deg, rgb(119, 155, 159) 6.0%, rgb(114, 149, 155) 15.8%, rgb(107, 144, 149) 25.6%, rgb(100, 138, 143) 35.3%, rgb(93, 131, 138) 45.1%, rgb(86, 126, 133) 54.9%, rgb(79, 120, 128) 64.7%, rgb(72, 115, 122) 74.4%, rgb(72, 115, 122) 84.2%, rgb(72, 115, 122) 94.0%);
+  --g-lab: linear-gradient(127.96481deg, rgb(216, 201, 147) 6.0%, rgb(216, 198, 140) 15.8%, rgb(215, 195, 134) 25.6%, rgb(214, 192, 128) 35.3%, rgb(213, 188, 122) 45.1%, rgb(212, 185, 117) 54.9%, rgb(210, 183, 110) 64.7%, rgb(209, 180, 104) 74.4%, rgb(209, 180, 104) 84.2%, rgb(209, 180, 104) 94.0%);
+  --g-fetal: linear-gradient(127.96481deg, rgb(244, 147, 164) 6.0%, rgb(245, 141, 160) 15.8%, rgb(246, 134, 155) 25.6%, rgb(246, 128, 149) 35.3%, rgb(247, 122, 145) 45.1%, rgb(247, 116, 140) 54.9%, rgb(248, 110, 135) 64.7%, rgb(248, 103, 129) 74.4%, rgb(248, 103, 129) 84.2%, rgb(248, 103, 129) 94.0%);
+  --g-eggs: linear-gradient(127.96481deg, rgb(106, 220, 226) 6.0%, rgb(98, 216, 225) 15.8%, rgb(91, 213, 225) 25.6%, rgb(83, 209, 224) 35.3%, rgb(74, 205, 223) 45.1%, rgb(66, 200, 222) 54.9%, rgb(58, 195, 222) 64.7%, rgb(50, 191, 221) 74.4%, rgb(50, 191, 221) 84.2%, rgb(50, 191, 221) 94.0%);
+  --g-administer: linear-gradient(127.96481deg, rgb(179, 198, 188) 6.0%, rgb(176, 195, 184) 15.8%, rgb(173, 193, 181) 25.6%, rgb(169, 189, 177) 35.3%, rgb(165, 186, 174) 45.1%, rgb(162, 183, 170) 54.9%, rgb(157, 179, 166) 64.7%, rgb(154, 176, 162) 74.4%, rgb(155, 176, 163) 84.2%, rgb(155, 176, 163) 94.0%);
+  --g-users: linear-gradient(127.96481deg, rgb(123, 147, 160) 6.0%, rgb(117, 141, 155) 15.8%, rgb(109, 135, 150) 25.6%, rgb(102, 128, 145) 35.3%, rgb(95, 122, 139) 45.1%, rgb(88, 115, 133) 54.9%, rgb(81, 109, 128) 64.7%, rgb(74, 103, 123) 74.4%, rgb(74, 103, 122) 84.2%, rgb(74, 103, 122) 94.0%);
+  --g-teal-card: linear-gradient(127.96481deg, rgb(50, 187, 182) 6.0%, rgb(46, 187, 181) 15.8%, rgb(39, 187, 181) 25.6%, rgb(33, 188, 181) 35.3%, rgb(28, 189, 181) 45.1%, rgb(23, 190, 182) 54.9%, rgb(19, 192, 184) 64.7%, rgb(16, 194, 185) 74.4%, rgb(15, 194, 185) 84.2%, rgb(14, 194, 185) 94.0%);
+  --g-users-wash: linear-gradient(127.96481deg, rgb(69, 108, 119) 6.0%, rgb(65, 105, 117) 15.8%, rgb(59, 100, 112) 25.6%, rgb(54, 96, 108) 35.3%, rgb(49, 92, 105) 45.1%, rgb(45, 89, 101) 54.9%, rgb(43, 87, 99) 64.7%, rgb(40, 86, 98) 74.4%, rgb(40, 85, 97) 84.2%, rgb(39, 85, 97) 94.0%);
+  --g-audit: linear-gradient(127.96481deg, rgb(201, 98, 120) 6.0%, rgb(203, 96, 118) 15.8%, rgb(204, 91, 115) 25.6%, rgb(205, 87, 112) 35.3%, rgb(207, 84, 110) 45.1%, rgb(210, 81, 107) 54.9%, rgb(213, 78, 106) 64.7%, rgb(215, 76, 104) 74.4%, rgb(215, 76, 104) 84.2%, rgb(214, 75, 103) 94.0%);
+  --g-approvals-wash: linear-gradient(148.47514deg, rgb(70, 99, 120) 6.0%, rgb(64, 95, 116) 15.8%, rgb(59, 90, 112) 25.6%, rgb(54, 86, 109) 35.3%, rgb(50, 81, 105) 45.1%, rgb(45, 78, 102) 54.9%, rgb(43, 75, 100) 64.7%, rgb(41, 73, 98) 74.4%, rgb(40, 73, 97) 84.2%, rgb(39, 72, 97) 94.0%);
+  --g-parivesh-wide2: linear-gradient(148.47514deg, rgb(107, 208, 229) 6.0%, rgb(99, 206, 228) 15.8%, rgb(89, 203, 227) 25.6%, rgb(80, 201, 225) 35.3%, rgb(74, 198, 224) 45.1%, rgb(67, 195, 224) 54.9%, rgb(63, 194, 223) 64.7%, rgb(58, 193, 222) 74.4%, rgb(54, 191, 221) 84.2%, rgb(50, 191, 221) 94.0%);
+  --g-parivesh: linear-gradient(127.96481deg, rgb(108, 231, 223) 6.0%, rgb(101, 230, 221) 15.8%, rgb(92, 229, 220) 25.6%, rgb(83, 227, 218) 35.3%, rgb(75, 226, 216) 45.1%, rgb(67, 225, 214) 54.9%, rgb(58, 223, 212) 64.7%, rgb(50, 222, 211) 74.4%, rgb(50, 222, 211) 84.2%, rgb(50, 222, 211) 94.0%);
+  --g-reports: linear-gradient(127.96481deg, rgb(108, 231, 222) 6.0%, rgb(101, 230, 221) 15.8%, rgb(92, 229, 220) 25.6%, rgb(84, 227, 218) 35.3%, rgb(75, 226, 216) 45.1%, rgb(67, 225, 214) 54.9%, rgb(58, 223, 212) 64.7%, rgb(50, 222, 211) 74.4%, rgb(50, 222, 211) 84.2%, rgb(50, 222, 211) 94.0%);
+  --g-parivesh-wide: linear-gradient(143.78207deg, rgb(108, 209, 230) 6.0%, rgb(100, 207, 229) 15.8%, rgb(92, 204, 228) 25.6%, rgb(83, 202, 226) 35.3%, rgb(75, 199, 225) 45.1%, rgb(67, 196, 224) 54.9%, rgb(58, 194, 222) 64.7%, rgb(50, 191, 221) 74.4%, rgb(50, 191, 221) 84.2%, rgb(50, 191, 221) 94.0%);
+  --g-followup: linear-gradient(127.96481deg, rgb(119, 155, 159) 6.0%, rgb(114, 149, 155) 15.8%, rgb(107, 144, 149) 25.6%, rgb(100, 138, 143) 35.3%, rgb(93, 131, 138) 45.1%, rgb(86, 126, 133) 54.9%, rgb(79, 120, 128) 64.7%, rgb(72, 115, 122) 74.4%, rgb(72, 115, 122) 84.2%, rgb(72, 115, 122) 94.0%);
+  --g-species: linear-gradient(127.96481deg, rgb(82, 156, 118) 6.0%, rgb(70, 149, 109) 15.8%, rgb(59, 143, 99) 25.6%, rgb(47, 136, 90) 35.3%, rgb(35, 129, 81) 45.1%, rgb(23, 122, 72) 54.9%, rgb(12, 116, 62) 64.7%, rgb(0, 109, 53) 74.4%, rgb(0, 109, 53) 84.2%, rgb(0, 109, 53) 94.0%);
+  --g-diet: linear-gradient(127.96481deg, rgb(252, 148, 125) 6.0%, rgb(252, 141, 116) 15.8%, rgb(251, 133, 108) 25.6%, rgb(251, 126, 99) 35.3%, rgb(251, 119, 90) 45.1%, rgb(251, 112, 81) 54.9%, rgb(250, 104, 73) 64.7%, rgb(250, 97, 64) 74.4%, rgb(250, 97, 64) 84.2%, rgb(250, 97, 64) 94.0%);
+  --g-hospital: linear-gradient(127.96481deg, rgb(103, 137, 143) 6.0%, rgb(93, 129, 136) 15.8%, rgb(82, 121, 128) 25.6%, rgb(72, 113, 121) 35.3%, rgb(62, 105, 113) 45.1%, rgb(52, 97, 106) 54.9%, rgb(41, 89, 98) 64.7%, rgb(31, 81, 91) 74.4%, rgb(31, 81, 91) 84.2%, rgb(31, 81, 91) 94.0%);
+
+  /* ── the overlay's own numbers ─────────────────────────────────────────
+     Read off the recordings, then rounded to something a designer can say
+     out loud. `--veil-blur` is the end of the ramp; the veil animates 0 → it. */
+  --veil-blur: 12px;                  /* 18 was mush at 1024 — the reference */
+                                      /* still lets you read the page behind  */
+  --veil-dim:  rgba(10, 38, 44, .30);
+  --veil-back: .972;                  /* Zomato scales the page to ≈.94 at   */
+                                      /* phone size; on a 1024 canvas that   */
+                                      /* much travel reads as a glitch, so   */
+                                      /* the same GESTURE at tablet amplitude */
+  --fab-size:  64px;
+  --fab-edge:  32px;                  /* = --pad-page at the 1024 reference  */
+  --tile:      208px;
+  --gap:       16px;
+  --speed:     1;                     /* the slow-motion control divides in  */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font); background: #0E1A1D; color: #E7F1F2; }
+
+/* ══ mockup chrome ═════════════════════════════════════════════════════ */
+.mk {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+  padding: 14px 20px;
+  background: rgba(14, 26, 29, .88);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, .10);
+}
+.mk h1 { margin: 0 8px 0 0; font-size: 15px; font-weight: 700; letter-spacing: .01em; }
+.mk h1 span { color: #6FD6CE; font-weight: 500; }
+.seg { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, .07); }
+.seg button {
+  appearance: none; border: 0; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600;
+  color: #A9C0C3; background: transparent; padding: 7px 14px; border-radius: 999px;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.seg button:hover { color: #E7F1F2; }
+.seg button[aria-pressed="true"] { background: #14C7BC; color: #05282B; }
+.mk label { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: #A9C0C3; cursor: pointer; }
+.mk .hint { margin-left: auto; font-size: 12px; color: #6C8489; }
+
+/* ══ the stage ═════════════════════════════════════════════════════════ */
+.stage { display: grid; justify-items: center; padding: 26px 20px 60px; }
+.blurb {
+  width: min(1024px, 100%); margin: 0 0 18px; padding: 14px 18px;
+  border-radius: 14px; background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .08);
+  font-size: 13px; line-height: 1.55; color: #B9CDCF;
+}
+.blurb b { color: #6FD6CE; font-weight: 600; }
+.blurb code { font-family: var(--font-num); color: #E7F1F2; }
+
+.device {
+  position: relative; width: var(--w, 1024px); max-width: 100%;
+  /* AN ACTUAL IPAD, BOTH WAYS ROUND — 1024×768 landscape and 768×1024
+     portrait. A FAB is judged by how far it is from the corner of a real
+     device, so the frame has to be one. */
+  height: var(--h, 768px); overflow: hidden;
+  border-radius: 26px; background: #FFF;
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .07);
+  transition: width var(--t-slow) var(--ease), height var(--t-slow) var(--ease);
+  /* the veil and the tray are `position:absolute` against THIS, which is what
+     makes the whole thing droppable into the app as one component later */
+  isolation: isolate;
+}
+
+/* ══ the home page under the blur ══════════════════════════════════════
+   A faithful reduction of index.html at the 1024 reference: the mint wash,
+   the greeting, the search, the announcement, the observation rail, the
+   module grid at its real gradients. It scrolls, so the blur is tested over
+   photographs and over flat colour both. */
+.app {
+  position: absolute; inset: 0; overflow: auto; background: var(--page-bg);
+  transform-origin: 50% 62%;
+  transition: transform var(--t-sheet) var(--ease-sheet);
+  will-change: transform;
+}
+.is-open .app { transform: scale(var(--veil-back)); }
+.app::-webkit-scrollbar { width: 0; }
+
+.panel { padding: 0 32px 40px; }
+.top {
+  padding: 26px 32px 20px;
+  background: url('../assets/img/foliage.png') right -40px top -30px / 420px auto no-repeat, transparent;
+}
+.greet { font-family: var(--font-greet); font-size: 24px; color: var(--c-secondary-dark); }
+.name  { font-family: var(--font-greet); font-size: 32px; font-weight: 500; color: var(--ink); margin-top: 2px; }
+.searchrow { display: flex; gap: 12px; margin-top: 18px; }
+.search {
+  flex: 1; height: 64px; border-radius: 999px; background: #FFF; box-shadow: var(--e1);
+  display: flex; align-items: center; gap: 12px; padding: 0 24px;
+  font-size: 18px; color: var(--ink-3);
+}
+.iconbtn {
+  width: 64px; height: 64px; border-radius: 50%; background: #FFF; box-shadow: var(--e1);
+  display: grid; place-items: center; border: 0;
+}
+.ann {
+  margin-top: 20px; border-radius: 20px; overflow: hidden; background: #E8F8F6;
+  display: grid; grid-template-columns: 1fr 300px; box-shadow: var(--e1);
+}
+.ann__in { padding: 20px 22px; }
+.ann__tag {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; color: var(--petrol-800); background: #FFF; border-radius: 999px; padding: 6px 12px 6px 6px;
+}
+.ann__tag i { width: 22px; height: 22px; border-radius: 50%; background: var(--c-secondary-dark); display: inline-block; }
+.ann__h { margin: 12px 0 8px; font-size: 22px; line-height: 1.25; color: #0F7A5A; font-weight: 700; }
+.ann__p { margin: 0; font-size: 15px; line-height: 1.5; color: #4A5C63; }
+.ann__m { margin-top: 14px; font-size: 12.5px; color: var(--ink-3); }
+.ann img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.band { display: flex; align-items: center; justify-content: space-between; margin: 26px 0 14px; }
+.band h2 { margin: 0; font-size: 22px; color: var(--ink); font-weight: 700; }
+.band a { font-size: 14px; font-weight: 600; color: var(--ui-link); text-decoration: none; }
+
+.rail { display: grid; grid-auto-flow: column; grid-auto-columns: 332px; gap: 16px; overflow: hidden; }
+.obs { border-radius: 18px; overflow: hidden; background: #FFF; box-shadow: var(--e1); }
+.obs__h { padding: 16px 18px 20px; color: #FFF; }
+.obs__h h3 { margin: 0 0 8px; font-size: 19px; }
+.obs__h p  { margin: 0; font-size: 13px; opacity: .92; }
+.obs--1 .obs__h { background: linear-gradient(135deg, #F4325B, #D81846); }
+.obs--2 .obs__h { background: linear-gradient(135deg, #FB8A6C, #F4674A); }
+.obs--3 .obs__h { background: linear-gradient(135deg, #F2B324, #E79A0C); }
+.obs__b { padding: 14px 18px 16px; font-size: 14px; line-height: 1.5; color: #435158; }
+.obs__f { display: flex; gap: 18px; padding: 0 18px 14px; font-size: 13px; color: var(--ink-3); }
+
+.hero {
+  margin: 8px 0 16px; height: 164px; border-radius: 18px; overflow: hidden; position: relative;
+  background: url('../assets/img/hero-banner.jpg') center / cover;
+}
+.hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20, 48, 32, .74), rgba(20, 48, 32, .18)); }
+.hero b { position: absolute; left: 28px; bottom: 26px; z-index: 1; font-size: 36px; color: #FFF; font-weight: 700; }
+
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; grid-auto-rows: 164px; }
+.card {
+  border-radius: 16px; position: relative; overflow: hidden; color: #FFF;
+  box-shadow: 0 1px 2px rgba(31, 65, 91, .05);
+}
+.card span { position: absolute; left: 14px; bottom: 12px; font-size: 18px; font-weight: 600; }
+.card img.g { position: absolute; left: 14px; top: 14px; width: 34px; height: 34px; }
+.card--photo { background-size: cover; background-position: center; }
+.card--photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .05), rgba(0, 0, 0, .55)); }
+.card--photo span { z-index: 1; }
+.w2 { grid-column: span 2; }
+
+/* ══ THE VEIL ══════════════════════════════════════════════════════════
+   One element doing three jobs the recordings do together: the blur ramp,
+   the dim, and the bloom out of the button's own position. It is a single
+   compositor layer, so all three ride one transition. */
+.veil {
+  position: absolute; inset: 0; z-index: 10;
+  opacity: 0; pointer-events: none;
+  background: var(--veil-dim);
+  -webkit-backdrop-filter: blur(0px) saturate(1);
+  backdrop-filter: blur(0px) saturate(1);
+  transition: opacity var(--t-sheet) var(--ease-sheet),
+              backdrop-filter var(--t-sheet) var(--ease-sheet),
+              -webkit-backdrop-filter var(--t-sheet) var(--ease-sheet);
+}
+.is-open .veil {
+  opacity: 1; pointer-events: auto;
+  -webkit-backdrop-filter: blur(var(--veil-blur)) saturate(.86);
+  backdrop-filter: blur(var(--veil-blur)) saturate(.86);
+}
+/* THE BLOOM. Zomato's wash comes OUT OF THE BUTTON, which is the whole
+   reason the gesture feels caused rather than announced. A radial gradient
+   centred on the FAB, scaled from nothing, does the same for one paint. */
+.bloom {
+  position: absolute; inset: 0; z-index: 9; pointer-events: none;
+  opacity: 0; transform: scale(.2); transform-origin: var(--ox) var(--oy);
+  background: radial-gradient(circle at var(--ox) var(--oy),
+      rgba(0, 214, 201, .40) 0%, rgba(0, 175, 214, .22) 34%, rgba(0, 171, 171, 0) 68%);
+  transition: opacity var(--t-slow) var(--ease-out), transform 520ms var(--ease-out);
+}
+.is-open .bloom { opacity: 1; transform: scale(1); }
+
+/* ══ THE FAB ═══════════════════════════════════════════════════════════ */
+.fab {
+  position: absolute; z-index: 30;
+  right: var(--fab-edge); bottom: var(--fab-edge);
+  width: var(--fab-size); height: var(--fab-size);
+  border: 0; border-radius: 50%; cursor: pointer; padding: 0;
+  background: linear-gradient(135deg, #00D6C9 0%, #00ABAB 52%, #009BB8 100%);
+  box-shadow: 0 10px 26px -6px rgba(0, 155, 154, .62), 0 2px 6px rgba(10, 38, 44, .22);
+  display: grid; place-items: center;
+  transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease),
+              background var(--t-base) var(--ease);
+}
+.fab:hover { transform: translateY(-2px) scale(1.04); }
+.fab:active { transform: scale(.94); }
+.fab:focus-visible { outline: 3px solid #FFF; outline-offset: 3px; }
+/* AT REST IT BREATHES, ONCE EVERY FIVE SECONDS. A FAB that never moves is
+   furniture; one that pulses constantly is a nag. A single ring every 5s is
+   the interval Swiggy's own centre button uses, near enough. */
+.fab__halo {
+  position: absolute; inset: -6px; border-radius: 50%; pointer-events: none;
+  border: 2px solid rgba(0, 214, 201, .55);
+  animation: halo 5s var(--ease-out) infinite;
+}
+@keyframes halo {
+  0%, 72%  { transform: scale(.86); opacity: 0; }
+  80%      { opacity: .8; }
+  100%     { transform: scale(1.5); opacity: 0; }
+}
+.is-open .fab__halo { animation: none; opacity: 0; }
+/* THE MORPH. The chat reference turns its create button into a ✕ in place —
+   the trigger and the dismissal are one control, so there is never a second
+   thing to find. Two glyphs crossfading with a 135° rotation is the cheapest
+   honest way to say that. */
+.fab__g { position: absolute; display: grid; place-items: center; transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease-out); }
+.fab__g--plus  { opacity: 1; transform: rotate(0deg) scale(1); }
+.fab__g--close { opacity: 0; transform: rotate(-135deg) scale(.6); }
+.is-open .fab { background: #FFF; box-shadow: 0 12px 30px -8px rgba(10, 38, 44, .5); }
+.is-open .fab__g--plus  { opacity: 0; transform: rotate(135deg) scale(.6); }
+.is-open .fab__g--close { opacity: 1; transform: rotate(0deg) scale(1); }
+
+/* ══ THE ACTIONS ═══════════════════════════════════════════════════════ */
+.tray {
+  position: absolute; z-index: 20; inset: 0; pointer-events: none;
+}
+.act {
+  position: absolute; pointer-events: auto; cursor: pointer;
+  border: 0; padding: 0; color: #FFF; text-align: left; font: inherit;
+  border-radius: 22px; overflow: hidden;
+  box-shadow: 0 14px 34px -12px rgba(10, 38, 44, .55);
+  opacity: 0;
+  transition: box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.act:hover  { transform: translateY(-2px) scale(1.015); box-shadow: 0 20px 44px -14px rgba(10, 38, 44, .6); }
+.act:active { transform: scale(.98); }
+.act:focus-visible { outline: 3px solid #FFF; outline-offset: 3px; }
+.act__in { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; padding: 18px 22px; }
+.act__ic { flex: none; width: 42px; height: 42px; border-radius: 14px; background: rgba(255, 255, 255, .22); display: grid; place-items: center; }
+.act__ic img { width: 26px; height: 26px; }
+.act__t { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.act__s { display: block; font-size: 12.5px; font-weight: 400; opacity: .82; margin-top: 2px; }
+
+/* P1 is a TILE, not a pill: the one action the page expects you to want is
+   the one your thumb cannot miss. Its glyph is oversized and its label sits
+   at the foot, which is the chat reference's own composition. */
+.act--tile { width: var(--tile); height: var(--tile); border-radius: 26px; }
+.act--tile .act__in { flex-direction: column; align-items: flex-start; justify-content: space-between; height: 100%; padding: 22px; gap: 0; }
+.act--tile .act__ic { width: 66px; height: 66px; border-radius: 22px; }
+.act--tile .act__ic img { width: 40px; height: 40px; }
+.act--tile .act__t { font-size: 21px; line-height: 1.2; }
+
+/* P4 is GLASS. Same size as its neighbours, a third of their weight — the
+   rank is legible before the label is read. */
+.act--glass { background: rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, .3); }
+.act--glass .act__ic { background: rgba(255, 255, 255, .2); }
+
+.rank {
+  position: absolute; z-index: 2; top: 10px; right: 12px;
+  font-family: var(--font-num); font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  padding: 3px 8px; border-radius: 999px;
+  background: rgba(0, 0, 0, .32); color: #FFF;
+  opacity: 0; transition: opacity var(--t-fast) var(--ease);
+}
+.show-rank .rank { opacity: 1; }
+
+/* ── concept 1 · CORNER BLOOM ────────────────────────────────────────────
+   Anchored to the FAB's own corner. The tile is two pill-rows tall and sits
+   INBOARD of the pills, so the shortest travel from the resting thumb reaches
+   the biggest target — which is the chat reference's arrangement read as a
+   rule rather than as a picture. */
+/* THE TWO PILLS ARE HALF THE TILE EACH, DERIVED AND NOT TYPED. They were a
+   literal 96px, which is exactly right at --tile:208 (96 + 16 + 96) and wrong
+   the moment the narrow band takes the tile to 176 — measured, the upper pill
+   dropped 16px into the lower one. The stack is the tile's height by
+   construction now, at any tile size. */
+[data-concept="bloom"] {
+  --pill:   240px;                                        /* the pills' width  */
+  --pill-h: calc((var(--tile) - var(--gap)) / 2);         /* and their height  */
+  --base:   calc(var(--fab-edge) + var(--fab-size) + 20px);
+}
+[data-concept="bloom"] .a1 { right: calc(var(--fab-edge) + var(--pill) + var(--gap)); bottom: var(--base); }
+[data-concept="bloom"] .a2 { right: var(--fab-edge); bottom: calc(var(--base) + var(--pill-h) + var(--gap)); width: var(--pill); height: var(--pill-h); }
+[data-concept="bloom"] .a3 { right: var(--fab-edge); bottom: var(--base); width: var(--pill); height: var(--pill-h); }
+[data-concept="bloom"] .a4 { right: var(--fab-edge); bottom: calc(var(--base) + var(--tile) + var(--gap)); width: calc(var(--tile) + var(--pill) + var(--gap)); height: 76px; }
+[data-concept="bloom"] .a4 .act__in { padding: 16px 22px; }
+/* THE REFERENCE'S PILLS SAY ONE THING EACH — "Ask Question", "Create Post" —
+   and that is not an omission. A pill is a target, not a description; the
+   moment it carries a second line it competes with the tile it is ranked
+   beneath. The sub-label survives only where there is room for it to be
+   read: the P1 tile, and the P4 row that has the whole width. */
+[data-concept="bloom"] .a2 .act__s,
+[data-concept="bloom"] .a3 .act__s { display: none; }
+
+/* ── concept 2 · QUARTER ARC ─────────────────────────────────────────────
+   THE TABLET IDEA. A 1024 canvas gives the bottom-right corner something a
+   phone never has: room. So the actions do not stack into a column that
+   walks up the screen — they fan out on a quarter circle whose centre is the
+   FAB, at one radius, so every target is the same thumb-sweep away and the
+   ranking is expressed by ANGLE instead of distance: P1 sits straight up the
+   short edge where the thumb rests, P4 out along the long edge where it has
+   to reach. Labels hang to the left of each disc so nothing is occluded by
+   the hand.
+
+   The geometry lives in JS because a quarter arc is trigonometry, not CSS —
+   but the RADIUS is a token, so the whole fan retunes from one number. */
+/* A FAN OF PILLS DOES NOT FIT A QUARTER CIRCLE and the first attempt proved
+   it: four 300px pills placed by their right edge on a 250px radius overlap
+   two-deep near the vertical end, because adjacent points there differ by
+   18px of y and 133 of x. So the arc carries DISCS — the thing a circle can
+   actually hold — and each disc's label sits under it, where two labels are
+   as far apart as their discs are. This is the speed dial the arc was always
+   going to have to be.
+
+   RANK IS THE DISC'S DIAMETER: 88 · 76 · 76 · 64. Size and angle say the
+   same thing twice, which is what makes the order readable at a glance
+   rather than at a read. */
+[data-concept="arc"] .act {
+  width: var(--d); height: var(--d); border-radius: 50%;
+  display: grid; place-items: center; overflow: visible;
+}
+[data-concept="arc"] .act--tile { --d: 88px; }
+[data-concept="arc"] .a2, [data-concept="arc"] .a3 { --d: 76px; }
+[data-concept="arc"] .a4 { --d: 64px; }
+[data-concept="arc"] .act__in { padding: 0; gap: 0; }
+[data-concept="arc"] .act__ic { width: 100%; height: 100%; background: none; border-radius: 50%; }
+[data-concept="arc"] .act--tile .act__ic img { width: 40px; height: 40px; }
+[data-concept="arc"] .act__ic img { width: 32px; height: 32px; }
+[data-concept="arc"] .a4 .act__ic img { width: 26px; height: 26px; }
+/* the caption rides OUTSIDE the disc, centred under it, so nothing inside the
+   circle has to shrink to make room for words */
+[data-concept="arc"] .act__t {
+  position: absolute; top: calc(100% + 9px); left: 50%; transform: translateX(-50%);
+  /* 104, NOT 132. The P1 disc sits directly above the FAB at x = width−64,
+     so a caption wider than 104 puts "Record Observation" through the right
+     wall. Wrapping to two lines costs nothing here and clipping costs the
+     word. */
+  width: max-content; max-width: 104px; text-align: center;
+  font-size: 13.5px; font-weight: 600; line-height: 1.25; color: #FFF;
+  text-shadow: 0 1px 10px rgba(6, 26, 30, .85), 0 1px 3px rgba(6, 26, 30, .6);
+}
+[data-concept="arc"] .act__s { display: none; }
+[data-concept="arc"] .rank { top: -4px; right: -6px; }
+
+/* ── concept 3 · SUMMONED DOCK ───────────────────────────────────────────
+   Swiggy carries a floating pill at the bottom of every screen. That is a
+   phone's answer to a small canvas, and it costs a strip of the page for
+   ever. This is the same shape SUMMONED: the FAB grows leftwards into it and
+   collapses back, so the tablet keeps its whole canvas until the moment it
+   does not need to.
+
+   It also blurs WITHOUT dimming, which the recordings do too — the page you
+   were on stays visibly there, which matters on a page whose job is to be
+   watched. */
+[data-concept="dock"] { --veil-dim: rgba(10, 38, 44, .06); }
+[data-concept="dock"] .dock {
+  position: absolute; z-index: 20; pointer-events: none;
+  right: calc(var(--fab-edge) + var(--fab-size) + 14px);
+  bottom: var(--fab-edge);
+  height: var(--fab-size);
+  /* WIDTH: MAX-CONTENT, AND IT IS LOAD-BEARING. An absolutely-positioned box
+     with only `right` set is shrink-to-fit against the containing block, so
+     the dock ran to the left wall and flex crushed every pill inside it into
+     an overlapping smear. It is exactly as wide as the four actions are. */
+  width: max-content; max-width: calc(100% - var(--fab-edge) * 2 - var(--fab-size) - 14px);
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px 8px 8px; border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 16px 40px -14px rgba(10, 38, 44, .5), inset 0 0 0 1px rgba(255, 255, 255, .7);
+  transform-origin: 100% 50%;
+  transform: scaleX(.04); opacity: 0;
+  transition: transform 380ms var(--ease-out), opacity 200ms var(--ease);
+}
+[data-concept="dock"].is-open .dock { transform: scaleX(1); opacity: 1; pointer-events: auto; }
+[data-concept="dock"] .dock .act {
+  /* FLEX, BECAUSE THE RANK CHIP IS A SIBLING OF THE LABEL AND NOT A LAYER.
+     Everywhere else the chip is absolutely positioned and costs nothing. In
+     the dock it has to sit IN the row, and a <button> lays its children out
+     as blocks — so with priority labels on, the chip took a line of its own
+     and pushed all four pills' contents 18px out through their own bottoms. */
+  display: flex; align-items: center;
+  position: static; flex: none; height: 48px; border-radius: 999px; box-shadow: none;
+  white-space: nowrap;
+  opacity: 0; transform: translateX(14px);
+  transition: opacity 200ms var(--ease), transform 260ms var(--ease-out);
+}
+[data-concept="dock"].is-open .dock .act { opacity: 1; transform: none; }
+[data-concept="dock"] .dock .act__in { padding: 10px 18px 10px 10px; gap: 10px; }
+[data-concept="dock"] .dock .act__ic { width: 32px; height: 32px; border-radius: 50%; }
+[data-concept="dock"] .dock .act__ic img { width: 20px; height: 20px; }
+[data-concept="dock"] .dock .act__t { font-size: 15px; }
+[data-concept="dock"] .dock .act__s { display: none; }
+[data-concept="dock"] .dock .act--tile { width: auto; height: 48px; }
+[data-concept="dock"] .dock .act--tile .act__in { flex-direction: row; align-items: center; justify-content: flex-start; height: 100%; padding: 10px 20px 10px 10px; }
+[data-concept="dock"] .dock .act--tile .act__ic { width: 32px; height: 32px; border-radius: 50%; }
+[data-concept="dock"] .dock .act--tile .act__ic img { width: 20px; height: 20px; }
+[data-concept="dock"] .dock .act--tile .act__t { font-size: 15px; }
+[data-concept="dock"] .dock .act--glass { background: rgba(31, 81, 91, .10); color: var(--petrol-800); border: 0; }
+[data-concept="dock"] .dock .act--glass .act__ic { background: rgba(31, 81, 91, .12); }
+[data-concept="dock"] .dock .act__in { align-items: center; }
+[data-concept="dock"] .dock .act__t { display: flex; align-items: center; gap: 8px; }
+[data-concept="dock"] .dock .rank { position: static; order: -1; opacity: 0; width: 0; padding: 0; overflow: hidden; }
+[data-concept="dock"].show-rank .dock .rank { opacity: 1; width: auto; padding: 3px 8px; margin-left: 2px; }
+/* PORTRAIT IS NOT A SHORTER LANDSCAPE. At 768 the four pills want 610px and
+   the dock has 642 before the rank chips are switched on, at which point the
+   last one goes through the wall. A dock is allowed to be two-tier — it is a
+   dock — so on the narrow band it wraps and grows upwards from the same
+   corner, which is also the direction the thumb is already travelling. */
+[data-w="768"][data-concept="dock"] .dock {
+  flex-wrap: wrap; justify-content: flex-end;
+  height: auto; border-radius: 34px; padding: 8px;
+  /* 420 AND NOT THE 642 THAT FITS. A wrapping flex box is as wide as it is
+     allowed to be, so at the full 642 the two rows measure 365 and 404 and
+     the dock carries 250px of empty glass on its left. Capping it near the
+     longer row is what makes it look like a dock rather than a panel. */
+  max-width: 420px;
+}
+/* the tray's absolutely-placed copies are not used by this concept */
+[data-concept="dock"] .tray > .act { display: none; }
+[data-concept="bloom"] .dock, [data-concept="arc"] .dock { display: none; }
+
+/* ══ the action colours ════════════════════════════════════════════════
+   Each action wears the gradient of the module it files into, so the overlay
+   is a continuation of the grid underneath rather than a new palette. */
+.c-observation { background: var(--g-species); }
+.c-case        { background: var(--g-medical); }
+.c-incident    { background: var(--g-mortality); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="mk">
+  <h1>FAB &amp; More Actions <span>· three concepts</span></h1>
+
+  <div class="seg" role="group" aria-label="Concept">
+    <button data-set="concept" data-val="bloom" aria-pressed="true">1 · Corner Bloom</button>
+    <button data-set="concept" data-val="arc"   aria-pressed="false">2 · Quarter Arc</button>
+    <button data-set="concept" data-val="dock"  aria-pressed="false">3 · Summoned Dock</button>
+  </div>
+
+  <div class="seg" role="group" aria-label="Width">
+    <button data-set="width" data-val="1024" aria-pressed="true">1024</button>
+    <button data-set="width" data-val="768"  aria-pressed="false">768</button>
+  </div>
+
+  <label><input type="checkbox" id="slow"> slow motion (¼×)</label>
+  <label><input type="checkbox" id="ranks"> priority labels</label>
+
+  <span class="hint">click the FAB · Esc closes</span>
+</header>
+
+<div class="stage">
+  <p class="blurb" id="blurb"></p>
+
+  <div class="device" id="device" data-concept="bloom" data-w="1024" style="--w:1024px;--h:768px">
+
+    <!-- ══ the home page, as it stands today ══════════════════════════ -->
+    <div class="app" id="app">
+      <div class="top">
+        <div class="greet">Good Morning,</div>
+        <div class="name">Sourav Tambe 👋</div>
+        <div class="searchrow">
+          <div class="search"><img src="../assets/icon/search.svg" width="24" height="24" alt="">Search “Animals”, “Users”, “Site”</div>
+          <button class="iconbtn" tabindex="-1"><img src="../assets/icon/scan.svg" width="26" height="26" alt="Scan"></button>
+        </div>
+        <div class="ann">
+          <div class="ann__in">
+            <span class="ann__tag"><i></i>ANNOUNCEMENT</span>
+            <h3 class="ann__h">World African Wild Dog Day: meet the pack this Saturday</h3>
+            <p class="ann__p">Did you know that African wild dogs are the ultimate team players? Every hunt is shared, every pup is fed first, and no member of the pack is left behind.</p>
+            <div class="ann__m">Kunal Singh · 27 Aug 2026</div>
+          </div>
+          <img src="../assets/img/hero-leopard.jpg" alt="">
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="band"><h2>Recent Observations</h2><a href="#">View All →</a></div>
+        <div class="rail">
+          <article class="obs obs--1">
+            <div class="obs__h"><h3>Deep Flank Wound</h3><p>• Open Wound  • Bleeding</p></div>
+            <div class="obs__b">Found a 6cm laceration on the left flank during the morning check, still bleeding lightly.</div>
+            <div class="obs__f"><span>♡ 12</span><span>💬 4</span></div>
+          </article>
+          <article class="obs obs--2">
+            <div class="obs__h"><h3>Metal Work</h3><p>• Rust and Corrosion  • Structural Changes</p></div>
+            <div class="obs__b">The lower rail on the north gate has rusted through where it meets the post.</div>
+            <div class="obs__f"><span>♡ 31</span><span>💬 9</span></div>
+          </article>
+          <article class="obs obs--3">
+            <div class="obs__h"><h3>Feed Refusal</h3><p>• Appetite  • Diet Change</p></div>
+            <div class="obs__b">Third morning running that she has left the meat and taken only the browse.</div>
+            <div class="obs__f"><span>♡ 8</span><span>💬 6</span></div>
+          </article>
+        </div>
+
+        <div class="band"><h2>All Modules</h2><a href="#">Edit Modules</a></div>
+        <div class="hero"><b>Antz Command Centre</b></div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+    <!-- ══ the overlay ═══════════════════════════════════════════════ -->
+    <div class="bloom" id="bloom"></div>
+    <div class="veil" id="veil"></div>
+
+    <div class="tray" id="tray"></div>
+    <div class="dock" id="dock"></div>
+
+    <button class="fab" id="fab" aria-expanded="false" aria-label="More actions">
+      <span class="fab__halo"></span>
+      <span class="fab__g fab__g--plus">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="fab__g fab__g--close">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#1F515B" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   ONE ENGINE, THREE ARRANGEMENTS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* THE FOUR ACTIONS, AND THEIR RANK. Every verb here is one the catalogue in
+   index.html already uses in a `data.actions` list, so the overlay is a
+   shortcut to work the product can already do, not a new surface with new
+   promises on it. */
+const ACTIONS = [
+  { id: 'obs',  rank: 'P1', title: 'Record Observation', sub: 'What you saw, on the round', cls: 'c-observation', icon: 'm-species.svg',       tile: true },
+  { id: 'case', rank: 'P2', title: 'New Case',           sub: 'Open a clinical record',     cls: 'c-case',        icon: 'm-medical.svg' },
+  { id: 'inc',  rank: 'P3', title: 'Report Incident',    sub: 'Safety, escape, injury',     cls: 'c-incident',    icon: 'm-security.svg' },
+  { id: 'ann',  rank: 'P4', title: 'New Announcement',   sub: 'Tell the site',              cls: 'act--glass',    icon: 'm-communication.svg' },
+];
+
+/* AN UNDERDAMPED SPRING, SAMPLED — the same five offsets js/lib/reactions.js
+   uses for a like, because the web has no spring primitive and a back-out
+   bezier overshoots once where a real spring overshoots, undershoots and
+   settles. Written as keyframes so the two files stay one motion language. */
+const SPRING = (dx, dy) => [
+  { transform: `translate(${dx}px, ${dy}px) scale(.86)`, opacity: 0,   offset: 0 },
+  { transform: `translate(${dx * .18}px, ${dy * .18}px) scale(1.04)`, opacity: 1, offset: .52 },
+  { transform: 'translate(0, 0) scale(.985)',            opacity: 1,   offset: .78 },
+  { transform: 'translate(0, 0) scale(1)',               opacity: 1,   offset: 1 },
+];
+
+/* THE CSS BLOCK AT THE FOOT OF THE STYLESHEET DOES NOT REACH THESE. A
+   `prefers-reduced-motion` rule flattens transitions and CSS animations; a
+   Web Animation is script and runs regardless. js/lib/motion.js guards its
+   own `animate()` for exactly this reason, so the mockup guards here too —
+   the actions still arrive, they just arrive without the spring. */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const device = document.getElementById('device');
+const fab    = document.getElementById('fab');
+const veil   = document.getElementById('veil');
+const bloom  = document.getElementById('bloom');
+const tray   = document.getElementById('tray');
+const dock   = document.getElementById('dock');
+const blurb  = document.getElementById('blurb');
+
+const BLURBS = {
+  bloom: '<b>1 · Corner Bloom</b> — the chat reference, adapted. The wash blooms out of the button itself (Zomato, 5.4s), the page blurs and settles back, and the FAB becomes the ✕. Priority is <b>size and reach</b>: P1 is a 208px tile inboard of the pills, so the largest target is also the nearest one.',
+  arc:   '<b>2 · Quarter Arc</b> — <b>the tablet idea.</b> A 1024 canvas has room a phone does not, so the actions fan out on one quarter circle centred on the FAB. Every target is the same thumb-sweep away and priority is expressed by <b>angle and diameter</b> at once: P1 is 88px straight up the short edge, P4 is 64px out along the long one. Captions sit under the discs, where two labels are as far apart as the discs they name.',
+  dock:  '<b>3 · Summoned Dock</b> — Swiggy carries a floating pill on every screen; a tablet should not pay that strip for ever. Here the FAB <b>grows leftwards into the dock</b> and collapses back. It blurs <b>without dimming</b>, so the page you were watching is still visibly there.',
+};
+
+/* ── the module grid under the blur ──────────────────────────────────── */
+const CARDS = [
+  ['Medical',      'g-medical',   'm-medical.svg'],
+  ['Species Management', null,    null, 'species.jpg', 2],
+  ['Hospital',     null,          null, 'hospital.jpg', 2],
+  ['Diet & Kitchen', null,        null, 'diet-kitchen.jpg', 2],
+  ['Housing',      'g-teal-card', 'm-housing.svg'],
+  ['Pharmacy',     'g-pharmacy',  'm-pharmacy.svg'],
+  ['Audit',        'g-audit',     'm-audit.svg'],
+  ['Lab',          'g-lab',       'm-lab.svg'],
+  ['Pending Approvals', 'g-approvals-wash', 'm-approvals.svg', null, 2],
+  ['Mortality',    'g-mortality', 'm-mortality.svg'],
+  ['Eggs',         'g-eggs',      'm-eggs.svg'],
+  ['Administer',   'g-administer','m-administer.svg'],
+  ['Users',        'g-users',     'm-users.svg'],
+  ['Parivesh',     'g-parivesh-wide', 'm-parivesh.svg', null, 2],
+  ['Security',     'g-security',  'm-security.svg'],
+];
+document.getElementById('grid').innerHTML = CARDS.map(([name, g, icon, photo, w]) => {
+  const style = photo ? `background-image:url('../assets/img/${photo}')` : `background:var(--${g})`;
+  return `<div class="card ${photo ? 'card--photo' : ''} ${w === 2 ? 'w2' : ''}" style="${style}">
+    ${icon ? `<img class="g" src="../assets/icon/${icon}" alt="">` : ''}<span>${name}</span></div>`;
+}).join('');
+
+/* ── the action buttons, built once and reused by all three concepts ─── */
+function build(host, list) {
+  host.innerHTML = list.map((a, i) => `
+    <button class="act ${a.tile ? 'act--tile' : ''} ${a.cls} a${i + 1}" data-i="${i}" type="button">
+      <span class="rank">${a.rank}</span>
+      <span class="act__in">
+        <span class="act__ic"><img src="../assets/icon/${a.icon}" alt=""></span>
+        <span class="act__t">${a.title}<span class="act__s">${a.sub}</span></span>
+      </span>
+    </button>`).join('');
+}
+build(tray, ACTIONS);
+build(dock, ACTIONS);
+
+/* ── concept 2's geometry ────────────────────────────────────────────────
+   A quarter circle from straight-up (−90°) to straight-left (180°), inset at
+   both ends so nothing touches an edge. The radius is measured from the FAB's
+   centre; the buttons are placed by their RIGHT edge so their labels grow
+   leftwards into the empty middle of the screen rather than off the page. */
+/* FROM STRAIGHT UP TO NEARLY STRAIGHT LEFT. Not past -90 at either end: the
+   FAB already sits 32px from the right wall, so a disc placed at -76 on a
+   250px radius has its centre 57px OUTSIDE the page. -90 → -172 keeps all
+   four inside, spaces their centres 118px apart — more than the 82px two
+   touching discs need — and leaves the last caption 20px of floor. */
+const ARC = { r: 250, from: -90, to: -172 };
+function layoutArc() {
+  const R      = getComputedStyle(device);
+  const edge   = parseFloat(R.getPropertyValue('--fab-edge'));
+  const size   = parseFloat(R.getPropertyValue('--fab-size'));
+  const cx     = device.clientWidth  - edge - size / 2;
+  const cy     = device.clientHeight - edge - size / 2;
+  const items  = [...tray.children];
+  const step   = (ARC.to - ARC.from) / (items.length - 1);
+
+  items.forEach((el, i) => {
+    const a = (ARC.from + step * i) * Math.PI / 180;
+    const x = cx + Math.cos(a) * ARC.r;
+    const y = cy + Math.sin(a) * ARC.r;
+    /* CENTRED ON THE ARC POINT, not hung off an edge — a disc has no useful
+       edge to hang from, and centring is what keeps the spacing above true. */
+    el.style.right = '';
+    el.style.left  = (x - el.offsetWidth  / 2) + 'px';
+    el.style.top   = (y - el.offsetHeight / 2) + 'px';
+  });
+}
+
+/* ── open / close ────────────────────────────────────────────────────── */
+let open = false;
+
+function speed() { return document.getElementById('slow').checked ? 4 : 1; }
+
+function setOrigin() {
+  /* the bloom starts where the button is, in the device's own coordinates */
+  const R    = getComputedStyle(device);
+  const edge = parseFloat(R.getPropertyValue('--fab-edge'));
+  const size = parseFloat(R.getPropertyValue('--fab-size'));
+  bloom.style.setProperty('--ox', (device.clientWidth  - edge - size / 2) + 'px');
+  bloom.style.setProperty('--oy', (device.clientHeight - edge - size / 2) + 'px');
+}
+
+function show() {
+  const k = speed();
+  device.style.setProperty('--t-sheet', 420 * k + 'ms');
+  device.style.setProperty('--t-base',  220 * k + 'ms');
+  device.style.setProperty('--t-slow',  320 * k + 'ms');
+  setOrigin();
+  if (device.dataset.concept === 'arc') layoutArc();
+
+  device.classList.add('is-open');
+  fab.setAttribute('aria-expanded', 'true');
+  open = true;
+
+  if (device.dataset.concept === 'dock') return;   /* the dock has its own CSS motion */
+
+  /* THE STAGGER RUNS FROM THE THUMB OUTWARDS, which is the order the eye
+     reads them in and the order the ranking claims. 55ms apart: close enough
+     to be one gesture, far enough apart to be four things. */
+  [...tray.children].forEach((el, i) => {
+    el.style.opacity = 0;
+    const fromX = device.dataset.concept === 'arc' ? 40 : 18;
+    const fromY = device.dataset.concept === 'arc' ? 30 : 26;
+    el.animate(REDUCED ? [{ opacity: 0 }, { opacity: 1 }] : SPRING(fromX, fromY), {
+      duration: REDUCED ? 1 : 460 * k, delay: REDUCED ? 0 : i * 55 * k,
+      easing: 'linear', fill: 'forwards',
+    });
+  });
+}
+
+function hide() {
+  const k = speed();
+  device.classList.remove('is-open');
+  fab.setAttribute('aria-expanded', 'false');
+  open = false;
+
+  /* A DISMISSAL IS NOT A CELEBRATION. No spring on the way out, no stagger,
+     half the duration — the same rule js/lib/reactions.js applies to UNPOP.
+     Leaving on the same spring makes a close feel like a second decision. */
+  [...tray.children].forEach((el) => {
+    el.animate([
+      { transform: 'none', opacity: 1 },
+      { transform: 'translate(10px, 12px) scale(.94)', opacity: 0 },
+    ], { duration: REDUCED ? 1 : 180 * k, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' });
+  });
+}
+
+fab.addEventListener('click', () => (open ? hide() : show()));
+veil.addEventListener('click', hide);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { hide(); fab.focus(); } });
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.act');
+  if (!b) return;
+  const a = ACTIONS[+b.dataset.i];
+  blurb.innerHTML = `<b>${a.title}</b> — in the live app this opens that flow. Nothing is wired up in a mockup.`;
+  hide();
+});
+
+/* ── the controls ────────────────────────────────────────────────────── */
+document.querySelectorAll('[data-set]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const { set, val } = btn.dataset;
+    btn.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    if (set === 'concept') {
+      hide();
+      device.dataset.concept = val;
+      blurb.innerHTML = BLURBS[val];
+      /* concept 2 places by inline style; clear it so 1 and 3 get their CSS back */
+      [...tray.children].forEach((el) => { el.style.left = el.style.right = el.style.top = ''; });
+    } else {
+      const narrow = val === '768';
+      device.dataset.w = val;             /* the device's width, not the window's — */
+      device.style.setProperty('--w', val + 'px');   /* a media query cannot see this */
+      device.style.setProperty('--h', narrow ? '1024px' : '768px');
+      /* the artboard's own tokens for the narrower band */
+      device.style.setProperty('--fab-edge', narrow ? '24px' : '32px');
+      device.style.setProperty('--tile',     narrow ? '176px' : '208px');
+      ARC.r = narrow ? 212 : 250;
+      setTimeout(() => { setOrigin(); if (device.dataset.concept === 'arc' && open) layoutArc(); }, 340);
+    }
+  });
+});
+document.getElementById('ranks').addEventListener('change', (e) => device.classList.toggle('show-rank', e.target.checked));
+
+blurb.innerHTML = BLURBS.bloom;
+setOrigin();
+addEventListener('resize', () => { setOrigin(); if (open && device.dataset.concept === 'arc') layoutArc(); });
+</script>
+</body>
+</html>
