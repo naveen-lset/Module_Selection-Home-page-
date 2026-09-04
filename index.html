@@ -705,15 +705,31 @@
      the height a module card can give away.
 
    `cqw` and not `vw` because a desktop scrollbar is part of `vw` and is not
-   part of the grid; the container is the panel, whose width IS the grid's. */
-:root { --card-ar: 1.0926829; }        /* 179.2 / 164, node 196:7384 */
+   part of the grid; the container is the modules band, whose content width IS
+   the grid's.
+
+   EVERY NUMBER IN THE CALC IS A LITERAL, AND THAT IS DELIBERATE. It read
+   `(100cqw - var(--grid-gap) * (var(--grid-cols) - 1)) / var(--grid-cols) /
+   var(--card-ar)`, which is the same arithmetic and three ways to fail on an
+   engine this cannot be tested against here: division by a substituted
+   custom property, multiplication by one, and a container unit inside a
+   custom property all have their own support histories in WebKit. If any
+   single one of them is not honoured the declaration is invalid at
+   computed-value time, `--grid-row` becomes nothing, `grid-auto-rows` falls
+   back to `auto`, and every module card collapses to the height of its own
+   label — a page with no cards on it. The band has exactly one column count,
+   so there is nothing for the variables to carry: 4 columns, 3 gaps of 16.
+   48 and 4 and the ratio are written out. 4 Sep 2026.
+
+   The container is the modules band and NOT the whole panel, for the same
+   reason: `container-type` brings layout containment with it, and there is no
+   call for the announcement deck and the observation rail to be inside a
+   containment boundary that only the grid needs. */
+:root { --card-ar: 1.0926829; }        /* 179.2 / 164, node 196:7384 — the ratio */
 @supports (container-type: inline-size) {
-  #panel-modules { container-type: inline-size; }
+  .modules-band { container-type: inline-size; }
   @media (min-width: 768px) and (max-width: 899px) {
-    #moduleGrid, .hero--estate {
-      --grid-row: calc(
-        (100cqw - var(--grid-gap) * (var(--grid-cols) - 1)) / var(--grid-cols) / var(--card-ar));
-    }
+    #moduleGrid, .hero--estate { --grid-row: calc((100cqw - 48px) / 4 / 1.0926829); }
   }
 }
 
@@ -7052,7 +7068,9 @@ body.is-site .card:active { transform: scale(.978); }
          node 152:4159 draws them. The Command Centre banner sits under the
          header at the module row's height, the first card of the section, and
          the grid follows. -->
-    <section aria-labelledby="modulesTitle">
+    <!-- `modules-band` exists for ONE reason: it is the query container the
+         grid measures itself against. See the stylesheet at --card-ar. -->
+    <section class="modules-band" aria-labelledby="modulesTitle">
       <div class="section-head section-head--home" id="modulesHead">
         <h2 class="section-head__title" id="modulesTitle">All Modules</h2>
         <div class="section-head__actions"></div>
