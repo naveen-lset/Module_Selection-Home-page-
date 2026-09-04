@@ -641,7 +641,9 @@
 @media (min-width: 768px) and (max-width: 899px) {
   :root {
     --grid-cols: 4;
-    --grid-gap:  14px;
+    /* 16, the node's own gutter, not 14. An iPad in portrait lands in this
+       band and the brief is that its spacing is Figma's. 4 Sep 2026. */
+    --grid-gap:  16px;
     --grid-row:  156px;
     --pad-page:  24px;
     --search-h:  60px;
@@ -667,6 +669,51 @@
     --grid-gap:  16px;
     --grid-row:  164px;
     --pad-page:  32px;
+  }
+}
+
+/* ══ THE CARD KEEPS ITS SHAPE AT EVERY WIDTH ══════════════════════════════
+   The bands above step the COLUMN COUNT, which is right, and pin a row
+   HEIGHT, which was not: a fixed height cannot hold a proportion across a
+   band whose columns are fluid. Measured, 4 Sep 2026 — the node's card is
+   179.2 × 164, an aspect of 1.093, and the build drew it
+
+       768px   169.5 × 156   1.09   ✓
+       834px   186   × 156   1.19   an iPad Air in portrait
+       899px   202   × 156   1.30   half again as wide as it is tall
+       900px   154   × 164   0.94   and taller than it is wide, one pixel later
+
+   so the same card was three different shapes across the range the brief
+   calls "iPad", and changed shape at the breakpoint rather than through it.
+
+   Deriving the height FROM the column width fixes all four: the row is
+   whatever keeps 1.093, so the column count is the only thing a breakpoint
+   decides. At the 1024 reference the same formula computes to exactly 164 —
+   the number it would replace — so the artboard band is untouched either way,
+   which is what makes the derivation safe to trust.
+
+   THE TABLET BAND ONLY, AND THE HOME GRID ONLY. Two limits, both earned:
+
+   · The band, because 900–1023 is a resized desktop window rather than a
+     device — every iPad is either in 768–899 (portrait) or at 1024 and above
+     (landscape), and 1024 is the artboard, where the fixed 164 is already
+     exactly right. Deriving 900–1023 as well would take the row to 141 there,
+     which is correct in shape and too short for the widget layouts that
+     `antz.allVariants()` renders into this grid to measure them.
+   · The id, because `.module-grid` is also the Site Workspace's grid, and its
+     widgets are not module cards: they carry arcs, rings and shelves that need
+     the height a module card can give away.
+
+   `cqw` and not `vw` because a desktop scrollbar is part of `vw` and is not
+   part of the grid; the container is the panel, whose width IS the grid's. */
+:root { --card-ar: 1.0926829; }        /* 179.2 / 164, node 196:7384 */
+@supports (container-type: inline-size) {
+  #panel-modules { container-type: inline-size; }
+  @media (min-width: 768px) and (max-width: 899px) {
+    #moduleGrid, .hero--estate {
+      --grid-row: calc(
+        (100cqw - var(--grid-gap) * (var(--grid-cols) - 1)) / var(--grid-cols) / var(--card-ar));
+    }
   }
 }
 
@@ -967,7 +1014,7 @@ button { font: inherit; color: inherit; }
      and editing animates it to a fixed 44px. That fixed height is wrong the
      moment the actions take a second line: the box stays 44px, `overflow:
      visible` lets the buttons paint outside it, and they land on top of the
-     drag hint.
+     first row of cards.
 
      The `--editing` class is on the selector to win on specificity rather than
      on order — this block sits in the home-chrome stylesheet and the 44px rule
@@ -979,10 +1026,6 @@ button { font: inherit; color: inherit; }
     height: auto;
     min-height: 44px;
   }
-  /* The hint is pulled up 12px to sit tight under a single-line header. Once
-     the header wraps and grows, that negative margin is 12px of collision
-     instead — measured, the actions ended 4px inside the hint's first line. */
-  body.is-editing .section-head--editing + .edit-hint { margin-top: 0; }
 }
 
 /* ── 3 · greeting ────────────────────────────────────────────────────────
@@ -1114,18 +1157,60 @@ button { font: inherit; color: inherit; }
    thing (both are how you get around, so they sit closer), 32 is the
    artboard's own page padding before the hero, and 16 is the grid gutter. */
 .search-row {
-  position: relative;
-  z-index: 1;
+  /* ═══ IT STICKS, AND IT COSTS THE RESTING PAGE NOTHING ═══════════════════
+     The field must stay reachable while the page scrolls under it. The trap
+     is that a sticky bar normally needs breathing room above and below, and
+     paying for that in the flow would push every y below it off the artboard
+     — the search row is exactly 64 tall in the node and the announcements
+     start at 228.
+
+     So the row carries 10px of padding for the sticky state and cancels it
+     with 10px of negative margin. Sticky positions the BORDER box, which
+     includes the padding; the margin only affects the flow. At rest the
+     field is still at y=140 and the deck at y=228, to the pixel. Stuck, the
+     field has 10px of glass above and below it. Nothing resizes, nothing
+     reflows: the only thing that changes across the whole transition is the
+     opacity of one backdrop layer. */
+  position: sticky;
+  top: 0;
+  /* over the page (1–6) and under the sheets (--z-sheet, 400) */
+  z-index: 20;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   /* NO MARGIN. The artboard puts 24 between the search field and the hero
      and it belongs to the Main Frame's padding-top, not to this row —
      20 here plus 32 there was 52. */
-  margin-bottom: 0;
+  padding-block: 10px;
+  margin-block: -10px;
   padding-inline: var(--pad-page);
   /* The artboard's own 8px between the field and the two buttons. */
   gap: var(--s2);
+}
+/* THE BACKDROP IS A SEPARATE LAYER SO THE TRANSITION IS ONE COMPOSITED
+   PROPERTY. Blurring or shadowing the row itself would repaint the field on
+   every frame of the fade; this paints once and cross-fades. */
+.search-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* the page's own top wash — rgba(175,239,235,.5) over white — held back to
+     78% so the blur has something to do */
+  background: rgba(215, 247, 245, .78);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-bottom: 1px solid rgba(195, 206, 199, .38);
+  box-shadow: 0 8px 20px -14px rgba(22, 55, 61, .38);
+  opacity: 0;
+  transition: opacity 260ms cubic-bezier(.22, .61, .36, 1);
+}
+.search-row.is-stuck::before { opacity: 1; }
+@supports not (backdrop-filter: blur(2px)) {
+  .search-row::before { background: rgb(215, 247, 245); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .search-row::before { transition: none; }
 }
 
 /* ══ the round control beside the field ═══════════════════════════════════
@@ -2011,6 +2096,42 @@ body.is-searching { overflow: hidden; }
   user-select: none;
   -webkit-user-select: none;
 }
+/* ══ THE BAND THE DECK SITS ON ════════════════════════════════════════════
+   Node 196:7243's announcements Main Frame (196:7748, y=204 h=312) carries a
+   FILL, and the build did not draw it: a vertical gradient from white to teal
+   held at 10%, square at the top, 32px round at the bottom, running the full
+   width of the page. It is what separates the greeting and the announcement
+   from everything below them, and without it the top of the page reads as one
+   undifferentiated wash — which is what "these things are not developed" was
+   pointing at on 4 Sep 2026.
+
+   Measured, not transcribed. Figma renders the fill at alpha 25/255, and its
+   colour ramp recovered from an isolated render of the node is #FFFFFF → about
+   #007F7F down the frame's 312px. Composited over this page's own wash that
+   predicts (206.6, 237.6, 236.8) at y=500, where the node draws (205, 238,
+   236) — so the ramp is right to within the quantisation of a 10% fill.
+
+   IT IS THE DECK'S OWN BOX, GROWN. The frame is exactly 24 above the deck and
+   24 below it, which is this element's margin and the Main Frame's padding, so
+   the band is drawn from the deck outwards rather than from a hard 312 that
+   would drift the moment --ann-h changes at a breakpoint. It bleeds the page
+   gutter on both sides to reach the edges.
+
+   Above the foliage and below the cards: `z-index: -1` puts it under the deck
+   without leaving .main-frame's stacking context, and .main-frame is already
+   above the planting. */
+.hero-stage::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: calc(var(--s6) * -1);
+  bottom: calc(var(--s6) * -1);
+  left: calc(var(--pad-page) * -1);
+  right: calc(var(--pad-page) * -1);
+  border-radius: 0 0 32px 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .1) 0%, rgba(0, 127, 127, .1) 100%);
+  pointer-events: none;
+}
 .hero-stage__deck { position: absolute; inset: 0; }
 /* a photograph is natively draggable, and a native drag cancels the pointer
    gesture — the swipe died with a `dragstart` on the image */
@@ -2022,17 +2143,27 @@ body.is-searching { overflow: hidden; }
   margin: 0;
   transform-origin: 100% 50%;
   will-change: transform, opacity;
-  transition: transform var(--t-deck) var(--ease-deck), opacity var(--t-deck) var(--ease-deck),
-              box-shadow var(--t-deck) var(--ease-deck);
+  /* TRANSFORM AND OPACITY ONLY. Both are composited, so a turn costs the GPU a
+     blend and nothing else. box-shadow used to be in this list, and animating
+     it repainted a 960px blurred shadow on every frame of every turn — one of
+     the reasons the deck stuttered on an iPad (4 Sep 2026). The shadows on the
+     two back cards are now identical, so nothing visibly snaps when a card
+     changes place. */
+  transition: transform var(--t-deck) var(--ease-deck), opacity var(--t-deck) var(--ease-deck);
 }
 .hero-stage .hero[data-pos='0']  { transform: translateX(0) scale(1); opacity: 1; z-index: 3; }
 .hero-stage .hero[data-pos='1']  { transform: translateX(var(--peek-1)) scale(var(--scale-1)); opacity: 1; z-index: 2; box-shadow: 0 1.8px 9px 0 rgba(76, 78, 100, .10); }
-.hero-stage .hero[data-pos='2']  { transform: translateX(var(--peek-2)) scale(var(--scale-2)); opacity: 1; z-index: 1; box-shadow: 0 1.6px 8px 0 rgba(76, 78, 100, .10); }
-.hero-stage .hero[data-pos='hidden'] { transform: translateX(var(--peek-2)) scale(var(--scale-2)); opacity: 0; z-index: 0; pointer-events: none; transition: none; }
-/* the card that has just been the front: slides off to the left and fades */
-.hero-stage .hero.is-leaving  { transform: translateX(-8%) scale(.98); opacity: 0; z-index: 4; pointer-events: none; }
-/* and one coming back from the left, when the deck is stepped backwards */
-.hero-stage .hero.is-entering { transform: translateX(-8%) scale(.98); opacity: 0; z-index: 4; transition: none; }
+.hero-stage .hero[data-pos='2']  { transform: translateX(var(--peek-2)) scale(var(--scale-2)); opacity: 1; z-index: 1; box-shadow: 0 1.8px 9px 0 rgba(76, 78, 100, .10); }
+/* hidden cards snap into place (a card dropped behind the deck must never be
+   seen travelling there) but may still fade, so the back sliver dims out when
+   the deck steps backwards instead of popping */
+.hero-stage .hero[data-pos='hidden'] { transform: translateX(var(--peek-2)) scale(var(--scale-2)); opacity: 0; z-index: 0; pointer-events: none; transition: opacity var(--t-deck) var(--ease-deck); }
+/* THE CARD THAT HAS JUST BEEN THE FRONT keeps going the way the finger sent it:
+   more than half its width to the left, past the page gutter, fading as it
+   goes. It used to stop at -8%, so a card swiped 25% of the way sprang BACK
+   towards the finger while it faded — the "not smooth" of 4 Sep 2026. Nothing
+   clips it and nothing is to its left, and a negative overhang never scrolls. */
+.hero-stage .hero[data-pos='gone'] { transform: translateX(-55%) scale(.96); opacity: 0; z-index: 4; pointer-events: none; }
 .hero-stage.is-dragging .hero { transition: none; }
 .hero-stage .hero[data-pos]:not([data-pos='0']) .hero__media { transform: none; }
 
@@ -2134,6 +2265,11 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .hero--slide.no-photo .ann__panel { border-radius: 30px; }
 .hero--slide[data-tone='important'] .ann__panel { background: linear-gradient(108deg, rgba(233, 51, 83, .1) 1.5%, rgba(250, 97, 64, .1) 96.9%); }
 .ann__copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; max-width: 531px; }
+/* node 159:4041, the Important variant: no photograph, and the copy FILLS the
+   panel (Figma: flex 1 0 0) instead of stopping at the 531px the photo card's
+   copy is fixed at. Capping it here left the right third of the card empty
+   and the title wrapping at "carefully to" — 4 Sep 2026 */
+.hero--slide.no-photo .ann__copy { max-width: none; flex: 1 1 auto; }
 .ann__chip {
   align-self: flex-start;
   display: inline-flex; align-items: center; gap: 8px;
@@ -2155,11 +2291,18 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   font-size: 16px; line-height: 24px; color: var(--c-on-surface-var, #44544A);
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
-.ann__meta { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-neutral-2, #7A8684); white-space: nowrap; overflow: hidden; }
+/* "Vantara admin" [4px] " • 08 Apr 2025" in the node: two runs with a 4px gap
+   and the bullet run starting with a space, so the bullet sits ~8px after the
+   name and ~4px before the date. The markup carries the spaces; no gap here. */
+.ann__meta { display: flex; align-items: center; gap: 0; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-neutral-2, #7A8684); white-space: nowrap; overflow: hidden; }
 .ann__photo { position: relative; flex: none; width: var(--ann-media); border-radius: 0 28px 28px 0; overflow: hidden; }
 .ann__photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* the like button belongs to the CARD, not the photograph: node 159:3912 puts
+   it at left 887 / top 192 inside the 952×256 inner frame, which is 17px from
+   the card's right edge and 16px from its bottom — on the Important card too,
+   where there is no photograph and it sits on the tinted panel at 50% white */
 .ann__like {
-  position: absolute; right: 17px; bottom: 16px;
+  position: absolute; right: 17px; bottom: 16px; z-index: 1;
   width: 52px; height: 52px; padding: 0; border: none; border-radius: 18px;
   display: grid; place-items: center;
   background: rgba(255, 255, 255, .25);
@@ -2168,7 +2311,9 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   cursor: pointer;
 }
 .ann__like img { display: block; width: 24px; height: 24px; }
+.hero--slide.no-photo .ann__like { background: rgba(255, 255, 255, .5); }
 .ann__like:hover { background: rgba(255, 255, 255, .4); }
+.hero--slide.no-photo .ann__like:hover { background: rgba(255, 255, 255, .7); }
 .ann__like:active { transform: scale(.96); }
 
 /* the two kinds the data no longer carries, kept drawable: see homeBanners.js */
@@ -2207,11 +2352,11 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .hero-site small { display: block; font-size: 11px; opacity: .9; }
 .hero-slide__bang { position: absolute; right: 12px; top: 12px; width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, .9); color: #2D9FD0; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
 
-@media (min-width: 768px) and (max-width: 899px) {
-  .hero-stage { --ann-h: 240px; --ann-media: 300px; }
-  .ann__title { font-size: 22px; }
-  .ann__body { -webkit-line-clamp: 2; font-size: 15px; line-height: 22px; }
-}
+/* No tablet step. Node 159:3912 has one set of metrics — 264 tall, a 365px
+   photograph, title 24, body 16/24 ×3 — and they fit from 768 up (at 768 the
+   copy is 315px wide and the two-line title clamp does the rest). A 768–899
+   override to 240/300/22/15 used to live here and was what an iPad showed
+   instead of the design — removed 4 Sep 2026. */
 /* a phone has no room for the photograph beside the copy: the panel takes
    the whole card and the type comes down a step */
 @media (max-width: 767px) {
@@ -2224,6 +2369,224 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   .ann__title { font-size: 20px; }
   .ann__body { font-size: 14px; line-height: 20px; -webkit-line-clamp: 3; }
   .ann__meta { font-size: 13px; }
+}
+
+/* ── 7c · RECENT OBSERVATIONS ── NODE 196:7243, "Current Design" (4 Sep 2026)
+   ═══════════════════════════════════════════════════════════════════════════
+   A band between the announcement deck and the modules: a section head with
+   "View All", then a horizontal rail of observation cards that runs off the
+   page's right edge. Every number below is measured off the node, not chosen.
+
+   THE RAIL BLEEDS RIGHT AND NOT LEFT. The node's container is `x=32 w=992`
+   inside a 1024 page — it starts on the page gutter and ends ON the page
+   edge, so the third card is cut and the rail reads as scrollable without a
+   scrollbar or an arrow. The negative right margin is that 32px gutter given
+   back; the matching padding puts it after the last card instead, so the end
+   of the rail is not flush against the edge of the screen.
+
+   THE CARD IS TWO BOXES THAT OVERLAP. Top section 336×225 from the card's
+   inner top; the white block 336×269.5 starting at 147 — so it covers the
+   bottom 78px of the colour, and the 24px radius on its top corners is what
+   draws the curve over the priority colour. Card 344×424.5: 147 + 269.5 = 416.5,
+   plus the 4px inset top and bottom.
+
+   THE PRIORITY COLOUR IS A BASE PLUS A 10% BLACK WASH, which is how Figma
+   composes three of the four — written that way here rather than as the
+   flattened hex, so the base stays legible against the file. High is the
+   exception and is a flat #F06D52 (240/0.9 > 255, so it cannot be a wash).  */
+.obs-band {
+  /* 48 above: 24 under the deck's Main Frame and 24 over this one.
+     44 below: 24 under the rail and 20 over the Modules head. Both collapse
+     with the neighbouring margins, so they are written as the TOTAL. */
+  margin-top: 48px;
+  margin-bottom: 44px;
+}
+.obs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  height: 29px;
+  margin-bottom: 16px;
+}
+.obs-head__title {
+  font-size: 24px; font-weight: 500; line-height: 29px; letter-spacing: 0;
+  color: var(--c-on-surface-var, #44544A);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.obs-head__all {
+  position: relative; flex: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 20px; padding: 0; border: 0; background: none;
+  font: inherit; font-size: 16px; font-weight: 500; line-height: 20px;
+  color: #006D35; cursor: pointer;
+}
+/* 20px of type is not a 44px target; the target grows, the row does not */
+.obs-head__all::after { content: ''; position: absolute; inset: -12px -10px; }
+.obs-head__all img { display: block; width: 20px; height: 20px; }
+
+.obs-rail {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  margin-right: calc(var(--pad-page) * -1);
+  padding-right: var(--pad-page);
+  /* the node draws no scrollbar; the cut card at the edge is the affordance */
+  scrollbar-width: none;
+}
+.obs-rail::-webkit-scrollbar { display: none; }
+
+.obs {
+  --obs-w: 344px;
+  flex: none;
+  width: var(--obs-w);
+  height: 424.5px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 32px;
+  background: #FFFFFF;
+  box-shadow: 0 2px 10px 0 rgba(76, 78, 100, .05);
+  overflow: hidden;
+}
+
+/* ── the coloured head ── */
+.obs__top {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border-radius: 30px 30px 0 0;
+  background: #F06D52;
+}
+/* the node's `Rectangle 34624366`: a warm blurred blob at 40%, sitting low in
+   the colour. It is one asset on every priority, so the cyan and the crimson
+   warm up towards their lower edge exactly as the artboard has them. Drawn
+   from its centre so the rotation does not move it. */
+.obs__glow {
+  position: absolute;
+  left: 215.85px; top: 80.51px;
+  width: 595.36px; height: 248.97px;
+  margin: -124.49px 0 0 -297.68px;
+  transform: rotate(1.82deg);
+  background: url("assets/icon/obs-glow.svg") 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
+}
+.obs__head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.obs__title {
+  font-size: 20px; font-weight: 500; line-height: 25px; letter-spacing: 0; color: #FFFFFF;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.obs__pri { flex: none; display: grid; place-items: center; padding: 2px; border-radius: 100px; background: #FEEFEC; }
+.obs__pri > * { display: grid; place-items: center; width: 24px; height: 24px; }
+.obs__pri span { font-size: 18px; font-weight: 600; line-height: 1; letter-spacing: -.4px; color: #FA6140; }
+.obs__pri img { display: block; width: 24px; height: 24px; }
+.obs__tags {
+  position: relative;
+  display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px 8px;
+  max-height: 38px; overflow: hidden;                 /* the node's two rows */
+  font-size: 14px; line-height: 16px; color: #FFFFFF;
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, .2));
+}
+.obs__tags span { white-space: nowrap; }
+
+/* the four priorities, node 188:6120 */
+.obs[data-priority='high']     .obs__top { background: #F06D52; }
+.obs[data-priority='critical'] .obs__top { background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), #F21037; }
+.obs[data-priority='moderate'] .obs__top { background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), #FFB71D; }
+.obs[data-priority='low']      .obs__top { background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), #0FC1E8; }
+.obs[data-priority='critical'] .obs__pri { background: #FDEBEE; }
+.obs[data-priority='moderate'] .obs__pri { background: #FFFAE2; }
+.obs[data-priority='moderate'] .obs__pri span { color: #E4B819; }
+.obs[data-priority='low']      .obs__pri { background: #E5FBFA; }
+.obs[data-priority='low']      .obs__pri span { color: #00D6C9; }
+
+/* ── the white block over it ── */
+.obs__body {
+  flex: none;
+  height: 269.5px;
+  margin-top: -78px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* 28, not the node's 32: the card's own 4px inset and `overflow: hidden`
+     already clip it to 28, and asking for 32 only adds a clipped corner. */
+  border-radius: 24px 24px 28px 28px;
+  background: #FFFFFF;
+  box-shadow: 0 2px 10px 0 rgba(76, 78, 100, .05);
+  overflow: hidden;
+}
+.obs__main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow: hidden; }
+.obs__entity { flex: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: rgba(0, 0, 0, .05); }
+.obs__thumb { flex: none; width: 44px; height: 44px; border-radius: 4.889px; object-fit: cover; display: block; background: rgba(0, 0, 0, .06); }
+.obs__ident { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.obs__aaid { font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-on-surface-var, #44544A); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.obs__aname { font-size: 14px; color: var(--c-on-surface-var, #44544A); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.obs__more { flex: none; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-on-surface-var, #44544A); }
+.obs__text { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.obs__note {
+  font-size: 16px; line-height: 24px; color: var(--c-on-surface-var, #44544A);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* the same two runs as the announcement card: name, then " • date" */
+.obs__meta { display: flex; align-items: center; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-on-surface-var, #44544A); white-space: nowrap; overflow: hidden; }
+
+/* ── the actions rail ── */
+.obs__actions {
+  flex: none;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8.5px 16px 8px;
+  border-top: .5px solid rgba(195, 206, 199, .4);
+  background: #FFFFFF;
+}
+.obs__acts { display: flex; align-items: center; gap: 8px; }
+.obs__act {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px; border: 0; border-radius: 12px; background: none;
+  font: inherit; color: inherit; cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+/* the glyph gets its own box so the spring scales the ICON and not the
+   button — a button that grows moves the count beside it */
+.obs__ico { position: relative; display: grid; place-items: center; width: 24px; height: 24px; flex: none; }
+.obs__ico img { display: block; width: 24px; height: 24px; }
+.obs__act b { font-size: 12px; font-weight: 400; line-height: 20px; color: rgba(68, 84, 74, .8); min-width: 18px; text-align: left; }
+/* the count needs somewhere for the outgoing digit to stand while it leaves */
+.obs__count { position: relative; display: inline-block; min-width: 18px; }
+.obs__count b { display: block; }
+@media (hover: hover) { .obs__act:hover { background: rgba(0, 0, 0, .04); } }
+.obs__act[aria-pressed='true'] b { color: #006D35; font-weight: 500; }
+/* NO `:active` transform on the glyph. The spring below is a Web Animation on
+   the same element and the two would compose, leaving the icon wherever the
+   arithmetic fell when the finger lifted mid-flight. One system owns scale. */
+
+/* ── the reaction burst ── amosgyamfi/open-swiftui-animations, the Pulsing
+   Hearts / Emotional Reactions family. Both are drawn from the centre of the
+   glyph box and are inert; the module that spawns them removes them. */
+.rx-ring, .rx-dot {
+  position: absolute; left: 50%; top: 50%;
+  pointer-events: none; border-radius: 50%;
+}
+.rx-ring { width: 30px; height: 30px; border: 2px solid var(--rx, #006D35); }
+.rx-dot { width: 4px; height: 4px; background: var(--rx, #006D35); }
+/* the digit on its way out, taken out of flow so it does not push its sibling */
+.rx-ghost { position: absolute; left: 0; top: 0; pointer-events: none; }
+
+/* a phone has no room for a 344px card beside the gutters; the card narrows
+   so a second one still peeks, and nothing inside it changes */
+@media (max-width: 767px) {
+  .obs { --obs-w: min(344px, calc(100vw - 72px)); }
+  .obs-head__title { font-size: 20px; line-height: 24px; }
+  .obs-head { height: 24px; }
+  .obs-band { margin-top: 40px; margin-bottom: 36px; }
 }
 
 /* ── 8 · modules section head ────────────────────────────────────────────
@@ -2272,15 +2635,18 @@ body.is-editing .section-head {
    row 44px for Add Module and Done. The Site Workspace's header keeps the
    zero-height rest state; only #modulesHead changes. */
 .section-head--home {
-  height: 24px;
-  align-items: flex-end;
+  /* 32, not 24 — node 196:7243 sets the head to 960×32 with the title at 24px
+     and the action centred in it (text y=1.5 h=29, action y=6 h=20). It was
+     24 with a 20px title, which is the earlier 154:4224 pass. 4 Sep 2026. */
+  height: 32px;
+  align-items: center;
   margin-bottom: var(--s4);
   opacity: 1;
   overflow: visible;
   pointer-events: auto;
 }
 body.is-editing .section-head--home { align-items: center; margin-bottom: var(--s2); }
-.section-head--home .section-head__title { font-size: 20px; font-weight: 500; letter-spacing: 0; line-height: 24px; color: var(--c-on-surface-var, #44544A); }
+.section-head--home .section-head__title { font-size: 24px; font-weight: 500; letter-spacing: 0; line-height: 29px; color: var(--c-on-surface-var, #44544A); }
 .section-head--home .section-head__actions { gap: var(--s3); }
 /* the resting Edit: the node's glyph (assets/icon/edit-grid.svg, exported from
    159:3755) and the word, no pill. The pencil the shared edit-mode component
@@ -2291,8 +2657,8 @@ body.is-editing .section-head--home { align-items: center; margin-bottom: var(--
 }
 .section-head--home .link-btn:not(.link-btn--done) .icon { display: none; }
 .section-head--home .link-btn:not(.link-btn--done)::before {
-  content: ''; width: 16px; height: 16px; flex: none;
-  background: url('assets/icon/edit-grid.svg') center / 16px 16px no-repeat;
+  content: ''; width: 20px; height: 20px; flex: none;   /* node 196:8083 */
+  background: url('assets/icon/edit-grid.svg') center / 20px 20px no-repeat;
 }
 .section-head--home .link-btn:not(.link-btn--done):hover { background: transparent; opacity: .82; }
 
@@ -3938,18 +4304,6 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
-
-/* ── edit-mode hint ───────────────────────────────────────────────────────*/
-.edit-hint {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-  margin: calc(var(--s3) * -1) 0 var(--s4);
-  font-size: var(--fs-label);
-  color: var(--ink-3);
-  animation: pop-in var(--t-base) var(--ease-out) both;
-}
-.edit-hint .icon { width: 15px; height: 15px; color: var(--ink-4); }
 
 
 /* ── resize control ───────────────────────────────────────────────────────
@@ -6672,6 +7026,25 @@ body.is-site .card:active { transform: scale(.978); }
       <div class="hero-stage__deck"></div>
     </div>
 
+    <!-- ══ recent observations ═════════════════════════════════════════
+         Node 196:7243, the "Current Design" of 4 Sep 2026: a band between the
+         announcements and the modules holding the newest observations as a
+         horizontal rail. The cards are rendered here by
+         js/components/RecentObservations.js from js/data/observations.js;
+         their four priority colours are node 188:6120. -->
+    <section class="obs-band" id="recentObs" aria-labelledby="obsTitle">
+      <div class="obs-head">
+        <h2 class="obs-head__title" id="obsTitle">Recent Observations</h2>
+        <!-- The node draws it and does not say where it goes; there is no
+             observations page in this build, so it is not made an anchor to
+             nowhere. It is a button that says so. -->
+        <button type="button" class="obs-head__all" id="obsViewAll">
+          View All<img src="assets/icon/arrow-right.svg" alt="" width="20" height="20">
+        </button>
+      </div>
+      <div class="obs-rail" id="obsRail" role="list"></div>
+    </section>
+
     <!-- ══ modules ═════════════════════════════════════════════════════
          The section head was zero-height at rest so the grid sat where the
          artboard puts it. Since 3 Sep 2026 it is a visible row under the
@@ -6681,7 +7054,7 @@ body.is-site .card:active { transform: scale(.978); }
          the grid follows. -->
     <section aria-labelledby="modulesTitle">
       <div class="section-head section-head--home" id="modulesHead">
-        <h2 class="section-head__title" id="modulesTitle">Modules</h2>
+        <h2 class="section-head__title" id="modulesTitle">All Modules</h2>
         <div class="section-head__actions"></div>
       </div>
     <a class="hero hero--estate" href="https://antz-command-centre-v5.vercel.app/"
@@ -19205,6 +19578,127 @@ function animate(el, keyframes, options) {
   __x.animate = animate;
 });
 
+__def('js/lib/reactions.js', function (__x, __req) {
+/**
+ * REACTIONS · how a like, a save and a count behave when they change
+ * ───────────────────────────────────────────────────────────────────────────
+ * Adopted from amosgyamfi/open-swiftui-animations — Pulsing Hearts, Emotional
+ * Reactions, the X-Like Animation, Safari-Style Add to Bookmarks and the
+ * Cross-Fade Numeric Transition. What is kept is the DESIGN of those four
+ * gestures. None of the code is, and the reasons matter:
+ *
+ *   A SPRING IS NOT AN EASING, SO IT IS WRITTEN AS KEYFRAMES. SwiftUI says
+ *   `.spring(response:dampingFraction:)` and the system integrates it. The web
+ *   has no spring primitive, and the usual substitute — a back-out bezier —
+ *   overshoots once and settles, where a real reaction overshoots, undershoots
+ *   and then settles. So `POP` is five offsets sampled off an underdamped
+ *   spring (ζ≈0.45), which is the shape those examples actually have. A single
+ *   cubic-bezier cannot express it because a bezier is monotonic in time.
+ *
+ *   THE BURST IS SIX NODES AND IT IS BUDGETED. The reference fireworks emit
+ *   dozens of particles; on a rail of six cards on an iPad that is dozens per
+ *   tap. Six radials read as the same gesture, live for 520ms and are removed
+ *   by their own `finished` promise, so nothing accumulates in the DOM.
+ *
+ *   NOTHING HERE RUNS UNDER A REDUCED-MOTION PREFERENCE. `animate()` is
+ *   already a no-op, but a burst also SPAWNS elements, so that is guarded
+ *   separately — an animation that is skipped must not leave litter behind.
+ *
+ * All three functions are safe to call on any element and return nothing; the
+ * state change is the caller's business, the motion is theirs.
+ */
+const { animate, prefersReducedMotion } = __req('js/lib/motion.js');
+
+/* an underdamped spring, sampled. 1 → squash → overshoot → settle */
+const POP = [
+  { transform: 'scale(1)',    offset: 0 },
+  { transform: 'scale(.78)',  offset: .14 },
+  { transform: 'scale(1.30)', offset: .42 },
+  { transform: 'scale(.94)',  offset: .68 },
+  { transform: 'scale(1.03)', offset: .86 },
+  { transform: 'scale(1)',    offset: 1 },
+]
+/* switching OFF is not a celebration: one quiet dip, half the time */
+const UNPOP = [
+  { transform: 'scale(1)' },
+  { transform: 'scale(.88)', offset: .45 },
+  { transform: 'scale(1)' },
+]
+
+/** The glyph springs. `on` picks the celebration or the quiet dip. */
+function pop(el, on = true) {
+  if (!el) return
+  animate(el, on ? POP : UNPOP, { duration: on ? 460 : 200, easing: 'linear' })
+}
+
+/**
+ * Six radials and a ring, from the reaction examples. Anchored on `host`,
+ * which must be positioned; the nodes are absolute inside it and remove
+ * themselves when they are done.
+ */
+function burst(host, { colour = '#006D35', radius = 15, n = 6 } = {}) {
+  if (!host || prefersReducedMotion()) return
+  const ring = document.createElement('span')
+  ring.className = 'rx-ring'
+  ring.style.setProperty('--rx', colour)
+  host.append(ring)
+  animate(ring, [
+    { transform: 'translate(-50%,-50%) scale(.35)', opacity: .55 },
+    { transform: 'translate(-50%,-50%) scale(1.9)', opacity: 0 },
+  ], { duration: 520, easing: 'cubic-bezier(.16,1,.3,1)' })
+    .finished.then(() => ring.remove()).catch(() => ring.remove())
+
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 - Math.PI / 2
+    const dot = document.createElement('span')
+    dot.className = 'rx-dot'
+    dot.style.setProperty('--rx', colour)
+    host.append(dot)
+    animate(dot, [
+      { transform: 'translate(-50%,-50%) translate(0,0) scale(.4)', opacity: 0 },
+      { transform: `translate(-50%,-50%) translate(${Math.cos(a) * radius * .55}px, ${Math.sin(a) * radius * .55}px) scale(1)`, opacity: 1, offset: .35 },
+      { transform: `translate(-50%,-50%) translate(${Math.cos(a) * radius}px, ${Math.sin(a) * radius}px) scale(.2)`, opacity: 0 },
+    ], { duration: 520, delay: i * 8, easing: 'cubic-bezier(.16,1,.3,1)' })
+      .finished.then(() => dot.remove()).catch(() => dot.remove())
+  }
+}
+
+/**
+ * A count that changes rolls: the old number leaves upwards, the new one
+ * rises into its place — the Cross-Fade Numeric Transition.
+ *
+ * THE LIVE ELEMENT TAKES THE NEW VALUE IMMEDIATELY and it is a GHOST that
+ * leaves. Doing it the other way round — swapping the text at the midpoint —
+ * means that for 110ms the element reads the old number, which is a lie to
+ * anything that asks: a screen reader, a test, the next line of code.
+ */
+function rollCount(el, next, dir = 1) {
+  if (!el) return
+  const from = el.textContent
+  if (String(next) === from) return
+  if (prefersReducedMotion()) { el.textContent = String(next); return }
+  const host = el.parentElement
+  const ghost = el.cloneNode(true)
+  ghost.setAttribute('aria-hidden', 'true')
+  ghost.classList.add('rx-ghost')
+  el.textContent = String(next)
+  host.append(ghost)                       // AFTER, so querySelector finds the live one
+  animate(ghost, [
+    { transform: 'translateY(0)', opacity: 1 },
+    { transform: `translateY(${-9 * dir}px)`, opacity: 0 },
+  ], { duration: 190, easing: 'cubic-bezier(.4,0,1,1)' })
+    .finished.then(() => ghost.remove()).catch(() => ghost.remove())
+  animate(el, [
+    { transform: `translateY(${9 * dir}px)`, opacity: 0 },
+    { transform: 'translateY(0)', opacity: 1 },
+  ], { duration: 260, easing: 'cubic-bezier(.16,1,.3,1)' })
+}
+
+  __x.pop = pop;
+  __x.burst = burst;
+  __x.rollCount = rollCount;
+});
+
 __def('js/lib/landing.js', function (__x, __req) {
 /**
  * THE LANDING · how a page of modules arrives
@@ -20271,10 +20765,10 @@ const { icon } = __req('js/icons.js');
  * original caller passes nothing.
  */
 const DEFAULT_LABELS = {
-  title:     'Modules',
+  title:     'All Modules',
+  edit:      'Edit Modules',
   editTitle: 'Edit Modules',
   add:       'Add Module',
-  hint:      'Drag cards to rearrange. Press space on a card to move it with the arrow keys.',
   entered:   'Editing modules. Drag cards to rearrange, or use the remove buttons.',
   saved:     'Layout saved.',
 }
@@ -20307,7 +20801,7 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, l
   const editBtn = document.createElement('button')
   editBtn.type = 'button'
   editBtn.className = 'link-btn'
-  editBtn.innerHTML = `${icon('pencil')}<span>Edit</span>`
+  editBtn.innerHTML = `${icon('pencil')}<span>${L.edit}</span>`
 
   const doneBtn = document.createElement('button')
   doneBtn.type = 'button'
@@ -20333,10 +20827,6 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, l
   addBtn.innerHTML = `${icon('plus')}<span>${L.add}</span>`
   addBtn.addEventListener('click', () => onAdd?.())
 
-  const hint = document.createElement('p')
-  hint.className = 'edit-hint'
-  hint.innerHTML = `${icon('grip')}<span>${L.hint}</span>`
-
   let editing = false
   let grabbed = null                // { uid, index } while a keyboard move runs
 
@@ -20353,7 +20843,6 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, l
     editBtn.replaceWith(doneBtn)
     actions.insertBefore(addBtn, doneBtn)
     head.classList.add('section-head--editing')
-    head.after(hint)
     grid.setEditing(true)
     onCommit?.(getCards(), { rerender: true })
     doneBtn.focus()
@@ -20369,7 +20858,6 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, l
     addBtn.remove()
     head.classList.remove('section-head--editing')
     doneBtn.replaceWith(editBtn)
-    hint.remove()
     grid.setEditing(false)
     onExit?.()
     editBtn.focus()
@@ -24459,12 +24947,21 @@ __def('js/data/homeBanners.js', function (__x, __req) {
  * how to draw an `insight` and a `note`, so bringing either back is one entry
  * here, not a rebuild.
  */
+/* FILLED TO THE DESIGN, 4 Sep 2026. Node 159:3912 shows a two-line title and
+   a body that runs to its third line and is cut with an ellipsis; the copy
+   here is written to that length (a body of ~230 characters fills three
+   24px lines at the 531px column), so every card carries as much as the
+   artboard's. Six cards: four with a photograph from assets/img, two without
+   — the designer's Important notice and a plain announcement — so both
+   layouts of the card are in the deck. Newest first. */
 const HOME_BANNERS = [
   {
     id: 'ann-wild-dog', kind: 'announcement', tone: 'announcement',
-    title: 'World African wild dog day', by: 'Kunal Singh', date: '27 Aug 2026',
-    body: 'Did you know that African wild dogs are the ultimate team players? ' +
-          'Every hunt is shared, every pup is fed first, and no member of the pack is left behind.',
+    title: 'World African Wild Dog Day: meet the pack this Saturday',
+    by: 'Kunal Singh', date: '27 Aug 2026',
+    body: 'Did you know that African wild dogs are the ultimate team players? Every hunt is shared, ' +
+          'every pup is fed first, and no member of the pack is left behind. Join the Carnivore Section ' +
+          'keepers at the viewing deck at 11:00 for a talk on how our pack of nine has settled in.',
     image: 'assets/img/species.jpg',
   },
   {
@@ -24472,15 +24969,46 @@ const HOME_BANNERS = [
        photograph, the red→orange tint and its diamond glyph */
     id: 'imp-safety', kind: 'announcement', tone: 'important',
     title: 'Please follow all safety protocols carefully to ensure smooth and secure daily operations',
-    by: 'Vantara admin', date: '08 Apr 2025',
+    by: 'Vantara admin', date: '26 Aug 2026',
     body: 'This is an important reminder regarding the strict adherence to all established guidelines, ' +
-          'protocols, and regulations across every section and enclosure.',
+          'protocols, and regulations across every section and enclosure. Report any hazard to your ' +
+          'section head at once, wear your issued PPE in every holding area, and never enter a night ' +
+          'house alone.',
+  },
+  {
+    id: 'ann-leopard', kind: 'announcement', tone: 'announcement',
+    title: 'Zara and Kian, our leopard cubs, go on exhibit from Monday',
+    by: 'Dr. Meera Nair', date: '24 Aug 2026',
+    body: 'After twelve weeks in the den the two Persian leopard cubs have passed their final health ' +
+          'check and will be out in the main habitat from Monday morning. Please keep the service path ' +
+          'behind the exhibit closed between 09:00 and 11:00 while they get used to the space.',
+    image: 'assets/img/hero-leopard.jpg', imagePos: '50% 30%',
+  },
+  {
+    id: 'ann-health-checks', kind: 'announcement', tone: 'announcement',
+    title: 'Quarterly health checks begin 7 September',
+    by: 'Hospital team', date: '22 Aug 2026',
+    body: 'The veterinary hospital starts the quarterly round on 7 September, section by section, ' +
+          'beginning with Hoofstock. Section heads will receive the schedule by Friday. Please have ' +
+          'weights, body-condition scores and any open medical notes updated in ANTZ before your date.',
+    image: 'assets/img/hospital.jpg',
   },
   {
     id: 'ann-orangutan', kind: 'announcement', tone: 'announcement',
-    title: 'Did you know?', by: 'Kunal Singh', date: '18 Aug 2026',
-    body: 'The orangutan is one of humankind’s closest relatives — we share nearly 97% of the same DNA.',
-    image: 'assets/img/hero-leopard.jpg', imagePos: '50% 30%',
+    title: 'Did you know? Orangutans share nearly 97% of our DNA',
+    by: 'Kunal Singh', date: '18 Aug 2026',
+    body: 'The orangutan is one of humankind’s closest relatives — we share nearly 97% of the same DNA. ' +
+          'New enrichment platforms go up in the Primate House this week; the keepers would love to ' +
+          'hear how the troop takes to them, so log what you see in the daily notes.',
+  },
+  {
+    id: 'ann-kitchen', kind: 'announcement', tone: 'announcement',
+    title: 'Fresh browse deliveries move to a morning schedule',
+    by: 'Diet Kitchen', date: '12 Aug 2026',
+    body: 'From next week the browse and produce delivery arrives at the Diet Kitchen at 06:30 instead ' +
+          'of 14:00, so every section collects its rations before the first feed. Diet change requests ' +
+          'still need a nutritionist’s sign-off in ANTZ by 16:00 the day before.',
+    image: 'assets/img/diet-kitchen.jpg',
   },
 ]
   __x.HOME_BANNERS = HOME_BANNERS;
@@ -24508,6 +25036,7 @@ __def('js/components/HeroBanners.js', function (__x, __req) {
 const { HOME_BANNERS } = __req('js/data/homeBanners.js');
 const { icon } = __req('js/icons.js');
 const { prefersReducedMotion } = __req('js/lib/motion.js');
+const { pop, burst } = __req('js/lib/reactions.js');
 
 const PEEK = 3          // front card + the two behind it are positioned; the rest are hidden
 const SWIPE = .18       // fraction of the width a drag must cover to turn the deck
@@ -24538,14 +25067,16 @@ function renderSlide(item) {
           `<h2 class="ann__title">${esc(item.title)}</h2>` +
           `<p class="ann__body">${esc(item.body)}</p>` +
         `</div>` +
-        `<div class="ann__meta"><span>${esc(item.by)}</span><span aria-hidden="true">•</span><span>${esc(item.date || item.ago || '')}</span></div>` +
+        `<div class="ann__meta"><span>${esc(item.by)}</span><span aria-hidden="true">&nbsp;&nbsp;•&nbsp;</span><span>${esc(item.date || item.ago || '')}</span></div>` +
       `</div></div>` +
       (item.image
         ? `<div class="ann__photo">` +
-            `<img src="${esc(item.image)}" alt=""${item.imagePos ? ` style="object-position:${esc(item.imagePos)}"` : ''}>` +
-            `<button type="button" class="ann__like" aria-label="Like"><img src="assets/icon/ann-like.svg" alt=""></button>` +
+            `<img src="${esc(item.image)}" alt="" decoding="async"${item.imagePos ? ` style="object-position:${esc(item.imagePos)}"` : ''}>` +
           `</div>`
-        : '')
+        : '') +
+      /* on the card, not in the photograph: the node draws it on both variants */
+      `<button type="button" class="ann__like" aria-pressed="false" aria-label="Like this announcement">` +
+        `<img src="assets/icon/ann-like.svg" alt=""></button>`
   } else if (item.kind === 'insight') {
     el.innerHTML =
       `<div class="hero-slide__media hero-slide__stats">` +
@@ -24599,52 +25130,146 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
 
   /* ── state ────────────────────────────────────────────────────────────── */
   let active = 0
-  let leaving = null      // the card animating off; place() leaves it alone until it lands
+  let leaving = null      // the card animating off; arrange() leaves it alone until it lands
 
-  function place() {
+  /* where every card rests for the current `active`; nothing else */
+  function arrange() {
     slides.forEach((s, i) => {
       if (s === leaving) return
       const k = (i - active + n) % n
       s.dataset.pos = k < PEEK ? String(k) : 'hidden'
       s.setAttribute('aria-hidden', String(k !== 0))
     })
+  }
+  /* a new slide is in front: arrange, name it, and start its dwell */
+  function place() {
+    arrange()
     root.setAttribute('aria-label', `Announcements, ${active + 1} of ${n}: ${items[active].title}`)
     restartDwell()
   }
 
-  function go(to, dir) {
+  /* ── geometry ─────────────────────────────────────────────────────────
+     ONE PATH FOR THE FINGER AND THE TRANSITION. A turn moves every visible
+     card one step along the stack: front → gone (off to the left), 1 → front,
+     2 → 1, hidden → 2; backwards is the same path reversed, with the previous
+     card coming in from the left. While a finger is down, `frame(dx)` draws
+     the deck part-way along that path, inline, with transitions off. On
+     release the inline styles are dropped and the CSS resting states take
+     over — and because a CSS transition starts from the last computed style,
+     every card continues from exactly where the finger left it. There is no
+     second path to jump to, which is what the 4 Sep 2026 "not smooth" was:
+     the front card used to be released towards -8% when the finger had
+     already taken it past -20%, and a card pulled back in was reset to its
+     start and faded in a second time. */
+  const GONE = .55                    // how far left, as a fraction of the width, a card is gone
+  const T_DECK = 560                  // matches --t-deck in the stylesheet
+  const FLICK = .45                   // px per ms: faster than this turns the deck however short the drag
+  let m = null                        // measured on pointerdown: width, peeks, scales
+  const measure = () => {
+    const cs = getComputedStyle(root)
+    const w = root.clientWidth || 1
+    m = {
+      w,
+      peek:  [0, parseFloat(cs.getPropertyValue('--peek-1')) || 4, parseFloat(cs.getPropertyValue('--peek-2')) || 10],
+      scale: [1, parseFloat(cs.getPropertyValue('--scale-1')) || .909, parseFloat(cs.getPropertyValue('--scale-2')) || .795],
+    }
+    return m
+  }
+  const lerp = (a, b, p) => a + (b - a) * p
+  const mix = (a, b, p) => ({ x: lerp(a.x, b.x, p), s: lerp(a.s, b.s, p), o: lerp(a.o, b.o, p) })
+  /* the resting state of stack position k: -1 gone, 0 front, 1, 2, 3+ hidden */
+  const rest = (k) => {
+    if (k < 0) return { x: -GONE * m.w, s: .96, o: 0 }
+    if (k > 2) return { x: m.peek[2], s: m.scale[2], o: 0 }
+    return { x: m.peek[k], s: m.scale[k], o: 1 }
+  }
+  const put = (el, st, z) => {
+    el.style.transform = `translateX(${st.x}px) scale(${st.s})`
+    el.style.opacity = String(st.o)
+    el.style.zIndex = z == null ? '' : String(z)
+  }
+  const clear = (el) => { el.style.transform = ''; el.style.opacity = ''; el.style.zIndex = '' }
+  const clearAll = () => { for (const s of slides) clear(s) }
+  /* set an element's inline state with its transition off, so the NEXT change
+     animates from here */
+  const jump = (el, st, z) => {
+    el.style.transition = 'none'
+    put(el, st, z)
+    void el.offsetWidth
+    el.style.transition = ''
+  }
+
+  /* the deck part-way through a turn: dx is the finger's travel, left negative */
+  function frame(dx) {
+    const p = Math.min(1, Math.abs(dx) / (GONE * m.w))
+    if (dx <= 0) {
+      /* forward: the front card follows the finger, thinning as it goes;
+         the cards behind close up one step */
+      for (let k = 0; k < Math.min(n, PEEK + 1); k++) {
+        const el = slides[(active + k) % n]
+        if (el === leaving) continue
+        if (k === 0) put(el, { x: dx, s: lerp(1, .96, p), o: 1 - p * p }, 4)
+        else put(el, mix(rest(k), rest(k - 1), p), 4 - k)
+      }
+    } else {
+      /* back: the previous card slides in from the left over the deck, and
+         the stack steps back one place behind it */
+      const prev = slides[(active - 1 + n) % n]
+      put(prev, { x: -GONE * m.w + dx, s: lerp(.96, 1, p), o: Math.min(1, .35 + p) }, 4)
+      for (let k = 0; k < Math.min(n - 1, PEEK); k++) {
+        const el = slides[(active + k) % n]
+        if (el === prev || el === leaving) continue
+        put(el, mix(rest(k), rest(k + 1), p), 3 - k)
+      }
+    }
+  }
+
+  /* the front card has gone: drop it behind the deck without a visible journey.
+     Its transform snaps to its new resting place while still invisible; only
+     its opacity is allowed to fade back in (which matters with three slides,
+     where the card that just left is the next back sliver). */
+  let landTimer = 0
+  function land(old) {
+    if (leaving !== old) return
+    leaving = null
+    clearTimeout(landTimer)
+    const k = (slides.indexOf(old) - active + n) % n
+    jump(old, { ...rest(k), o: 0 })
+    arrange()
+    clear(old)
+    root.style.removeProperty('--t-deck')
+  }
+
+  function go(to, dir, { from = null } = {}) {
     const next = (to + n) % n
     if (next === active || n < 2) return
     const forward = dir ?? (((next - active + n) % n) <= n / 2)
     const old = slides[active]
     if (!reduced) {
+      if (!from) measure()          // a finger measured already; keys and the dwell measure now
       if (forward) {
-        /* the front card leaves to the left; when it has gone it is dropped
-           behind the deck without a transition */
+        /* the front card leaves to the left, continuing from the finger if
+           there was one, and is dropped behind the deck when it has gone */
+        if (leaving && leaving !== old) land(leaving)
         leaving = old
-        old.dataset.pos = 'leaving'
-        old.classList.add('is-leaving')
-        let landed = false
-        const land = () => {
-          if (landed) return
-          landed = true
-          old.classList.remove('is-leaving')
-          if (leaving === old) leaving = null
-          place()
-        }
-        old.addEventListener('transitionend', land, { once: true })
-        setTimeout(land, 700)
-      } else {
-        /* stepping back: the returning card starts off to the left, then
-           takes the front in one transition */
-        const inc = slides[next]
-        inc.classList.add('is-entering')
-        void inc.offsetWidth
-        inc.classList.remove('is-entering')
+        old.dataset.pos = 'gone'
+        /* the card's own transition, not a child's bubbling up (a hover scale
+           on the photograph would otherwise land the card mid-flight) */
+        old.addEventListener('transitionend', function onEnd(e) {
+          if (e.target !== old) return
+          old.removeEventListener('transitionend', onEnd)
+          land(old)
+        })
+        landTimer = setTimeout(() => land(old), (parseFloat(root.style.getPropertyValue('--t-deck')) || T_DECK) + 150)
+      } else if (!from) {
+        /* stepping back with no finger: the returning card starts off to the
+           left, then takes the front in one transition */
+        jump(slides[next], { ...rest(-1), o: .35 }, 4)
       }
     }
     active = next
     place()
+    if (!reduced && !forward && !from) clear(slides[next])
   }
 
   /* the dwell: see the stylesheet. The fill ends, the deck turns. */
@@ -24652,12 +25277,33 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
     if (e.animationName === 'hero-dot-fill' && !reduced) go(active + 1, true)
   })
 
+  /* ── the like on the card ────────────────────────────────────────────────
+     The node draws this button and until now it did nothing at all. It has no
+     count and nowhere to post to, but whether the reader liked the thing is
+     the reader's own state and can be held here honestly — so it toggles, and
+     it toggles with the same spring and burst the observation cards use rather
+     than a second dialect of the same gesture. Delegated, because the deck
+     re-renders nothing and the buttons outlive any one listener. */
+  const likedSlides = new WeakSet()
+  root.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ann__like')
+    if (!btn || !root.contains(btn)) return
+    e.stopPropagation()
+    const on = !likedSlides.has(btn)
+    on ? likedSlides.add(btn) : likedSlides.delete(btn)
+    btn.setAttribute('aria-pressed', String(on))
+    pop(btn.querySelector('img'), on)
+    /* white, not green: it sits on a photograph */
+    if (on) burst(btn, { colour: '#FFFFFF', radius: 22, n: 6 })
+  })
+
   /* ── swipe ────────────────────────────────────────────────────────────── */
   let drag = null
+  let raf = 0
   let swallowClick = false
   root.addEventListener('pointerdown', (e) => {
-    if ((e.pointerType === 'mouse' && e.button !== 0) || e.target.closest('.hero-dots, .ann__like')) return
-    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, moved: false }
+    if (n < 2 || (e.pointerType === 'mouse' && e.button !== 0) || e.target.closest('.hero-dots, .ann__like')) return
+    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, vx: 0, lastX: e.clientX, lastT: e.timeStamp, moved: false }
   })
   root.addEventListener('pointermove', (e) => {
     if (!drag || e.pointerId !== drag.id) return
@@ -24666,39 +25312,43 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
       /* a vertical gesture is a page scroll, not a swipe; leave it alone */
       if (Math.abs(drag.dx) < 8 || Math.abs(drag.dx) < Math.abs(e.clientY - drag.y0)) return
       drag.moved = true
+      measure()
       root.classList.add('is-dragging')
       try { root.setPointerCapture(drag.id) } catch { /* fine without */ }
     }
     e.preventDefault()
-    const w = root.clientWidth || 1
-    const p = Math.min(1, Math.abs(drag.dx) / w)
-    const cs = getComputedStyle(root)
-    const peek = parseFloat(cs.getPropertyValue('--peek-1')) || 4
-    const sc = parseFloat(cs.getPropertyValue('--scale-1')) || .909
-    const cur = slides[active]
-    cur.style.transform = `translateX(${drag.dx}px) scale(${1 - p * .02})`
-    cur.style.opacity = String(1 - p * .3)
-    if (drag.dx < 0) {
-      const nx = slides[(active + 1) % n]
-      nx.style.transform = `translateX(${peek - peek * p}px) scale(${sc + (1 - sc) * p})`
-    } else {
-      const pv = slides[(active - 1 + n) % n]
-      pv.style.zIndex = '4'
-      pv.style.opacity = String(p)
-      pv.style.transform = `translateX(${-8 + 8 * p}%) scale(${.98 + .02 * p})`
-    }
+    /* velocity, smoothed over the last few events, for the flick test */
+    const dt = e.timeStamp - drag.lastT
+    if (dt > 0) drag.vx = drag.vx * .6 + ((e.clientX - drag.lastX) / dt) * .4
+    drag.lastX = e.clientX; drag.lastT = e.timeStamp
+    /* one draw per frame, however many events the pointer sends */
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (drag) frame(drag.dx) })
   })
   const release = (e) => {
     if (!drag || e.pointerId !== drag.id) return
     const d = drag
     drag = null
-    root.classList.remove('is-dragging')
-    for (const s of slides) { s.style.transform = ''; s.style.opacity = ''; s.style.zIndex = '' }
     if (!d.moved) return
     swallowClick = true
     setTimeout(() => { swallowClick = false }, 0)
-    const w = root.clientWidth || 1
-    if (Math.abs(d.dx) > w * SWIPE) go(active + (d.dx < 0 ? 1 : -1), d.dx < 0)
+    /* draw the finger's final position and let the browser take it as the
+       start of what follows — still with transitions off */
+    if (raf) { cancelAnimationFrame(raf); raf = 0 }
+    frame(d.dx)
+    void root.offsetWidth
+    root.classList.remove('is-dragging')
+    clearAll()
+    const p = Math.min(1, Math.abs(d.dx) / (GONE * m.w))
+    const flick = Math.abs(d.vx) > FLICK && Math.sign(d.vx) === Math.sign(d.dx) && Math.abs(d.dx) > 16
+    const turn = Math.abs(d.dx) > m.w * SWIPE || flick
+    /* the time left is the distance left: a card three quarters of the way
+       there does not take the full 560ms to arrive, and a flick is quicker */
+    let t = turn ? Math.max(200, T_DECK * (1 - p)) : Math.max(180, 320 * p)
+    if (flick) t = Math.min(t, 320)
+    root.style.setProperty('--t-deck', `${Math.round(t)}ms`)
+    if (turn) go(active + (d.dx < 0 ? 1 : -1), d.dx < 0, { from: d })
+    /* a forward turn resets --t-deck when its card lands; the others here */
+    if (!turn || d.dx > 0) setTimeout(() => { if (!leaving) root.style.removeProperty('--t-deck') }, t + 50)
   }
   root.addEventListener('pointerup', release)
   root.addEventListener('pointercancel', release)
@@ -24720,6 +25370,269 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   return { go, get active() { return active }, root }
 }
   __x.createHeroBanners = createHeroBanners;
+});
+
+__def('js/data/observations.js', function (__x, __req) {
+/**
+ * RECENT OBSERVATIONS — the rail's content
+ * ───────────────────────────────────────────────────────────────────────────
+ * An observation is what a keeper or a vet writes down about an animal or a
+ * structure: what they saw, where, how urgent, and who else it involves. Node
+ * 196:7243 draws four of them on the home page; there is no observations
+ * service in this prototype, so this is the seed the rail reads until there
+ * is, and it is written as real site copy rather than lorem.
+ *
+ * `priority` is one of the four the design defines — critical, high, moderate,
+ * low — and nothing else; RecentObservations.js falls back to `low` for an
+ * unknown value rather than drawing an uncoloured card.
+ *
+ * `more` is how many OTHER animals the observation covers beyond the one
+ * named, drawn as "+2". Zero means the row shows nothing there.
+ */
+const OBSERVATIONS = [
+  {
+    id: 'obs-1', priority: 'critical',
+    title: 'Deep Flank Wound',
+    tags: ['Open Wound', 'Bleeding'],
+    animal: { id: 'AAID : 87546/24', name: 'Big Bull', photo: 'assets/img/obs-animal.png' },
+    more: 2,
+    body: 'Found a 6cm laceration on the left flank during the morning check, still bleeding lightly. ' +
+          'Separated him into the night house and called the duty vet. Needs cleaning, a suture and a ' +
+          'tetanus cover before he goes back out with the herd.',
+    by: 'Ramesh Patil', date: '03 Sep 2026', likes: 12, comments: 4,
+  },
+  {
+    id: 'obs-2', priority: 'high',
+    title: 'Metal Work',
+    tags: ['Rust and Corrosion', 'Structural Changes'],
+    animal: { id: 'ENC : HB-04', name: 'Hoofstock Barn', photo: 'assets/img/hospital.jpg' },
+    more: 0,
+    body: 'The lower rail on the north gate has rusted through where it meets the post, and the whole ' +
+          'panel now flexes when the animals lean on it. It will not hold a charge much longer. ' +
+          'Raised with maintenance; the paddock stays closed until the panel is replaced.',
+    by: 'Anita Deshmukh', date: '02 Sep 2026', likes: 31, comments: 9,
+  },
+  {
+    id: 'obs-3', priority: 'moderate',
+    title: 'Feed Refusal',
+    tags: ['Appetite', 'Diet Change'],
+    animal: { id: 'AAID : 44120/25', name: 'Zara', photo: 'assets/img/hero-leopard.jpg' },
+    more: 1,
+    body: 'Third morning running that she has left the meat and taken only the browse. Weight is steady ' +
+          'and she is bright and active otherwise, so this is not urgent yet. Nutrition are trialling a ' +
+          'change of protein from Monday and want the intake logged at every feed.',
+    by: 'Dr. Meera Nair', date: '01 Sep 2026', likes: 8, comments: 6,
+  },
+  {
+    id: 'obs-4', priority: 'low',
+    title: 'Coat Condition',
+    tags: ['Grooming', 'Routine Check'],
+    animal: { id: 'AAID : 21873/23', name: 'Kanha', photo: 'assets/img/species.jpg' },
+    more: 3,
+    body: 'Slight thinning across the shoulders on four of the herd, most likely the seasonal moult ' +
+          'rather than anything to treat. Skin underneath is clean with no scurf and no scratching. ' +
+          'Worth a photograph each week so we can tell a moult from a problem if it spreads.',
+    by: 'Suresh Yadav', date: '30 Aug 2026', likes: 5, comments: 2,
+  },
+  {
+    id: 'obs-5', priority: 'high',
+    title: 'Water Line Leak',
+    tags: ['Utilities', 'Enclosure'],
+    animal: { id: 'ENC : PR-02', name: 'Primate House', photo: 'assets/img/diet-kitchen.jpg' },
+    more: 0,
+    body: 'The supply to the drinker in the outdoor run has been dripping since Tuesday and has turned ' +
+          'the ground under it to mud. The troop is walking through it to reach the water. Isolated the ' +
+          'line at the stopcock and moved them to the tub until it is fixed.',
+    by: 'Anita Deshmukh', date: '29 Aug 2026', likes: 17, comments: 3,
+  },
+  {
+    id: 'obs-6', priority: 'moderate',
+    title: 'Intermittent Lameness',
+    tags: ['Gait', 'Left Hind'],
+    animal: { id: 'AAID : 66301/24', name: 'Moti', photo: 'assets/img/obs-animal.png' },
+    more: 0,
+    body: 'Favouring the left hind for the first few strides after standing, then walking it off within ' +
+          'a minute. No heat, no swelling and no reaction to pressure on the hoof. Booked for a proper ' +
+          'gait assessment on Thursday; keep him off the hard standing until then.',
+    by: 'Dr. Meera Nair', date: '28 Aug 2026', likes: 9, comments: 5,
+  },
+]
+  __x.OBSERVATIONS = OBSERVATIONS;
+});
+
+__def('js/components/RecentObservations.js', function (__x, __req) {
+/**
+ * THE RECENT OBSERVATIONS RAIL — node 196:7243, cards from node 188:6120
+ * ───────────────────────────────────────────────────────────────────────────
+ * A horizontal rail of observation cards under the announcement deck. Each
+ * card is two overlapping boxes: a priority-coloured head carrying the title
+ * and the tags, and a white block over its lower 78px carrying the animal,
+ * the note and the actions. All of that geometry is in the stylesheet at
+ * `.obs`; this file renders the content into it and owns two behaviours.
+ *
+ * WHAT IS DELIBERATELY NOT HERE. No scroll handler and no arrows: the rail is
+ * a plain overflow container, so the browser's own momentum, snapping and
+ * scrollbar-free touch handling apply, and the card cut off at the page edge
+ * is the affordance the design uses instead of a control.
+ *
+ * No destinations either. The prototype has no observation page, so the card
+ * is an article rather than a link and `View All` is a button with an
+ * `onViewAll` hook — the same choice HeroBanners.js makes and for the same
+ * reason: a control that goes nowhere is worse than no control. Like and
+ * bookmark DO work, because they are local state and can be honest.
+ */
+const { OBSERVATIONS } = __req('js/data/observations.js');
+const { pop, burst, rollCount } = __req('js/lib/reactions.js');
+const { landCards } = __req('js/lib/landing.js');
+const { animate } = __req('js/lib/motion.js');
+
+/* the four the design defines. `glyph` is the punctuation the node sets in
+   the pill; critical is the one that draws a vector instead. */
+const PRIORITY = {
+  critical: { label: 'Critical', src: 'assets/icon/obs-flame.svg' },
+  high:     { label: 'High',     glyph: '!!!' },
+  moderate: { label: 'Moderate', glyph: '!!' },
+  low:      { label: 'Low',      glyph: '!' },
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
+function renderCard(o) {
+  const key = PRIORITY[o.priority] ? o.priority : 'low'
+  const p = PRIORITY[key]
+  const el = document.createElement('article')
+  el.className = 'obs'
+  el.dataset.priority = key
+  el.dataset.id = o.id
+  el.setAttribute('role', 'listitem')
+  /* the coloured head says the priority in colour alone, so the pill carries
+     the word for anyone who cannot see it */
+  const pill = p.src
+    ? `<img src="${esc(p.src)}" alt="">`
+    : `<span aria-hidden="true">${esc(p.glyph)}</span>`
+  const a = o.animal || {}
+  el.innerHTML =
+    `<div class="obs__top">` +
+      `<span class="obs__glow" aria-hidden="true"></span>` +
+      `<div class="obs__head">` +
+        `<h3 class="obs__title">${esc(o.title)}</h3>` +
+        `<span class="obs__pri" title="${esc(p.label)} priority">${pill}` +
+          `<span class="sr-only">${esc(p.label)} priority</span></span>` +
+      `</div>` +
+      `<div class="obs__tags">` +
+        (o.tags || []).map((t) => `<span aria-hidden="true">•</span><span>${esc(t)}</span>`).join('') +
+      `</div>` +
+    `</div>` +
+    `<div class="obs__body">` +
+      `<div class="obs__main">` +
+        `<div class="obs__entity">` +
+          `<img class="obs__thumb" src="${esc(a.photo || '')}" alt="" decoding="async">` +
+          `<span class="obs__ident">` +
+            `<b class="obs__aaid">${esc(a.id || '')}</b>` +
+            `<span class="obs__aname">${esc(a.name || '')}</span>` +
+          `</span>` +
+          (o.more ? `<span class="obs__more">+${esc(o.more)}<span class="sr-only"> more animals</span></span>` : '') +
+        `</div>` +
+        `<div class="obs__text">` +
+          `<p class="obs__note">${esc(o.body)}</p>` +
+          `<div class="obs__meta"><span>${esc(o.by)}</span>` +
+            `<span aria-hidden="true">&nbsp;&nbsp;•&nbsp;</span><span>${esc(o.date)}</span></div>` +
+        `</div>` +
+      `</div>` +
+      `<div class="obs__actions">` +
+        `<div class="obs__acts">` +
+          `<button type="button" class="obs__act" data-act="like" aria-pressed="false">` +
+            `<span class="obs__ico"><img src="assets/icon/obs-like.svg" alt=""></span>` +
+            `<span class="obs__count"><b>${esc(o.likes ?? 0)}</b></span>` +
+            `<span class="sr-only">Like this observation</span></button>` +
+          `<button type="button" class="obs__act" data-act="comment">` +
+            `<span class="obs__ico"><img src="assets/icon/obs-comment.svg" alt=""></span>` +
+            `<span class="obs__count"><b>${esc(o.comments ?? 0)}</b></span>` +
+            `<span class="sr-only">Comments</span></button>` +
+        `</div>` +
+        `<button type="button" class="obs__act" data-act="save" aria-pressed="false">` +
+          `<span class="obs__ico"><img src="assets/icon/obs-bookmark.svg" alt=""></span>` +
+          `<span class="sr-only">Save this observation</span></button>` +
+      `</div>` +
+    `</div>`
+  return el
+}
+
+function createRecentObservations({ root, items = OBSERVATIONS, onViewAll, onOpen } = {}) {
+  if (!root) return null
+  const rail = root.querySelector('.obs-rail')
+  const all = root.querySelector('.obs-head__all')
+  if (!rail) return null
+  if (!items.length) { root.hidden = true; return null }
+  for (const o of items) rail.append(renderCard(o))
+
+  /* LIKE AND BOOKMARK ARE REAL, AND LOCAL. There is nowhere to send them, but
+     they are the user's own state and can be held here honestly — the count
+     moves, the control reports itself pressed, and nothing pretends to have
+     reached a server. Delegated from the rail so six cards cost two listeners
+     rather than eighteen. */
+  const liked = new Set()
+  rail.addEventListener('click', (e) => {
+    const btn = e.target.closest('.obs__act')
+    if (!btn || !rail.contains(btn)) return
+    const card = btn.closest('.obs')
+    const act = btn.dataset.act
+    const ico = btn.querySelector('.obs__ico')
+    if (act === 'like') {
+      const key = card.dataset.id
+      const on = !liked.has(key)
+      on ? liked.add(key) : liked.delete(key)
+      btn.setAttribute('aria-pressed', String(on))
+      ico.querySelector('img').src = `assets/icon/obs-like${on ? '-on' : ''}.svg`
+      const base = items.find((i) => i.id === key)?.likes ?? 0
+      /* the number rises when it goes up and falls when it comes back down —
+         the direction carries the meaning, so it is not always the same roll */
+      rollCount(btn.querySelector('b'), base + (on ? 1 : 0), on ? 1 : -1)
+      pop(ico, on)
+      if (on) burst(ico)
+    } else if (act === 'save') {
+      const on = btn.getAttribute('aria-pressed') !== 'true'
+      btn.setAttribute('aria-pressed', String(on))
+      ico.querySelector('img').src = `assets/icon/obs-bookmark${on ? '-on' : ''}.svg`
+      /* Safari's add-to-bookmarks: it lifts before it settles, rather than
+         only growing — the vertical move is what says "filed away". */
+      if (on) {
+        animate(ico, [
+          { transform: 'translateY(0) scale(1)' },
+          { transform: 'translateY(-7px) scale(1.18)', offset: .35 },
+          { transform: 'translateY(2px) scale(.96)', offset: .72 },
+          { transform: 'translateY(0) scale(1)' },
+        ], { duration: 460, easing: 'cubic-bezier(.16,1,.3,1)' })
+        burst(ico, { radius: 13, n: 5 })
+      } else {
+        pop(ico, false)
+      }
+    } else if (act === 'comment') {
+      pop(ico, false)
+      /* no comment thread in this build; the count is the whole truth */
+      onOpen?.(items.find((i) => i.id === card.dataset.id), 'comments')
+    }
+  })
+  all?.addEventListener('click', () => onViewAll?.())
+
+  /* ── the rail arrives ────────────────────────────────────────────────────
+     The module grid below has landed its cards since the first build, and this
+     band appeared next to it with no entrance at all — six cards materialising
+     beside a grid that bridges in. `landCards` already does the design; the
+     rail is handed to it as a single row so the cascade runs left to right,
+     the direction the rail itself reads. Shorter travel and a slower beat than
+     the grid, because these cards are three times the size: the same 64px rise
+     on a 424px card is a twitch, and six cards do not need a 340ms cap. */
+  const cells = [...rail.querySelectorAll('.obs')].map((el, i) => ({
+    uid: el.dataset.id, el, x: i, y: 0, w: 1, h: 1,
+  }))
+  landCards(cells, { from: 'left', distance: 40, stagger: 52, maxDelay: 300, duration: 620 })
+
+  return { root, rail, get count() { return items.length } }
+}
+  __x.createRecentObservations = createRecentObservations;
 });
 
 __def('js/app.js', function (__x, __req) {
@@ -24782,6 +25695,34 @@ mountIconSprite()
    Under the hero: the announcements as a deck of cards. */
 const { createHeroBanners } = __req('js/components/HeroBanners.js')
 createHeroBanners({ root: document.getElementById('heroStage') })
+
+/* ── recent observations ────────────────────────────────────────────────
+   The rail between the announcements and the modules, node 196:7243. */
+const { createRecentObservations } = __req('js/components/RecentObservations.js')
+createRecentObservations({ root: document.getElementById('recentObs') })
+
+/* ── the search field sticks ────────────────────────────────────────────
+   The row is `position: sticky` in CSS and needs no help to stay put; the
+   only thing JavaScript decides is WHEN the glass behind it fades in.
+   An IntersectionObserver fires twice per journey — once crossing out, once
+   crossing back — where a scroll listener fires on every frame of every
+   scroll for the whole life of the page. The class it toggles drives one
+   opacity transition and nothing else, so no layout is read or written.
+
+   THE ROW WATCHES ITSELF. The usual trick is a 1px sentinel above it, and
+   that is what this was: a 1px box whose negative margin was meant to cancel
+   its own height. It did not — a negative margin next to the row's own
+   negative margin COLLAPSES to the more negative of the two rather than
+   summing, so the sentinel left 1px behind and moved the whole page down.
+   Shrinking the root by 1px at the top instead asks the same question of the
+   row itself: fully visible means not stuck, and one pixel short of fully
+   visible with its top at zero means stuck. Nothing is added to the flow. */
+const searchRow = document.querySelector('.search-row')
+if (searchRow && 'IntersectionObserver' in window) {
+  new IntersectionObserver(([e]) => {
+    searchRow.classList.toggle('is-stuck', e.intersectionRatio < 1 && e.boundingClientRect.top <= 0)
+  }, { threshold: [1], rootMargin: '-1px 0px 0px 0px' }).observe(searchRow)
+}
 
 /* A continuous animation on a page nobody is looking at is pure cost. The
    jiggle is paused in CSS off this class rather than being torn down, so
@@ -25517,9 +26458,9 @@ const wsEdit = createEditMode({
      header above it already says what you are looking at. */
   labels: {
     title:     'Workspace',
+    edit:      'Edit',
     editTitle: 'Customize Workspace',
     add:       'Add Widget',
-    hint:      'Drag widgets to rearrange. Press space on a widget to move it with the arrow keys.',
     entered:   'Customizing your workspace. Drag widgets to rearrange, or use the remove buttons.',
     saved:     'Workspace saved.',
   },
@@ -26635,6 +27576,14 @@ Object.assign(window, {
 
 __req('js/app.js');
 })();
+</script>
+<script>
+// Agentation feedback toolbar, dev only: loads solely on localhost.
+if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+  var __ag = document.createElement('script');
+  __ag.src = 'tools/agentation/agentation.js'; __ag.defer = true;
+  document.body.appendChild(__ag);
+}
 </script>
 </body>
 </html>

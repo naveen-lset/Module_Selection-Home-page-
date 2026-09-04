@@ -5,3 +5,12 @@
 References
 tools
 customizable_modules_responsive_prompt.md
+
+# Design references and session notes. Neither is servable, and Vercel uploads
+# the WORKING DIRECTORY rather than the commit — so an untracked mockup and its
+# photographs would ship to production without ever being committed. That is
+# why the 3 Sep deploy had to move `mockups/home-banners.html` and 1.2MB of
+# announcement photos aside by hand; naming the two directories here does the
+# same thing every time and cannot be forgotten. 4 Sep 2026.
+mockups
+_planning

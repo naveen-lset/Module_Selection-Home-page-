@@ -470,5 +470,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 </div>
 
 <script src="js/dashboard.js"></script>
+<script>
+// Agentation feedback toolbar, dev only: loads solely on localhost.
+if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+  var __ag = document.createElement('script');
+  __ag.src = 'tools/agentation/agentation.js'; __ag.defer = true;
+  document.body.appendChild(__ag);
+}
+</script>
 </body>
 </html>
