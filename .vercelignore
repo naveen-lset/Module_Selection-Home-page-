@@ -14,3 +14,8 @@ customizable_modules_responsive_prompt.md
 # same thing every time and cannot be forgotten. 4 Sep 2026.
 mockups
 _planning
+
+# The icon set as it was delivered. assets/icon/ IS deployed — the SVGs the
+# page uses; the archive they arrived in is not, and it is untracked, which is
+# exactly the case the note above is about.
+assets/icon.zip
