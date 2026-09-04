@@ -38,7 +38,12 @@ FIGMA = {
     "#obsRail":      (585, 424.5),
     "#modulesHead":  (1053.5, 32),
     ".hero--estate": (1101.5, 164),
-    "#moduleGrid":   (1281.5, 884),
+    # FOUR ROWS, NOT THE NODE'S FIVE. 884 is 5 x 164 + 4 x 16, which is what
+    # the node draws and what this build drew until Reports' door came off the
+    # default page on 4 Sep 2026 (see DEFAULT_LAYOUT in index.html). Twenty
+    # cells in five columns is four rows exactly: 4 x 164 + 3 x 16 = 704. The
+    # y above is unchanged, because nothing above the grid moved.
+    "#moduleGrid":   (1281.5, 704),
 }
 
 BOXES = """(()=>{const o={};for(const s of %s){const e=document.querySelector(s);

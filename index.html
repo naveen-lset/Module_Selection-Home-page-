@@ -7990,7 +7990,9 @@ const DOORS = [
   ['housing',       ['small', 'medium'], 'primary'],
   ['parivesh',      ['small', 'medium'], 'secondary'],
   ['approvals',     ['small', 'medium'], 'secondary'],
-  ['reports',       ['small', 'medium'], 'primary'],
+  /* `secondary` since 4 Sep 2026 — off the default page on the user's
+     ruling, still addable from Add Module. */
+  ['reports',       ['small', 'medium'], 'secondary'],
   ['communication', ['small', 'medium'], 'secondary'],
 ].map(([moduleId, supportedSizes, priority]) => ({
   id: `${moduleId}.default`,
@@ -9587,7 +9589,12 @@ const KEY = 'antz.home.layout'
    before and wonders why nothing changed. It cost me three rounds of measuring
    a page I had cleared localStorage on while the real browser showed the old
    one. */
-const VERSION = 7
+/* 6 → 7 · FOLLOW UP'S QUEUE CAME OFF THE PAGE, and 7 → 8 · REPORTS' DOOR CAME
+   OFF IT TOO (4 Sep 2026). Both are the same case as every bump above: the
+   saved layout is still perfectly VALID — the ids resolve, repair() passes
+   them through — so without a bump the one person who has actually used this
+   page is the one who keeps seeing the card that was removed. */
+const VERSION = 8
 
 /**
  * The cards a fresh install starts with.
@@ -9602,7 +9609,7 @@ const VERSION = 7
 const DEFAULT_LAYOUT = [
   /* THE DEFAULT HOME PAGE IS A BALANCE, NOT A DUMP.
      ─────────────────────────────────────────────────────────────────────────
-     There are 71 cards in the catalogue and 16 of them are here. The brief is
+     There are 71 cards in the catalogue and 15 of them are here. The brief is
      explicit that not every widget goes on the home page automatically, and the
      reason is not tidiness: a home page carrying every card is a home page with
      no hierarchy, which is the same as having no home page.
@@ -9612,7 +9619,7 @@ const DEFAULT_LAYOUT = [
 
        NAVIGATE   Medical · Hospital · Pharmacy · Diet & Kitchen · Lab ·
                   Mortality · Eggs · Administer · Users · Security ·
-                  Reports · Parivesh · Housing
+                  Parivesh · Housing
        UNDERSTAND Species Statistics
        ATTENTION  Pending Approvals
 
@@ -9621,7 +9628,7 @@ const DEFAULT_LAYOUT = [
      place. VERSION went 6 → 7 with it, so a saved layout still carrying the
      card is dropped rather than shown for ever (see the note above VERSION).
 
-     `priority: 'primary'` in the catalogue means EXACTLY "one of these sixteen"
+     `priority: 'primary'` in the catalogue means EXACTLY "one of these fifteen"
      — there is no third state and no exception list, so the rule can be checked
      rather than remembered. `antz.checkDefaults()` in the console asserts the
      two files still agree in both directions: nothing primary is missing from
@@ -9637,6 +9644,10 @@ const DEFAULT_LAYOUT = [
        row 3   Follow Up Queue(2×2)  Lab(1×1)  Pending Approvals(2×1)
        row 4     ↑ continues         Mortality  Eggs  Administer
        row 5   Users  Security  Reports  Parivesh(2×1)
+
+     TWO OF THOSE ARE NO LONGER SEEDED — Follow Up's queue (3 Sep) and Reports'
+     door (4 Sep), both on the user's ruling — so the page the code builds is
+     the artboard minus those two, packed up into four rows.
 
      PARIVESH IS THE LAST CARD, and that is the boundary the brief drew: up to
      and including it, this list IS the artboard. Anything after it is a
@@ -9686,13 +9697,18 @@ const DEFAULT_LAYOUT = [
   { variantId: 'eggs.default',        size: 'small'  },   /* NAVIGATE  */
   { variantId: 'administer.default',  size: 'small'  },   /* NAVIGATE  */
   { variantId: 'users.default',       size: 'small'  },   /* NAVIGATE  */
-  /* Parivesh ahead of Security and Reports since Follow Up came out: with 21
-     cells in five columns a fifth row is unavoidable, but this order fills
-     row 4 edge to edge and leaves only Reports below, where the old order
-     left a hole at the end of row 4 and Parivesh alone under it. */
+  /* Parivesh ahead of Security since Follow Up came out. That order used to
+     leave Reports alone on a fifth row; with Reports gone as well the twenty
+     remaining cells are four rows of five exactly, edge to edge, with no hole
+     at the end of a row and nothing hanging below. */
   { variantId: 'parivesh.wide',       size: 'medium' },   /* NAVIGATE  */
   { variantId: 'security.default',    size: 'small'  },   /* NAVIGATE  */
-  { variantId: 'reports.default',     size: 'small'  },   /* NAVIGATE  */
+
+  /* REPORTS' DOOR WAS HERE, the last card on the page, until 4 Sep 2026 —
+     removed on the user's ruling, the same way Follow Up's queue went before
+     it. VERSION went 7 → 8 with it so a saved layout still carrying the card
+     is dropped rather than showing it for ever, and the door is `secondary` in
+     the catalogue now: still in Add Module, no longer seeded. */
 
   /* ══ AND NOTHING ELSE ═══════════════════════════════════════════════════
      A SECOND BLOCK OF EIGHTEEN USED TO FOLLOW, on the compositions a later
