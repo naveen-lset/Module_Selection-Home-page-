@@ -19,3 +19,9 @@ _planning
 # page uses; the archive they arrived in is not, and it is untracked, which is
 # exactly the case the note above is about.
 assets/icon.zip
+
+# The harness's own configuration. It holds no secrets — Bash allow-patterns
+# and one additionalDirectories entry — but it names local absolute paths and
+# is not servable, and it was reachable at /.claude/settings.json on the live
+# site until this line. Same case as the icon archive above. 7 Sep 2026.
+.claude
