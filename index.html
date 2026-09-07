@@ -2387,35 +2387,61 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   .ann__meta { font-size: 13px; }
 }
 
-/* ── 7c · RECENT OBSERVATIONS ── NODE 196:7243, "Current Design" (4 Sep 2026)
+/* ── 7c · RECENT OBSERVATIONS ── RecentObservationsFinal.html, variant G2
    ═══════════════════════════════════════════════════════════════════════════
    A band between the announcement deck and the modules: a section head with
    "View All", then a horizontal rail of observation cards that runs off the
-   page's right edge. Every number below is measured off the node, not chosen.
+   page's right edge. The HEAD and the RAIL are still node 196:7243. The CARD
+   is not: it was redrawn in `RecentObservationsFinal.html` (7 Sep 2026), the
+   design file that carries six card options and chooses one. Every number in
+   the card below is read off that file's chosen variant — `f--bare f--note3
+   f--priright`, the option its own switch labels G2 — and not off the node,
+   which drew a different card and is superseded here.
 
-   THE RAIL BLEEDS RIGHT AND NOT LEFT. The node's container is `x=32 w=992`
-   inside a 1024 page — it starts on the page gutter and ends ON the page
-   edge, so the third card is cut and the rail reads as scrollable without a
-   scrollbar or an arrow. The negative right margin is that 32px gutter given
-   back; the matching padding puts it after the last card instead, so the end
-   of the rail is not flush against the edge of the screen.
+   WHAT THE NEW CARD IS. A photograph, four by three, filling the top of the
+   card. The entity — the animal or the enclosure the observation is about —
+   floats on the bottom of that photograph as a frosted chip: a 44px thumbnail,
+   its code, its name, and "+2" when the observation covers more animals than
+   the one named. Below the photograph, on white: the observation's title with
+   its date, its tags, and three lines of the note. Then a hairline, and a
+   footer carrying who wrote it, the like, the comment count and the bookmark.
 
-   THE CARD IS TWO BOXES THAT OVERLAP. Top section 336×225 from the card's
-   inner top; the white block 336×269.5 starting at 147 — so it covers the
-   bottom 78px of the colour, and the 24px radius on its top corners is what
-   draws the curve over the priority colour. Card 344×424.5: 147 + 269.5 = 416.5,
-   plus the 4px inset top and bottom.
+   AND WHAT REPLACES THE PHOTOGRAPH WHEN THERE ISN'T ONE. Not every
+   observation carries a picture. Those cards fill the same four-by-three box
+   with the priority colour and name the entity in it instead — kind, name,
+   code — over the node's own warm blur. So the rail reads as one shape whether
+   or not there is a photograph, and the colour is never the only thing
+   carrying the priority: the badge in the corner does that on every card.
 
-   THE PRIORITY COLOUR IS A BASE PLUS A 10% BLACK WASH, which is how Figma
-   composes three of the four — written that way here rather than as the
-   flattened hex, so the base stays legible against the file. High is the
-   exception and is a flat #F06D52 (240/0.9 > 255, so it cannot be a wash).  */
+   THE CARD HAS NO FIXED HEIGHT. The design file gives it none: the media is a
+   ratio, the note is clamped, and the footer is pinned to the bottom with
+   `margin-top: auto`. So the rail stretches its cards to the tallest of them
+   and every footer lands on one line. `align-items: stretch` is the whole of
+   that mechanism — it was `flex-start` for the old card, which had a literal
+   height and did not need it.
+
+   THE RAIL BLEEDS RIGHT AND NOT LEFT, unchanged: the node's container is
+   `x=32 w=992` inside a 1024 page, so it starts on the page gutter and ends ON
+   the page edge, and the cut card at the edge is the affordance instead of a
+   scrollbar or an arrow.
+
+   THE RAIL NOW HAS PADDING, because the new card has a real shadow and lifts
+   under a mouse, and `overflow-x: auto` clips both. The padding is inside the
+   scroll box, so the shadow has room; it is taken back out of the band's
+   margins below so nothing on the page moves.  */
 .obs-band {
   /* 48 above: 24 under the deck's Main Frame and 24 over this one.
-     44 below: 24 under the rail and 20 over the Modules head. Both collapse
-     with the neighbouring margins, so they are written as the TOTAL. */
+     44 below, as before — but 22 of it is now the rail's bottom padding, so
+     the margin carries the other 22. Both still collapse with the
+     neighbouring margins, so they are written as the TOTAL. */
   margin-top: 48px;
-  margin-bottom: 44px;
+  margin-bottom: 22px;
+
+  /* the design file's two shadows. The lift is a mouse-only state — see the
+     `hover: hover` rule on `.obs` — but both are declared here because the
+     rail's padding is sized to hold the larger one. */
+  --obs-shadow:      0 1px 3px rgba(31, 65, 91, .06), 0 8px 24px -10px rgba(31, 65, 91, .14);
+  --obs-shadow-lift: 0 4px 10px rgba(31, 65, 91, .10), 0 26px 56px -18px rgba(31, 65, 91, .32);
 }
 .obs-head {
   display: flex;
@@ -2423,7 +2449,8 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   justify-content: space-between;
   gap: var(--s4);
   height: 29px;
-  margin-bottom: 16px;
+  /* 8 here and 8 of rail padding = the node's 16 */
+  margin-bottom: 8px;
 }
 .obs-head__title {
   font-size: 24px; font-weight: 500; line-height: 29px; letter-spacing: 0;
@@ -2443,143 +2470,201 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 
 .obs-rail {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  /* the cards have no height of their own; this is what gives them one */
+  align-items: stretch;
+  gap: 20px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
+  /* 8 top and 22 bottom hold the resting and the lifted shadow; 10 left holds
+     the lifted shadow's horizontal reach and is pulled back out by the margin
+     so the first card still starts on the page gutter. The right pair is the
+     bleed: the gutter is given back as margin and re-spent as padding, so the
+     rail ends on the page edge but the LAST card does not. */
+  padding: 8px var(--pad-page) 22px 10px;
   margin-right: calc(var(--pad-page) * -1);
-  padding-right: var(--pad-page);
+  margin-left: -10px;
+  /* AND THE SNAPPORT HAS TO MOVE WITH THAT LEFT PADDING. A snap area aligned
+     to `start` aligns with the start of the SNAPPORT, which is the rail's
+     padding box — so without this the browser snaps the rail 10px on load to
+     bring the first card flush to the padding box, and the whole rail rests
+     10px into its own gutter. `scroll-padding` is the one thing that tells the
+     snapport where the content really begins. */
+  scroll-padding-left: 10px;
   /* the node draws no scrollbar; the cut card at the edge is the affordance */
   scrollbar-width: none;
 }
 .obs-rail::-webkit-scrollbar { display: none; }
 
 .obs {
-  --obs-w: 344px;
+  --obs-w: 320px;
   flex: none;
   width: var(--obs-w);
-  height: 424.5px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
-  padding: 4px;
-  border-radius: 32px;
+  border-radius: 20px;
   background: #FFFFFF;
-  box-shadow: 0 2px 10px 0 rgba(76, 78, 100, .05);
+  box-shadow: var(--obs-shadow);
   overflow: hidden;
+  transition: box-shadow .25s var(--ease), transform .25s var(--ease);
+}
+/* A LIFT IS A POINTER GESTURE AND NOTHING ELSE. On a touch screen `:hover`
+   sticks after a tap, so the card would stay raised for no reason; this is the
+   same gate the action buttons below are under. */
+@media (hover: hover) {
+  .obs:hover { transform: translateY(-2px); box-shadow: var(--obs-shadow-lift); }
 }
 
-/* ── the coloured head ── */
-.obs__top {
-  flex: 1 1 auto;
-  min-height: 0;
+/* the four priorities. `slab` paints the photograph's stand-in, `badge` and
+   `glyph` the corner pill — three tokens per card so the rules below never
+   name a colour. Values from node 188:6120 by way of the design file. */
+.obs[data-priority='critical'] { --obs-slab: #F21037; --obs-badge: #FDEBEE; --obs-glyph: #E93353; }
+.obs[data-priority='high']     { --obs-slab: #F06D52; --obs-badge: #FEEFEC; --obs-glyph: #FA6140; }
+.obs[data-priority='moderate'] { --obs-slab: #FFB71D; --obs-badge: #FFFAE2; --obs-glyph: #E4B819; }
+.obs[data-priority='low']      { --obs-slab: #0FC1E8; --obs-badge: #E5FBFA; --obs-glyph: #00D6C9; }
+
+/* ── the media: four by three, a photograph or the priority colour ── */
+.obs__media {
   position: relative;
+  flex: none;
+  aspect-ratio: 4 / 3;
+  background: #E3EBE8;                        /* what shows while it loads */
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 24px;
-  border-radius: 30px 30px 0 0;
-  background: #F06D52;
 }
-/* the node's `Rectangle 34624366`: a warm blurred blob at 40%, sitting low in
-   the colour. It is one asset on every priority, so the cyan and the crimson
-   warm up towards their lower edge exactly as the artboard has them. Drawn
-   from its centre so the rotation does not move it. */
+.obs__photo { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* THE PRIORITY COLOUR IS A BASE PLUS A 10% BLACK WASH, which is how Figma
+   composes three of the four — written that way rather than as the flattened
+   hex, so the base stays legible against the design file. High is the
+   exception and is a flat #F06D52 (240/0.9 > 255, so it cannot be a wash). */
+.obs__flat { position: absolute; inset: 0; background: var(--obs-slab); color: #FFFFFF; }
+.obs[data-priority='critical'] .obs__flat,
+.obs[data-priority='moderate'] .obs__flat,
+.obs[data-priority='low']      .obs__flat {
+  background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), var(--obs-slab);
+}
+/* the node's `Rectangle 34624366`: a warm blurred blob sitting low in the
+   colour and running off its right edge. It is one asset on every priority, so
+   the cyan and the crimson warm up towards their lower edge exactly as the
+   artboard has them. Sized as the design file sizes it — a proportion of the
+   box, not the node's absolute 595×249, because this box is now 4:3. */
 .obs__glow {
   position: absolute;
-  left: 215.85px; top: 80.51px;
-  width: 595.36px; height: 248.97px;
-  margin: -124.49px 0 0 -297.68px;
-  transform: rotate(1.82deg);
+  top: 38%; right: -52%;
+  width: 175%; height: 108%;
   background: url("assets/icon/obs-glow.svg") 0 0 / 100% 100% no-repeat;
   pointer-events: none;
 }
-.obs__head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* THE COLOUR CARRIES ONE WORD, NOT THREE. The design file's markup puts the
+   entity's kind, its name and its code in here and then hides the last two for
+   this card family — `.f .flat__txt .big, .f .flat__txt .code { display:none }`
+   — because the chip at the foot of the same box already carries both, and a
+   card that prints "Hoofstock Barn / ENC : HB-04" twice is what that rule is
+   there to prevent. So only the kind is rendered at all. 54px down: clear of
+   the corner badge, and well above the chip. */
+.obs__flat-txt { position: absolute; left: 16px; right: 16px; top: 54px; }
+.obs__kind { font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
+
+/* ── the priority badge, top right of the media on every card ── */
+.obs__pri {
+  position: absolute; z-index: 2;
+  top: 12px; right: 12px;
+  display: grid; place-items: center;
+  width: 30px; height: 30px; padding: 3px;
+  border-radius: 100px;
+  background: var(--obs-badge);
+  box-shadow: 0 1px 3px rgba(31, 65, 91, .16);
+}
+/* its own box, so the `sr-only` word beside it keeps the 1px it needs */
+.obs__pri-ico { display: grid; place-items: center; width: 24px; height: 24px; }
+.obs__pri-ico img { display: block; width: 24px; height: 24px; }
+.obs__pri-ico span { font-size: 18px; font-weight: 600; line-height: 1; letter-spacing: -.4px; color: var(--obs-glyph); }
+
+/* ── the entity chip, floating on the foot of the media ──
+   The design file tried six materials here and chose the bare one: NO panel
+   behind the chip, so the photograph stays sharp right up to the card's edge
+   and only the chip itself is frosted. `.obs__strip` is therefore just the
+   chip's inset — it paints nothing. */
+.obs__strip { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 10px 12px; }
+.obs__entity {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .66);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow: 0 1px 2px rgba(31, 65, 91, .10), 0 8px 20px -12px rgba(31, 65, 91, .35);
+}
+.obs__thumb { flex: none; width: 44px; height: 44px; border-radius: 5px; object-fit: cover; display: block; background: rgba(31, 65, 91, .06); }
+.obs__ident { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* #1F415B is MD3_Antz/OnSecondaryContainer, the design file's own `--ink`. It
+   is written as a literal because the token's name is a role this text is not
+   in, and the frosted chip needs the darkest ink in the palette to hold
+   against a photograph of any brightness. */
+.obs__aaid { font-size: 14px; font-weight: 500; letter-spacing: .1px; color: #1F415B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.obs__aname { font-size: 14px; color: #1F415B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.obs__more { flex: none; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: #1F415B; }
+
+/* ── the white body ── */
+.obs__body { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 12px; }
+.obs__title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .obs__title {
-  font-size: 20px; font-weight: 500; line-height: 25px; letter-spacing: 0; color: #FFFFFF;
+  font-size: 17px; font-weight: 600; line-height: 22px; letter-spacing: -.01em; color: #1F415B;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
 }
-.obs__pri { flex: none; display: grid; place-items: center; padding: 2px; border-radius: 100px; background: #FEEFEC; }
-.obs__pri > * { display: grid; place-items: center; width: 24px; height: 24px; }
-.obs__pri span { font-size: 18px; font-weight: 600; line-height: 1; letter-spacing: -.4px; color: #FA6140; }
-.obs__pri img { display: block; width: 24px; height: 24px; }
-.obs__tags {
-  position: relative;
-  display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px 8px;
-  max-height: 38px; overflow: hidden;                 /* the node's two rows */
-  font-size: 14px; line-height: 16px; color: #FFFFFF;
-  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, .2));
-}
+.obs__date { flex: none; font-family: var(--font-num); font-size: 13px; color: var(--c-neutral-2, #7A8684); }
+.obs__tags { display: flex; flex-wrap: wrap; gap: 0 6px; font-size: 13px; color: var(--c-neutral-2, #7A8684); }
 .obs__tags span { white-space: nowrap; }
-
-/* the four priorities, node 188:6120 */
-.obs[data-priority='high']     .obs__top { background: #F06D52; }
-.obs[data-priority='critical'] .obs__top { background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), #F21037; }
-.obs[data-priority='moderate'] .obs__top { background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), #FFB71D; }
-.obs[data-priority='low']      .obs__top { background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), #0FC1E8; }
-.obs[data-priority='critical'] .obs__pri { background: #FDEBEE; }
-.obs[data-priority='moderate'] .obs__pri { background: #FFFAE2; }
-.obs[data-priority='moderate'] .obs__pri span { color: #E4B819; }
-.obs[data-priority='low']      .obs__pri { background: #E5FBFA; }
-.obs[data-priority='low']      .obs__pri span { color: #00D6C9; }
-
-/* ── the white block over it ── */
-.obs__body {
-  flex: none;
-  height: 269.5px;
-  margin-top: -78px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  /* 28, not the node's 32: the card's own 4px inset and `overflow: hidden`
-     already clip it to 28, and asking for 32 only adds a clipped corner. */
-  border-radius: 24px 24px 28px 28px;
-  background: #FFFFFF;
-  box-shadow: 0 2px 10px 0 rgba(76, 78, 100, .05);
-  overflow: hidden;
-}
-.obs__main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow: hidden; }
-.obs__entity { flex: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: rgba(0, 0, 0, .05); }
-.obs__thumb { flex: none; width: 44px; height: 44px; border-radius: 4.889px; object-fit: cover; display: block; background: rgba(0, 0, 0, .06); }
-.obs__ident { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.obs__aaid { font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-on-surface-var, #44544A); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.obs__aname { font-size: 14px; color: var(--c-on-surface-var, #44544A); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.obs__more { flex: none; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-on-surface-var, #44544A); }
-.obs__text { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 .obs__note {
-  font-size: 16px; line-height: 24px; color: var(--c-on-surface-var, #44544A);
+  font-size: 14px; line-height: 21px; color: var(--c-on-surface-var, #44544A);
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
-/* the same two runs as the announcement card: name, then " • date" */
-.obs__meta { display: flex; align-items: center; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--c-on-surface-var, #44544A); white-space: nowrap; overflow: hidden; }
 
-/* ── the actions rail ── */
+/* ── the footer, pinned to the bottom of whichever card is tallest ── */
 .obs__actions {
   flex: none;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8.5px 16px 8px;
-  border-top: .5px solid rgba(195, 206, 199, .4);
+  margin-top: auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 16px 12px;
+  border-top: 1px solid #E3EBE8;
   background: #FFFFFF;
+  font-size: 13px;
+  color: var(--c-on-surface-var, #44544A);
 }
-.obs__acts { display: flex; align-items: center; gap: 8px; }
+.obs__who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.obs__av { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #E1F0EA; color: #1F515B; font-size: 10px; font-weight: 600; }
+.obs__by { font-weight: 500; color: #1F415B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.obs__acts { flex: none; display: flex; align-items: center; gap: 12px; }
 .obs__act {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px; border: 0; border-radius: 12px; background: none;
-  font: inherit; color: inherit; cursor: pointer;
-  transition: background var(--t-fast) var(--ease);
+  position: relative;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 0; border: 0; background: none;
+  font: inherit; font-family: var(--font-num); font-size: 13px; font-weight: 500;
+  color: inherit; cursor: pointer;
 }
+/* THE DESIGN FILE DRAWS THESE AS TEXT, NOT AS BUTTONS, and gives them no
+   padding. Two of the three are real controls here, so the target grows
+   without the row growing — `-6px` either side is exactly the 12px gap, so
+   neighbouring targets meet and never overlap, and 18 + 26 = 44 tall. */
+.obs__act::after { content: ''; position: absolute; inset: -13px -6px; }
 /* the glyph gets its own box so the spring scales the ICON and not the
    button — a button that grows moves the count beside it */
-.obs__ico { position: relative; display: grid; place-items: center; width: 24px; height: 24px; flex: none; }
-.obs__ico img { display: block; width: 24px; height: 24px; }
-.obs__act b { font-size: 12px; font-weight: 400; line-height: 20px; color: rgba(68, 84, 74, .8); min-width: 18px; text-align: left; }
+.obs__ico { position: relative; flex: none; display: grid; place-items: center; width: 18px; height: 18px; }
+.obs__ico img { display: block; width: 18px; height: 18px; opacity: .85; }
+/* the bookmark carries no count. Its box is 24 where the other two are 18,
+   and since it is the tallest thing in the row it is what makes the footer 47
+   — get it wrong and the whole card comes up 2px short. The glyph inside is
+   20, so it still reads a size up from the like and the comment. */
+.obs__act--save { margin-left: 4px; }
+.obs__act--save .obs__ico { width: 24px; height: 24px; }
+.obs__act--save .obs__ico img { width: 20px; height: 20px; }
+.obs__act b { font: inherit; color: inherit; min-width: 12px; text-align: left; }
 /* the count needs somewhere for the outgoing digit to stand while it leaves */
-.obs__count { position: relative; display: inline-block; min-width: 18px; }
+.obs__count { position: relative; display: inline-block; min-width: 12px; }
 .obs__count b { display: block; }
-@media (hover: hover) { .obs__act:hover { background: rgba(0, 0, 0, .04); } }
-.obs__act[aria-pressed='true'] b { color: #006D35; font-weight: 500; }
+.obs__act[aria-pressed='true'] b { color: #006D35; }
+.obs__act[aria-pressed='true'] .obs__ico img { opacity: 1; }
 /* NO `:active` transform on the glyph. The spring below is a Web Animation on
    the same element and the two would compose, leaving the icon wherever the
    arithmetic fell when the finger lifted mid-flight. One system owns scale. */
@@ -2596,13 +2681,15 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 /* the digit on its way out, taken out of flow so it does not push its sibling */
 .rx-ghost { position: absolute; left: 0; top: 0; pointer-events: none; }
 
-/* a phone has no room for a 344px card beside the gutters; the card narrows
-   so a second one still peeks, and nothing inside it changes */
+/* a phone has no room for a 320px card beside the gutters; the card narrows
+   so a second one still peeks, and nothing inside it changes — the media is a
+   ratio, so it narrows with the card and keeps its four by three. */
 @media (max-width: 767px) {
-  .obs { --obs-w: min(344px, calc(100vw - 72px)); }
+  .obs { --obs-w: min(320px, calc(100vw - 72px)); }
   .obs-head__title { font-size: 20px; line-height: 24px; }
   .obs-head { height: 24px; }
-  .obs-band { margin-top: 40px; margin-bottom: 36px; }
+  /* 36 below as before, less the rail's 22px of padding */
+  .obs-band { margin-top: 40px; margin-bottom: 14px; }
 }
 
 /* ── 8 · modules section head ────────────────────────────────────────────
@@ -7284,11 +7371,13 @@ body.is-hidden .qa-fab__halo,
     </div>
 
     <!-- ══ recent observations ═════════════════════════════════════════
-         Node 196:7243, the "Current Design" of 4 Sep 2026: a band between the
-         announcements and the modules holding the newest observations as a
-         horizontal rail. The cards are rendered here by
+         The band is node 196:7243, the "Current Design" of 4 Sep 2026: it sits
+         between the announcements and the modules and holds the newest
+         observations as a horizontal rail. The CARD inside it is newer than
+         the node — `RecentObservationsFinal.html` of 7 Sep 2026, the variant
+         its own switch labels G2 — and is rendered here by
          js/components/RecentObservations.js from js/data/observations.js;
-         their four priority colours are node 188:6120. -->
+         its four priority colours are still node 188:6120. -->
     <section class="obs-band" id="recentObs" aria-labelledby="obsTitle">
       <div class="obs-head">
         <h2 class="obs-head__title" id="obsTitle">Recent Observations</h2>
@@ -25668,6 +25757,19 @@ __def('js/data/observations.js', function (__x, __req) {
  * low — and nothing else; RecentObservations.js falls back to `low` for an
  * unknown value rather than drawing an uncoloured card.
  *
+ * `entity` IS NOT ALWAYS AN ANIMAL, which is why it is not called one. Half of
+ * these are about a place — a barn, a primate house — and the card prints the
+ * difference: `kind` is the word above the name when there is no photograph to
+ * show instead. It carries the thumbnail that identifies it, and `focus` is
+ * that thumbnail's `object-position`, because a portrait crop of an animal
+ * loses the head at dead centre.
+ *
+ * `photo` IS THE OBSERVATION'S OWN PICTURE, and it is optional. Three of these
+ * six have one and three do not — the keeper who logged the rusted gate did not
+ * photograph it — and the card draws the priority colour instead of leaving a
+ * hole. That is the design's own resting state, not a demonstration: in
+ * `RecentObservationsFinal.html` the same three cards carry no photograph.
+ *
  * `more` is how many OTHER animals the observation covers beyond the one
  * named, drawn as "+2". Zero means the row shows nothing there.
  */
@@ -25676,8 +25778,12 @@ const OBSERVATIONS = [
     id: 'obs-1', priority: 'critical',
     title: 'Deep Flank Wound',
     tags: ['Open Wound', 'Bleeding'],
-    animal: { id: 'AAID : 87546/24', name: 'Big Bull', photo: 'assets/img/obs-animal.png' },
+    entity: {
+      kind: 'animal', id: 'AAID : 87546/24', name: 'Big Bull',
+      photo: { src: 'assets/img/obs-animal.png', focus: '50% 35%' },
+    },
     more: 2,
+    photo: { src: 'assets/img/obs-animal.png', focus: '50% 35%' },
     body: 'Found a 6cm laceration on the left flank during the morning check, still bleeding lightly. ' +
           'Separated him into the night house and called the duty vet. Needs cleaning, a suture and a ' +
           'tetanus cover before he goes back out with the herd.',
@@ -25687,7 +25793,10 @@ const OBSERVATIONS = [
     id: 'obs-2', priority: 'high',
     title: 'Metal Work',
     tags: ['Rust and Corrosion', 'Structural Changes'],
-    animal: { id: 'ENC : HB-04', name: 'Hoofstock Barn', photo: 'assets/img/hospital.jpg' },
+    entity: {
+      kind: 'enclosure', id: 'ENC : HB-04', name: 'Hoofstock Barn',
+      photo: { src: 'assets/img/hospital.jpg' },
+    },
     more: 0,
     body: 'The lower rail on the north gate has rusted through where it meets the post, and the whole ' +
           'panel now flexes when the animals lean on it. It will not hold a charge much longer. ' +
@@ -25698,8 +25807,12 @@ const OBSERVATIONS = [
     id: 'obs-3', priority: 'moderate',
     title: 'Feed Refusal',
     tags: ['Appetite', 'Diet Change'],
-    animal: { id: 'AAID : 44120/25', name: 'Zara', photo: 'assets/img/hero-leopard.jpg' },
+    entity: {
+      kind: 'animal', id: 'AAID : 44120/25', name: 'Zara',
+      photo: { src: 'assets/img/hero-leopard.jpg', focus: '50% 30%' },
+    },
     more: 1,
+    photo: { src: 'assets/img/hero-leopard.jpg', focus: '50% 30%' },
     body: 'Third morning running that she has left the meat and taken only the browse. Weight is steady ' +
           'and she is bright and active otherwise, so this is not urgent yet. Nutrition are trialling a ' +
           'change of protein from Monday and want the intake logged at every feed.',
@@ -25709,7 +25822,10 @@ const OBSERVATIONS = [
     id: 'obs-4', priority: 'low',
     title: 'Coat Condition',
     tags: ['Grooming', 'Routine Check'],
-    animal: { id: 'AAID : 21873/23', name: 'Kanha', photo: 'assets/img/species.jpg' },
+    entity: {
+      kind: 'animal', id: 'AAID : 21873/23', name: 'Kanha',
+      photo: { src: 'assets/img/species.jpg' },
+    },
     more: 3,
     body: 'Slight thinning across the shoulders on four of the herd, most likely the seasonal moult ' +
           'rather than anything to treat. Skin underneath is clean with no scurf and no scratching. ' +
@@ -25720,8 +25836,12 @@ const OBSERVATIONS = [
     id: 'obs-5', priority: 'high',
     title: 'Water Line Leak',
     tags: ['Utilities', 'Enclosure'],
-    animal: { id: 'ENC : PR-02', name: 'Primate House', photo: 'assets/img/diet-kitchen.jpg' },
+    entity: {
+      kind: 'enclosure', id: 'ENC : PR-02', name: 'Primate House',
+      photo: { src: 'assets/img/diet-kitchen.jpg' },
+    },
     more: 0,
+    photo: { src: 'assets/img/diet-kitchen.jpg' },
     body: 'The supply to the drinker in the outdoor run has been dripping since Tuesday and has turned ' +
           'the ground under it to mud. The troop is walking through it to reach the water. Isolated the ' +
           'line at the stopcock and moved them to the tub until it is fixed.',
@@ -25731,7 +25851,10 @@ const OBSERVATIONS = [
     id: 'obs-6', priority: 'moderate',
     title: 'Intermittent Lameness',
     tags: ['Gait', 'Left Hind'],
-    animal: { id: 'AAID : 66301/24', name: 'Moti', photo: 'assets/img/obs-animal.png' },
+    entity: {
+      kind: 'animal', id: 'AAID : 66301/24', name: 'Moti',
+      photo: { src: 'assets/img/obs-animal.png', focus: '50% 35%' },
+    },
     more: 0,
     body: 'Favouring the left hind for the first few strides after standing, then walking it off within ' +
           'a minute. No heat, no swelling and no reaction to pressure on the hoof. Booked for a proper ' +
@@ -25744,13 +25867,22 @@ const OBSERVATIONS = [
 
 __def('js/components/RecentObservations.js', function (__x, __req) {
 /**
- * THE RECENT OBSERVATIONS RAIL — node 196:7243, cards from node 188:6120
+ * THE RECENT OBSERVATIONS RAIL — the rail is node 196:7243, the card is
+ * `RecentObservationsFinal.html` variant G2 (7 Sep 2026)
  * ───────────────────────────────────────────────────────────────────────────
  * A horizontal rail of observation cards under the announcement deck. Each
- * card is two overlapping boxes: a priority-coloured head carrying the title
- * and the tags, and a white block over its lower 78px carrying the animal,
- * the note and the actions. All of that geometry is in the stylesheet at
- * `.obs`; this file renders the content into it and owns two behaviours.
+ * card is a four-by-three picture with the entity floating on the foot of it
+ * as a frosted chip, then white: title and date, tags, three lines of the
+ * note, and a footer carrying the author, the like, the comments and the
+ * bookmark. All of that geometry is in the stylesheet at `.obs`; this file
+ * renders the content into it and owns two behaviours.
+ *
+ * THE ONE DECISION THIS FILE MAKES ABOUT THE DESIGN. An observation may have
+ * no photograph, and half of them don't. Rather than a grey box, the card
+ * fills the same media area with the priority colour and names the entity in
+ * it — its kind, its name, its code — which is where `renderMedia` forks. The
+ * priority is never carried by that colour alone: the corner badge says it on
+ * every card, photograph or not, and carries the word for a screen reader.
  *
  * WHAT IS DELIBERATELY NOT HERE. No scroll handler and no arrows: the rail is
  * a plain overflow container, so the browser's own momentum, snapping and
@@ -25777,8 +25909,39 @@ const PRIORITY = {
   low:      { label: 'Low',      glyph: '!' },
 }
 
+/* the word the card prints over the entity's name when it has no photograph.
+   An unknown kind prints nothing rather than guessing at "Animal". */
+const KIND = { animal: 'Animal', enclosure: 'Enclosure' }
+
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
+/* 'Dr. Meera Nair' → 'MN'. The title goes first: an avatar two letters wide
+   has no room to spend one of them on "Dr". */
+function initials(name) {
+  return String(name ?? '').replace(/^(Dr|Mr|Mrs|Ms)\.?\s+/i, '')
+    .split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+}
+
+/* '03 Sep 2026' → '03 Sep'. The rail only ever holds the last few days, so
+   the year is four characters of noise beside a 17px title. */
+function shortDate(d) {
+  return String(d ?? '').replace(/\s+\d{4}$/, '')
+}
+
+/* the photograph, or the priority colour standing in for it */
+function renderMedia(o, e) {
+  if (o.photo?.src) {
+    return `<img class="obs__photo" src="${esc(o.photo.src)}" alt="" decoding="async"` +
+           ` style="object-position:${esc(o.photo.focus || '50% 50%')}">`
+  }
+  /* the kind is the only text in the colour — the chip below carries the name
+     and the code, and the design file hides them here for exactly that reason */
+  return `<div class="obs__flat">` +
+      `<span class="obs__glow" aria-hidden="true"></span>` +
+      (KIND[e.kind] ? `<div class="obs__flat-txt"><span class="obs__kind">${esc(KIND[e.kind])}</span></div>` : '') +
+    `</div>`
 }
 
 function renderCard(o) {
@@ -25789,52 +25952,59 @@ function renderCard(o) {
   el.dataset.priority = key
   el.dataset.id = o.id
   el.setAttribute('role', 'listitem')
-  /* the coloured head says the priority in colour alone, so the pill carries
-     the word for anyone who cannot see it */
+  /* the badge says the priority in colour alone, so it carries the word for
+     anyone who cannot see it */
   const pill = p.src
     ? `<img src="${esc(p.src)}" alt="">`
     : `<span aria-hidden="true">${esc(p.glyph)}</span>`
-  const a = o.animal || {}
+  const e = o.entity || {}
+  const th = e.photo || {}
   el.innerHTML =
-    `<div class="obs__top">` +
-      `<span class="obs__glow" aria-hidden="true"></span>` +
-      `<div class="obs__head">` +
-        `<h3 class="obs__title">${esc(o.title)}</h3>` +
-        `<span class="obs__pri" title="${esc(p.label)} priority">${pill}` +
-          `<span class="sr-only">${esc(p.label)} priority</span></span>` +
-      `</div>` +
-      `<div class="obs__tags">` +
-        (o.tags || []).map((t) => `<span aria-hidden="true">•</span><span>${esc(t)}</span>`).join('') +
-      `</div>` +
-    `</div>` +
-    `<div class="obs__body">` +
-      `<div class="obs__main">` +
+    `<div class="obs__media">` +
+      renderMedia(o, e) +
+      `<span class="obs__pri" title="${esc(p.label)} priority">` +
+        `<span class="obs__pri-ico">${pill}</span>` +
+        `<span class="sr-only">${esc(p.label)} priority</span></span>` +
+      `<div class="obs__strip">` +
         `<div class="obs__entity">` +
-          `<img class="obs__thumb" src="${esc(a.photo || '')}" alt="" decoding="async">` +
+          `<img class="obs__thumb" src="${esc(th.src || '')}" alt="" decoding="async"` +
+            ` style="object-position:${esc(th.focus || '50% 50%')}">` +
           `<span class="obs__ident">` +
-            `<b class="obs__aaid">${esc(a.id || '')}</b>` +
-            `<span class="obs__aname">${esc(a.name || '')}</span>` +
+            `<b class="obs__aaid">${esc(e.id || '')}</b>` +
+            `<span class="obs__aname">${esc(e.name || '')}</span>` +
           `</span>` +
           (o.more ? `<span class="obs__more">+${esc(o.more)}<span class="sr-only"> more animals</span></span>` : '') +
         `</div>` +
-        `<div class="obs__text">` +
-          `<p class="obs__note">${esc(o.body)}</p>` +
-          `<div class="obs__meta"><span>${esc(o.by)}</span>` +
-            `<span aria-hidden="true">&nbsp;&nbsp;•&nbsp;</span><span>${esc(o.date)}</span></div>` +
-        `</div>` +
       `</div>` +
-      `<div class="obs__actions">` +
-        `<div class="obs__acts">` +
-          `<button type="button" class="obs__act" data-act="like" aria-pressed="false">` +
-            `<span class="obs__ico"><img src="assets/icon/obs-like.svg" alt=""></span>` +
-            `<span class="obs__count"><b>${esc(o.likes ?? 0)}</b></span>` +
-            `<span class="sr-only">Like this observation</span></button>` +
-          `<button type="button" class="obs__act" data-act="comment">` +
-            `<span class="obs__ico"><img src="assets/icon/obs-comment.svg" alt=""></span>` +
-            `<span class="obs__count"><b>${esc(o.comments ?? 0)}</b></span>` +
-            `<span class="sr-only">Comments</span></button>` +
-        `</div>` +
-        `<button type="button" class="obs__act" data-act="save" aria-pressed="false">` +
+    `</div>` +
+    `<div class="obs__body">` +
+      `<div class="obs__title-row">` +
+        `<h3 class="obs__title">${esc(o.title)}</h3>` +
+        `<span class="obs__date">${esc(shortDate(o.date))}</span>` +
+      `</div>` +
+      `<div class="obs__tags">` +
+        /* a bullet BEFORE each tag, the first one included — the design file
+           draws the row that way, so it reads as a continuation of the title
+           above rather than as a list of its own */
+        (o.tags || []).map((t) => `<span aria-hidden="true">•</span><span>${esc(t)}</span>`).join('') +
+      `</div>` +
+      `<p class="obs__note">${esc(o.body)}</p>` +
+    `</div>` +
+    `<div class="obs__actions">` +
+      `<div class="obs__who">` +
+        `<span class="obs__av" aria-hidden="true">${esc(initials(o.by))}</span>` +
+        `<span class="obs__by">${esc(o.by)}</span>` +
+      `</div>` +
+      `<div class="obs__acts">` +
+        `<button type="button" class="obs__act" data-act="like" aria-pressed="false">` +
+          `<span class="obs__ico"><img src="assets/icon/obs-like.svg" alt=""></span>` +
+          `<span class="obs__count"><b>${esc(o.likes ?? 0)}</b></span>` +
+          `<span class="sr-only">Like this observation</span></button>` +
+        `<button type="button" class="obs__act" data-act="comment">` +
+          `<span class="obs__ico"><img src="assets/icon/obs-comment.svg" alt=""></span>` +
+          `<span class="obs__count"><b>${esc(o.comments ?? 0)}</b></span>` +
+          `<span class="sr-only">Comments</span></button>` +
+        `<button type="button" class="obs__act obs__act--save" data-act="save" aria-pressed="false">` +
           `<span class="obs__ico"><img src="assets/icon/obs-bookmark.svg" alt=""></span>` +
           `<span class="sr-only">Save this observation</span></button>` +
       `</div>` +
@@ -25906,7 +26076,7 @@ function createRecentObservations({ root, items = OBSERVATIONS, onViewAll, onOpe
      rail is handed to it as a single row so the cascade runs left to right,
      the direction the rail itself reads. Shorter travel and a slower beat than
      the grid, because these cards are three times the size: the same 64px rise
-     on a 424px card is a twitch, and six cards do not need a 340ms cap. */
+     on a card this size is a twitch, and six cards do not need a 340ms cap. */
   const cells = [...rail.querySelectorAll('.obs')].map((el, i) => ({
     uid: el.dataset.id, el, x: i, y: 0, w: 1, h: 1,
   }))

@@ -35,15 +35,29 @@ FIGMA = {
     ".search":       (140, 64),
     "#heroStage":    (228, 264),
     ".obs-head":     (540, 29),
-    "#obsRail":      (585, 424.5),
-    "#modulesHead":  (1053.5, 32),
-    ".hero--estate": (1101.5, 164),
+    # THE RAIL'S BOX IS NO LONGER THE CARD'S BOX. The card of node 196:7243 was
+    # 424.5 tall and the rail had no padding, so the two coincided. The card is
+    # now RecentObservationsFinal.html's, which measures 430, and the rail
+    # carries 8px above it and 22px below so the card's shadow and its
+    # pointer lift have somewhere to paint: 8 + 430 + 22 = 460. The CARD still
+    # starts at the node's 585 — the 8px comes out of the head's margin, not
+    # off the top of the page.
+    "#obsRail":      (577, 460),
+    # …and everything under the rail is 5.25 lower than the node draws it,
+    # which is the new card's 5.5px of extra height less a quarter pixel the
+    # header above has always been short. That is a real change to the page and
+    # it is written down rather than absorbed: taking it out of the 44px under
+    # the rail would compromise a gap the node states to protect a y it also
+    # states, and 5px under a 430px card is the cheaper of the two.
+    "#modulesHead":  (1058.75, 32),
+    ".hero--estate": (1106.75, 164),
     # FOUR ROWS, NOT THE NODE'S FIVE. 884 is 5 x 164 + 4 x 16, which is what
     # the node draws and what this build drew until Reports' door came off the
     # default page on 4 Sep 2026 (see DEFAULT_LAYOUT in index.html). Twenty
     # cells in five columns is four rows exactly: 4 x 164 + 3 x 16 = 704. The
-    # y above is unchanged, because nothing above the grid moved.
-    "#moduleGrid":   (1281.5, 704),
+    # y carries the rail's 5.25 with everything else below it; the node's own
+    # number for it is 1281.5.
+    "#moduleGrid":   (1286.75, 704),
 }
 
 BOXES = """(()=>{const o={};for(const s of %s){const e=document.querySelector(s);
@@ -113,33 +127,72 @@ def main():
               near(ar, 1.0927, .02) or not want_ar, f"{ar}")
 
         # ── the observation rail ──────────────────────────────────────────
+        # The RAIL is still node 196:7243. The CARD is not: it is
+        # RecentObservationsFinal.html variant G2 (7 Sep 2026), and it has no
+        # height of its own — the media is a ratio, the note is clamped and the
+        # footer is pinned, so the rail stretches every card to the tallest.
+        # These checks therefore assert the RELATIONSHIPS the design file
+        # states — four by three, six equal heights, a footer on the bottom
+        # edge — rather than a literal height it never states.
         print("\nrecent observations")
         o = c.eval("""(()=>{const rail=document.getElementById('obsRail');
           const cs=[...rail.querySelectorAll('.obs')]; const rr=rail.getBoundingClientRect();
           const b=(e)=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:+r.width.toFixed(1),h:+r.height.toFixed(2)}};
           const one=cs[0]; const page=document.querySelector('.page').getBoundingClientRect();
-          const tops=cs.map(c=>getComputedStyle(c.querySelector('.obs__top')).backgroundColor);
-          return {n:cs.length, card:b(one), gap:+(cs[1].getBoundingClientRect().x-cs[0].getBoundingClientRect().right).toFixed(1),
-            top:b(one.querySelector('.obs__top')), body:b(one.querySelector('.obs__body')),
-            overlap:+(b(one.querySelector('.obs__top')).y+b(one.querySelector('.obs__top')).h-b(one.querySelector('.obs__body')).y).toFixed(1),
+          const pad=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pad-page'));
+          const media=b(one.querySelector('.obs__media')); const chip=b(one.querySelector('.obs__entity'));
+          const like=one.querySelector('.obs__act[data-act=like]'); const lr=like.getBoundingClientRect();
+          const at=(y)=>{const e=document.elementFromPoint(lr.x+lr.width/2,y); return e===like||like.contains(e)};
+          return {n:cs.length, card:b(one), media, ar:+(media.w/media.h).toFixed(4),
+            heights:[...new Set(cs.map(c=>+c.getBoundingClientRect().height.toFixed(2)))],
+            footGap:+Math.max(...cs.map(c=>Math.abs(c.getBoundingClientRect().bottom
+              - c.querySelector('.obs__actions').getBoundingClientRect().bottom))).toFixed(2),
+            gap:+(cs[1].getBoundingClientRect().x-cs[0].getBoundingClientRect().right).toFixed(1),
+            restX:+(cs[0].getBoundingClientRect().x-page.x-pad).toFixed(1), scrollLeft:rail.scrollLeft,
             bleed:+(page.right-rr.right).toFixed(1), scrollable:rail.scrollWidth>rail.clientWidth+8,
-            prios:[...new Set(cs.map(c=>c.dataset.priority))].sort(), tops:[...new Set(tops)].length,
+            prios:[...new Set(cs.map(c=>c.dataset.priority))].sort(),
+            badges:[...new Set(cs.map(c=>getComputedStyle(c.querySelector('.obs__pri')).backgroundColor))].length,
+            photos:cs.filter(c=>c.querySelector('.obs__photo')).length,
+            slabs:cs.filter(c=>c.querySelector('.obs__flat')).length,
+            kinds:cs.filter(c=>c.querySelector('.obs__flat'))
+              .map(c=>c.querySelector('.obs__kind')?.textContent||''),
+            loaded:[...rail.querySelectorAll('.obs__photo,.obs__thumb')].every(i=>i.complete&&i.naturalWidth>0),
+            chipInset:+(media.y+media.h-chip.y-chip.h).toFixed(1),
+            frosted:getComputedStyle(one.querySelector('.obs__entity')).backdropFilter,
             acts:one.querySelectorAll('.obs__act').length,
-            noteLines:Math.round(b(one.querySelector('.obs__note')).h/24),
-            tagRows:Math.round(b(one.querySelector('.obs__tags')).h/22)}})()""")
+            target:lr.height, tallTarget:at(lr.y-11)&&at(lr.bottom+11),
+            noteLines:Math.round(b(one.querySelector('.obs__note')).h/21)}})()""")
         check("six observations render", o["n"] == 6, str(o["n"]))
-        check("card is 344 wide", near(o["card"]["w"], 344) or WIDTH < 768, f"{o['card']['w']}")
-        check("card is 424.5 tall", near(o["card"]["h"], 424.5), f"{o['card']['h']}")
-        check("rail gap is 10", near(o["gap"], 10), f"{o['gap']}")
-        check("top section is 336×225", near(o["top"]["w"], 336, 8) and near(o["top"]["h"], 225), f"{o['top']['w']}×{o['top']['h']}")
-        check("white block is 269.5 tall", near(o["body"]["h"], 269.5), f"{o['body']['h']}")
-        check("it covers the colour's last 78px", near(o["overlap"], 78), f"{o['overlap']}")
+        check("card is 320 wide", near(o["card"]["w"], 320) or WIDTH < 768, f"{o['card']['w']}")
+        check("the media is four by three", near(o["ar"], 4 / 3, .005), f"{o['ar']}")
+        check("all six cards are the same height", len(o["heights"]) == 1, f"{o['heights']}")
+        check("every footer sits on its card's bottom edge", near(o["footGap"], 0, .5), f"{o['footGap']}px off")
+        check("the note clamps to three lines", o["noteLines"] == 3, str(o["noteLines"]))
+        check("rail gap is 20", near(o["gap"], 20), f"{o['gap']}")
+        # the rail's own shadow padding must not become a resting scroll offset:
+        # a snap area aligned to `start` aligns to the SNAPPORT, so without
+        # `scroll-padding-left` the rail rests 10px into its own gutter
+        check("the rail rests unscrolled, first card on the page gutter",
+              o["scrollLeft"] == 0 and near(o["restX"], 0), f"scrollLeft {o['scrollLeft']}, {o['restX']}px off")
         check("the rail runs to the page edge", near(o["bleed"], 0), f"{o['bleed']}px short")
         check("the rail scrolls", o["scrollable"])
         check("all four priorities are drawn", o["prios"] == ["critical", "high", "low", "moderate"], str(o["prios"]))
-        check("each priority has its own colour", o["tops"] == 4, f"{o['tops']} distinct fills")
+        # the badge, not the media: three of the six cards carry a photograph,
+        # so the priority colour is NOT on every card and the badge is what
+        # makes the priority readable on all of them
+        check("each priority has its own badge colour", o["badges"] == 4, f"{o['badges']} distinct")
+        check("three cards carry a photograph and three the priority slab",
+              o["photos"] == 3 and o["slabs"] == 3, f"{o['photos']} photos, {o['slabs']} slabs")
+        check("a card with no photograph names its entity's kind",
+              all(k in ("Animal", "Enclosure") for k in o["kinds"]) and len(o["kinds"]) == 3, str(o["kinds"]))
+        check("every photograph and thumbnail loaded", o["loaded"])
+        check("the entity chip is frosted, 10px off the foot of the media",
+              near(o["chipInset"], 10) and "blur" in o["frosted"], f"{o['chipInset']}px, {o['frosted']}")
         check("three actions per card", o["acts"] == 3, str(o["acts"]))
-        check("the note clamps to three lines", o["noteLines"] == 3, str(o["noteLines"]))
+        # the design file draws these as 18px of text; two of them are real
+        # controls, so the TARGET is grown to 44 without the row growing
+        check("an 18px glyph still has a 44px target",
+              near(o["target"], 18) and o["tallTarget"], f"{o['target']}px box, reachable: {o['tallTarget']}")
 
         # like toggles, and says so
         like = c.eval("""(()=>{const b=document.querySelector('.obs__act[data-act=like]');
