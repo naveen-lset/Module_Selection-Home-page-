@@ -25,3 +25,19 @@ assets/icon.zip
 # is not servable, and it was reachable at /.claude/settings.json on the live
 # site until this line. Same case as the icon archive above. 7 Sep 2026.
 .claude
+
+# The session notes and the module spec. Same case as the two above, found the
+# same way — `/SESSION_HANDOFF.md` and `/docs/framing-site-command-centre.md`
+# both answered 200 on the live site. Neither is servable: nothing in
+# index.html fetches from `docs/`, the three mentions of it are prose inside
+# comments, and the handoff is a 69KB internal document that names local paths,
+# unpushed branches and deployment ids. 8 Sep 2026.
+SESSION_HANDOFF.md
+docs
+
+# The Vercel OIDC token `vercel link` leaves behind. `/.env.local` answers 404
+# today because the CLI ignores dotfiles of its own accord — which is a
+# default, not a promise, and this is a credential. `.vercelignore` REPLACES
+# `.gitignore` rather than adding to it, so being ignored by git buys nothing
+# here. 8 Sep 2026.
+.env*

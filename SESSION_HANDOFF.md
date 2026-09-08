@@ -580,7 +580,7 @@ reading it. See §7.
 
 | | |
 |---|---|
-| Live (home only — **two sessions behind**) | <https://antz-module-selection-home.vercel.app> |
+| Live (home only — **current, 8 Sep 2026**) | <https://antz-module-selection-home.vercel.app> · both pages: `?v=1` and `?v=2` |
 | Repository | <https://github.com/naveen-lset/Module_Selection-Home-page-> |
 | Vercel project | `naveen-lsets-projects/antz-module-selection-home` |
 | Working copy | `~/Desktop/Module Selection` |
@@ -595,9 +595,23 @@ assets/         7 photographs, avatar, foliage, 27 module SVGs
 README.md       the decisions, the measurements, and what was got wrong
 ```
 
-**⚠ Not deployed and not committed.** `vercel deploy --prod --yes` from the
-working copy. Vercel is still not connected to GitHub (§6), so pushing does not
-deploy.
+**Deployed and committed, 8 Sep 2026.** The alias above serves `9b71560`
+(`dpl_2C5DZRtp7uXt7xxymWj7Bq9UKYDs`, target production); `verify_home.py` and
+`verify_v2.py` both pass against it. Ship with `vercel --prod --yes` from the
+working copy.
+
+**⚠ Three things that are still true and still catch people.** Vercel is not
+connected to GitHub (§6), so pushing does not deploy and deploying does not
+push. It uploads the WORKING COPY rather than the commit, which is why
+`.vercelignore` names `References`, `tools`, `mockups`, `_planning`,
+`assets/icon.zip` and `.claude` — an untracked file ships to production without
+ever being committed. And **verify against the alias, never the
+`…-<hash>-naveen-lsets-projects.vercel.app` URL the CLI prints**: that one is
+behind Deployment Protection and answers with a Vercel login page, which reads
+exactly like a broken deploy.
+
+**⚠ The commits are local.** `site-command-centre` is ahead 2 of its own remote
+and 45 ahead of `main`; nothing is pushed.
 
 ---
 
