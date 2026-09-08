@@ -108,6 +108,29 @@
   --c-on-primary-ctr:   #1F515B;  /* MD3_Antz/OnPrimaryContainer  active date */
   --c-success:          #72E128;  /* Light/Success/Main          presence dot */
   --c-white:            #FFFFFF;  /* Light/Common/White                       */
+  /* FOUR MORE, NAMED BY NODE 280:3521 — 8 Sep 2026. Figure colours sitting on
+     a dark card, and library variables rather than anything mixed here.
+
+     TWO OF THEM ARE NEARLY THE SEMANTIC TONES AND ARE STILL WRITTEN OUT.
+     ErrorContainer #FFD3D3 is three units off --c-alert #FFD6CE, and
+     SecondaryContainer #AFEFEB is in --c-ok's family. Reusing the tones would
+     have been one fewer token and the wrong relationship: --c-ok/warn/alert
+     mean "this figure is in trouble", and Deaths and Transfers on the Key
+     Insights card are not two states of one measurement — they are two
+     different counts the design gives two different library colours. A card
+     that asks for MD3_Antz/ErrorContainer should read that token. */
+  --c-notes:            #FCF4AE;  /* MD3_Antz/notes                           */
+  --c-error-ctr:        #FFD3D3;  /* MD3_Antz/ErrorContainer                  */
+  --c-secondary-ctr:    #AFEFEB;  /* MD3_Antz/SecondaryContainer              */
+  --c-moderate:         #FFE86E;  /* MD3_Antz/moderatePrimary                 */
+  --c-primary:          #37BD69;  /* MD3_Antz/Primary            the FAB      */
+  /* …AND THE ONE THAT CAN CARRY TEXT. #37BD69 is a fill under white, not an
+     ink: on the pale tint the Quick Actions grid uses for a pressed cell it
+     measures 2.4:1, which is not a label. #1E7A44 is the same green darkened
+     until it clears AA both ways — 5.35:1 — and it is already the button green
+     in five places in the search stylesheet as a literal. Named here so this
+     component does not add a sixth. */
+  --c-primary-ink:      #1E7A44;
 
   --ink:      var(--c-on-secondary-ctr);
   --ink-head: var(--c-on-surface-var);
@@ -308,6 +331,31 @@
                     rgb(58, 193, 222) 74.4%,
                     rgb(54, 191, 221) 84.2%,
                     rgb(50, 191, 221) 94.0%);
+  /* KEY INSIGHTS · node 286:3940, the one card on the second home page whose
+     fill is not a module's. Sampled the same way as everything above, and the
+     reason is on show here more plainly than anywhere else in this block:
+     Figma reports the fill as `linear-gradient(205.578deg, rgb(0,214,201)
+     44.809%, rgb(31,65,91) 133.5%)` — one handle starting past the middle of
+     the card, the other a third of a card-length beyond its corner. Rendered
+     as written that gives rgb(0,214,201) across the whole top edge; the
+     artboard draws rgb(8,171,170) there. Measured against the node's own
+     render at 340x144, the fitted axis is 25.6deg and the ramp below matches
+     the frame to an RMS of 0.4 of one 8-bit level over ~500 sample points.
+
+     ITS TWO ENDS ARE BOTH IN THE PALETTE. #00D6C9 is MD3_Antz/Secondary and
+     #1F415B is OnSecondaryContainer — the ink the Focus Hub's other variation
+     is painted. This is a new pairing, not a new colour. */
+  --g-insights:      linear-gradient(25.6deg,
+                    rgb(24, 98, 115) 6.0%,
+                    rgb(22, 106, 121) 15.8%,
+                    rgb(20, 114, 127) 25.6%,
+                    rgb(19, 122, 133) 35.3%,
+                    rgb(17, 130, 139) 45.1%,
+                    rgb(15, 138, 145) 54.9%,
+                    rgb(14, 147, 151) 64.7%,
+                    rgb(12, 155, 157) 74.4%,
+                    rgb(10, 163, 163) 84.2%,
+                    rgb(8, 171, 169) 94.0%);
   --g-pharmacy-wash: var(--g-teal-card);
   --g-reports-wash:  var(--g-teal-card);
 
@@ -2715,6 +2763,12 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    and the page keeps the one thing the band is for: a lit top that separates
    the greeting from the work.
 
+   AND THE SET IT SEEDS HAS MOVED ON TWICE SINCE. 270:4176 gave the page four
+   columns and the frame's own row order; 280:3521 added Key Insights beside
+   Hospital and sent Pharmacy and Lab to the foot. Neither touched the two
+   bands or the re-parented gradient described above, which is why this note
+   still says 236:6669 — see V2_LAYOUT in layoutStore.js for the cards.
+
    THE ARRANGEMENT IS NOT TRANSCRIBED, AND CANNOT BE. Node 236:6669 is a
    744-wide artboard laying its cards across FOUR columns; this page is five at
    1024. The set of sixteen cards is the design's, card for card and size for
@@ -2722,6 +2776,81 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    to the head of it and Diet & Kitchen added to it the same afternoon — see
    V2_LAYOUT in layoutStore.js — but which cell each lands in is the packer's
    answer to five columns, not the artboard's to four. ═══════════════════ */
+
+/* ── V2'S GRID IS FOUR COLUMNS, NOT FIVE ── node 270:4176, 8 Sep 2026
+   ═══════════════════════════════════════════════════════════════════════════
+   THE ALIGNMENT RULING. V2's note in layoutStore.js used to say the artboard's
+   rows "cannot be reproduced and are not pretended to be", because the frame is
+   744 wide across FOUR columns and this page was five at 1024. The user's
+   answer on 8 Sep was to reproduce them, so the page changes its column count
+   rather than the design changing its rows.
+
+   IT IS MEASURED, THE SAME WAY THE FIVE WAS. Node 270:4176 draws every small
+   card at 162 x 144 and every wide one at 340, on a 696 content width:
+   (696 - 3x16) / 4 = 162 exactly, and 162x2 + 16 = 340 exactly. The two tall
+   cards — Notes and My Focus Hub — are 304, which is 144x2 + 16. So the frame
+   is four columns, 16px gutters, 144px rows, and every row in it falls out of
+   that: Medical + Housing + Species(2), Hospital(2) + Pharmacy + Lab, Notes(2x2)
+   beside Diet(2) over Administer + Mortality, four smalls, then My Focus
+   Hub(2x2) beside Pending Approvals(2).
+
+   NOTHING IN SPAN_TABLE CHANGES. It already carries a 4-column step for every
+   size — small [1,1], medium [2,1], tall [2,2] — because the 768-899 portrait
+   band has always been four. This makes 1024 use the same step, which is why
+   the ruling costs one token rather than a second table.
+
+   THE ROW HEIGHT IS DERIVED, NOT FIXED. 162:144 is a 1.125 ratio where V1's
+   179.2:164 is 1.0927, and a fixed 164 under a 228px card would draw the
+   artboard's shape wrong. The mechanism is the one the portrait band already
+   uses — see `--card-ar` and the `cqw` note in section 2 — and every number in
+   the calc is a literal for the reasons given there. At 1024 that is
+   (960 - 48) / 4 = 228 wide and 202.67 tall, which is 162 x 144 to the pixel
+   in proportion.
+
+   THE PAGE PADDING STAYS AT WHATEVER THE BAND SAYS. The frame's is 24 and this
+   page's is 32 at the reference; matching it would move the greeting, the
+   search field and the band as well as the grid — a change to the whole page's
+   margins on a ruling about the cards. The columns and their proportion are the
+   alignment, and `cqw` measures whatever content width the padding leaves, so
+   the proportion holds at every width in the band.
+   AND IT STARTS AT 700, NOT AT 900. The frame is 744 wide, which is an iPad
+   Mini in portrait and lands in this stylesheet's PHONE band — so at the
+   artboard's own width the page was drawing two columns and none of the rows
+   above existed. The four columns therefore begin below the frame's width
+   rather than above it, and the gutter is pinned to the frame's 16 in the same
+   breath: the phone band sets 12, and the row-height calc below subtracts a
+   literal 48 for three gaps, so a 12px gutter would leave every row 3px short
+   of its own proportion.
+
+   BELOW 700 IS STILL TWO COLUMNS. Four at 660 is a 140px card carrying a 32px
+   glyph and a wrapping name — narrower than anything the artboard draws — and
+   a phone is not the frame this ruling is about. One number here if that is
+   wanted lower down. */
+@media (min-width: 700px) {
+  :root[data-page-version='2'] { --grid-cols: 4; --grid-gap: 16px; }
+}
+@supports (container-type: inline-size) {
+  @media (min-width: 700px) {
+    :root[data-page-version='2'] #moduleGrid,
+    :root[data-page-version='2'] .hero--estate { --grid-row: calc((100cqw - 48px) / 4 / 1.125); }
+  }
+}
+
+/* ── ONE CARD IS PAINTED DIFFERENTLY ON THE TWO PAGES ─────────────────────
+   Pending Approvals' second line. Node 136:4547 draws "12 High Priority" in
+   the coral family, which is --c-alert and what the card carries; node
+   280:3521 draws the same line in MD3_Antz/moderatePrimary, #FFE86E. Both
+   frames are current and they disagree, so neither is overwritten: the card
+   keeps V1's colour and V2 states its own here.
+
+   THE PAGE VERSION IS THE RIGHT PLACE FOR IT because that is what differs. A
+   second variant would put a near-duplicate Pending Approvals in the picker
+   and make a paint difference look like a choice a user could make; a second
+   `subTone` in the catalogue would have to be read by whichever page happened
+   to seed it. This is one selector, scoped to the page it belongs to. */
+:root[data-page-version='2'] .card[data-variant='approvals.pending'] .l-stat__sub[data-tone='alert'] {
+  color: var(--c-moderate);
+}
 
 /* V2 drops both bands. `display: none` and not a class on them: the elements
    are still in the markup for V1 and nothing about them changes, so the
@@ -3749,6 +3878,116 @@ body.is-editing .section-head--home { align-items: center; margin-bottom: var(--
   font-size: var(--fs-label);
   font-variant-numeric: tabular-nums;
 }
+
+/* ══ LAYOUT · headline ════════════════════════════════════════════════════
+   NODE 286:3940. One count with the two it has to be read against boxed
+   beside it: 32 births this month, against 2 deaths and 12 transfers.
+
+   THE BOX MODEL IS THE FRAME'S, EXPRESSED IN THE CARD'S OWN PADDING TOKEN.
+   The node pads the card 8, pads the LEFT half a further 8, and leaves the
+   right half unpadded — so the tiles reach 8 from the card's edge where the
+   head and the figure start at 16, and the tiles' top sits ABOVE the head's
+   first line rather than level with it. That is not a rounding artefact in the
+   file, it is what makes the tiles read as attached to the card rather than as
+   two more things in the column. Everything below is `--pad-card` and half of
+   it, so the relationship holds if that token ever moves and no literal 8
+   appears anywhere.
+
+   TYPE IS THE ARTBOARD'S ABSOLUTE SIZE, NOT THE CARD'S SCALE. This card is
+   340 wide in the file and 472 at 1024, and the 44px figure is still 44 —
+   which is the rule the whole stylesheet already follows (see the 1024 freeze
+   block). The 20px supporting figures land on --fs-metric-sm, 21.17, the
+   nearest step on this file's own scale. ═════════════════════════════════ */
+.card[data-layout='headline'] { padding: calc(var(--pad-card) / 2); }
+.l-headline {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1 0 0;
+  min-height: 0;
+}
+.l-headline__lead {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  min-width: 0;
+  padding: calc(var(--pad-card) / 2);
+}
+/* the figure is pushed to the foot of its half, which is what leaves the ramp
+   showing between the head and it */
+.l-headline__body {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  min-height: 0;
+}
+.l-headline__value {
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: var(--fs-stat);
+  line-height: 1;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'opsz' 14;
+  color: var(--c-notes);
+}
+.l-headline__label {
+  font-size: var(--fs-micro);
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.l-headline__side {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(var(--pad-card) / 2);
+  min-width: 0;
+}
+/* NOT A PLATE. 5% black under a 2px backdrop blur — the module's ramp still
+   reads through it, which is the difference between separating two figures and
+   dropping a dashboard tile onto a card. The hairline is the node's
+   rgba(31,81,91,.05), all but invisible and doing the same job as the blur:
+   giving the box an edge without giving it a surface. */
+.l-headline__tile {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  padding: var(--s2) var(--s3);
+  border: .5px solid rgba(31, 81, 91, .05);
+  border-radius: var(--s3);
+  background: rgba(0, 0, 0, .05);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.l-headline__tile-label {
+  font-size: var(--fs-micro);
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.l-headline__tile-value {
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: var(--fs-metric-sm);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'opsz' 14;
+}
+/* The two library containers the node names, and the reason they are not
+   --c-alert and --c-ok is in the palette block: these are two different counts
+   given two different colours, not two states of one measurement. */
+.l-headline__tile[data-tone='error'] .l-headline__tile-value     { color: var(--c-error-ctr); }
+.l-headline__tile[data-tone='secondary'] .l-headline__tile-value { color: var(--c-secondary-ctr); }
 
 /* ══ LAYOUT · meters ══════════════════════════════════════════════════════
    Named rows that each carry their own short track. For quantities where the
@@ -7610,242 +7849,656 @@ body.is-site .card:active { transform: scale(.978); }
 <style>
 /* ══ css/quick-actions.css ══ */
 /* ══════════════════════════════════════════════════════════════════════════
-   QUICK ACTIONS · THE CORNER FAB AND THE DOCK IT SUMMONS
-   ──────────────────────────────────────────────────────────────────────────
-   The sixteen actions of the ANTZ mobile app's Quick Actions sheet
-   (References/IMG_2226.HEIC), on a tablet, behind one button in the corner.
+   THE QUICK ACTIONS ROW AND THE MENU IT OPENS — node 280:3521, 8 Sep 2026
+   ══════════════════════════════════════════════════════════════════════════
+   WHAT THIS REPLACES. A 64px circular FAB in the bottom-right corner that
+   summoned a sixteen-cell dock beside itself (`mockups/fab-actions.html`,
+   concept 3). The frame draws neither: it draws a PAIR of controls, centred at
+   the foot of the page — a pill carrying a 2x2 glyph and the words "Quick
+   Actions", and a chat disc beside it — over a soft blurred wash. The FAB is
+   deleted rather than hidden, on the user's ruling of 8 Sep: "Remove Current
+   Fab".
 
-   WHY A DOCK AND NOT A SHEET. On the phone these arrive as a bottom sheet that
-   covers two thirds of the screen — which is the right answer when the screen
-   is 390px wide and the sheet is the only thing that will fit. A 1024 canvas
-   does not have that problem, and covering a command centre to offer sixteen
-   verbs throws away the one thing the page is for: being watched. So the
-   actions come in as a band that grows out of the button, over a page that is
-   blurred but never dimmed and never hidden.
+   THE PILL WAS BUILT FROM NODE 270:4176 AND IS RE-READ HERE. That frame drew
+   the disc too and only the pill was built; 280:3521 draws the same pair and
+   redraws the pill flat. Both changes are that frame's, and the values are
+   under `.qa-pill` and `.qa-chat` with what each replaced.
 
-   THE SHAPE IS THE COUNT. Sixteen divides into full rows two ways that are
-   worth having: 8 x 2 and 4 x 4. The wide band is the landscape answer and
-   keeps the dock reading as a dock; the square is the portrait one. Six
-   columns would fit both bands and leave a ragged half-row, which is why
-   there is no six.
+   THREE THINGS THE FRAME GIVES AND ONE IT DOES NOT.
+     · The pill: flat #37BD69, a 1px WHITE border, a stadium radius, 16/14
+       padding, a 20px glyph, 16px semibold label, and
+       `0 4px 16px rgba(0,0,0,.2)`. 109 from the foot.
+     · The wash: a 182px gradient across the foot, rgba(255,255,255,.2) at
+       27.47% to rgba(119,119,119,.15) at 93.13%, with `filter: blur(10px)` on
+       the shape itself — which is what the node does. It is NOT a backdrop
+       blur: the page behind stays sharp until the menu opens.
+     · The glyph: `assets/icon/qa-actions.svg`, the frame's own export
+       (fi_10348852), committed rather than hand-drawn.
+     · WHAT IT DOES NOT DRAW is the open state. The user's instruction settles
+       it — "it has to appear like the profile menu selection, background
+       should be blur" — so the panel is the profile menu's own material and
+       the page behind it takes a real backdrop blur while it is open.
 
-   MOTION: A WIPE, NOT A STRETCH. The concept mockup grew a single-row pill
-   with `scaleX`, which is free and undetectable on one row of pills. On a
-   two-row grid the same transform visibly smears sixteen labels on the way
-   in, so the reveal is a `clip-path` wipe from the right edge instead — the
-   same "it comes out of the button" reading, with no glyph distorted.
-
-   Mockup and rationale: mockups/fab-actions.html, concept 3.
+   AND THE ONE BEHAVIOUR THAT IS PURELY THE USER'S. "When I scroll, Quick
+   Access text will go, only icon has to show; once I scroll to the top it has
+   to show with text." The label collapses to nothing and the pill closes to a
+   circle around the glyph. It is `max-width` and not `display`, so the width
+   animates instead of jumping, and `.qa.is-scrolled` is set by the SAME
+   observer the sticky search row already uses — one signal, two consumers.
    ══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --qa-fab:  64px;
-  --qa-cell: 92px;
-  --qa-cell-h: 100px;   /* 48 disc + 8 + three lines of 11.5px label       */
-  --qa-gap:  8px;
-  --qa-pad:  14px;
-  --qa-cols: 4;         /* portrait and the resized windows below 1024     */
+  /* THE PILL SITS AT 40, NOT THE NODE'S 109 — the user's ruling of 8 Sep,
+     "little down that Quick Access button has to come". 109 is measured off a
+     744x1369 artboard where the page ENDS just under the pill; on a scrolling
+     page it plants a floating control a third of the way up the last row of
+     cards, which is what it looked like in use. 40 reads as "at the foot of
+     the screen" at every height, and #panel-modules' tail is derived from this
+     token so the last row still clears it. */
+  --qa-b:      40px;
+  --qa-h:      52px;    /* the pill's and the chat disc's height, from the node */
+  --qa-band:   182px;   /* the wash's height, from the node                   */
+  --qa-cols:   4;       /* the menu's cells across — 4x4 holds the sixteen    */
+
+  /* ── THE PANEL, REDESIGNED · the brief of 8 Sep 2026 ────────────────────
+     "Make the interaction feel like a premium Apple-style iPad system
+     component — calm, fluid, spatial, precise." Every number below is from
+     that brief's own ranges, which is why they are literals rather than the
+     page's spacing tokens: --s3 happening to be 12px today is not the same
+     statement as "the grid gap is 12–16px", and if --s3 moved this component
+     would silently leave the range it was specified in. */
+  --qa-cell-h: 64px;    /* brief: 56–68 minimum, and over a 44px touch floor  */
+  --qa-gap:    14px;    /* brief: 12–16                                       */
+  --qa-pad:    20px;
+  --qa-r:      22px;    /* the panel's radius; the pill's is --qa-h / 2 = 26  */
+  --qa-cell-r: 14px;    /* brief: 14–16                                       */
+  --qa-icon:   20px;    /* brief: 16–20                                       */
+  --qa-cell-px: 16px;   /* the cell's own side padding; brief: 12–16          */
+  /* THE CELL'S TARGET WIDTH, which is what the panel's width is derived from
+     rather than the other way round: the longest of the sixteen labels sets
+     the cell and the cell sets the panel.
+
+     190 IS MEASURED, AND 170 WAS NOT ENOUGH. "+ Missing/Escaped Animals" is
+     25 characters where the next longest is 12, and held together as one run
+     it is 123.4px at 13.5px — so in a 170px cell its label box was 106px, the
+     line broke after the slash, and "Escaped Animals" at 105px then needed a
+     THIRD line which the clamp took away: the cell read "+ Missing/Escaped…".
+     At 190 the label box is 126px, the whole first run fits on one line and
+     "Animals" follows it. Nothing about the other fifteen needed this; one
+     string sets the width of the panel, which is what it means for a layout to
+     hold its content rather than crop it. */
+  --qa-cell-w: 190px;
+
+  /* ── the motion ────────────────────────────────────────────────────────
+     ITS OWN CURVE, NOT THE PAGE'S --ease-out. That token is
+     cubic-bezier(.16,1,.3,1), which spends most of its travel in the first
+     fifth and then coasts — right for a card lifting under a finger, wrong
+     for a surface that is meant to feel "almost effortless".
+
+     AND NOT THE FIRST ONE TRIED HERE EITHER. cubic-bezier(.32,.72,0,1) went in
+     first and was measured, frame by frame, on the real gesture: at 40ms of a
+     200ms reveal the surface was already 66% open and at 80ms it was 92% open.
+     Every number was inside the brief's ranges and the motion still read as a
+     snap followed by a wait, because a front-loaded curve puts the travel
+     where the eye has not arrived yet. This is a plain ease-out quad — 31% at
+     a fifth, 57% at two fifths, 77% at three — so the surface is visibly
+     moving for the whole 200ms. Both control-point y values are at or under 1,
+     so it cannot overshoot: the brief forbids bounce, elastic and overshoot by
+     name. */
+  --qa-ease:       cubic-bezier(.25, .46, .45, .94);
+  --qa-ease-press: cubic-bezier(.4, 0, .2, 1);
+
+  /* THE BRIEF'S CLOCK STARTS AT TOUCH-DOWN AND THIS ONE STARTS AT THE CLICK,
+     which is why the absolute numbers below are smaller than its timeline.
+     The press is `:active` and so begins on pointerdown; the click that opens
+     the panel arrives on release, 60–100ms later on a real tap. Adding the
+     brief's own 140ms on top of that would put a third of a second between
+     the finger and the surface moving. So the ORDER and the INTERVALS are the
+     brief's — press, then morph, then surface, then rows bottom-up — and the
+     offsets are measured from the event this component actually receives. */
+  --qa-t-press:    100ms;  /* brief: ~100, 1 → .96, ease-out, no bounce       */
+  --qa-t-morph:    170ms;  /* brief: 160–180, grid → ×                        */
+  --qa-t-surface:  200ms;
+  --qa-t-row:      180ms;
+  --qa-row-step:    35ms;  /* brief: 30–40 between rows                       */
+  /* …AND THE TOTAL THAT STEP IS ALLOWED TO ADD UP TO. The brief's 30–40ms is
+     written for the four rows of a 4x4, where three gaps come to 105ms. At two
+     columns the same sixteen actions are EIGHT rows, and 35ms each would make
+     the last one wait 245ms and the whole unfold take 485 — the gesture
+     getting slower because the screen got narrower, which is exactly backwards.
+     So 105 is the budget and the step is whatever divides into it, capped at
+     the brief's 35: four rows step 35, eight rows step 15, and the reveal ends
+     at the same moment either way. JS does the division — see measureRows(). */
+  --qa-stagger:    105ms;
+  /* THE ROWS START WHILE THE SURFACE IS STILL OPENING, not after it. 60ms in,
+     the surface is a third of the way up and the bottom row is under it — so
+     the reveal is one continuous movement rather than a panel that arrives and
+     then fills. The last row lands at 60 + 3x35 + 180 = 345ms, which is where
+     the whole gesture ends. */
+  --qa-open-base:   60ms;
+  --qa-surface-in:  50ms;
+  --qa-t-close:    320ms;  /* the whole reverse, and the `hidden` timeout      */
+
+  /* Set by JS on every open: the pill's measured width and where its centre
+     falls relative to the panel's, which together are the window the panel's
+     clip starts as.
+
+     BOTH ARE MEASURED, AND THE SECOND ONE IS THE ONE THAT WAS MISSING. The
+     pill is not in the middle of the panel: the row centres the PAIR — pill
+     and chat disc — so the pill's centre sits half a disc and half a gap left
+     of the panel's, 32px at this size. A clip window centred on the panel
+     therefore grew out of a point 32px beside the FAB, which showed up in the
+     very first frame-by-frame pass and is precisely the spatial link the brief
+     is about. Neither number is derivable in CSS: one depends on the label's
+     text and the other on whether the chat disc is there at all.
+
+     The width is measured rather than assumed because the pill has two of
+     them — with its label and collapsed to a disc — and the surface has to
+     come out of whichever one is under the finger. */
+  --qa-orig-w: 150px;
+  --qa-orig-cx: 0px;
 }
-/* THE MEDIA QUERY MEASURES THE VIEWPORT AND THE DOCK LIVES IN THE PAGE, and
-   here that is safe rather than the trap it is for the grid: above 1024 the
-   page has stopped growing, so the frame IS 1024 and the two agree. */
-@media (min-width: 1024px) { :root { --qa-cols: 8; } }
 
 /* ── the layer ───────────────────────────────────────────────────────────
-   ANCHORED TO THE PAGE, NOT TO THE WINDOW. `.page` is capped at
-   960 + 2 x --pad-page and centred, so a plainly-fixed FAB would sit against
-   the right edge of a 27" monitor with 450px of nothing between it and the
-   product. This box is the page's own frame, pinned, with no height of its
-   own; everything inside is positioned off its bottom-right corner, which is
-   the corner the artboard's content actually ends at. */
+   ANCHORED TO THE PAGE, NOT TO THE WINDOW, for the reason the FAB was: the
+   page is capped at 960 + 2 x --pad-page and centred, so a plainly-fixed
+   control would sit against the middle of a 27" monitor's viewport rather
+   than the middle of the product. This box is the page's frame, pinned. */
 .qa {
   position: fixed;
+  z-index: var(--z-sheet);
   left: 0; right: 0; bottom: 0;
-  margin-inline: auto;
-  width: min(100%, calc(var(--max-content) + var(--pad-page) * 2));
   height: 0;
-  z-index: calc(var(--z-sheet) - 100);   /* under every sheet, over the page */
+  margin: 0 auto;
+  max-width: calc(var(--max-content) + var(--pad-page) * 2);
   pointer-events: none;
 }
-/* Four states where a corner button is in the way rather than to hand: the
-   Site panel has its own affordances, edit mode is about the cards that are
-   already down, search covers the page, and a drag is holding one. */
-body.is-site .qa,
-body.is-editing .qa,
-body.is-searching .qa,
-body.is-dragging .qa { display: none; }
 
-/* ── the veil · BLUR, NOT DIM ────────────────────────────────────────────
-   The recordings this came from blur their page and leave it visible; the
-   .scrim this file does NOT use dims to rgba(10,38,44,.34) because a sheet
-   has replaced the page. Nothing has replaced the page here. The 6% wash is
-   there only to keep white cards from reading as part of the dock. */
-.qa-veil {
-  position: fixed; inset: 0;
-  background: rgba(10, 38, 44, .06);
-  opacity: 0;
-  -webkit-backdrop-filter: blur(0px) saturate(1);
-  backdrop-filter: blur(0px) saturate(1);
-  transition: opacity var(--t-sheet) var(--ease-sheet),
-              backdrop-filter var(--t-sheet) var(--ease-sheet),
-              -webkit-backdrop-filter var(--t-sheet) var(--ease-sheet),
-              visibility 0s linear var(--t-sheet);
-  visibility: hidden;
-}
-.qa.is-open .qa-veil {
-  opacity: 1; visibility: visible; pointer-events: auto;
-  -webkit-backdrop-filter: blur(11px) saturate(.94);
-  backdrop-filter: blur(11px) saturate(.94);
-  transition-delay: 0s;
+/* ── the wash under the pill ─────────────────────────────────────────────
+   The node's own shape and blur. It spans the WINDOW rather than the page
+   frame — the gradient is the foot of the screen, not of the content — so it
+   is the one thing here that escapes `.qa`'s width. */
+.qa-band {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: var(--qa-band);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .2) 27.473%, rgba(119, 119, 119, .15) 93.132%);
+  filter: blur(10px);
+  pointer-events: none;
 }
 
-/* ── the dock ────────────────────────────────────────────────────────────*/
-.qa-dock {
+/* ── the row · TWO CONTROLS SINCE NODE 280:3521, 8 Sep 2026 ───────────────
+   The pill no longer centres itself. Node 286:3988 is a "Button Row" — the
+   pill and a 52px chat disc, 12 apart, the pair centred at the foot — so the
+   centring moved up one level to the row and the two controls became flex
+   items in it. The pill's own `translateX(-50%)` had to go with it, which is
+   why `:active` below is a bare `scale()` where it used to carry the offset.
+
+   THE ROW IS CENTRED, NOT THE PILL. A row of `left: 50%; translateX(-50%)`
+   centres the PAIR, so the pill sits left of the page's midline by half the
+   chat disc and its gap. That is what the frame draws — the pill is not
+   centred in it either — and it is also what keeps the pill still when the
+   label collapses on scroll and the row's width changes underneath it. */
+.qa-row {
   position: absolute;
-  right: calc(var(--pad-page) + var(--qa-fab) + 14px);
-  bottom: var(--pad-page);
-  display: grid;
-  grid-template-columns: repeat(var(--qa-cols), var(--qa-cell));
-  grid-auto-rows: var(--qa-cell-h);
-  gap: var(--qa-gap);
-  padding: var(--qa-pad);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, .84);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  backdrop-filter: blur(18px) saturate(1.5);
-  box-shadow: 0 18px 46px -16px rgba(10, 38, 44, .46),
-              inset 0 0 0 1px rgba(255, 255, 255, .72);
-  pointer-events: auto;
-  visibility: hidden;
-  opacity: 0;
-  clip-path: inset(0 0 0 100% round 28px);
-  transition: opacity 180ms var(--ease),
-              clip-path var(--t-slow) var(--ease-out),
-              visibility 0s linear var(--t-slow);
-}
-.qa.is-open .qa-dock {
-  visibility: visible; opacity: 1;
-  clip-path: inset(0 0 0 0 round 28px);
-  transition-delay: 0s;
-}
-@supports not (clip-path: inset(0 0 0 100% round 28px)) {
-  .qa-dock { transform: scale(.9); transform-origin: 100% 100%; transition: opacity 180ms var(--ease), transform var(--t-slow) var(--ease-out), visibility 0s linear var(--t-slow); }
-  .qa.is-open .qa-dock { transform: none; }
+  left: 50%;
+  bottom: var(--qa-b);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
 }
 
-/* ── one action ──────────────────────────────────────────────────────────
-   A disc and a caption, which is what the phone sheet is: the caption is
-   under the glyph and not beside it, so sixteen cells tile evenly however
-   long the words are. Every disc is the same teal ring — the sheet does not
-   rank these and neither does this. Their ORDER is the ranking, and it is the
-   order the sheet gives them, read the way the page is read. */
-.qa-act {
-  appearance: none; border: 0; background: none; padding: 6px 2px 4px;
-  display: grid; justify-items: center; align-content: start; gap: 8px;
-  border-radius: 18px; cursor: pointer; font: inherit;
-  /* A GRID ITEM'S min-width IS `auto`, WHICH MEANS "never narrower than my
-     longest word". On the phone the columns are 1fr and "Announcement" is one
-     pixel wider than the track it is in, so the cell quietly overflowed its
-     own column. Nothing here needs an intrinsic minimum. */
-  min-width: 0;
-  opacity: 0;
-  transition: background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
-}
-.qa-act:hover  { background: rgba(0, 171, 171, .09); }
-.qa-act:active { transform: scale(.95); }
-.qa-act:focus-visible { outline: 3px solid var(--ui-link); outline-offset: 2px; }
-.qa-act__disc {
-  width: 48px; height: 48px; border-radius: 50%;
-  display: grid; place-items: center;
-  color: var(--c-secondary-dark);
-  background: rgba(0, 171, 171, .10);
-  box-shadow: inset 0 0 0 1.5px rgba(0, 171, 171, .42);
-  transition: background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
-}
-.qa-act:hover .qa-act__disc {
-  background: rgba(0, 171, 171, .18);
-  box-shadow: inset 0 0 0 1.5px rgba(0, 171, 171, .7);
-}
-.qa-act__disc .icon { width: 24px; height: 24px; }
-.qa-act__label {
-  font-size: 11.5px; font-weight: 600; line-height: 1.22;
-  color: var(--petrol-800); text-align: center;
-  /* three lines is the longest label in the set — "+ Missing/ Escaped
-     Animals" — and nothing may leave the cell whatever arrives later */
-  /* `min-width: 0` and not just `max-width` — the label is itself a grid
-     item, and a grid item's automatic minimum size beats a max-width, so
-     "Announcement" stayed one pixel wide of its column on the phone until
-     the minimum was written off explicitly. */
-  width: 100%; min-width: 0; overflow-wrap: break-word;
-}
+/* ── the pill ────────────────────────────────────────────────────────────
+   FLAT #37BD69 SINCE NODE 280:3521, where it was a #37BD69 → #1F415B ramp
+   from 270:4176, and a stadium where it was radius 24. The shadow deepened
+   with it: 0 4px 16px at 20% against the old 0 4px 6.2px at 15%. All three
+   are the newer frame's, read off node 286:3989.
 
-/* ── the button ──────────────────────────────────────────────────────────*/
-.qa-fab {
-  position: absolute;
-  right: var(--pad-page); bottom: var(--pad-page);
-  width: var(--qa-fab); height: var(--qa-fab);
-  border: 0; border-radius: 50%; padding: 0; cursor: pointer;
+   The disc beside it keeps the OLDER shadow, and that is not an oversight —
+   see `.qa-chat`. */
+.qa-pill {
   pointer-events: auto;
-  display: grid; place-items: center;
-  background: linear-gradient(135deg, #00D6C9 0%, #00ABAB 52%, #009BB8 100%);
-  box-shadow: 0 10px 26px -6px rgba(0, 155, 154, .62), 0 2px 6px rgba(10, 38, 44, .22);
-  transition: transform var(--t-base) var(--ease-out),
-              background var(--t-base) var(--ease),
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  height: var(--qa-h);
+  padding: 14px 16px;
+  border: 1px solid #FFFFFF;
+  border-radius: var(--r-pill);
+  background: var(--c-primary);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, .2);
+  color: #FFFFFF;
+  cursor: pointer;
+  /* THE PRESS IS ITS OWN TIMING AND NOT THE PILL'S GENERAL ONE. The width
+     changes on scroll over --t-base, which is a 220ms shape change and reads
+     as deliberate; a press that took 220ms to reach .96 reads as lag. The
+     brief asks for ~100ms on a plain ease-out, so `transform` is pulled out of
+     the shared line and given it. */
+  transition: padding var(--t-base) var(--qa-ease),
+              gap var(--t-base) var(--qa-ease),
+              transform var(--qa-t-press) var(--qa-ease-press),
               box-shadow var(--t-base) var(--ease);
 }
-.qa-fab:hover  { transform: translateY(-2px) scale(1.04); }
-.qa-fab:active { transform: scale(.94); }
-.qa-fab:focus-visible { outline: 3px solid var(--ui-link); outline-offset: 3px; }
+.qa-pill:hover { box-shadow: 0 8px 22px -2px rgba(0, 0, 0, .26); }
+.qa-pill:active { transform: scale(.96); }
+.qa-pill:focus-visible { outline: 3px solid var(--ui-link); outline-offset: 3px; }
+/* …AND IT STAYS COMPRESSED WHILE THE PANEL IS OPEN, a touch under its resting
+   size. The pill is no longer a button that was pressed and sprang back — it
+   is the thing the open surface came out of, and it should read as held down
+   for as long as that surface is up. .98 rather than the press's .96: half the
+   compression, so the difference between pressed and open is still legible
+   under the finger. */
+.qa.is-open .qa-pill { transform: scale(.98); }
+.qa.is-open .qa-pill:active { transform: scale(.96); }
 
-/* AT REST IT BREATHES ONCE EVERY FIVE SECONDS. A button that never moves is
-   furniture and one that pulses constantly is a nag; a single ring on a long
-   interval is the difference. It stops while the dock is open, and with the
-   tab — .is-hidden already pauses the cards' jiggle for the same reason. */
-.qa-fab__halo {
-  position: absolute; inset: -6px; border-radius: 50%; pointer-events: none;
-  border: 2px solid rgba(0, 214, 201, .55);
-  animation: qa-halo 5s var(--ease-out) infinite;
+/* ── the chat disc ───────────────────────────────────────────────────────
+   Node 286:3997, committed as `assets/icon/qa-chat.svg` — the glyph alone, cut
+   out of the frame's export at its own 24px and its own position, so the
+   surface under it is a real control with real states rather than a picture of
+   one.
+
+   ITS RING IS A GRADIENT WHERE THE PILL'S IS FLAT WHITE, because the export
+   says so: white at the foot to #DDEBE9 at 10% at the head, which over the
+   disc's own 52px works out at roughly 72% white below and 50% above. Two
+   adjacent controls with different hairlines looks like an inconsistency and
+   is the file's own drawing; the pill's stroke is reported flat white and is
+   left flat. `background-clip` rather than `border-image` because the ring has
+   to follow a 26px radius, which border-image cannot do.
+
+   AND ITS SHADOW IS THE OLDER, SHALLOWER ONE — 0 4px 6.2px at 15%, straight
+   off the export's `feDropShadow` (dy 4, stdDeviation 3.1, alpha .15). The
+   pill's is 0 4px 16px at 20%. The frame gives the pair two different depths
+   and both are transcribed rather than averaged. */
+.qa-chat {
+  pointer-events: auto;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--qa-h);
+  height: var(--qa-h);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background-image:
+    linear-gradient(#37BD69, #37BD69),
+    linear-gradient(0deg, rgba(255, 255, 255, .72) 0%, rgba(230, 240, 238, .5) 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 4px 6.2px 0 rgba(0, 0, 0, .15);
+  cursor: pointer;
+  transition: transform var(--t-base) var(--ease-out),
+              box-shadow var(--t-base) var(--ease);
 }
-@keyframes qa-halo {
-  0%, 72% { transform: scale(.86); opacity: 0; }
-  80%     { opacity: .8; }
-  100%    { transform: scale(1.5); opacity: 0; }
+.qa-chat:hover { box-shadow: 0 8px 16px -2px rgba(0, 0, 0, .22); }
+.qa-chat:active { transform: scale(.94); }
+.qa-chat:focus-visible { outline: 3px solid var(--ui-link); outline-offset: 3px; }
+.qa-chat img { display: block; width: 24px; height: 24px; }
+/* the disc does not carry a label, so it has nothing to collapse — it holds
+   its size at every scroll position while the pill beside it closes */
+/* ── the glyph, WHICH IS TWO GLYPHS IN ONE BOX ────────────────────────────
+   The brief: the grid mark becomes a × when the panel opens, and "the
+   transformation should feel morphing rather than replacing the icon
+   instantly". A true path morph would need the two marks to share a topology
+   and they do not — one is four squares, the other two crossed bars — so what
+   is shared instead is the MOTION: each rotates a quarter turn through the
+   other and scales through the handover, so the eye follows one mark turning
+   into the other rather than two marks swapping.
+
+   BOTH ARE ABSOLUTE IN A 20px BOX, so the pill's width never twitches during
+   the handover, and the × is drawn in CSS rather than exported: it is two
+   2px bars of `currentColor` and an export would be a second file to keep in
+   step with the pill's colour. The bars also draw themselves out from the
+   centre — `scaleX` .2 → 1 — which is the part that reads as morphing. */
+.qa-pill__g { position: relative; flex: none; width: 20px; height: 20px; }
+.qa-pill__grid, .qa-pill__x {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  transition: opacity var(--qa-t-morph) var(--qa-ease),
+              transform var(--qa-t-morph) var(--qa-ease);
 }
-body.is-hidden .qa-fab__halo,
-.qa.is-open .qa-fab__halo { animation-play-state: paused; opacity: 0; }
-
-/* THE TRIGGER IS THE DISMISSAL. One control, two glyphs, crossfading through
-   135 degrees — so there is never a second thing to find, and the ✕ is always
-   exactly where the finger that opened this already is. */
-.qa-fab__g {
-  position: absolute; display: grid; place-items: center;
-  transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease-out);
+.qa-pill__grid { width: 100%; height: 100%; opacity: 1; transform: rotate(0deg) scale(1); }
+.qa-pill__x { opacity: 0; transform: rotate(-90deg) scale(.55); }
+.qa.is-open .qa-pill__grid { opacity: 0; transform: rotate(90deg) scale(.55); }
+.qa.is-open .qa-pill__x { opacity: 1; transform: rotate(0deg) scale(1); }
+.qa-pill__x i {
+  position: absolute; left: 50%; top: 50%;
+  width: 15px; height: 2px; border-radius: 1px;
+  background: currentColor;
+  transition: transform var(--qa-t-morph) var(--qa-ease);
 }
-.qa-fab__g .icon { width: 28px; height: 28px; stroke-width: 2.2; }
-.qa-fab__g--close { opacity: 0; transform: rotate(-135deg) scale(.6); color: var(--petrol-800); }
-.qa-fab__g--open  { color: #FFF; }
-.qa.is-open .qa-fab { background: #FFF; box-shadow: 0 12px 30px -8px rgba(10, 38, 44, .5); }
-.qa.is-open .qa-fab__g--open  { opacity: 0; transform: rotate(135deg) scale(.6); }
-.qa.is-open .qa-fab__g--close { opacity: 1; transform: rotate(0deg) scale(1); }
+.qa-pill__x i:first-child  { transform: translate(-50%, -50%) rotate(45deg)  scaleX(.2); }
+.qa-pill__x i:last-child   { transform: translate(-50%, -50%) rotate(-45deg) scaleX(.2); }
+.qa.is-open .qa-pill__x i:first-child { transform: translate(-50%, -50%) rotate(45deg)  scaleX(1); }
+.qa.is-open .qa-pill__x i:last-child  { transform: translate(-50%, -50%) rotate(-45deg) scaleX(1); }
 
-/* THE BUTTON MUST NOT SIT ON THE LAST CARD. Scrolled to the foot of the home
-   page, the page's own 48px tail leaves the bottom-right module half under a
-   64px button — a card you can see and cannot press. The panel gives back the
-   height the button occupies, and only that panel, because the Site panel does
-   not carry one. */
-#panel-modules { padding-bottom: calc(var(--qa-fab) + var(--pad-page)); }
+.qa-pill__t {
+  /* the collapsing half. `max-width` carries the animation because a label
+     that goes to `display: none` takes the pill's width with it in one frame,
+     and the whole point of the gesture is that the pill CLOSES. */
+  max-width: 12em;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  transition: max-width var(--t-base) var(--qa-ease), opacity 140ms var(--ease);
+}
+/* SCROLLED: the words go and the pill becomes a disc around its glyph */
+.qa.is-scrolled .qa-pill { padding: 14px; gap: 0; }
+.qa.is-scrolled .qa-pill__t { max-width: 0; opacity: 0; }
+/* …and while the menu is open it stays open-shaped, whatever the scroll says:
+   the control that opened the panel should not change under the finger. The
+   brief draws the open state as `[ × Quick Actions ]`, so the label is part of
+   it rather than something the × replaces. */
+.qa.is-open .qa-pill { padding: 14px 16px; gap: var(--s2); }
+.qa.is-open .qa-pill__t { max-width: 12em; opacity: 1; }
 
-/* ── mobile · under 768 there is no room beside the button ───────────────
-   The dock stops being a dock and becomes what the phone already does: a
-   sheet across the foot of the page. Same markup, same motion, four columns. */
+/* ── the veil · A DIM, NOT A FROST ────────────────────────────────────────
+   THIS IS A REVERSAL AND THE BRIEF MAKES IT ONE. The panel first shipped with
+   the profile menu's own material behind it — rgba(16,44,48,.18) over
+   blur(6px) saturate(1.1) — on the instruction of 8 Sep, "it has to appear
+   like the profile menu selection, background should be blur". The brief of
+   the same day is explicit the other way: "Do NOT create the strong
+   frosted/blurred background shown in the current design… approximately 5–10%
+   visual reduction… The user should still understand where they are in the
+   dashboard."
+
+   Both are the user's and the later one wins, but it is worth saying WHY it
+   is also right: the profile menu is a small panel over a page you are
+   leaving alone, where a frost is a way of saying "come back to this". Quick
+   Actions is sixteen verbs about the page underneath — you pick "+ Note"
+   BECAUSE of what you can see behind it — so hiding that page is hiding the
+   context for the decision. 6% and a 2px blur keep the dashboard readable and
+   still put the panel plainly in front. */
+.qa-veil {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(16, 44, 48, .06);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  transition: opacity var(--qa-t-surface) var(--qa-ease);
+}
+.qa.is-open .qa-veil { opacity: 1; pointer-events: auto; }
+
+/* ══ THE SURFACE, AND HOW IT COMES OUT OF THE PILL ═════════════════════════
+   The brief's central ask: "the FAB should feel like it is TRANSFORMING INTO
+   the Quick Actions module… The panel must visually originate from the FAB."
+   And the three prohibitions that go with it — not a sudden appearance, not a
+   modal animation, and not sixteen blocks popping in independently.
+
+   WHAT THIS IS: ONE SURFACE, CLIPPED. The panel is laid out at its full size
+   from the first frame, and what animates is the WINDOW onto it — a clip-path
+   inset that starts as a pill: the measured width of the FAB, the height of
+   the FAB, the radius of the FAB, sitting at the panel's bottom edge, which
+   `translateY(--s2)` puts exactly on the FAB's top edge. It then opens out to
+   the whole panel. Nothing inside is scaled, nothing reflows, and the
+   surface's own shadow grows with it because it is inside the clip.
+
+   WHY NOT scale(). A modal zoom from .95 is the animation the brief rules
+   out, and it is also a different statement: scaling moves the CONTENT, so
+   the sixteen cells slide and grow, which is the "cards appearing" reading.
+   Clipping leaves every cell exactly where it will end up and reveals it. The
+   brief's own words for the difference — "the interface is unfolding", not
+   "16 cards are appearing".
+
+   WHY THE OPEN STATE CLIPS TO -60px AND NOT 0. `inset(0)` clips at the border
+   box, which takes the box-shadow with it and leaves the open panel flat on
+   the page — measured: the pixel 14px under the panel went from rgb(183,183,
+   183) to pure white. A negative inset extends the clip region outside the
+   box instead, and 60 clears this shadow's 44px of spread. The alternative
+   was a second wrapper to carry the shadow unclipped, which would have shown
+   a full-size shadow around a pill-size surface for the whole opening.
+   ═════════════════════════════════════════════════════════════════════════ */
+.qa-menu {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--qa-b) + var(--qa-h) + var(--s2));
+  /* the panel's width is the cells' — see --qa-cell-w */
+  width: min(
+    calc(var(--qa-cols) * var(--qa-cell-w)
+         + (var(--qa-cols) - 1) * var(--qa-gap)
+         + var(--qa-pad) * 2),
+    calc(100vw - 32px));
+  padding: var(--qa-pad);
+  border-radius: var(--qa-r);
+  border: 1px solid rgba(31, 65, 91, .07);
+  background: rgba(255, 255, 255, .94);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  /* two layers and neither of them a glow: a hairline to sit the panel on the
+     page and one soft, offset drop to lift it off */
+  box-shadow: 0 1px 2px rgba(31, 65, 91, .08), 0 18px 44px -16px rgba(31, 65, 91, .26);
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  opacity: 0;
+  transform: translate(-50%, var(--s2));
+  /* the window: --qa-h tall at the panel's bottom edge, --qa-orig-w wide, and
+     centred on the PILL rather than on the panel — which is what the ± on the
+     two horizontal insets is doing, and what puts it over the FAB */
+  clip-path: inset(
+    calc(100% - var(--qa-h))
+    calc(50% - var(--qa-orig-cx) - var(--qa-orig-w) / 2)
+    0px
+    calc(50% + var(--qa-orig-cx) - var(--qa-orig-w) / 2)
+    round calc(var(--qa-h) / 2));
+  transition: opacity var(--qa-surface-in) linear,
+              transform var(--qa-t-surface) var(--qa-ease),
+              clip-path var(--qa-t-surface) var(--qa-ease);
+  will-change: clip-path, transform;
+}
+.qa-menu[hidden] { display: none; }
+.qa.is-open .qa-menu {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  clip-path: inset(-60px round var(--qa-r));
+}
+/* CLOSING · the surface waits for the rows to go before it contracts, which is
+   the brief's order in reverse — rows collapse toward the FAB, then the panel
+   contracts to its origin. */
+.qa.is-closing .qa-menu {
+  /* THREE DELAYS, IN THE ORDER THE SHORTHAND ABOVE LISTS THEM — opacity,
+     transform, clip-path — and the first is why this is not one number.
+     `transition-delay: 60ms` applied to all three, so the 50ms opacity fade
+     ran 60–110ms while the clip contracted until 260ms: measured, the surface
+     was fully transparent at 120ms with 53% of its travel still to go, and
+     the whole second half of "the panel contracts toward its origin" happened
+     to something invisible. The fade belongs at the END of the close, once the
+     surface is nearly back to the pill's own footprint. */
+  transition-delay: 190ms, 60ms, 60ms;
+  /* …AND IT STOPS TAKING INPUT THE MOMENT IT STARTS LEAVING. The element is
+     still in the layout for the length of the close — `hidden` lands at
+     --qa-t-close — and a cell that is on its way out must not accept the press
+     that lands in the middle of it. */
+  pointer-events: none;
+}
+
+/* ── the head, and the rows ──────────────────────────────────────────────
+   ROW-BASED STAGGER, WHICH IS THE BRIEF'S AND IS ALSO THE ONLY ONE THAT
+   READS. "Do not stagger every individual card. Stagger by ROW." Sixteen
+   separate delays at 20ms each is 320ms of things starting, which the eye
+   reads as scatter; four delays of 35ms is one edge travelling up the panel.
+
+   FROM THE BOTTOM, because the bottom is where the FAB is: row 4 at 0, row 1
+   last, so the reveal runs away from the finger. `--qa-row` is that index and
+   it is set by JS from each cell's MEASURED top, not from its position in the
+   list — the grid is four across on a tablet and two on a phone, and a
+   DOM-order rule would stagger a phone's cells diagonally.
+
+   The head is a fifth step, so the title lands after the last row: it is the
+   top of the panel and it should arrive with the top. */
+.qa-menu__head, .qa-act {
+  opacity: 0;
+  /* the brief's three, in one transform: 12px up, and .98 → 1 */
+  transform: translateY(12px) scale(.98);
+  transition: opacity var(--qa-t-row) var(--qa-ease),
+              transform var(--qa-t-row) var(--qa-ease),
+              background var(--t-fast) var(--ease),
+              color var(--t-fast) var(--ease);
+  transition-delay: var(--qa-delay, 0ms);
+}
+.qa-act { --qa-delay: calc(var(--qa-open-base) + var(--qa-row, 0) * var(--qa-row-step)); }
+.qa-menu__head { --qa-delay: calc(var(--qa-open-base) + var(--qa-rows, 4) * var(--qa-row-step)); }
+.qa.is-open .qa-menu__head,
+.qa.is-open .qa-act { opacity: 1; transform: none; }
+/* CLOSING · the same stagger from the other end, so the panel folds down the
+   way it opened up: the head goes first, then row 1, and row 4 — the one over
+   the FAB — is the last thing on screen. */
+.qa.is-closing .qa-act { --qa-delay: calc(var(--qa-row-r, 0) * var(--qa-row-step)); }
+.qa.is-closing .qa-menu__head { --qa-delay: 0ms; }
+
+.qa-menu__head {
+  display: flex; align-items: baseline; gap: var(--s2);
+  padding: 2px 2px var(--qa-gap);
+}
+.qa-menu__head b {
+  font-size: var(--fs-micro); font-weight: 650; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--petrol-600);
+}
+.qa-menu__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--qa-cols), minmax(0, 1fr));
+  gap: var(--qa-gap);
+}
+
+/* ── one cell ────────────────────────────────────────────────────────────
+   NOT SIXTEEN CARDS. The brief is emphatic twice over — "Do not make the
+   blocks look like 16 independent cards", "The Quick Actions container is the
+   main visual surface" — and the version this replaces broke it in a way
+   worth naming: every cell carried a 40px filled plate behind its glyph, so
+   the panel read as sixteen tiles with icons on them. The plate is gone. What
+   separates the cells now is a 3.5% neutral wash and the gap, and the wash is
+   there for substance rather than for separation: at rest the panel is one
+   surface with sixteen slightly-recessed areas on it.
+
+   HORIZONTAL, GLYPH THEN LABEL, LEFT-ALIGNED. The brief's own sketch draws it
+   this way and it is the arrangement that reads as a control rather than a
+   tile — a centred glyph over a centred caption IS a card, whatever it is
+   painted. It also gives the label the cell's full remaining width, which is
+   what lets "+ Missing/Escaped Animals" set in two lines instead of three.
+
+   ONE ACCENT, ON PRESS ONLY. "DO NOT give every action a different color…
+   Icons should primarily use the same neutral/dark tone." So all sixteen
+   glyphs are petrol-600 and the green appears on exactly one occasion: the
+   cell under the finger. */
+.qa-act {
+  display: flex; align-items: center; gap: 12px;
+  min-height: var(--qa-cell-h);
+  padding: 14px var(--qa-cell-px);
+  border: 0; border-radius: var(--qa-cell-r);
+  background: rgba(31, 65, 91, .035);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.qa-act:hover { background: rgba(31, 65, 91, .07); }
+/* AN INSET RING RATHER THAN AN OUTLINE. `outline` on a 14px radius draws a
+   rectangle around a rounded cell in some engines; an inset shadow follows the
+   corner. The ring is --ui-link, the AA-corrected cyan, and not the accent:
+   focus is not a press. */
+.qa-act:focus-visible {
+  outline: none;
+  background: rgba(31, 65, 91, .07);
+  box-shadow: inset 0 0 0 2px var(--ui-link);
+}
+.qa-act:active {
+  transform: scale(.97);
+  background: rgba(55, 189, 105, .12);
+  color: var(--c-primary-ink);
+  /* the press must land under the finger and not queue behind this cell's
+     reveal delay, which is still on the element */
+  transition-delay: 0ms;
+}
+.qa-act__g {
+  flex: none; display: grid; place-items: center;
+  width: var(--qa-icon); height: var(--qa-icon);
+  color: var(--petrol-600);
+  transition: color var(--t-fast) var(--ease);
+}
+.qa-act__g .icon { width: var(--qa-icon); height: var(--qa-icon); }
+.qa-act:active .qa-act__g { color: var(--c-primary-ink); }
+.qa-act__t {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink-head);
+  /* THREE LINES, WHICH IS A SAFETY NET AND NOT A LAYOUT. At every width this
+     component is specified for, the widest label sets in two — see
+     --qa-cell-w — so `min-height` governs and all sixteen cells are the same
+     height. The third line exists so that a width nobody measured, or a
+     seventeenth action longer than these, grows its row instead of quietly
+     losing the end of a word. A clamp of 2 did exactly that.
+
+     `break-word` UNDER IT, for the same reason one step further down: a single
+     token wider than the cell breaks rather than being cropped. */
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  overflow-wrap: break-word;
+}
+.qa-act:active .qa-act__t { color: var(--c-primary-ink); }
+
+/* THE PAGE GIVES BACK THE HEIGHT THE PILL OCCUPIES. Without it the last row
+   of modules sits under a control it cannot be pressed through. The pill's
+   own box is --qa-h tall at --qa-b from the foot; the panel gives that back
+   and a gutter, and only this panel, because the Site panel carries no pill.
+   IT WAS A LITERAL 48 and the pill has been 52 since node 280:3521 — four
+   pixels of the last row sat under it. */
+#panel-modules { padding-bottom: calc(var(--qa-b) + var(--qa-h) + var(--s4)); }
+
+/* ── narrow · TWO ACROSS, NOT THREE, AND NOTHING HIDDEN ───────────────────
+   The brief specifies a 4x4 and forbids removing, hiding, categorising,
+   paginating or collapsing any of the sixteen. Four across holds down to the
+   iPad the brief is about: at 768 the panel is 736 wide and each cell 163,
+   which still sets the longest label in two lines.
+
+   BELOW THAT IT IS TWO, WHICH IS 2x8 AND STILL ALL SIXTEEN. A phone cannot
+   give a horizontal glyph-and-label cell 170px four times over — at 500 that
+   is an 89px cell, and the label would set in five lines or ellipse away. Two
+   columns keeps every action visible, legible and over the touch floor, which
+   is what the prohibition is protecting; the previous three-column rule split
+   the difference and got a 130px cell that did neither well.
+
+   The threshold is 620 rather than 767 because the four-column layout is
+   genuinely fine at 640 — measured, not assumed. */
+/* THE PANEL RUNS OUT OF WIDTH BEFORE THE PAGE DOES, so its own spacing comes
+   in one step before its column count does. At 900 and below the panel is
+   capped by the viewport rather than by --qa-cell-w, so the cells are narrower
+   than 190 and the padding is what gives the label its width back: 16 → 12 on
+   the cell and 20 → 16 / 14 → 12 on the panel buys 12px of label per cell,
+   which at 768 is the difference between "Escaped Animals" setting on one line
+   and taking a third. Every value stays inside the brief's 12–16. */
+@media (max-width: 900px) {
+  :root { --qa-pad: 16px; --qa-gap: 12px; --qa-cell-px: 12px; }
+}
 @media (max-width: 767px) {
-  :root { --qa-cell: 1fr; --qa-fab: 56px; }
-  .qa-dock {
-    right: var(--pad-page); left: var(--pad-page);
-    bottom: calc(var(--pad-page) + var(--qa-fab) + 12px);
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  :root { --qa-b: 24px; --qa-band: 132px; }
 }
+@media (max-width: 620px) {
+  :root { --qa-cols: 2; --qa-cell-h: 60px; }
+}
+
+/* Reduced motion: the panel is simply there, at its full size, with every
+   cell already visible — the clip is opened outright rather than transitioned,
+   because a clip-path left at its closed value would hide the panel
+   altogether. The pill's collapse on scroll is a width change rather than a
+   decoration, so it stays: it is information about the scroll position, not an
+   animation. */
+@media (prefers-reduced-motion: reduce) {
+  .qa-menu, .qa-veil, .qa-pill, .qa-pill__t,
+  .qa-pill__grid, .qa-pill__x, .qa-pill__x i,
+  .qa-menu__head, .qa-act { transition: none; }
+  .qa-menu__head, .qa-act { --qa-delay: 0ms; }
+  .qa.is-open .qa-menu, .qa.is-closing .qa-menu { clip-path: inset(-60px round var(--qa-r)); }
+  /* and the close's own timeout comes down with it, so `hidden` lands on the
+     next tick rather than leaving an invisible panel in the layout for a
+     third of a second */
+  :root { --qa-t-close: 0ms; }
+}
+
 </style>
 
 <!-- ══ WHICH HOME PAGE: V1 OR V2 ═══════════════════════════════════════════
@@ -8096,10 +8749,11 @@ body.is-hidden .qa-fab__halo,
 </main>
 
 <!-- ══ QUICK ACTIONS ═══════════════════════════════════════════════════════
-     The corner button and the dock it summons. OUTSIDE <main> deliberately:
-     it is pinned to the page frame rather than carried by the document, and
-     a fixed box inside a scrolling region is one `transform` away from
-     scrolling with it. Empty here — QuickActionsDock.js fills it. -->
+     The pill at the foot of the page, the wash behind it and the panel it
+     opens — node 270:4176. OUTSIDE <main> deliberately: it is pinned to the
+     page frame rather than carried by the document, and a fixed box inside a
+     scrolling region is one `transform` away from scrolling with it. Empty
+     here — QuickActions.js fills it. -->
 <div id="quickActions"></div>
 
 <script>
@@ -8951,6 +9605,11 @@ const LAYOUT_FILL = {
      Focus Hub overrides this with `fill: 'ink'` on the variant. See the fills
      in the stylesheet for why this is not the reverted `soft` fill. */
   focus: 'plate', note: 'plate',
+  /* Key Insights has no module behind it either, and unlike those two it is
+     not on a plate: node 286:3940 paints it with a ramp of its own, which the
+     `insights` pseudo-module carries as its gradient. So it is `solid` in the
+     ordinary way and nothing here is special-cased. */
+  headline: 'solid',
 }
 
 /* Every module's plain door, at the module's own gradient. */
@@ -10600,6 +11259,35 @@ const VARIANTS = [
     data: { title: 'Notes', items: NOTES },
   },
 
+  /* ══ KEY INSIGHTS ═══════════════════════════════════════════════════════
+     Node 286:3940, on the second home page since 8 Sep 2026, where it takes the
+     2x1 cell beside Hospital that Pharmacy and Lab used to share.
+
+     THE FIGURES ARE THE FRAME'S, INCLUDING THE PADDED "02". Two deaths is not
+     the same news as twelve transfers, and the design writes the small number
+     with its leading zero so the three figures sit in one column of glances
+     rather than reading as "2 vs 12" at different widths. It is a string in the
+     catalogue for exactly that reason.
+
+     `medium` ALONE. The composition is a headline and two boxes SIDE BY SIDE,
+     which is a 2x1 shape: at `small` the two boxes would be 60px wide and at
+     `tall` there is a card-height of empty ramp under three figures. A card
+     that only works at one size says so here rather than being repaired in CSS
+     at the two it was never drawn for. */
+  {
+    id: 'insights.key', moduleId: 'insights', name: 'Key Insights',
+    layout: 'headline', purpose: 'UNDERSTAND',
+    supportedSizes: ['medium'], defaultSize: 'medium', priority: 'secondary',
+    data: {
+      title: 'Key Insights',
+      value: '32', label: 'Birth Animals',
+      items: [
+        { label: 'Death',     value: '02', tone: 'error' },
+        { label: 'Transfers', value: '12', tone: 'secondary' },
+      ],
+    },
+  },
+
 ]
 
 /** Fill in what every variation has in common so the catalogue states only
@@ -10874,7 +11562,18 @@ const KEY = isV2() ? 'antz.home.layout.v2' : 'antz.home.layout'
    document is a complete list, not a diff, so a browser holding fifteen cards
    goes on drawing fifteen and the new one never appears. This is the failure
    that reads as "the change did not work". */
-const VERSION = 10
+/* 10 → 11 · V2 IS NODE 270:4176 NOW, four columns and the frame's own order
+   (8 Sep 2026). The set is the same sixteen cards; what changed is the ORDER,
+   which is the one kind of change a saved document hides most completely —
+   every id resolves, every size is supported, repair() passes it through, and
+   the page draws yesterday's arrangement of today's cards. */
+/* 11 → 12 · KEY INSIGHTS JOINED V2 AND PHARMACY AND LAB MOVED DOWN IT
+   (node 280:3521, 8 Sep 2026). Both halves need the bump and for different
+   reasons: the new card is an id a saved document has never heard of, so
+   nothing would put it on the page; and the two doors' new cells are an ORDER
+   change, which is the kind repair() cannot see — every id resolves, every
+   size is supported, and the page draws yesterday's arrangement in silence. */
+const VERSION = 12
 
 /**
  * The cards a fresh install starts with.
@@ -11008,13 +11707,15 @@ const DEFAULT_LAYOUT = [
 ]
 
 /**
- * THE SECOND PAGE'S CARDS — Figma node 236:6669, 7 Sep 2026.
+ * THE SECOND PAGE'S CARDS — Figma node 236:6669, 7 Sep 2026; the arrangement
+ * is node 270:4176's of 8 Sep and the set is node 280:3521's of the same day.
  *
- * V2 is not V1 with two bands removed; its grid seeds a different set. Sixteen
- * cards, read off the artboard row by row, and two of the three new widgets are
- * two of them: Notes at the top of the page and the plate Focus Hub at the foot
- * of it. The artboard drew a third — the ink Focus Hub, beside Pending
- * Approvals — and the ruling of 8 Sep 2026 took it off; see the list itself.
+ * V2 is not V1 with two bands removed; its grid seeds a different set.
+ * Seventeen cards, read off the artboard row by row, and three of them are
+ * widgets no module owns: Notes near the top, the plate Focus Hub at the foot,
+ * and Key Insights beside Hospital since node 280:3521. The artboard once drew
+ * a fourth — the ink Focus Hub, beside Pending Approvals — and the ruling of
+ * 8 Sep 2026 took it off; see the list itself.
  *
  * WHAT V1 HAS THAT THIS DOES NOT: Parivesh's wide door, and that is now the
  * only one. The artboard draws neither it nor Diet & Kitchen's photograph —
@@ -11041,39 +11742,52 @@ const DEFAULT_LAYOUT = [
  * for priority; see it for the distinction.
  */
 const V2_LAYOUT = [
-  /* rows 1–2 · NOTES LEADS THE PAGE — the user's ruling of 8 Sep 2026, "Notes
-     put in the top". It is a 2x2, so it takes the first two columns of the
-     first two rows and the small cards fill in beside it. */
-  { variantId: 'notes.recent',       size: 'tall'   },
+  /* THE ORDER IS NODE 280:3521's, ROW BY ROW, and at the four columns the
+     stylesheet gives V2 it packs into exactly the frame's rows.
+
+     WHAT 280:3521 CHANGED AGAINST 270:4176 — 8 Sep 2026, and it is one move
+     with two halves. A new card, KEY INSIGHTS, takes the 2-wide cell beside
+     Hospital in row 2; Pharmacy and Lab, which were that cell's two smalls,
+     go to the foot of the page beside My Focus Hub. Nothing else in the frame
+     moved. Seventeen cards now where there were sixteen.
+
+     AND IT IS A BETTER PAGE FOR THE SAME REASON THE FRAME GIVES IT: the second
+     row of a home page is prime, and two module doors were spending it on
+     navigation that the four-small row further down does just as well. What is
+     there now is the only card on the page that says how the collection
+     CHANGED this month.
+
+     row 1 · Medical + Housing beside Species Management's 2-wide card */
   { variantId: 'medical.default',    size: 'small'  },
   { variantId: 'housing.default',    size: 'small'  },
   { variantId: 'species.stats',      size: 'medium' },
-  /* row 3 · DIET & KITCHEN JOINS THE PAGE — the user's ruling of 8 Sep 2026,
-     "show the diet on v2 also". Node 236:6669 does not draw it, which is why
-     it was absent rather than lost; it is here beside Hospital because that is
-     how the two photographic doors sit on V1, and a photograph on its own in a
-     row of tinted rectangles reads as an accident. */
+  /* row 2 · Hospital's photograph and Key Insights, both 2-wide. PHARMACY AND
+     LAB USED TO BE THIS ROW'S SECOND HALF and are now in the last block — see
+     the note above this list. */
   { variantId: 'hospital.photo',     size: 'medium' },
+  { variantId: 'insights.key',       size: 'medium' },
+  /* rows 3–4 · Notes is 2x2 on the left; the right half is Diet's photograph
+     across the top with Administer and Mortality under it. NOTES NO LONGER
+     LEADS THE PAGE: the ruling of the morning put it first because the page it
+     was on had no drawn order to follow, and this frame has one. */
+  { variantId: 'notes.recent',       size: 'tall'   },
   { variantId: 'diet.photo',         size: 'medium' },
-  { variantId: 'pharmacy.default',   size: 'small'  },
-  { variantId: 'lab.default',        size: 'small'  },
-  /* THE INK FOCUS HUB WAS HERE, and came off the page on the same ruling —
-     "remove that dark blue one". The node offered two compositions of My Focus
-     Hub at once, the #1F415B ink card (`focus.hub`) and the white plate
-     (`focus.light`), which is the file offering a choice; the choice is now
-     made and the plate is it. The ink card is NOT deleted — it is still in the
-     catalogue and still addable from Add Module, exactly as Reports' door is —
-     it is simply no longer seeded. */
-  { variantId: 'approvals.pending',  size: 'medium' },
   { variantId: 'administer.default', size: 'small'  },
   { variantId: 'mortality.default',  size: 'small'  },
-  /* row 4 */
+  /* row 5 · four smalls, which is the one row that fills itself */
   { variantId: 'eggs.default',       size: 'small'  },
   { variantId: 'audit.default',      size: 'small'  },
   { variantId: 'users.default',      size: 'small'  },
   { variantId: 'security.default',   size: 'small'  },
-  /* last row · the plate hub, which is the only My Focus Hub on the page now */
+  /* rows 6–7 · My Focus Hub's 2x2, and beside it Pharmacy and Lab over Pending
+     Approvals. The frame draws that right half as a column — two smalls, then
+     the 2-wide under them — and at four columns the packer produces exactly
+     that from this order. The empty cell the previous frame left under
+     Approvals is now filled by the two doors, so the page ends square. */
   { variantId: 'focus.light',        size: 'tall'   },
+  { variantId: 'pharmacy.default',   size: 'small'  },
+  { variantId: 'lab.default',        size: 'small'  },
+  { variantId: 'approvals.pending',  size: 'medium' },
 ]
 
 /**
@@ -11671,6 +12385,34 @@ const MODULES = [
     category: 'animal',
     keywords: ['note', 'observation', 'remark', 'comment', 'reminder', 'log'],
     blurb: 'Notes written against an animal or an enclosure.',
+  },
+  /* ══ KEY INSIGHTS · node 280:3521, 8 Sep 2026 ═══════════════════════════
+     The third of these page-level pseudo-modules, and it is here for the same
+     reason the other two are: the card has no module behind it. Births belong
+     to Species, deaths to Mortality and transfers to Housing, and the whole
+     point of the card is that it puts the month's three movements together
+     where a reader sees them as one figure and its two counterweights. Filing
+     it under any one of the three would put it in that module's picker page
+     and imply the other two counts are its business.
+
+     `icon` AND NOT `sprite`, WHERE FOCUS AND NOTES TAKE SPRITES. Those two
+     had no glyph drawn for them in the file — the artboard gives the Focus Hub
+     no head glyph at all — so they borrow from js/icons.js. This one the frame
+     DOES draw: fi_15220534, an 18px bulb, exported and committed like every
+     module glyph rather than approximated from the sprite sheet's `insight`. */
+  {
+    id: 'insights',
+    icon: 'm-insights.svg',
+    /* The frame's own 18, per the note on iconSize at the head of this file.
+       It is inert on the page — `--icon-size` is read by the door tile's glyph
+       and this module has no door — and it is still the artboard's number
+       rather than a placeholder, so a door drawn tomorrow starts correct. */
+    iconSize: 18,
+    gradient: '--g-insights',
+    name: 'Key Insights',
+    category: 'animal',
+    keywords: ['births', 'deaths', 'transfers', 'movement', 'month', 'summary'],
+    blurb: "The month's births, deaths and transfers on one card.",
   },
 ]
 
@@ -20868,6 +21610,42 @@ const LAYOUTS = {
         `</span>`).join('') +
       `</span></span>`,
 
+  /**
+   * HEADLINE · one count that leads, and beside it the counts it has to be
+   * read against, each in a box of its own.
+   *
+   * WHY THE BOXES, WHEN NOTHING ELSE IN THIS FILE HAS THEM. The standing rule
+   * a few layouts up is that a visualisation is drawn straight onto the
+   * module's gradient and never on a plate of its own, because a plate is how
+   * a card stops belonging to this system and becomes a dashboard tile. These
+   * are not plates: node 286:3940 draws them as 5% black under a 2px backdrop
+   * blur — the ramp still shows through, and what the box does is separate two
+   * SUBORDINATE counts from the one the card is about. Take them away and the
+   * card is three figures of equal weight, which is the opposite of what it is
+   * for.
+   *
+   * AND WHY NOT `metrics`, WHICH IS ALSO SEVERAL FIGURES. That layout puts its
+   * figures in a row separated by whitespace alone, all of them peers. Here one
+   * figure is 44px and the other two are 20px, in a column, beside it. Three
+   * counts side by side and one count with two counterweights are different
+   * statements, and this file's premise is that they get different markup.
+   */
+  headline: (mod, variant, data) =>
+    `<span class="l-headline">` +
+      `<span class="l-headline__lead">${head(mod, variant, data)}` +
+        `<span class="l-headline__body">` +
+          `<span class="l-headline__value">${esc(data.value)}</span>` +
+          (data.label ? `<span class="l-headline__label">${esc(data.label)}</span>` : '') +
+        `</span>` +
+      `</span>` +
+      `<span class="l-headline__side">` +
+      (data.items || []).slice(0, 2).map((i) =>
+        `<span class="l-headline__tile"${i.tone ? ` data-tone="${esc(i.tone)}"` : ''}>` +
+          `<span class="l-headline__tile-label">${esc(i.label)}</span>` +
+          `<span class="l-headline__tile-value">${esc(i.value)}</span>` +
+        `</span>`).join('') +
+      `</span></span>`,
+
   /* METERS · rows that each carry their own track, for quantities where the
      remainder is the story and a bare figure would not say whether it is
      comfortable or nearly out. */
@@ -27655,34 +28433,76 @@ const HOME_QUICK_ACTIONS = [
   __x.HOME_QUICK_ACTIONS = HOME_QUICK_ACTIONS;
 });
 
-__def('js/components/QuickActionsDock.js', function (__x, __req) {
+__def('js/components/QuickActions.js', function (__x, __req) {
 /**
- * THE CORNER BUTTON AND THE DOCK IT SUMMONS
+ * THE QUICK ACTIONS ROW, AND THE MENU THE PILL IN IT OPENS
  * ───────────────────────────────────────────────────────────────────────────
- * Concept 3 of mockups/fab-actions.html, which is the one that was chosen.
- * Swiggy carries a floating pill on every screen it has; a tablet should not
- * pay a strip of its canvas for ever, so this one only exists while it is
- * wanted — it grows out of the button and collapses back into it.
+ * Node 280:3521 draws two controls at the foot of the page: a flat green pill
+ * with a 2x2 glyph and the words "Quick Actions", and a chat disc beside it.
+ * This file owns both, the panel of sixteen verbs the pill opens, and the two
+ * behaviours the user asked for on 8 Sep 2026 — the panel appears "like the
+ * profile menu selection" with the page behind it blurred, and the label
+ * collapses to the glyph alone while the page is scrolled.
  *
- * WHAT THE MEASUREMENTS SAY IT SHOULD FEEL LIKE. Read off the two recordings
- * in References/Animetions & App Strcutres frame by frame:
- *   · the wash comes OUT OF the button rather than arriving over the page,
- *   · the page behind is blurred and stays visible — it is never replaced,
- *   · the trigger becomes the ✕, so the way out is where the way in was.
- * The first two are CSS (see css/quick-actions.css). This file owns the third,
- * the stagger, and the fact that a dismissal is not a celebration.
+ * ONLY THE PILL COLLAPSES. The disc has no label to lose, and a control that
+ * shrank on scroll for company would be motion with nothing behind it.
  *
- * THE STAGGER IS 18ms AND THAT IS ARITHMETIC, NOT TASTE. The concept had four
- * actions at 55ms apart, which is 165ms of cascade and reads as one gesture.
- * Sixteen at 55 would be 825ms — long enough that the last cell arrives after
- * the hand has already started moving, which reads as lag. 18 x 15 = 270ms,
- * the same cascade over four times the cells.
+ * ═══ THE PANEL IS THE PILL, UNFOLDED — the brief of 8 Sep 2026 ════════════
+ *
+ * "Make the interaction feel like a premium Apple-style iPad system component
+ * — calm, fluid, spatial, precise and highly polished", with the FAB "
+ * TRANSFORMING INTO the Quick Actions module" rather than a panel appearing
+ * over it. All sixteen actions stay visible; nothing is hidden, categorised,
+ * paginated or collapsed.
+ *
+ * WHAT THAT COST, IN ONE SENTENCE EACH.
+ *   · The panel is laid out at full size and REVEALED by a clip-path that
+ *     starts as the pill's own measured box and opens outward — so no content
+ *     scales, nothing reflows, and the surface visibly comes out of the FAB.
+ *   · The glyph and a CSS × live in one 20px box and rotate through each
+ *     other, so the mark morphs instead of being swapped.
+ *   · The reveal staggers BY ROW, from the bottom up, off each cell's measured
+ *     top edge — four delays travelling away from the finger rather than
+ *     sixteen cells arriving separately.
+ *   · The close is that in reverse, driven by a second row index set at the
+ *     same time as the first, so the head goes first and the row over the FAB
+ *     is the last thing on screen.
+ *   · The per-cell icon plate is gone. It was what made one surface read as
+ *     sixteen tiles, which the brief rules out twice.
+ *   · The backdrop frost came down to a 6% dim and a 2px blur, reversing the
+ *     instruction of the same morning. The stylesheet says why at `.qa-veil`.
+ *
+ * THE ONE THING NOT DONE. The brief opens "keep the existing Quick Actions FAB
+ * at the bottom-right" and the existing FAB is not there — node 280:3521 draws
+ * a centred row at the foot, which is what shipped hours earlier and what the
+ * brief's own diagrams show (a panel centred over the FAB beneath it). "Keep
+ * the existing" is read as the operative instruction and the control has not
+ * moved. Everything here is anchored to the pill rather than to the page, so
+ * moving it is one rule in the stylesheet if that reading is wrong.
+ *
+ * WHAT WAS HERE BEFORE. A 64px corner FAB and a sixteen-cell dock that grew
+ * out of it (mockups/fab-actions.html, concept 3). Both are gone on the same
+ * ruling — "Remove Current Fab" — and with them the stagger, the halo and the
+ * clip-path wipe that were the dock's own motion. The panel's entrance is now
+ * the profile menu's, because it IS the profile menu's surface.
+ *
+ * WHY THIS DOES NOT USE ProfileMenu.js ITSELF. That component hangs a column
+ * of rows off an anchor and closes on selection, which is right for four items
+ * and wrong for sixteen: a 16-row menu is a thousand pixels tall and scrolls
+ * in a page that is already scrolling. What is shared is the MATERIAL and the
+ * idiom — see `.qa-menu` in the stylesheet, every value of which is
+ * `.pmenu`'s — and the two pieces of behaviour that make a popover a popover:
+ * a click-catcher layer rather than a document listener, and Escape.
+ *
+ * THE CATCHER IS THE VEIL. The dock's veil already existed to blur the page;
+ * making it the click target as well means there is no invisible fourth
+ * element in the tree, and no race between the click that opens the menu and
+ * the click that would close it.
  */
 const { HOME_QUICK_ACTIONS } = __req('js/data/quickActions.js');
 const { icon } = __req('js/icons.js');
-const { animate, prefersReducedMotion } = __req('js/lib/motion.js');
 
-function createQuickActionsDock({ root, onAction } = {}) {
+function createQuickActions({ root, onAction, onChat } = {}) {
   if (!root) return null
 
   const actions = HOME_QUICK_ACTIONS
@@ -27690,131 +28510,240 @@ function createQuickActionsDock({ root, onAction } = {}) {
   root.className = 'qa'
   root.innerHTML =
     '<div class="qa-veil"></div>' +
-    '<div class="qa-dock" role="menu" aria-label="Quick actions">' +
-      actions.map((a, i) =>
-        `<button type="button" class="qa-act" role="menuitem" data-i="${i}" data-action="${a.id}">` +
-          `<span class="qa-act__disc">${icon(a.icon)}</span>` +
-          /* TWO TYPOGRAPHIC REPAIRS, BOTH ON THE SAME LABEL AND BOTH RENDERING
-             CONCERNS — the data keeps the sheet's plain text.
-
-             A NON-BREAKING SPACE AFTER THE "+", because a caption three lines
-             deep breaks straight after it otherwise and leaves a lone plus
-             sign on a line of its own.
-
-             A <wbr> AFTER EVERY SLASH, because binding the plus then makes
-             "+ Missing/Escaped" one 118px token in a 92px cell, and a token
-             with nowhere to break does not wrap — it hangs out through the
-             side of the dock. Measured in portrait, where the cells are
-             narrowest. `overflow-wrap` in the stylesheet is the backstop for
-             a future label with no slash in it. */
-          `<span class="qa-act__label">${a.label.replace(/^\+ /, '+\u00A0').replace(/\//g, '/<wbr>')}</span>` +
-        '</button>').join('') +
+    '<div class="qa-band" aria-hidden="true"></div>' +
+    /* THE ROW, NOT THE PILL, IS WHAT IS CENTRED — node 286:3988. See the
+       stylesheet: the pill used to centre itself and now sits in a row with
+       the chat disc, which is what stops it moving when its label collapses. */
+    '<div class="qa-row">' +
+    '<button type="button" class="qa-pill" id="qaPill" aria-expanded="false" aria-haspopup="true" aria-controls="qaMenu">' +
+      /* TWO MARKS IN ONE BOX, and the second one is the open state's. The grid
+         is the frame's own export rather than a sprite glyph — the sixteen-verb
+         2x2 is not in js/icons.js and `widgets` is the Add Module plus-in-a-
+         quadrant, which means something else. The × is two CSS bars: it is
+         `currentColor`, so an export would be a second file to keep in step
+         with the pill's colour, and the bars are what draw themselves out
+         during the morph. See the stylesheet. */
+      '<span class="qa-pill__g">' +
+        '<img class="qa-pill__grid" src="assets/icon/qa-actions.svg" alt="">' +
+        '<span class="qa-pill__x" aria-hidden="true"><i></i><i></i></span>' +
+      '</span>' +
+      '<span class="qa-pill__t">Quick Actions</span>' +
+    '</button>' +
+    /* THE CHAT DISC · node 286:3997. A LABEL AND NOT A TOOLTIP: the disc
+       carries a glyph and nothing else, so the only name it has is this one,
+       and a title attribute would leave it nameless to a screen reader. */
+    '<button type="button" class="qa-chat" id="qaChat" aria-label="Chat">' +
+      '<img src="assets/icon/qa-chat.svg" alt="">' +
+    '</button>' +
     '</div>' +
-    '<button type="button" class="qa-fab" aria-expanded="false" aria-haspopup="true" aria-label="Quick actions">' +
-      '<span class="qa-fab__halo"></span>' +
-      `<span class="qa-fab__g qa-fab__g--open">${icon('plus')}</span>` +
-      `<span class="qa-fab__g qa-fab__g--close">${icon('close')}</span>` +
-    '</button>'
+    '<div class="qa-menu" id="qaMenu" role="menu" aria-label="Quick actions" hidden>' +
+      '<div class="qa-menu__head"><b>Quick Actions</b></div>' +
+      '<div class="qa-menu__grid">' +
+        actions.map((a) =>
+          `<button type="button" class="qa-act" role="menuitem" data-action="${a.id}">` +
+            /* `__g`, not the `__disc` this replaces. The name changed with the
+               thing: a disc is a filled plate behind a glyph, which is what
+               made the panel read as sixteen tiles, and there is no plate now
+               — only the glyph, at the same neutral tone as the other fifteen. */
+            `<span class="qa-act__g">${icon(a.icon)}</span>` +
+            /* TWO TYPOGRAPHIC REPAIRS, BOTH RENDERING CONCERNS — the data keeps
+               the sheet's plain text.
 
+               A NON-BREAKING SPACE AFTER THE "+", so a wrapped label never
+               starts a line with the sign. Unchanged.
+
+               AND A BREAK OPPORTUNITY AFTER THE SLASH, WHERE THIS USED TO PUT
+               A WORD JOINER AROUND IT. The joiner was right for the cell this
+               replaces — a narrow one with the label centred under its glyph,
+               where the pair could sit on its own line. In the wide horizontal
+               cell there is no such line: measured at 1024, "+ Missing/Escaped"
+               held together is 123.4px of unbreakable text in a 106px label
+               box, so it was cut to "+ Missing/Escap" with the second line
+               half empty. A break after the slash is the natural one and the
+               only one this string offers. */
+            `<span class="qa-act__t">${a.label.replace(/^\+ /, '+\u00A0').replace('/', '/\u200B')}</span>` +
+          '</button>').join('') +
+      '</div>' +
+    '</div>'
+
+  const pill = root.querySelector('.qa-pill')
+  const menu = root.querySelector('.qa-menu')
   const veil = root.querySelector('.qa-veil')
-  const dock = root.querySelector('.qa-dock')
-  const fab  = root.querySelector('.qa-fab')
-  const cells = [...dock.querySelectorAll('.qa-act')]
-
-  /* Its own live region, the same shape as edit mode's — sixteen buttons
-     appearing is a change a screen reader has no other way to hear. */
-  const live = document.createElement('div')
-  live.className = 'a11y-live'
-  live.setAttribute('aria-live', 'polite')
-  root.append(live)
-
+  const cells = [...menu.querySelectorAll('.qa-act')]
   let open = false
+  let closing = 0
 
-  /* CLOSED MEANS UNTABBABLE. `visibility: hidden` already takes the dock out
-     of the tab order in every engine that matters, but the transition holds
-     it visible for --t-slow on the way out, and sixteen buttons reachable by
-     Tab during that window is sixteen buttons in the wrong place. `inert`
-     says it once and says it for focus, pointer and the a11y tree together. */
-  function setInert(on) {
-    if ('inert' in dock) dock.inert = on
-    else dock.setAttribute('aria-hidden', String(on))
+  /** A token off the root, in ms. */
+  const ms = (name) =>
+    parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || 0
+
+  /**
+   * WHICH ROW EACH CELL IS ON, MEASURED RATHER THAN COUNTED.
+   *
+   * The stagger is by row and runs from the bottom up, so every cell needs to
+   * know its row — and `index / columns` is the wrong way to get it. The grid
+   * is four across on a tablet and two on a phone, and a media query can move
+   * that under a number baked into the DOM order; the diagonal scatter that
+   * results is exactly what the brief means by "do not stagger every
+   * individual card".
+   *
+   * So the row comes off the rendered box, the same way the module grid's rows
+   * are read: cells sharing a top edge are one row. Both directions are set
+   * here — `--qa-row` counts up from the bottom for opening, `--qa-row-r` down
+   * from the top for closing — because the close is the open reversed and
+   * working one out from the other in CSS would need a count CSS does not have.
+   *
+   * CALLED WITH THE PANEL LAID OUT BUT NOT YET OPEN. `hidden` is off, so the
+   * boxes are real; `is-open` is not on yet, so nothing has started moving.
+   */
+  function measureRows() {
+    const tops = []
+    for (const cell of cells) {
+      const top = Math.round(cell.offsetTop)
+      if (!tops.includes(top)) tops.push(top)
+    }
+    tops.sort((a, b) => a - b)
+    const n = tops.length
+    menu.style.setProperty('--qa-rows', String(n))
+
+    /* THE STEP IS DIVIDED INTO A FIXED BUDGET, NOT FIXED ITSELF — see
+       --qa-stagger. Set on the panel so the cells inherit it; the root keeps
+       the brief's 35 as the ceiling, and this only ever lowers it. */
+    const base = ms('--qa-row-step')
+    const total = ms('--qa-stagger')
+    menu.style.setProperty('--qa-row-step',
+      `${n > 1 ? Math.min(base, total / (n - 1)) : base}ms`)
+    for (const cell of cells) {
+      const i = tops.indexOf(Math.round(cell.offsetTop))
+      cell.style.setProperty('--qa-row', String(n - 1 - i))   /* bottom row = 0 */
+      cell.style.setProperty('--qa-row-r', String(i))         /* top row    = 0 */
+    }
   }
-  setInert(true)
 
   function show() {
     if (open) return
     open = true
-    root.classList.add('is-open')
-    fab.setAttribute('aria-expanded', 'true')
-    setInert(false)
+    if (closing) { clearTimeout(closing); closing = 0 }
+    root.classList.remove('is-closing')
 
-    cells.forEach((el, i) => {
-      el.style.opacity = '0'
-      if (prefersReducedMotion()) { el.style.opacity = '1'; return }
-      animate(el, [
-        { opacity: 0, transform: 'translateY(9px) scale(.94)' },
-        { opacity: 1, transform: 'none' },
-      ], { duration: 220, delay: i * 18, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' })
+    /* ── EVERY MEASUREMENT BEFORE THE PANEL IS DISPLAYED, AND THAT ORDER IS
+       LOAD-BEARING. `--qa-orig-w` and `--qa-orig-cx` are read by the closed
+       clip-path, and clip-path is transitioned — so setting them on a panel
+       that is already displayed changes an animatable property and starts a
+       200ms transition of its own. The real one, a frame later, then began
+       from that transition's mid-flight value rather than from the pill's box.
+       Measured, at currentTime 0: the clip read `calc(50% - 75px)` — the
+       token's 150px default — while the inline property beside it already said
+       164px, so the surface came out of a window the wrong width and 32px off
+       centre no matter what these lines computed.
+
+       Set while `hidden` is still on, none of it transitions: an element
+       arriving from `display: none` has no previous value to animate from. */
+    const box = pill.getBoundingClientRect()
+
+    /* the panel is as tall as it needs to be until the window is shorter than
+       that; then it scrolls inside what is left, which is what capToViewport
+       does for the two anchored menus. The panel is centred and bottom-pinned
+       rather than hung off an anchor, so the arithmetic is simpler: everything
+       above the pill, less a gutter. */
+    menu.style.maxHeight = `${Math.max(180, box.top - 12)}px`
+
+    /* THE WINDOW THE CLIP STARTS AS IS THE PILL'S OWN BOX. Measured on every
+       open rather than assumed, because the pill has two widths — with its
+       label, and collapsed to a disc once the page has scrolled — and the
+       surface has to come out of whichever one was just pressed.
+
+       THE PANEL'S CENTRE IS TAKEN OFF `.qa` AND NOT OFF THE PANEL, which is
+       both more honest and what lets this run before the panel exists to be
+       measured: the panel is `left: 50%` with `translateX(-50%)` inside this
+       layer, so its centre IS the layer's centre, exactly. */
+    const layer = root.getBoundingClientRect()
+    menu.style.setProperty('--qa-orig-w', `${Math.round(box.width)}px`)
+    menu.style.setProperty('--qa-orig-cx',
+      `${Math.round((box.left + box.width / 2) - (layer.left + layer.width / 2))}px`)
+
+    menu.hidden = false
+    measureRows()
+    /* ONE FRAME BETWEEN LAYOUT AND MOTION. The measurements above are reads;
+       `is-open` is the write that starts every transition. Setting it in the
+       same frame would have the browser resolve the closed clip and the open
+       clip in one style pass and the panel would simply be there — the
+       "sudden appearance" the brief rules out. */
+    requestAnimationFrame(() => {
+      root.classList.add('is-open')
+      pill.setAttribute('aria-expanded', 'true')
     })
 
-    live.textContent = ''
-    live.textContent = `Quick actions open, ${actions.length} actions`
+    /* …and focus moves once the first row is actually on screen. Focusing into
+       a panel that has not been revealed yet makes some screen readers announce
+       a cell while the surface is still a pill. */
+    setTimeout(() => { if (open) cells[0]?.focus() }, ms('--qa-open-base'))
+    document.addEventListener('keydown', onKeydown)
   }
 
-  function hide({ focusFab = false } = {}) {
+  function hide({ focusPill = true } = {}) {
     if (!open) return
     open = false
+    /* `is-closing` BEFORE `is-open` COMES OFF, in the same style pass: the
+       closing class is what swaps each row's delay to the reverse one, and if
+       it landed a frame later the rows would start leaving on the opening
+       stagger and then jump. */
+    root.classList.add('is-closing')
     root.classList.remove('is-open')
-    fab.setAttribute('aria-expanded', 'false')
-    setInert(true)
+    pill.setAttribute('aria-expanded', 'false')
+    document.removeEventListener('keydown', onKeydown)
 
-    /* A DISMISSAL IS NOT A CELEBRATION — no stagger, no spring, half the
-       duration. js/lib/reactions.js applies the same rule to un-liking: a
-       leaving animation that is as pleased with itself as the arriving one
-       makes closing feel like a second decision. */
-    cells.forEach((el) => {
-      if (prefersReducedMotion()) { el.style.opacity = '0'; return }
-      animate(el, [
-        { opacity: 1, transform: 'none' },
-        { opacity: 0, transform: 'translateY(6px) scale(.97)' },
-      ], { duration: 140, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' })
-    })
-
-    if (focusFab) fab.focus()
+    /* hidden only once the whole reverse has run, or the panel vanishes
+       instead of leaving. --qa-t-close covers the last row's delay plus its
+       duration; reduced motion zeroes the transitions and this still lands,
+       one timeout later, with nothing to look at in between. */
+    closing = setTimeout(() => {
+      closing = 0
+      if (open) return
+      menu.hidden = true
+      root.classList.remove('is-closing')
+    }, ms('--qa-t-close'))
+    if (focusPill) pill.focus()
   }
 
-  fab.addEventListener('click', () => (open ? hide() : show()))
+  function onKeydown(e) {
+    if (e.key === 'Escape') { e.preventDefault(); hide() }
+  }
+
+  pill.addEventListener('click', () => (open ? hide() : show()))
   veil.addEventListener('click', () => hide())
 
-  dock.addEventListener('click', (e) => {
+  /* THE DISC IS NOT A SECOND DOOR INTO THIS MENU. It is its own control with
+     its own destination, and this build has none to give it — see app.js,
+     where it announces itself exactly as the sixteen verbs do. It does close
+     the menu first: leaving a sixteen-cell panel open behind a control that
+     has just been pressed is the one thing it must not do. */
+  root.querySelector('.qa-chat').addEventListener('click', () => {
+    hide({ focusPill: false })
+    onChat?.()
+  })
+
+  menu.addEventListener('click', (e) => {
     const btn = e.target.closest('.qa-act')
     if (!btn) return
-    const a = actions[+btn.dataset.i]
-    hide({ focusFab: true })
-    live.textContent = ''
-    live.textContent = `${a.label} — not built yet`
-    if (typeof onAction === 'function') onAction(a)
+    const a = actions.find((x) => x.id === btn.dataset.action)
+    hide()
+    if (a) onAction?.(a)
   })
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && open) { e.stopPropagation(); hide({ focusFab: true }) }
-  })
-
-  /* THE CSS HIDES THIS LAYER IN FOUR STATES AND HIDING IS NOT CLOSING. Edit
-     mode, search, a drag and the Site panel each put `display: none` on `.qa`
-     — which takes the dock off the screen while `open` stays true, so the FAB
-     comes back later already showing a ✕ over nothing. Watching the flags that
-     do the hiding is the only place that can be noticed; there is no event,
-     because the four things that set them have no reason to know this exists. */
-  const HIDDEN_BY = ['is-site', 'is-editing', 'is-searching', 'is-dragging']
-  new MutationObserver(() => {
-    if (open && HIDDEN_BY.some((c) => document.body.classList.contains(c))) hide()
-  }).observe(document.body, { attributes: true, attributeFilter: ['class'] })
-
-  return { open: show, close: hide, isOpen: () => open, el: root }
+  /* ── the collapse ──────────────────────────────────────────────────────
+     Set from OUTSIDE, by whatever already knows the page has scrolled — see
+     app.js, where the sticky search row's observer drives both. A second
+     observer here would be a second answer to the same question. */
+  return {
+    root,
+    open: show,
+    close: hide,
+    get isOpen() { return open },
+    setScrolled(on) { root.classList.toggle('is-scrolled', !!on) },
+  }
 }
-
-  __x.createQuickActionsDock = createQuickActionsDock;
+  __x.createQuickActions = createQuickActions;
 });
 
 __def('js/app.js', function (__x, __req) {
@@ -27895,14 +28824,22 @@ if (PAGE_VERSION !== '2') {
 }
 
 /* ── quick actions ──────────────────────────────────────────────────────
-   The corner FAB and its dock — the sixteen verbs of the mobile app's Quick
-   Actions sheet, on the home page. `onAction` is where the create flows will
-   hang; there are none in this build, so it says so out loud rather than
-   pretending a button did something. */
-const { createQuickActionsDock } = __req('js/components/QuickActionsDock.js')
-const quickActions = createQuickActionsDock({
+   The pill and the chat disc at the foot of the page, and the panel of sixteen
+   verbs the pill opens — node 280:3521. `onAction` is where the create flows
+   will hang; there are none in this build, so it says so out loud rather than
+   pretending a button did something.
+
+   AND `onChat` HAS NOWHERE HONEST TO GO EITHER. The scan control in the search
+   row is wired to Global Search because this build has something scanner-
+   shaped to open; there is nothing chat-shaped in it. Communication is the
+   nearest module and it has no destination — only Species does — so sending
+   the disc there would be inventing an intent the frame does not state. It
+   announces instead, which is what the sixteen verbs beside it do. */
+const { createQuickActions } = __req('js/components/QuickActions.js')
+const quickActions = createQuickActions({
   root: document.getElementById('quickActions'),
   onAction: (a) => console.info(`[antz] quick action: ${a.label} (${a.id}) — no flow built yet`),
+  onChat: () => console.info('[antz] chat — no flow built yet'),
 })
 
 /* ── the search field sticks ────────────────────────────────────────────
@@ -27924,7 +28861,16 @@ const quickActions = createQuickActionsDock({
 const searchRow = document.querySelector('.search-row')
 if (searchRow && 'IntersectionObserver' in window) {
   new IntersectionObserver(([e]) => {
-    searchRow.classList.toggle('is-stuck', e.intersectionRatio < 1 && e.boundingClientRect.top <= 0)
+    const stuck = e.intersectionRatio < 1 && e.boundingClientRect.top <= 0
+    searchRow.classList.toggle('is-stuck', stuck)
+    /* AND THE SAME ANSWER DRIVES THE QUICK ACTIONS PILL. The user's brief of
+       8 Sep: "when I scroll, Quick Access text will go, only icon has to show;
+       once I scroll to the top it has to show with text." That is the question
+       this observer is already asking — is the page at the top or not — so the
+       pill reads it rather than watching the scroll itself. One signal, two
+       consumers, and the collapse cannot disagree with the search row's glass
+       about whether the page has moved. */
+    quickActions?.setScrolled(stuck)
   }, { threshold: [1], rootMargin: '-1px 0px 0px 0px' }).observe(searchRow)
 }
 

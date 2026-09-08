@@ -1,11 +1,15 @@
-"""The second home page — Figma node 236:6669 — and the widgets on it.
+"""The second home page — Figma nodes 236:6669, 270:4176 and 280:3521 — and the
+widgets on it.
 
     python3 tools/verify_v2.py                      # 1024, the app's own width
     python3 tools/verify_v2.py http://host/ 768     # another origin, another width
 
 V2 is `?v=2`: the same application drawing the composition node 236:6669 draws —
 no announcement deck, no observation rail, the gradient band re-parented onto
-the module grid, and Notes and My Focus Hub seeded into it.
+the module grid, and Notes and My Focus Hub seeded into it. 270:4176 set the
+four columns and the frame's row order; 280:3521 added Key Insights beside
+Hospital, moved Pharmacy and Lab to the foot of the page, and drew the chat
+disc beside the Quick Actions pill.
 
 THE INK FOCUS HUB IS NO LONGER SEEDED — the ruling of 8 Sep 2026, "Notes put in
 the top, remove that dark blue one". The node drew both compositions of My Focus
@@ -25,7 +29,7 @@ priority pill) and, at every width, that nothing clips. Clipping is the whole
 risk with these two: they are 2x2 compositions and SPAN_TABLE hands them a
 single column on a phone.
 """
-import os, sys, time
+import json, os, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 
@@ -80,6 +84,48 @@ PROBE = """(()=>{
               focusable:!!b&&document.activeElement===b}})(),
     n:cards.length,
     ids:cards.map(e=>e.dataset.variant),
+    /* the LIVE column count, read off the grid rather than off a media query,
+       and the rows as drawn — cards grouped by their rendered top edge, which
+       is the only place the packer's answer is visible */
+    gridCols:getComputedStyle(q('#moduleGrid')).gridTemplateColumns.split(' ').length,
+    rows:(()=>{const g=q('#moduleGrid').getBoundingClientRect(); const by=new Map();
+      for(const e of cards){const t=Math.round(e.getBoundingClientRect().top-g.top);
+        if(!by.has(t)) by.set(t, []); by.get(t).push(e.dataset.variant)}
+      return [...by.entries()].sort((a,b)=>a[0]-b[0]).map(([,v])=>v)})(),
+    /* KEY INSIGHTS · node 286:3940, the card node 280:3521 added. Everything
+       here is either a number the frame states or a relationship the layout
+       exists to hold — the ramp reaching the card at all, the figure in the
+       library colour it names, and the two tiles carrying two DIFFERENT
+       library colours, which is the whole reason they are not one tone. */
+    ki:(()=>{const k=of('insights.key'); if(!k) return null;
+      const cs=getComputedStyle(k);
+      const v=k.querySelector('.l-headline__value');
+      const lb=k.querySelector('.l-headline__label');
+      const gl=k.querySelector('.c-head__icon img');
+      const tiles=[...k.querySelectorAll('.l-headline__tile')];
+      const tb=tiles[0]&&getComputedStyle(tiles[0]);
+      return {fill:k.dataset.fill, size:k.dataset.size, layout:k.dataset.layout,
+        w:+k.getBoundingClientRect().width.toFixed(1),
+        h:+k.getBoundingClientRect().height.toFixed(1),
+        ramp:cs.backgroundImage.slice(0, 40),
+        title:k.querySelector('.c-head__text').textContent,
+        glyph:!!gl&&gl.complete&&gl.naturalWidth>0,
+        value:v&&v.textContent, valueColor:v&&getComputedStyle(v).color,
+        label:lb&&lb.textContent,
+        n:tiles.length,
+        tiles:tiles.map(t=>({
+          label:t.querySelector('.l-headline__tile-label').textContent,
+          value:t.querySelector('.l-headline__tile-value').textContent,
+          color:getComputedStyle(t.querySelector('.l-headline__tile-value')).color})),
+        /* NOT A PLATE · 5% black under a blur, so the ramp still reads */
+        tileBg:tb&&tb.backgroundColor,
+        tileBlur:tb&&(tb.backdropFilter||tb.webkitBackdropFilter),
+        /* the tiles reach half the card's padding from its edge and the head
+           reaches a whole one — the frame's own asymmetry */
+        tileRight:tiles[0]&&+(k.getBoundingClientRect().right
+                              - tiles[0].getBoundingClientRect().right).toFixed(1),
+        headLeft:+(k.querySelector('.c-head').getBoundingClientRect().left
+                   - k.getBoundingClientRect().left).toFixed(1)}})(),
     three:[hub,lite,note].filter(Boolean).length,
     fills:{hub:hub&&hub.dataset.fill, lite:lite&&lite.dataset.fill, note:note&&note.dataset.fill},
     sizes:{hub:hub&&hub.dataset.size, lite:lite&&lite.dataset.size, note:note&&note.dataset.size},
@@ -168,15 +214,200 @@ EDIT_HEAD = """(()=>{const h=document.getElementById('modulesHead');
 HEAD_AWAY = """(()=>({editing:document.body.classList.contains('is-editing'),
   h:+document.getElementById('modulesHead').getBoundingClientRect().height.toFixed(1)}))()"""
 
-# what V2 seeds, in V2_LAYOUT's order: the node's cards, less the ink Focus Hub
-# the ruling of 8 Sep took off, with Notes moved to the head of the page and
-# Diet & Kitchen added beside Hospital the same afternoon
-WANT = ['notes.recent', 'medical.default', 'housing.default', 'species.stats',
-        'hospital.photo', 'diet.photo', 'pharmacy.default', 'lab.default',
-        'approvals.pending', 'administer.default', 'mortality.default',
+# what V2 seeds, in V2_LAYOUT's order — which is node 280:3521's own order, row
+# by row, since 8 Sep 2026. The ink Focus Hub is off the page; everything else
+# the frame draws is on it.
+#
+# WHAT CHANGED AGAINST 270:4176 and is therefore what this list is now guarding:
+# Key Insights takes the 2-wide cell beside Hospital, and Pharmacy and Lab —
+# which used to be that cell's two smalls — are at the foot beside My Focus Hub.
+WANT = ['medical.default', 'housing.default', 'species.stats',
+        'hospital.photo', 'insights.key',
+        'notes.recent', 'diet.photo', 'administer.default', 'mortality.default',
         'eggs.default', 'audit.default', 'users.default', 'security.default',
-        'focus.light']
+        'focus.light', 'pharmacy.default', 'lab.default', 'approvals.pending']
 
+# and the rows those seventeen pack into at the frame's four columns. Each entry
+# is one row of the grid: the cards on it, in order, with the column span the
+# frame gives them. A 2x2 appears on the row it starts.
+WANT_ROWS = [
+    ['medical.default', 'housing.default', 'species.stats'],
+    ['hospital.photo', 'insights.key'],
+    ['notes.recent', 'diet.photo'],
+    ['administer.default', 'mortality.default'],
+    ['eggs.default', 'audit.default', 'users.default', 'security.default'],
+    ['focus.light', 'pharmacy.default', 'lab.default'],
+    ['approvals.pending'],
+]
+
+
+PILL = """(()=>{
+  const p=document.querySelector('.qa-pill'), t=document.querySelector('.qa-pill__t');
+  const row=document.querySelector('.qa-row'), ch=document.querySelector('.qa-chat');
+  const r=p&&p.getBoundingClientRect(), cs=p&&getComputedStyle(p);
+  const rr=row&&row.getBoundingClientRect(), cr=ch&&ch.getBoundingClientRect();
+  const chs=ch&&getComputedStyle(ch);
+  const img=ch&&ch.querySelector('img');
+  return {pill:!!p, fab:!!document.querySelector('.qa-fab'),
+    band:!!document.querySelector('.qa-band'),
+    w:r&&Math.round(r.width), h:r&&Math.round(r.height),
+    /* THE ROW IS WHAT IS CENTRED SINCE NODE 286:3988, not the pill — see the
+       note in the stylesheet. Measuring the pill here would fail on a page
+       that is drawn exactly as the frame draws it. */
+    centred:rr&&Math.abs((rr.left+rr.right)/2 - innerWidth/2)<2,
+    fromFoot:rr&&Math.round(innerHeight-rr.bottom),
+    label:t&&t.textContent, labelW:t&&Math.round(t.getBoundingClientRect().width),
+    radius:cs&&cs.borderRadius, border:cs&&cs.borderTopColor,
+    bg:cs&&cs.backgroundImage, bgColor:cs&&cs.backgroundColor,
+    /* the chat disc */
+    chat:!!ch, chatW:cr&&Math.round(cr.width), chatH:cr&&Math.round(cr.height),
+    chatGap:(cr&&r)&&Math.round(cr.left-r.right),
+    chatGlyph:!!img&&img.complete&&img.naturalWidth>0,
+    chatGlyphW:img&&Math.round(img.getBoundingClientRect().width),
+    chatLabel:ch&&ch.getAttribute('aria-label'),
+    scrolled:document.querySelector('.qa').classList.contains('is-scrolled')}})()"""
+
+MENU = """(()=>{
+  const m=document.querySelector('.qa-menu'), r=m.getBoundingClientRect();
+  const cs=getComputedStyle(m), v=getComputedStyle(document.querySelector('.qa-veil'));
+  return {open:document.querySelector('.qa').classList.contains('is-open'),
+    cells:m.querySelectorAll('.qa-act').length,
+    w:Math.round(r.width), h:Math.round(r.height),
+    onScreen:r.top>=-0.5 && r.bottom<=innerHeight+0.5,
+    material:cs.backgroundColor, radius:cs.borderRadius,
+    veilBlur:v.backdropFilter||v.webkitBackdropFilter, veilOpacity:v.opacity,
+    /* the dim itself, and the blur's radius — read as numbers so the check can
+       say "5–10%" rather than "there is a blur of some sort" */
+    veilAlpha:(()=>{const m=/rgba?\([^)]*?([\d.]+)\s*\)$/.exec(v.backgroundColor);
+      return m?+m[1]:1})(),
+    veilPx:(()=>{const m=/blur\(([\d.]+)px\)/.exec(v.backdropFilter||v.webkitBackdropFilter||'');
+      return m?+m[1]:0})(),
+    labelW:Math.round(document.querySelector('.qa-pill__t').getBoundingClientRect().width)}})()"""
+
+# ── THE OPENING, RESOLVED INTO NUMBERS ────────────────────────────────────
+# The clip-path is the whole animation, and its computed value is a string of
+# calc()s — `inset(calc(63.07% - 54.95px) … round 24.52px)`. Rather than assert
+# anything about that string, this resolves each side against the panel's own
+# box and reports the WINDOW it describes: width, height, radius and centre, in
+# pixels, panel-relative. That is what the eye sees, and it is comparable
+# directly against the pill's box.
+STATE = """(()=>{
+  const qa=document.querySelector('.qa'), m=document.querySelector('.qa-menu');
+  const p=document.querySelector('.qa-pill');
+  const cs=getComputedStyle(m), r=m.getBoundingClientRect(), pr=p.getBoundingClientRect();
+  const W=r.width, H=r.height;
+  /* one <length-percentage> or calc() of the two, against its own axis */
+  const len=(v,base)=>{
+    v=String(v).trim();
+    let x=/^calc\((-?[\d.]+)%\s*([-+])\s*([\d.]+)px\)$/.exec(v);
+    if(x) return base*(+x[1])/100 + (x[2]==='-'?-(+x[3]):+(+x[3]));
+    x=/^(-?[\d.]+)px$/.exec(v); if(x) return +x[1];
+    x=/^(-?[\d.]+)%$/.exec(v);  if(x) return base*(+x[1])/100;
+    return NaN;
+  };
+  /* split on top-level spaces only — the arguments contain calc(a - b) */
+  const args=(str)=>{
+    const out=[]; let d=0, cur='';
+    for(const ch of str){
+      if(ch==='(') d++; if(ch===')') d--;
+      if(ch===' '&&d===0){ if(cur) out.push(cur); cur=''; } else cur+=ch;
+    }
+    if(cur) out.push(cur); return out;
+  };
+  const win=(()=>{
+    const s=/^inset\((.*)\)$/.exec(cs.clipPath.replace(/\s+/g,' ').trim());
+    if(!s) return null;
+    let a=args(s[1]), rad=null;
+    const i=a.indexOf('round');
+    if(i>=0){ rad=len(a[i+1], W); a=a.slice(0,i); }
+    const t=len(a[0],H),
+          rt=len(a.length>1?a[1]:a[0],W),
+          b=len(a.length>2?a[2]:a[0],H),
+          l=len(a.length>3?a[3]:(a.length>1?a[1]:a[0]),W);
+    return {t,rt,b,l,rad};
+  })();
+  const rows={}, spread={}, cellByRow={};
+  const dly=(k)=>{const c=cellByRow[k]; if(!c) return null;
+    return Math.round(parseFloat(getComputedStyle(c).transitionDelay)*1000)};
+  for(const cell of document.querySelectorAll('.qa-act')){
+    const k=cell.style.getPropertyValue('--qa-row').trim()||'0';
+    const o=+(+getComputedStyle(cell).opacity).toFixed(2);
+    if(!(k in rows)){ rows[k]=o; cellByRow[k]=cell }
+    (spread[k]=spread[k]||[]).push(o);
+  }
+  /* the clip's own endpoints, so progress is a number and not a guess */
+  const closedTop=H-52, openTop=-60;
+  const prog=win?Math.max(0,Math.min(1,(closedTop-win.t)/(closedTop-openTop))):null;
+  return JSON.stringify({
+    winW:win&&+(W-win.l-win.rt).toFixed(1),
+    winH:win&&+(H-win.t-win.b).toFixed(1),
+    winR:win&&+win.rad.toFixed(1),
+    winCx:win&&+(win.l+(W-win.l-win.rt)/2).toFixed(1),
+    menuCx:+(W/2).toFixed(1),
+    pillW:+pr.width.toFixed(1),
+    pillCx:+(pr.left+pr.width/2-r.left).toFixed(1),
+    progress:prog===null?null:+prog.toFixed(3),
+    opacity:+(+cs.opacity).toFixed(2),
+    grid:+(+getComputedStyle(document.querySelector('.qa-pill__grid')).opacity).toFixed(2),
+    x:+(+getComputedStyle(document.querySelector('.qa-pill__x')).opacity).toFixed(2),
+    rows,
+    rowSpread:+Math.max(...Object.values(spread).map(v=>Math.max(...v)-Math.min(...v))).toFixed(3),
+    /* THE DELAYS THEMSELVES, which is the only thing that PROVES the close is
+       the open reversed. Opacity ordering cannot: in both directions the row
+       nearest the FAB is the more opaque one, so "bottom leads" is true while
+       opening and while closing. What differs is which row waits — so read the
+       resolved transition-delay off the top and bottom cells and let the check
+       compare them. */
+    delayBottom:dly('0'), delayTop:dly(String(Object.keys(rows).length-1)),
+  })})()"""
+
+GRID = """(()=>{
+  const grid=document.querySelector('.qa-menu__grid');
+  const cells=[...document.querySelectorAll('.qa-act')];
+  const gcs=getComputedStyle(grid);
+  const uniq=(a)=>[...new Set(a)];
+  const tops=uniq(cells.map(c=>Math.round(c.offsetTop)));
+  const c0=cells[0], cs0=getComputedStyle(c0);
+  /* IS THIS FILL A COLOUR? — asked of what the eye receives, not of the
+     notation. The cells' wash is rgba(31,65,91,.035): read raw, its channels
+     span 60 levels and any naive test calls it blue. Composited over the
+     panel's white at 3.5% it is (247,248,249) — a spread of two, which is what
+     "neutral" means here. So flatten it first. */
+  const sat=(v)=>{
+    const m=/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s]+([\d.]+))?/.exec(v);
+    if(!m) return false;
+    const a=m[4]===undefined?1:+m[4];
+    const over=(ch)=>ch*a + 255*(1-a);
+    const c=[over(+m[1]), over(+m[2]), over(+m[3])];
+    return Math.max(...c)-Math.min(...c) > 12;
+  };
+  return JSON.stringify({
+    n:cells.length,
+    visible:cells.filter(c=>{const r=c.getBoundingClientRect();return r.width>1&&r.height>1}).length,
+    cols:gcs.gridTemplateColumns.split(' ').length,
+    rows:tops.length,
+    iconColors:uniq(cells.map(c=>getComputedStyle(c.querySelector('.qa-act__g')).color)),
+    textColors:uniq(cells.map(c=>getComputedStyle(c.querySelector('.qa-act__t')).color)),
+    cellBg:uniq(cells.map(c=>getComputedStyle(c).backgroundColor)),
+    restSaturated:cells.filter(c=>sat(getComputedStyle(c).backgroundColor)).length,
+    withBorder:cells.filter(c=>parseFloat(getComputedStyle(c).borderTopWidth)>0).length,
+    withShadow:cells.filter(c=>getComputedStyle(c).boxShadow!=='none').length,
+    /* the 40px filled disc the redesign removed: a glyph wrapper with a fill */
+    withPlate:cells.filter(c=>{const g=getComputedStyle(c.querySelector('.qa-act__g'));
+      return g.backgroundColor!=='rgba(0, 0, 0, 0)'&&g.backgroundColor!=='transparent'}).length,
+    cellW:Math.round(c0.getBoundingClientRect().width),
+    cellH:Math.round(c0.getBoundingClientRect().height),
+    radius:Math.round(parseFloat(cs0.borderTopLeftRadius)),
+    icon:Math.round(c0.querySelector('.qa-act__g').getBoundingClientRect().width),
+    label:Math.round(parseFloat(getComputedStyle(c0.querySelector('.qa-act__t')).fontSize)*10)/10,
+    gap:Math.round(parseFloat(gcs.gap)),
+  })})()"""
+
+# One cell's three colours, read at rest and again while it is held down.
+CELL_INK = """(()=>{const c=document.querySelector('.qa-act');
+  const cs=getComputedStyle(c);
+  return JSON.stringify({bg:cs.backgroundColor, ink:getComputedStyle(c.querySelector('.qa-act__t')).color,
+    icon:getComputedStyle(c.querySelector('.qa-act__g')).color})})()"""
 
 OPEN_MENU = "(()=>{document.getElementById('avatarBtn').click(); return 1})()"
 
@@ -209,7 +440,7 @@ WHERE = """(()=>({v:document.documentElement.dataset.pageVersion, search:locatio
 
 
 def main():
-    print(f"V2 — node 236:6669, {WIDTH}px")
+    print(f"V2 — node 280:3521, {WIDTH}px")
 
     # ── V1 is untouched by any of this ────────────────────────────────────
     print("\nV1 still V1")
@@ -258,8 +489,8 @@ def main():
               not o["head"]["focusable"],
               "the Edit Modules button still takes focus" if o["head"]["focusable"] else "")
 
-        print("\nthe sixteen cards it seeds")
-        check("sixteen cards", o["n"] == 16, str(o["n"]))
+        print("\nthe seventeen cards it seeds")
+        check("seventeen cards", o["n"] == 17, str(o["n"]))
         check("and they are the node's, in V2_LAYOUT's order", o["ids"] == WANT,
               "as drawn" if o["ids"] == WANT
               else f"unexpected {[i for i in o['ids'] if i not in WANT]}, "
@@ -270,9 +501,24 @@ def main():
         # says what it is.
         check("the ink Focus Hub is not seeded", o["fills"]["hub"] is None,
               "the dark blue card is back on the page" if o["fills"]["hub"] else "")
-        # NOTES FIRST IS THE ORDER, and the packer is what makes it the top-left
-        # cell — a card first in the array can still be drawn anywhere.
-        check("Notes leads the page", o["ids"][0] == "notes.recent", str(o["ids"][0]))
+        # THE ALIGNMENT RULING, 8 Sep 2026: V2 is four columns, not five, so the
+        # frame's rows can be reproduced instead of approximated. This is the
+        # check that would catch the page silently going back to five — the
+        # order above would still pass, drawn into ragged rows.
+        # …AND ONLY ABOVE 700, WHICH IS WHERE THE STYLESHEET GIVES V2 FOUR.
+        # Below that the page is two columns on purpose — four at 660 is a
+        # 140px card carrying a 32px glyph and a wrapping name, and a phone is
+        # not the frame this ruling is about. These two ran unconditionally
+        # and so reported a failure at any phone width for a page that was
+        # drawing exactly what it is supposed to draw.
+        if WIDTH >= 700:
+            check("the grid is the frame's four columns", o["gridCols"] == 4, str(o["gridCols"]))
+            check("…and the rows are the frame's, card for card",
+                  o["rows"] == WANT_ROWS,
+                  "as drawn" if o["rows"] == WANT_ROWS else str(o["rows"]))
+        else:
+            check("below 700 the grid is two columns, as the stylesheet says",
+                  o["gridCols"] == 2, str(o["gridCols"]))
         check("seeded at `tall`, which is 2x2 at four and five columns",
               {o["sizes"]["lite"], o["sizes"]["note"]} == {"tall"}, str(o["sizes"]))
 
@@ -327,6 +573,51 @@ def main():
               f"(content is {o['noteTextSH']}px)")
         check("five notes, and its indicator draws the running pill",
               o["noteRun"] and o["noteDots"] == 5, f"run={o['noteRun']} dots={o['noteDots']}")
+
+        # ══ KEY INSIGHTS ═══════════════════════════════════════════════════
+        # The card node 280:3521 put on this page, and the first card in the
+        # product whose fill belongs to no module.
+        print("\nKey Insights")
+        k = o["ki"]
+        check("the card is on the page", k is not None,
+              "" if k else "insights.key did not render")
+        if k:
+            check("at `medium`, which is the frame's 2x1", k["size"] == "medium",
+                  str(k["size"]))
+            check("…and 2 cells wide, not 1 or 3",
+                  near(k["w"], 2 * (k["h"] * 1.125) + 16, 3) or WIDTH < 700,
+                  f"{k['w']}x{k['h']}")
+            check("it wears its own ramp, not a module's",
+                  k["fill"] == "solid" and "gradient" in k["ramp"], str(k["ramp"]))
+            check("the frame's bulb is exported, not drawn", k["glyph"], "")
+            check("the head reads Key Insights", k["title"] == "Key Insights", k["title"])
+            # THE FIGURE AND ITS COLOUR TOGETHER. A figure in the wrong colour
+            # is the failure this card is most likely to have, because three
+            # near-identical pale tones sit next to each other in the palette.
+            check("32 Birth Animals, in MD3_Antz/notes",
+                  k["value"] == "32" and k["label"] == "Birth Animals"
+                  and k["valueColor"] == "rgb(252, 244, 174)",
+                  f"{k['value']} / {k['label']} / {k['valueColor']}")
+            check("two tiles, and they carry the frame's two counts",
+                  k["n"] == 2
+                  and [t["label"] for t in k["tiles"]] == ["Death", "Transfers"]
+                  and [t["value"] for t in k["tiles"]] == ["02", "12"],
+                  str(k["tiles"]))
+            # …AND IN TWO DIFFERENT LIBRARY COLOURS. Collapsing these onto one
+            # semantic tone is the tempting simplification and it is the wrong
+            # one: see the palette block.
+            check("…in ErrorContainer and SecondaryContainer, not one tone",
+                  [t["color"] for t in k["tiles"]]
+                  == ["rgb(255, 211, 211)", "rgb(175, 239, 235)"],
+                  str([t["color"] for t in k["tiles"]]))
+            check("the tiles are 5% black under a blur, not plates",
+                  k["tileBg"] == "rgba(0, 0, 0, 0.05)" and "blur(2px)" in (k["tileBlur"] or ""),
+                  f"{k['tileBg']} / {k['tileBlur']}")
+            # THE FRAME'S ASYMMETRY, WHICH IS EASY TO TIDY AWAY BY ACCIDENT:
+            # the tiles reach 8 from the card edge where the head starts at 16.
+            check("…and they reach half the padding from the edge, where the head reaches a whole one",
+                  near(k["tileRight"] * 2, k["headLeft"], 1.5),
+                  f"tiles {k['tileRight']} / head {k['headLeft']}")
 
         print("\npaging")
         for k, want_pages in (("lite", 3), ("note", 5)):
@@ -451,6 +742,327 @@ def main():
         errs = c.errors()
         check("no console errors across three switches", not errs,
               "; ".join(str(e)[:110] for e in errs[:3]))
+
+    # ── THE QUICK ACTIONS PILL — node 270:4176 ────────────────────────────
+    # It replaced a corner FAB and a sixteen-cell dock on the ruling of 8 Sep
+    # ("Remove Current Fab"), so the first check is that the FAB is GONE:
+    # leaving both would put two ways to the same sixteen verbs on one page.
+    #
+    # THE COLLAPSE IS THE PART THAT CAN ROT SILENTLY. It is driven by the
+    # sticky search row's observer — one signal, two consumers — so a change to
+    # that observer breaks a behaviour on the other side of the page. Measured
+    # as a WIDTH, not a class: the class is what the stylesheet reads, and the
+    # question is whether the label actually went.
+    print("\nthe Quick Actions row")
+    with Chrome(width=WIDTH, height=768) as c:
+        c.goto(BASE + "index.html?v=2", settle=2.2)
+        r = c.eval(PILL)
+        check("the pill is there and the FAB is not", r["pill"] and not r["fab"],
+              f"pill={r['pill']} fab={r['fab']}")
+        # 40 AND NOT THE NODE'S 109 — the ruling of 8 Sep; see --qa-b in the
+        # stylesheet for why the artboard's number does not survive a page that
+        # scrolls. Below 768 it is 24.
+        want_b = 40 if WIDTH >= 768 else 24
+        check(f"centred on the page, {want_b} from the foot",
+              r["centred"] and near(r["fromFoot"], want_b, 1.5),
+              f"centred={r['centred']} foot={r['fromFoot']}")
+        # FLAT SINCE NODE 280:3521, where 270:4176 drew a #37BD69 → #1F415B ramp
+        # and a radius of 24. `backgroundImage` is asserted to be `none` as well
+        # as the colour being right: a leftover gradient would sit ON TOP of the
+        # flat colour and the colour check alone would pass under it.
+        check("the frame's stadium, white border and flat green",
+              r["radius"] == "999px" and r["border"] == "rgb(255, 255, 255)"
+              and r["bgColor"] == "rgb(55, 189, 105)" and r["bg"] == "none",
+              f"{r['radius']} / {r['border']} / {r['bgColor']} / {r['bg'][:40]}")
+
+        # THE DISC · node 286:3997. It was in 270:4176 too and was never built;
+        # this is what stops it being dropped again.
+        check("the chat disc is beside it, 52 across", r["chat"]
+              and near(r["chatW"], 52, 1) and near(r["chatH"], 52, 1),
+              f"{r['chatW']}x{r['chatH']}")
+        check("…12 from the pill, which is the frame's gap",
+              near(r["chatGap"], 12, 1), str(r["chatGap"]))
+        check("…carrying the frame's own 24px glyph, loaded",
+              r["chatGlyph"] and near(r["chatGlyphW"], 24, 1),
+              f"loaded={r['chatGlyph']} {r['chatGlyphW']}px")
+        # a disc with a glyph and no text has no accessible name without this
+        check("…and it is named for a screen reader", r["chatLabel"] == "Chat",
+              str(r["chatLabel"]))
+        check("it reads \"Quick Actions\" at rest", r["label"] == "Quick Actions" and r["labelW"] > 60,
+              f"{r['label']!r} at {r['labelW']}px")
+        check("the wash is behind it", r["band"], "")
+
+        # scrolled: the words go, the pill closes to a disc around its glyph
+        c.eval("scrollTo(0, 600); 1")
+        time.sleep(0.8)
+        sc = c.eval(PILL)
+        check("scrolled: the label collapses to nothing",
+              sc["scrolled"] and sc["labelW"] == 0, f"scrolled={sc['scrolled']} label={sc['labelW']}px")
+        check("…and the pill is a disc, not a pill",
+              abs(sc["w"] - sc["h"]) <= 2, f"{sc['w']}x{sc['h']}")
+        # the disc has no label to lose and must not move or resize with it
+        check("…while the chat disc holds its size",
+              near(sc["chatW"], 52, 1) and near(sc["chatH"], 52, 1),
+              f"{sc['chatW']}x{sc['chatH']}")
+
+        # the menu: the profile menu's material, the sixteen verbs, page blurred
+        c.eval("document.querySelector('.qa-pill').click(); 1")
+        time.sleep(0.6)
+        m = c.eval(MENU)
+        check("it opens sixteen verbs", m["open"] and m["cells"] == 16, str(m["cells"]))
+        # ITS OWN SURFACE SINCE THE REDESIGN, not the profile menu's borrowed
+        # one. The panel used to be `.pmenu`'s material at radius 18 because the
+        # instruction was "like the profile menu selection"; the brief of the
+        # same day asks for a restrained system surface of its own.
+        check("a light neutral surface of its own",
+              m["material"] == "rgba(255, 255, 255, 0.94)" and m["radius"] == "22px",
+              f"{m['material']} r={m['radius']}")
+        # A DIM, NOT A FROST — and this is the check that would catch the frost
+        # coming back. "Do NOT create the strong frosted/blurred background
+        # shown in the current design… approximately 5–10% visual reduction."
+        check("the dashboard behind stays readable: a 5–10% dim, blur under 3px",
+              m["veilOpacity"] == "1" and .05 <= m["veilAlpha"] <= .10 and m["veilPx"] <= 3,
+              f"alpha={m['veilAlpha']} blur={m['veilPx']}px")
+        check("the panel is wholly on screen", m["onScreen"], f"{m['w']}x{m['h']}")
+        # THE LABEL COMES BACK WHILE IT IS OPEN, scrolled or not: the control
+        # that opened the panel must not change shape under the finger.
+        check("…and the pill wears its label again while open", m["labelW"] > 60, str(m["labelW"]))
+        check("Escape closes it", c.eval(
+            "(()=>{document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));"
+            "return 1})()") == 1)
+        time.sleep(0.5)
+        check("…and the panel is hidden, not merely faded",
+              c.eval("document.querySelector('.qa-menu').hidden") is True)
+
+        # back at the top the label returns on its own
+        c.eval("scrollTo(0, 0); 1")
+        time.sleep(0.8)
+        top = c.eval(PILL)
+        check("back at the top the label returns",
+              not top["scrolled"] and top["labelW"] > 60,
+              f"scrolled={top['scrolled']} label={top['labelW']}px")
+        errs = c.errors()
+        check("no console errors through any of it", not errs,
+              "; ".join(str(e)[:110] for e in errs[:3]))
+
+    # ══ ONE RESTRAINED SURFACE, NOT SIXTEEN CARDS ══════════════════════════
+    # The brief's colour section is the most emphatic part of it — "DO NOT give
+    # every action a different color", no rainbow cards, monochrome icons, the
+    # accent reserved for the FAB and the pressed state — and its block section
+    # says the same thing structurally: "Do not make the blocks look like 16
+    # independent cards." Both are easy to undo one variant at a time, so both
+    # are measured here rather than left to the eye.
+    print("\nthe grid: one visual language")
+    with Chrome(width=WIDTH, height=900) as c:
+        c.goto(BASE + "index.html?v=2", settle=2.0)
+        c.eval("document.querySelector('.qa-pill').click(); 1")
+        time.sleep(0.9)
+        g = json.loads(c.eval(GRID))
+        check("all sixteen are there, and none is hidden or collapsed",
+              g["n"] == 16 and g["visible"] == 16, f"{g['n']} cells, {g['visible']} visible")
+        check("in a 4x4 while the panel has the width for it",
+              (g["cols"] == 4 and g["rows"] == 4) or WIDTH <= 620,
+              f"{g['cols']} x {g['rows']}")
+        # ONE COLOUR FOR EVERY GLYPH. This is the check that a future variant
+        # cannot quietly opt out of.
+        check("every glyph is the same neutral tone", len(g["iconColors"]) == 1,
+              " / ".join(g["iconColors"][:5]))
+        check("…and every label is too", len(g["textColors"]) == 1,
+              " / ".join(g["textColors"][:5]))
+        # AND NO CELL IS PAINTED. At rest the wash is one neutral at low alpha;
+        # sixteen different fills, or one saturated fill, would show here.
+        check("every cell wears the same neutral wash at rest",
+              len(g["cellBg"]) == 1 and g["restSaturated"] == 0,
+              f"{len(g['cellBg'])} fills: {' / '.join(g['cellBg'][:3])}")
+        # NOT CARDS: no cell carries an outline or a drop shadow of its own.
+        # The container is the surface; the cells are areas on it.
+        check("no cell has a border or a shadow of its own",
+              g["withBorder"] == 0 and g["withShadow"] == 0,
+              f"{g['withBorder']} bordered, {g['withShadow']} shadowed")
+        check("…and no icon sits on a plate", g["withPlate"] == 0, str(g["withPlate"]))
+        # THE BRIEF'S OWN RANGES, and the touch floor under them.
+        check("cells clear the 44px touch floor and the brief's 56 minimum",
+              g["cellH"] >= 56 and g["cellH"] >= 44, f"{g['cellW']}x{g['cellH']}")
+        check("radius 14–16, icon 16–20, label 13–14, gap 12–16",
+              14 <= g["radius"] <= 16 and 16 <= g["icon"] <= 20
+              and 13 <= g["label"] <= 14 and 12 <= g["gap"] <= 16,
+              f"r{g['radius']} icon {g['icon']} label {g['label']} gap {g['gap']}")
+        # THE ONE PLACE THE ACCENT APPEARS. Pressed, and nowhere else — and it
+        # is the AA-safe green rather than the FAB's fill, because on the pale
+        # pressed wash #37BD69 measures 2.4:1 and this carries a label.
+        # `:active` cannot be set from script, so the cell is pressed with real
+        # pointer events and read while the button is still down.
+        rest = json.loads(c.eval(CELL_INK))
+        box = json.loads(c.eval(
+            "(()=>{const b=document.querySelector('.qa-act').getBoundingClientRect();"
+            "return JSON.stringify({x:b.left+b.width/2,y:b.top+b.height/2})})()"))
+        c.cmd("Input.dispatchMouseEvent", type="mousePressed", x=box["x"], y=box["y"],
+              button="left", clickCount=1, buttons=1)
+        # SETTLE BEFORE READING, WITH THE BUTTON STILL DOWN. Read in the same
+        # breath as the dispatch, the cell's own background already showed the
+        # accent while its label and glyph still showed the resting ink — which
+        # looked exactly like a cascade bug and was a style recalculation that
+        # had not run yet. Held for a moment, all three agree.
+        time.sleep(0.25)
+        held = json.loads(c.eval(CELL_INK))
+        c.cmd("Input.dispatchMouseEvent", type="mouseReleased", x=box["x"], y=box["y"],
+              button="left", clickCount=1, buttons=0)
+        check("pressed, and only pressed, a cell takes the accent",
+              held["bg"] != rest["bg"] and held["ink"] != rest["ink"]
+              and held["ink"] == "rgb(30, 122, 68)" and held["icon"] == "rgb(30, 122, 68)",
+              f"rest {rest['ink']} → held {held['ink']} on {held['bg']}")
+        errs = c.errors()
+        check("no console errors", not errs, "; ".join(str(e)[:110] for e in errs[:3]))
+
+    # ══ THE OPENING, WHICH IS THE WHOLE POINT OF THE REDESIGN ══════════════
+    # The brief of 8 Sep 2026: the FAB should feel like it is TRANSFORMING INTO
+    # the panel — not a modal, not sixteen blocks popping in, and the surface
+    # must visibly originate FROM the pill.
+    #
+    # MEASURED BY FREEZING THE TRANSITIONS, NOT BY SLEEPING. A first pass here
+    # slept between screenshots and reported that everything was already at its
+    # end state 50ms in — the captures themselves cost ~100ms each, so the
+    # samples were never at the times they claimed. `getAnimations()` gives the
+    # real thing: pause every transition, seek it to a known time, then read.
+    # Two traps that cost real debugging, both guarded below: a transition still
+    # inside its delay may not exist yet when the freeze runs, so everything is
+    # re-paused before each seek; and the component sets `hidden` when the close
+    # finishes, which is `display: none` and CANCELS every transition on the
+    # panel, so that setter is neutralised for the duration of the measurement.
+    print("\nthe FAB transforming into the panel")
+    with Chrome(width=WIDTH, height=900, reduced_motion=False) as c:
+        c.goto(BASE + "index.html?v=2", settle=2.0)
+
+        def freeze():
+            c.eval("(()=>{document.getAnimations().forEach(a=>a.pause());"
+                   "const m=document.querySelector('.qa-menu');"
+                   "Object.defineProperty(m,'hidden',{get:()=>false,set:()=>{},configurable:true});"
+                   "return 1})()")
+
+        def at(t):
+            c.eval("(()=>{for(const a of document.getAnimations()){a.pause();"
+                   "try{a.currentTime=%d}catch(e){}} return 1})()" % t)
+            return json.loads(c.eval(STATE))
+
+        c.eval("document.querySelector('.qa-pill').click(); 1")
+        time.sleep(0.004)
+        freeze()
+
+        f0 = at(0)
+        # THE FIRST FRAME IS THE PILL. A clip window --qa-h tall at the panel's
+        # bottom edge, the pill's measured width, the pill's radius — and
+        # centred on the PILL, which is what the asymmetric left/right insets
+        # are. A symmetric inset here means the surface is growing out of a
+        # point beside the FAB, which is what shipped in the first pass.
+        check("frame 0: the surface is the pill's own box",
+              near(f0["winW"], f0["pillW"], 2) and near(f0["winH"], 52, 1)
+              and near(f0["winR"], 26, 1),
+              f"{f0['winW']}x{f0['winH']} r{f0['winR']} vs pill {f0['pillW']}")
+        check("…centred on the FAB, not on the panel",
+              near(f0["winCx"], f0["pillCx"], 2),
+              f"window {f0['winCx']} vs pill {f0['pillCx']} (panel {f0['menuCx']})")
+        check("…with nothing revealed yet", max(f0["rows"].values()) == 0, str(f0["rows"]))
+        check("…and the glyph is still the grid",
+              f0["grid"] == 1 and f0["x"] == 0, f"grid={f0['grid']} x={f0['x']}")
+
+        # MID-REVEAL. The curve matters as much as the duration: the first one
+        # tried here was 66% open at a fifth of its travel, which reads as a
+        # snap and a wait. This asserts the surface is still genuinely moving in
+        # the middle of its own transition.
+        f = at(100)
+        check("halfway: the surface is still opening, not already there",
+              .25 < f["progress"] < .85, f"{round(f['progress'], 2)} of the way")
+        check("…the glyph is mid-morph, both marks on screen",
+              0 < f["grid"] < 1 and 0 < f["x"] < 1, f"grid={f['grid']} x={f['x']}")
+
+        # ROW STAGGER, FROM THE BOTTOM. "Do not stagger every individual card.
+        # Stagger by ROW." Sampled mid-reveal, the four rows must be strictly
+        # ordered: the one over the FAB furthest along, the top one last.
+        f = at(180)
+        # bottom → top, and it must be monotonically DECREASING: at any instant
+        # the row over the FAB is further along than the one above it, which is
+        # what makes the reveal one edge travelling rather than a scatter.
+        seq = [f["rows"][k] for k in sorted(f["rows"], key=int)]
+        check("the rows unfold bottom-up, one edge travelling",
+              all(seq[i] >= seq[i + 1] for i in range(len(seq) - 1)) and seq[0] > seq[-1],
+              f"bottom→top {seq}")
+        # AND THE ROW NEAREST THE FAB IS THE ONE THAT WAITS LEAST.
+        check("…because the delays run away from the FAB",
+              f["delayTop"] > f["delayBottom"],
+              f"bottom waits {f['delayBottom']}ms, top {f['delayTop']}ms")
+        # …AND ALL FOUR OF A ROW TOGETHER. The stagger is by row, so a row's own
+        # cells must not be spread out.
+        check("…and a row's four cells arrive together", f["rowSpread"] <= .02,
+              f"widest spread within one row: {f['rowSpread']}")
+
+        # SAMPLED PAST THE END, AND THE END IS DERIVED. The last row starts at
+        # --qa-open-base + (rows-1) x step and runs for --qa-t-row; at two
+        # columns that is eight rows, not four. A hardcoded 400ms passed on a
+        # tablet and failed on a phone for a panel that was opening correctly.
+        last = json.loads(c.eval(
+            "(()=>{const cs=getComputedStyle(document.documentElement);"
+            "const n=+getComputedStyle(document.querySelector('.qa-menu'))"
+            ".getPropertyValue('--qa-rows')||4;"
+            "const px=(k,el)=>parseFloat((el||cs).getPropertyValue(k));"
+            "const step=parseFloat(getComputedStyle(document.querySelector('.qa-menu'))"
+            ".getPropertyValue('--qa-row-step'))||px('--qa-row-step');"
+            "return JSON.stringify({end:px('--qa-open-base')+(n-1)*step+px('--qa-t-row'), n, step})})()"))
+        check("the stagger fits its budget whatever the column count",
+              last["end"] <= 400, f"{last['n']} rows, step {last['step']}ms, ends {last['end']}ms")
+        f = at(int(last["end"]) + 40)
+        check("and it lands: open, square, every cell there",
+              f["progress"] == 1 and min(f["rows"].values()) == 1
+              and f["grid"] == 0 and f["x"] == 1, str(f["rows"]))
+
+    # ══ THE CLOSING, WHICH MUST BE THAT IN REVERSE ═════════════════════════
+    print("\nthe panel folding back into the FAB")
+    with Chrome(width=WIDTH, height=900, reduced_motion=False) as c:
+        c.goto(BASE + "index.html?v=2", settle=2.0)
+        c.eval("document.querySelector('.qa-pill').click(); 1")
+        time.sleep(0.9)
+        c.eval("document.querySelector('.qa-pill').click(); 1")
+        time.sleep(0.004)
+        c.eval("(()=>{document.getAnimations().forEach(a=>a.pause());"
+               "const m=document.querySelector('.qa-menu');"
+               "Object.defineProperty(m,'hidden',{get:()=>false,set:()=>{},configurable:true});"
+               "return 1})()")
+
+        def at2(t):
+            c.eval("(()=>{for(const a of document.getAnimations()){a.pause();"
+                   "try{a.currentTime=%d}catch(e){}} return 1})()" % t)
+            return json.loads(c.eval(STATE))
+
+        f = at2(60)
+        seq = [f["rows"][k] for k in sorted(f["rows"], key=int)]   # bottom → top
+        check("the rows leave top-down: the top has gone first",
+              all(seq[i] >= seq[i + 1] for i in range(len(seq) - 1)) and seq[0] > seq[-1],
+              f"bottom→top {seq}")
+        # THE PROOF THAT THIS IS THE OPEN REVERSED and not the same stagger
+        # again. Opacity ordering is identical in both directions — the row by
+        # the FAB is the more opaque one either way — so the delays are what
+        # tell them apart: opening, the top waits longest; closing, it waits
+        # least, and the row over the FAB is the last thing on screen.
+        check("…and the delays have turned around",
+              f["delayTop"] < f["delayBottom"],
+              f"bottom waits {f['delayBottom']}ms, top {f['delayTop']}ms")
+
+        # THE SURFACE IS STILL VISIBLE WHILE IT CONTRACTS. Measured on the first
+        # pass: one `transition-delay` covered opacity as well as the clip, so
+        # the panel was fully transparent at 120ms with 53% of its contraction
+        # still to run — "the panel contracts toward its origin" was happening
+        # to something invisible.
+        f = at2(180)
+        check("the surface is still opaque while it is contracting",
+              f["opacity"] > .9 and .3 < (1 - f["progress"]) < .95,
+              f"opacity {f['opacity']} at {round(1 - f['progress'], 2)} closed")
+
+        f = at2(300)
+        check("and it ends where it started: the pill's own box",
+              near(f["winW"], f["pillW"], 3) and near(f["winH"], 52, 1)
+              and near(f["winR"], 26, 1) and near(f["winCx"], f["pillCx"], 3),
+              f"{f['winW']}x{f['winH']} r{f['winR']} at {f['winCx']} vs pill {f['pillW']} at {f['pillCx']}")
+        check("…and the glyph is the grid again", f["grid"] == 1 and f["x"] == 0,
+              f"grid={f['grid']} x={f['x']}")
 
     print()
     if fails:
