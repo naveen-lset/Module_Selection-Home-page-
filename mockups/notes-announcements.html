@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notes &amp; Announcements · ten widgets · ANTZ</title>
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  NOTES & ANNOUNCEMENTS · ten ways to draw the pair, 7 Sep 2026. A mockup.
+  Nothing here is wired and nothing here is in the app yet.
+  ═══════════════════════════════════════════════════════════════════════════
+
+  THE ASK. The two cards in the design file — a NOTES widget (a header with
+  "View All", one filled observation card, a dot pager) and an ANNOUNCEMENT
+  widget (the tinted panel, the round glyph and its word, a gradient title, a
+  photograph) — drawn ten ways, kept simple, so the choice is made by looking.
+
+  THE ONE THING EVERY VARIATION IS HELD TO. The home grid's 2x2 footprint:
+  374.4 x 344, which is two 179.2 columns and two 164 rows with the 16px
+  gutter between (node 55476:32828, the same arithmetic widget-concepts.html
+  uses). Both widgets are that box in every variation, side by side, so what
+  changes between the ten is composition and nothing else. The design file's
+  announcement is 264 tall and 952 wide; a third of that width is why its
+  32px title and its 365px photograph cannot come across unchanged, and
+  variation A is that refit rather than a redraw.
+
+  WHAT IS DELIBERATELY THE SAME IN ALL TEN.
+    · Copy is the app's seed copy, verbatim — js/data/observations.js and
+      js/data/homeBanners.js. No lorem, no placeholder authors.
+    · Colour is the app's own: the four priority slabs from the observation
+      card (critical, high, moderate, low), the cyan→green announcement
+      gradient, the red→orange important gradient, petrol ink, #006D35 links.
+    · Photographs are the ones already in assets/img, icons the ones in
+      assets/icon.
+    · The 4/8 scale: padding 12/14, gaps 6/8/10, radii 10/12/16.
+
+  THE TEN, ONE LINE EACH.
+    A  AS DRAWN      the design file's own parts, refitted to the 2x2 box
+    B  TYPE ONLY     no fill, no photograph — an eyebrow, a title, a footer
+    C  COLOUR HEAD   a 52px tone band names the widget; content on white
+    D  PHOTO TOP     a 16:9 picture across the top, copy beneath
+    E  TWO STRIPES   two items, each on white behind a 6px tone edge
+    F  FOUR ROWS     four items as rows — a dot, a title, a date
+    G  COVER         one photograph, full bleed, copy on the scrim
+    H  TINTED        the whole widget takes the 10% tone wash, no inner card
+    I  DECK          one card with the next two peeking, no dots
+    J  SPLIT         tone-filled top half, white bottom half
+
+  Open at http://localhost:8000/mockups/notes-announcements.html, or in a
+  1024px window. It lays out from 768 up; below that the pair stacks.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* ══ 1 · TOKENS — copied from index.html ═══════════════════════════════════ */
+:root {
+  --page-bg:
+    linear-gradient(180deg, rgba(175,239,235,.5) 0%, rgba(175,239,235,.275) 32.386%, rgba(242,255,248,.5) 68.662%),
+    linear-gradient(90deg, rgb(255,255,255) 0%, rgb(255,255,255) 100%);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --ink:      #1F415B;   /* MD3_Antz/OnSecondaryContainer */
+  --ink-head: #44544A;   /* MD3_Antz/OnSurfaceVariant     */
+  --ink-mute: #7A8684;   /* MD3_Antz/neutralSecondary     */
+  --ink-2:    #52697A;
+  --teal:     #00ABAB;
+  --link:     #006D35;
+  --line:     #E3EBE8;
+  --surface:  #FFFFFF;
+
+  --shadow-card: 0 1px 3px rgba(31,65,91,.06), 0 8px 24px -10px rgba(31,65,91,.14);
+  --scrim-band:  linear-gradient(179deg, rgba(255,255,255,0) 6%, rgba(35,45,42,.78) 78%);
+  --r-card: 16px; --r-pill: 999px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+
+  /* the 2x2 widget: two 179.2 columns + one 16 gutter, two 164 rows + one 16 */
+  --w: 374.4px;
+  --h: 344px;
+}
+
+/* the four priorities, from index.html's observation card. `slab` fills,
+   `soft` tints, `glyph` inks the punctuation, `deep` is the AA-safe text
+   colour for the same hue on white. */
+[data-p='critical'] { --slab:#F21037; --soft:#FDEBEE; --glyph:#E93353; --deep:#C10E2E; }
+[data-p='high']     { --slab:#F06D52; --soft:#FEEFEC; --glyph:#FA6140; --deep:#C2492C; }
+[data-p='moderate'] { --slab:#FFB71D; --soft:#FFFAE2; --glyph:#E4B819; --deep:#96700A; }
+[data-p='low']      { --slab:#0FC1E8; --soft:#E5FBFA; --glyph:#00D6C9; --deep:#00758C; }
+[data-p]            { --fill: linear-gradient(var(--slab), var(--slab)); }
+
+/* the two announcement tones, from index.html's .ann__ rules */
+[data-tone='announcement'] {
+  --tint: linear-gradient(-72deg, rgba(0,175,214,.1) 3.9%, rgba(55,189,105,.1) 108%);
+  --grad: linear-gradient(-44deg, #00AFD6 .6%, #37BD69 103%);
+  --fill: linear-gradient(-44deg, #00AFD6 .6%, #37BD69 103%);
+  --soft: rgba(55,189,105,.1);
+  --deep: #1E7A44;
+  --slab: #37BD69;
+}
+[data-tone='important'] {
+  --tint: linear-gradient(108deg, rgba(233,51,83,.1) 1.5%, rgba(250,97,64,.1) 96.9%);
+  --grad: linear-gradient(143deg, #E93353 1.5%, #FA6140 96.9%);
+  --fill: linear-gradient(143deg, #E93353 1.5%, #FA6140 96.9%);
+  --soft: rgba(233,51,83,.1);
+  --deep: #C81E38;
+  --slab: #E93353;
+}
+
+/* ══ 2 · THE PAGE — chrome for the mockup, not for the product ════════════ */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font); color: var(--ink); font-size: 15px; line-height: 1.45;
+  background: var(--page-bg) no-repeat; background-attachment: fixed;
+  -webkit-font-smoothing: antialiased; padding-bottom: 72px;
+}
+button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+img { display: block; max-width: 100%; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+.mast { padding: 40px 0 8px; }
+.mast__kick { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+.mast h1 { margin: 6px 0 12px; font-size: 34px; line-height: 1.12; letter-spacing: -.02em; }
+.mast p { max-width: 68ch; color: var(--ink-2); line-height: 1.6; }
+.mast p + p { margin-top: 10px; }
+.mast code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .86em; background: rgba(31,65,91,.07); padding: .1em .35em; border-radius: 4px; }
+
+/* one variation per row up to 1600, two above it */
+.grid { display: grid; gap: 36px; grid-template-columns: repeat(auto-fill, minmax(800px, 1fr)); margin-top: 32px; }
+.v { min-width: 0; }
+.v__cap { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.v__letter {
+  flex: none; align-self: center; width: 30px; height: 30px; border-radius: 9px;
+  display: grid; place-items: center; background: #1F515B; color: #fff;
+  font-size: 14px; font-weight: 700;
+}
+.v__name { flex: none; font-size: 17px; font-weight: 700; color: var(--ink-head); letter-spacing: -.01em; }
+.v__note { font-size: 13.5px; color: var(--ink-2); min-width: 0; }
+.v__pair { display: flex; flex-wrap: wrap; gap: 16px; }
+
+/* ══ 3 · THE WIDGET SHELL — the 2x2 box every variation is held to ════════ */
+.w {
+  position: relative; flex: none;
+  width: min(var(--w), calc(100vw - 80px)); height: var(--h);
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px; border-radius: var(--r-card);
+  background: var(--surface); box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.w--flush { padding: 0; gap: 0; }
+
+/* ══ 4 · SHARED PARTS ═════════════════════════════════════════════════════ */
+/* the widget's own header — the section head from the observations band, at
+   widget scale: 24px title, the green View All, its 44px target unseen */
+.hd { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 22px; }
+.hd__t { font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: var(--ink-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hd__all { position: relative; flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: var(--link); }
+.hd__all::after { content: ''; position: absolute; inset: -12px -8px; }
+.hd__all img { width: 15px; height: 15px; }
+
+/* the priority badge — the pill from the observation card's media corner */
+.pri { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: var(--r-pill); background: var(--soft); box-shadow: 0 1px 3px rgba(31,65,91,.16); }
+.pri img { width: 15px; height: 15px; }
+.pri i { font-style: normal; font-size: 14px; font-weight: 600; line-height: 1; letter-spacing: -.4px; color: var(--glyph); }
+/* the same fact as a word, for the compositions that have room for one */
+.priw { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border-radius: var(--r-pill); background: var(--soft); color: var(--deep); font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.priw::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--slab); }
+
+/* the announcement chip — node 159:3912's glyph and word, at 24px */
+.chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; padding: 2px 10px 2px 2px; border-radius: var(--r-pill); background: var(--soft); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-head); }
+.chip img { width: 24px; height: 24px; }
+
+/* "who • when", and the tag run the observation card draws with a leading dot */
+.meta { font-size: 12px; font-weight: 500; letter-spacing: .1px; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tags { display: flex; flex-wrap: wrap; gap: 0 5px; font-size: 12px; color: var(--ink-mute); overflow: hidden; max-height: 18px; }
+.tags i { font-style: normal; }
+.on-fill .meta, .on-fill .tags { color: rgba(255,255,255,.85); }
+
+/* the entity chip: the animal or the place the note is about */
+.ent { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 6px 8px; border-radius: 10px; }
+.ent__th { flex: none; width: 34px; height: 34px; border-radius: 5px; object-fit: cover; background: rgba(31,65,91,.06); }
+.ent__id { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.ent__id b, .ent__id i { font-style: normal; font-size: 12.5px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ent__id b { font-weight: 500; }
+.ent em { flex: none; font-style: normal; font-size: 12.5px; font-weight: 500; }
+.ent--plain { background: rgba(31,65,91,.05); color: var(--ink); }
+.ent--fill  { background: rgba(255,255,255,.22); color: #fff; }
+.ent--glass { background: rgba(255,255,255,.66); color: var(--ink); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); box-shadow: 0 1px 2px rgba(31,65,91,.10), 0 8px 20px -12px rgba(31,65,91,.35); }
+
+/* like and comment, counts included — local state in the app, inert here */
+.acts { flex: none; display: flex; align-items: center; gap: 12px; font-size: 12.5px; font-weight: 500; color: var(--ink-head); }
+.act { display: inline-flex; align-items: center; gap: 4px; }
+.act img { width: 16px; height: 16px; opacity: .85; }
+.on-fill .acts { color: #fff; }
+.on-fill .act img { filter: brightness(0) invert(1); opacity: .95; }
+
+/* the pager under the Notes card */
+.dots { flex: none; display: flex; align-items: center; justify-content: center; gap: 4px; height: 10px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: rgba(31,65,91,.18); }
+.dots i.is-on { width: 18px; border-radius: 3px; background: #B6C4C0; }
+
+/* three clamps, and a title that takes the tone's gradient */
+.cl1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl2, .cl3, .cl4, .cl5, .cl6, .cl8 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.cl2 { -webkit-line-clamp: 2; } .cl3 { -webkit-line-clamp: 3; } .cl4 { -webkit-line-clamp: 4; }
+.cl5 { -webkit-line-clamp: 5; } .cl6 { -webkit-line-clamp: 6; } .cl8 { -webkit-line-clamp: 8; }
+.body { font-size: 13px; line-height: 19px; color: var(--ink-head); }
+.on-fill .body { color: rgba(255,255,255,.92); }
+.title { font-size: 18px; line-height: 23px; font-weight: 600; letter-spacing: -.015em; color: var(--ink); }
+.title--grad { background-image: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 600; }
+.title--on-fill { color: #fff; }
+.rule { flex: none; height: 1px; background: var(--line); }
+.fill { background: var(--fill); }
+.grow { flex: 1 1 auto; min-height: 0; }
+.push { margin-top: auto; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+
+/* ══ 5 · A · AS DRAWN ═════════════════════════════════════════════════════
+   The design file's parts at a third of its width. The Notes card keeps its
+   fill, its punctuation badge, its entity chip and its footer; the
+   announcement keeps the tinted panel, the chip, the gradient title and the
+   photograph on the right — which at 132px leaves 214 for the copy, and that
+   is the finding this variation exists to make visible. */
+.a-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 7px; padding: 12px; border-radius: 12px; color: #fff; }
+.a-card h3 { font-size: 17px; line-height: 21px; font-weight: 600; letter-spacing: -.01em; }
+.a-panel { flex: 1 1 auto; display: flex; min-height: 0; background: var(--tint); }
+.a-panel__copy { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 14px; }
+.a-panel__photo { flex: none; position: relative; width: 132px; }
+.a-panel__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.a-panel .title { font-size: 16px; line-height: 21px; }
+
+/* ══ 6 · B · TYPE ONLY ════════════════════════════════════════════════════
+   No fill and no photograph: an eyebrow in the tone's AA-safe ink over a
+   short rule, the title at 18, three lines of the note, a hairline, the
+   footer. The loudest thing on the widget is 20 x 3 pixels. */
+.b-eye { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--deep); }
+.b-eye span { flex: none; width: 20px; height: 3px; border-radius: 2px; background: var(--slab); }
+.b-item { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+
+/* ══ 7 · C · COLOUR HEAD ══════════════════════════════════════════════════
+   The tone moves off the content and into a 52px band that names the widget
+   and counts what is in it. Everything below is white, so the note and the
+   announcement read identically and only the band differs. */
+.c-band { flex: none; margin: -14px -14px 12px; height: 52px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--fill); color: #fff; }
+.c-band b { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.c-band .n { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 10px; border-radius: var(--r-pill); background: rgba(255,255,255,.22); font-size: 12px; font-weight: 600; }
+.c-band img { width: 22px; height: 22px; filter: brightness(0) invert(1); }
+
+/* ══ 8 · D · PHOTO TOP ════════════════════════════════════════════════════
+   The observation card's own composition, shortened: a 16:9 picture instead
+   of its 4:3, the priority badge in the corner, the entity frosted on the
+   foot of the photograph, then white. An observation with no photograph
+   fills the same box with the priority colour, exactly as the app does. */
+.d-media { flex: none; position: relative; height: 148px; background: #E3EBE8; overflow: hidden; }
+.d-media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.d-media .pri { position: absolute; right: 10px; top: 10px; z-index: 2; }
+.d-media .chip { position: absolute; left: 10px; top: 10px; z-index: 2; background: rgba(255,255,255,.8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.d-media .ent { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 2; }
+.d-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 14px; }
+
+/* ══ 9 · E · TWO STRIPES ══════════════════════════════════════════════════
+   Two items to a widget. The tone is a 6px edge and nothing else, so two
+   different priorities — or an announcement and an important notice — can sit
+   one above the other without the widget turning into a colour chart. */
+.e-list { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.e-item { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 10px; border-left: 6px solid var(--slab); background: #F7FAF9; }
+.e-item h3 { font-size: 14.5px; line-height: 19px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.e-item .body { font-size: 12.5px; line-height: 18px; }
+
+/* ══ 10 · F · FOUR ROWS ═══════════════════════════════════════════════════
+   The most items per widget, and the only variation that shows what else is
+   waiting. A dot for the tone, the title, who or where it is about, the date.
+   No body copy at all — the row is a way in, not the note itself. */
+.f-rows { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.f-row { flex: 1 1 0; display: grid; grid-template-columns: 8px minmax(0,1fr) auto; align-items: center; gap: 11px; min-width: 0; }
+.f-row + .f-row { border-top: 1px solid var(--line); }
+.f-row .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--slab); }
+.f-row b { display: block; font-size: 14px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.f-row span { display: block; font-size: 12px; color: var(--ink-mute); }
+.f-row time { font-size: 12px; font-weight: 500; color: var(--ink-mute); white-space: nowrap; }
+
+/* ══ 11 · G · COVER ═══════════════════════════════════════════════════════
+   One photograph, full bleed, the copy on the artboard's own scrim band. The
+   boldest of the ten and the least legible per pixel: a title, a line of
+   meta, and nothing else fits over a picture. */
+.g-cover { position: absolute; inset: 0; }
+.g-cover img { width: 100%; height: 100%; object-fit: cover; }
+.g-cover::after { content: ''; position: absolute; inset: 0; background: var(--scrim-band); }
+.g-top { position: absolute; left: 14px; right: 14px; top: 14px; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.g-copy { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 2; display: flex; flex-direction: column; gap: 6px; }
+.g-copy .title { color: #fff; }
+.g-copy .meta { color: rgba(255,255,255,.88); }
+.g-pill { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px 0 4px; border-radius: var(--r-pill); background: rgba(255,255,255,.78); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-head); }
+.g-pill img { width: 22px; height: 22px; }
+.g-pill--word { padding: 0 12px; }
+
+/* ══ 12 · H · TINTED ══════════════════════════════════════════════════════
+   No inner card: the widget itself is the 10% wash the announcement panel
+   already uses, and the note gets the same treatment from its priority tint.
+   One surface, one shadow, nothing nested. */
+.h-w { background: var(--soft); }
+.h-w[data-tone] { background: var(--tint); }
+.h-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.h-w .rule { background: rgba(31,65,91,.10); }
+
+/* ══ 13 · I · DECK ════════════════════════════════════════════════════════
+   The hero deck's idiom at widget size: the card in front, the next two
+   peeking out to the right, cut off by the widget's own edge. The peek is the
+   pager, so the dots come off. */
+.i-deck { position: relative; flex: 1 1 auto; min-height: 0; }
+.i-c { position: absolute; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(31,65,91,.10), 0 10px 24px -14px rgba(31,65,91,.30); }
+.i-c[data-k='0'] { inset: 0 24px 0 0; z-index: 3; display: flex; flex-direction: column; gap: 7px; padding: 12px; border-top: 4px solid var(--slab); }
+.i-c[data-k='1'] { top: 9px; bottom: 9px; left: 12px; right: 12px; z-index: 2; background: #FBFDFC; }
+.i-c[data-k='2'] { top: 18px; bottom: 18px; left: 24px; right: 0; z-index: 1; background: #F4F8F7; }
+.i-c h3 { font-size: 16px; line-height: 21px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+
+/* ══ 14 · J · SPLIT ═══════════════════════════════════════════════════════
+   Half tone, half white. The fill carries the label and the title, the white
+   carries the note and the footer — so the colour is at full strength and
+   the reading is still on white. */
+.j-top { flex: none; height: 150px; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--fill); color: #fff; }
+.j-top .title { color: #fff; }
+.j-label { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 11px 0 4px; border-radius: var(--r-pill); background: rgba(255,255,255,.92); color: var(--deep); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.j-label img { width: 20px; height: 20px; }
+.j-top .meta { color: rgba(255,255,255,.88); }
+.j-label--word { padding: 0 11px; }
+.j-bot { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 14px; }
+
+/* ══ 15 · CLOSING NOTES ═══════════════════════════════════════════════════ */
+.close { margin-top: 44px; padding-top: 24px; border-top: 1px solid rgba(31,65,91,.12); }
+.close h2 { font-size: 20px; font-weight: 700; letter-spacing: -.015em; color: var(--ink-head); margin-bottom: 12px; }
+.close ul { margin: 0; padding-left: 20px; max-width: 78ch; }
+.close li { margin-bottom: 9px; color: var(--ink-2); line-height: 1.6; }
+.close li strong { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 860px) {
+  .wrap { padding: 0 20px; }
+  .grid { grid-template-columns: 1fr; }
+  .mast h1 { font-size: 27px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <p class="mast__kick">Mockup · 7 September 2026 · nothing here is wired</p>
+    <h1>Notes &amp; Announcements, ten ways</h1>
+    <p>The two widgets from the design file, drawn ten ways in the home grid's <strong>2&times;2 footprint — 374&times;344</strong>. Every variation is that same box for both widgets, side by side, so the only thing that changes down the page is the composition. Copy is the app's own seed copy from <code>observations.js</code> and <code>homeBanners.js</code>; colour, photographs and icons are the app's.</p>
+    <p>A is the design file refitted, and it is the control: the announcement's 32px gradient title and 365px photograph were drawn for a 952px banner, and a third of that width is what the other nine are answers to.</p>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <section class="close">
+    <h2>What to look at, and what I would pick</h2>
+    <ul>
+      <li><strong>How much copy actually survives.</strong> Every widget here is filled with the same full-length seed note and clamped to what its own box holds, so the count is the finding: B and H give the note six lines, C, I and J five, A’s narrow column eight short ones, D four under its picture, E three per item across two items, G a title and nothing else, F no prose at all across four items. That trade is the whole decision.</li>
+      <li><strong>Where the colour is.</strong> A and J put the priority at full strength behind the text, which is loud beside eleven module cards; C moves it into a band; B and E cut it to an edge or a rule; F to a dot. The priority is never carried by colour alone anywhere here — the badge, the word or the eyebrow says it too.</li>
+      <li><strong>Whether the two widgets look like one system.</strong> A does not: the Notes card is filled and the announcement is tinted, so the pair reads as two products. Every other variation gives both the same treatment and only the hue differs.</li>
+      <li><strong>The photograph.</strong> At 374px a picture beside the copy leaves a 214px column of eight-word lines (A), and full bleed costs the body altogether (G). D's 16:9 top is the only place a picture and a paragraph both fit — and half the observations have no picture, so it fills that box with the priority colour instead, exactly as the rail's card does.</li>
+      <li><strong>My pick: D for Notes, C or B for Announcements</strong> — or E for both if the home page should show two items rather than one. D keeps the observation card the rail already uses, which means one card component and no second design to maintain; C gives the announcement its name and its tone without spending the content area on either.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   THE CONTENT · verbatim from js/data/observations.js and js/data/homeBanners.js,
+   trimmed only where a 374px column cannot hold the full paragraph. Rendered
+   from data rather than written out twenty times so the ten variations are
+   compared on composition and never on the words.
+   ══════════════════════════════════════════════════════════════════════════ */
+const OBS = {
+  metal: {
+    p: 'high', title: 'Metal Work', date: '02 Sep 2026',
+    tags: ['Rust and Corrosion', 'Structural Changes'],
+    ent: { id: 'ENC : HB-04', name: 'Hoofstock Barn', th: '../assets/img/hospital.jpg' },
+    body: 'The lower rail on the north gate has rusted through where it meets the post, and the whole panel now flexes when the animals lean on it. It will not hold a charge much longer. Raised with maintenance; the paddock stays closed until the panel is replaced.',
+    by: 'Anita Deshmukh', likes: 31, comments: 9,
+  },
+  flank: {
+    p: 'critical', title: 'Deep Flank Wound', date: '03 Sep 2026',
+    tags: ['Open Wound', 'Bleeding'],
+    ent: { id: 'AAID : 87546/24', name: 'Big Bull', th: '../assets/img/obs-animal.png', more: 2 },
+    photo: { src: '../assets/img/obs-animal.png', pos: '50% 35%' },
+    body: 'Found a 6cm laceration on the left flank during the morning check, still bleeding lightly. Separated him into the night house and called the duty vet. Needs cleaning, a suture and a tetanus cover before he goes back out with the herd.',
+    by: 'Ramesh Patil', likes: 12, comments: 4,
+  },
+  feed: {
+    p: 'moderate', title: 'Feed Refusal', date: '01 Sep 2026',
+    tags: ['Appetite', 'Diet Change'],
+    ent: { id: 'AAID : 44120/25', name: 'Zara', th: '../assets/img/hero-leopard.jpg', more: 1 },
+    photo: { src: '../assets/img/hero-leopard.jpg', pos: '50% 30%' },
+    body: 'Third morning running that she has left the meat and taken only the browse. Weight is steady and she is bright and active otherwise, so this is not urgent yet. Nutrition are trialling a change of protein from Monday.',
+    by: 'Dr. Meera Nair', likes: 8, comments: 6,
+  },
+  leak: {
+    p: 'high', title: 'Water Line Leak', date: '29 Aug 2026',
+    tags: ['Utilities', 'Enclosure'],
+    ent: { id: 'ENC : PR-02', name: 'Primate House', th: '../assets/img/diet-kitchen.jpg' },
+    body: 'The supply to the drinker in the outdoor run has been dripping since Tuesday and has turned the ground under it to mud. Isolated the line at the stopcock.',
+    by: 'Anita Deshmukh', likes: 17, comments: 3,
+  },
+}
+
+const ANN = {
+  dog: {
+    tone: 'announcement', title: 'World African Wild Dog Day: meet the pack this Saturday',
+    by: 'Kunal Singh', date: '27 Aug 2026',
+    body: 'Did you know that African wild dogs are the ultimate team players? Every hunt is shared, every pup is fed first, and no member of the pack is left behind. Join the Carnivore Section keepers at the viewing deck at 11:00 for a talk on how our pack of nine has settled in.',
+    img: '../assets/img/species.jpg',
+  },
+  safety: {
+    tone: 'important', title: 'Please follow all safety protocols carefully',
+    by: 'Vantara admin', date: '26 Aug 2026',
+    body: 'This is an important reminder regarding the strict adherence to all established guidelines, protocols and regulations across every section and enclosure. Report any hazard to your section head at once, wear your issued PPE in every holding area, and never enter a night house alone.',
+  },
+  cubs: {
+    tone: 'announcement', title: 'Zara and Kian, our leopard cubs, go on exhibit from Monday',
+    by: 'Dr. Meera Nair', date: '24 Aug 2026',
+    body: 'After twelve weeks in the den the two Persian leopard cubs have passed their final health check and will be out in the main habitat from Monday morning. Please keep the service path behind the exhibit closed between 09:00 and 11:00 while they get used to the space.',
+    img: '../assets/img/hero-leopard.jpg', pos: '50% 30%',
+  },
+  kitchen: {
+    tone: 'announcement', title: 'Fresh browse deliveries move to a morning schedule',
+    by: 'Diet Kitchen', date: '12 Aug 2026',
+    body: 'From next week the delivery arrives at the Diet Kitchen at 06:30 instead of 14:00, so every section collects its rations before the first feed.',
+    img: '../assets/img/diet-kitchen.jpg',
+  },
+}
+
+/* ── the parts every variation draws from ─────────────────────────────────── */
+const PRI = {
+  critical: { word: 'Critical', src: '../assets/icon/obs-flame.svg' },
+  high:     { word: 'High',     glyph: '!!!' },
+  moderate: { word: 'Moderate', glyph: '!!' },
+  low:      { word: 'Low',      glyph: '!' },
+}
+const short = (d) => String(d).replace(/\s+\d{4}$/, '')
+const word  = (a) => a.tone === 'important' ? 'Important' : 'Announcement'
+
+const hd = (t, all = 'View All') =>
+  `<div class="hd"><span class="hd__t">${t}</span>` +
+  `<button class="hd__all" type="button">${all}<img src="../assets/icon/arrow-right.svg" alt="" width="15" height="15"></button></div>`
+
+const pri = (o) => {
+  const p = PRI[o.p]
+  return `<span class="pri" data-p="${o.p}">` +
+    (p.src ? `<img src="${p.src}" alt="">` : `<i aria-hidden="true">${p.glyph}</i>`) +
+    `<span class="sr">${p.word} priority</span></span>`
+}
+const priw  = (o) => `<span class="priw" data-p="${o.p}">${PRI[o.p].word}</span>`
+const chip  = (a) => `<span class="chip"><img src="../assets/icon/ann-${a.tone}.svg" alt="">${word(a)}</span>`
+const tags  = (o) => `<div class="tags">${o.tags.map((t) => `<i aria-hidden="true">•</i><span>${t}</span>`).join('')}</div>`
+const meta  = (x) => `<div class="meta">${x.by} &nbsp;•&nbsp; ${short(x.date)}</div>`
+const ent   = (o, mode) => `<div class="ent ent--${mode}">` +
+  `<img class="ent__th" src="${o.ent.th}" alt="">` +
+  `<span class="ent__id"><b>${o.ent.id}</b><i>${o.ent.name}</i></span>` +
+  (o.ent.more ? `<em>+${o.ent.more}<span class="sr"> more animals</span></em>` : '') + `</div>`
+const acts  = (o) => `<div class="acts">` +
+  `<span class="act"><img src="../assets/icon/obs-like.svg" alt="">${o.likes}<span class="sr"> likes</span></span>` +
+  `<span class="act"><img src="../assets/icon/obs-comment.svg" alt="">${o.comments}<span class="sr"> comments</span></span></div>`
+const dots  = (n, on) => `<div class="dots" aria-hidden="true">` +
+  Array.from({ length: n }, (_, i) => `<i class="${i === on ? 'is-on' : ''}"></i>`).join('') + `</div>`
+/* the photograph, or the priority colour standing in for it — the app's fork */
+const media = (o) => o.photo
+  ? `<img src="${o.photo.src}" alt="" style="object-position:${o.photo.pos}">`
+  : `<div class="fill" data-p="${o.p}" style="position:absolute;inset:0"></div>`
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE TEN. Each returns [notes widget, announcement widget].
+   ══════════════════════════════════════════════════════════════════════════ */
+const VARIANTS = [
+
+['A', 'As drawn', 'The design file’s own parts refitted to the box — the filled Notes card with its pager, the tinted announcement panel with its photograph on the right. The picture takes 132 of the 374 and the copy lives on what is left.', () => {
+  const o = OBS.metal, a = ANN.dog
+  return [
+    `<div class="w">${hd('Notes')}
+       <article class="a-card fill on-fill" data-p="${o.p}">
+         <div class="row-between"><h3>${o.title}</h3>${pri(o)}</div>
+         ${tags(o)}
+         ${ent(o, 'fill')}
+         <p class="body cl5">${o.body}</p>
+         <div class="row-between push">${meta(o)}${acts(o)}</div>
+       </article>
+       ${dots(3, 0)}</div>`,
+    `<div class="w w--flush" data-tone="${a.tone}">
+       <div class="a-panel">
+         <div class="a-panel__copy">
+           ${chip(a)}
+           <h3 class="title title--grad cl3">${a.title}</h3>
+           <p class="body cl8">${a.body}</p>
+           <div class="push">${meta(a)}</div>
+         </div>
+         <div class="a-panel__photo"><img src="${a.img}" alt=""></div>
+       </div>
+     </div>`,
+  ]
+}],
+
+['B', 'Type only', 'No fill, no photograph. An eyebrow in the tone’s ink over a 20px rule, the title at 18, then as much of the note as the box holds — six lines — and the footer. The quietest of the ten and the one that carries the most words.', () => {
+  const o = OBS.metal, a = ANN.dog
+  return [
+    `<div class="w">${hd('Notes')}
+       <article class="b-item" data-p="${o.p}">
+         <div class="b-eye"><span aria-hidden="true"></span>${PRI[o.p].word} priority</div>
+         <h3 class="title cl2">${o.title}</h3>
+         ${tags(o)}
+         <p class="body cl6">${o.body}</p>
+         <div class="rule push"></div>
+         <div class="row-between">${meta(o)}${acts(o)}</div>
+       </article></div>`,
+    `<div class="w" data-tone="${a.tone}">${hd('Announcements')}
+       <article class="b-item">
+         <div class="b-eye"><span aria-hidden="true"></span>${word(a)}</div>
+         <h3 class="title cl2">${a.title}</h3>
+         <p class="body cl6">${a.body}</p>
+         <div class="rule push"></div>
+         <div class="row-between">${meta(a)}<span class="acts"><span class="act"><img src="../assets/icon/ann-like.svg" alt="">24</span></span></div>
+       </article></div>`,
+  ]
+}],
+
+['C', 'Colour head', 'The tone moves out of the content and into a 52px band that names the widget and counts what is in it. Below the band both widgets are identical, which is the point.', () => {
+  const o = OBS.flank, a = ANN.dog
+  return [
+    `<div class="w" data-p="${o.p}">
+       <div class="c-band"><b>Notes</b><span class="n">6</span></div>
+       <article class="b-item">
+         <div class="row-between"><h3 class="title cl1">${o.title}</h3>${priw(o)}</div>
+         ${tags(o)}
+         <p class="body cl5">${o.body}</p>
+         <div class="rule push"></div>
+         <div class="row-between">${meta(o)}${acts(o)}</div>
+       </article></div>`,
+    `<div class="w" data-tone="${a.tone}">
+       <div class="c-band"><b>Announcements</b><span class="n">4</span></div>
+       <article class="b-item">
+         <h3 class="title cl2">${a.title}</h3>
+         <p class="body cl5">${a.body}</p>
+         <div class="rule push"></div>
+         ${meta(a)}
+       </article></div>`,
+  ]
+}],
+
+['D', 'Photo top', 'The observation card the rail already uses, shortened: a 16:9 picture, the priority badge in its corner, the entity frosted on its foot, then white. One card component for both widgets.', () => {
+  const o = OBS.flank, a = ANN.dog
+  return [
+    `<div class="w w--flush" data-p="${o.p}">
+       <div class="d-media">${media(o)}${pri(o)}${ent(o, 'glass')}</div>
+       <div class="d-body">
+         <div class="row-between"><h3 class="title cl1">${o.title}</h3><span class="meta">${short(o.date)}</span></div>
+         ${tags(o)}
+         <p class="body cl4">${o.body}</p>
+         <div class="row-between push">${meta(o)}${acts(o)}</div>
+       </div></div>`,
+    `<div class="w w--flush" data-tone="${a.tone}">
+       <div class="d-media"><img src="${a.img}" alt="">${chip(a)}</div>
+       <div class="d-body">
+         <h3 class="title cl2">${a.title}</h3>
+         <p class="body cl4">${a.body}</p>
+         <div class="row-between push">${meta(a)}<span class="acts"><span class="act"><img src="../assets/icon/ann-like.svg" alt="">24</span></span></div>
+       </div></div>`,
+  ]
+}],
+
+['E', 'Two stripes', 'Two items to a widget, the tone cut down to a 6px edge — so two priorities, or an announcement and an important notice, can sit one above the other without the widget becoming a colour chart.', () => {
+  const items = (x, isNote) => `<article class="e-item" ${isNote ? `data-p="${x.p}"` : `data-tone="${x.tone}"`}>
+      <div class="row-between"><h3 class="cl1">${x.title}</h3>${isNote ? priw(x) : ''}</div>
+      <p class="body cl3">${x.body}</p>
+      <div class="meta push">${x.by} &nbsp;•&nbsp; ${short(x.date)}</div>
+    </article>`
+  return [
+    `<div class="w">${hd('Notes')}<div class="e-list">${items(OBS.flank, true)}${items(OBS.metal, true)}</div></div>`,
+    `<div class="w">${hd('Announcements')}<div class="e-list">${items(ANN.safety, false)}${items(ANN.dog, false)}</div></div>`,
+  ]
+}],
+
+['F', 'Four rows', 'The most items per widget and the only variation that shows what else is waiting. A dot for the tone, the title, what it is about, the date. No body copy — the row is a way in, not the note.', () => {
+  const row = (t, sub, date, tone) => `<div class="f-row" ${tone}>
+      <span class="dot" aria-hidden="true"></span>
+      <span><b class="cl1">${t}</b><span class="cl1">${sub}</span></span>
+      <time>${short(date)}</time></div>`
+  return [
+    `<div class="w">${hd('Notes')}<div class="f-rows">` +
+      [OBS.flank, OBS.metal, OBS.feed, OBS.leak].map((o) =>
+        row(o.title, o.ent.name, o.date, `data-p="${o.p}"`)).join('') + `</div></div>`,
+    `<div class="w">${hd('Announcements')}<div class="f-rows">` +
+      [ANN.safety, ANN.dog, ANN.cubs, ANN.kitchen].map((a) =>
+        row(a.title, a.by, a.date, `data-tone="${a.tone}"`)).join('') + `</div></div>`,
+  ]
+}],
+
+['G', 'Cover', 'One photograph, full bleed, the copy on the artboard’s own scrim. The boldest of the ten and the least generous: over a picture there is room for a title and a line of meta, and that is all.', () => {
+  const o = OBS.flank, a = ANN.cubs
+  return [
+    `<div class="w w--flush" data-p="${o.p}">
+       <div class="g-cover"><img src="${o.photo.src}" alt="" style="object-position:${o.photo.pos}"></div>
+       <div class="g-top"><span class="g-pill g-pill--word">Notes</span>${pri(o)}</div>
+       <div class="g-copy">
+         <h3 class="title cl2">${o.title}</h3>
+         ${meta(o)}
+       </div></div>`,
+    `<div class="w w--flush" data-tone="${a.tone}">
+       <div class="g-cover"><img src="${a.img}" alt="" style="object-position:${a.pos}"></div>
+       <div class="g-top"><span class="g-pill"><img src="../assets/icon/ann-${a.tone}.svg" alt="">${word(a)}</span></div>
+       <div class="g-copy">
+         <h3 class="title cl2">${a.title}</h3>
+         ${meta(a)}
+       </div></div>`,
+  ]
+}],
+
+['H', 'Tinted', 'No inner card: the widget itself takes the 10% wash the announcement panel already uses, and the note takes the same from its priority tint. One surface, one shadow, nothing nested.', () => {
+  const o = OBS.metal, a = ANN.dog
+  return [
+    `<div class="w h-w" data-p="${o.p}">${hd('Notes')}
+       <article class="h-body">
+         <div class="row-between">${priw(o)}<span class="meta">${short(o.date)}</span></div>
+         <h3 class="title cl2">${o.title}</h3>
+         <p class="body cl6">${o.body}</p>
+         <div class="rule push"></div>
+         <div class="row-between">${meta(o)}${acts(o)}</div>
+       </article></div>`,
+    `<div class="w h-w" data-tone="${a.tone}">
+       <article class="h-body">
+         ${chip(a)}
+         <h3 class="title title--grad cl2">${a.title}</h3>
+         <p class="body cl6">${a.body}</p>
+         <div class="rule push"></div>
+         <div class="row-between">${meta(a)}<span class="acts"><span class="act"><img src="../assets/icon/ann-like.svg" alt="">24</span></span></div>
+       </article></div>`,
+  ]
+}],
+
+['I', 'Deck', 'The hero deck’s idiom at widget size: the card in front, the next two peeking out to the right and cut off by the widget’s edge. The peek is the pager, so the dots come off.', () => {
+  const o = OBS.flank, a = ANN.dog
+  return [
+    `<div class="w">${hd('Notes')}
+       <div class="i-deck">
+         <div class="i-c" data-k="2" aria-hidden="true"></div>
+         <div class="i-c" data-k="1" aria-hidden="true"></div>
+         <article class="i-c" data-k="0" data-p="${o.p}">
+           <div class="row-between"><h3 class="cl1">${o.title}</h3>${pri(o)}</div>
+           ${tags(o)}
+           <p class="body cl5">${o.body}</p>
+           <div class="row-between push">${meta(o)}${acts(o)}</div>
+         </article>
+       </div></div>`,
+    `<div class="w">${hd('Announcements')}
+       <div class="i-deck">
+         <div class="i-c" data-k="2" aria-hidden="true"></div>
+         <div class="i-c" data-k="1" aria-hidden="true"></div>
+         <article class="i-c" data-k="0" data-tone="${a.tone}">
+           ${chip(a)}
+           <h3 class="cl2">${a.title}</h3>
+           <p class="body cl5">${a.body}</p>
+           <div class="push">${meta(a)}</div>
+         </article>
+       </div></div>`,
+  ]
+}],
+
+['J', 'Split', 'Half tone, half white. The fill carries the label and the title at full strength; the white carries the note and the footer, so the reading is still on white.', () => {
+  const o = OBS.metal, a = ANN.dog
+  return [
+    `<div class="w w--flush" data-p="${o.p}">
+       <div class="j-top">
+         <span class="j-label j-label--word">Notes &nbsp;•&nbsp; ${PRI[o.p].word}</span>
+         <h3 class="title cl2">${o.title}</h3>
+         <div class="meta push">${o.ent.id} &nbsp;•&nbsp; ${o.ent.name}</div>
+       </div>
+       <div class="j-bot">
+         <p class="body cl5">${o.body}</p>
+         <div class="row-between push">${meta(o)}${acts(o)}</div>
+       </div></div>`,
+    `<div class="w w--flush" data-tone="${a.tone}">
+       <div class="j-top">
+         <span class="j-label"><img src="../assets/icon/ann-${a.tone}.svg" alt="">${word(a)}</span>
+         <h3 class="title cl2">${a.title}</h3>
+       </div>
+       <div class="j-bot">
+         <p class="body cl5">${a.body}</p>
+         <div class="row-between push">${meta(a)}<span class="acts"><span class="act"><img src="../assets/icon/ann-like.svg" alt="">24</span></span></div>
+       </div></div>`,
+  ]
+}],
+
+]
+
+/* ── mount ────────────────────────────────────────────────────────────────── */
+document.getElementById('grid').innerHTML = VARIANTS.map(([letter, name, note, build]) => {
+  const [notes, ann] = build()
+  return `<figure class="v">
+    <figcaption class="v__cap">
+      <span class="v__letter" aria-hidden="true">${letter}</span>
+      <span class="v__name">${name}</span>
+      <span class="v__note">${note}</span>
+    </figcaption>
+    <div class="v__pair">${notes}${ann}</div>
+  </figure>`
+}).join('')
+</script>
+</body>
+</html>
