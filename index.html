@@ -104,6 +104,7 @@
   --c-secondary:        #00D6C9;  /* MD3_Antz/Secondary                       */
   --c-add-primary:      #00AFD6;  /* MD3_Antz/addPrimary                      */
   --c-tertiary:         #FA6140;  /* MD3_Antz/Tertiary                        */
+  --c-tertiary-ctr:     #FFBDA8;  /* MD3_Antz/TertiaryContainer  hub legend */
   --c-on-primary-ctr:   #1F515B;  /* MD3_Antz/OnPrimaryContainer  active date */
   --c-success:          #72E128;  /* Light/Success/Main          presence dot */
   --c-white:            #FFFFFF;  /* Light/Common/White                       */
@@ -2692,6 +2693,115 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   .obs-band { margin-top: 40px; margin-bottom: 14px; }
 }
 
+
+/* ── 7d · THE TWO PAGE VERSIONS ── V1 as built, V2 = NODE 236:6669
+   ═══════════════════════════════════════════════════════════════════════════
+   `?v=2` selects the second composition. The switch is stamped on <html>
+   before the body is parsed — see the script above <body> for why — so
+   everything below is a plain attribute selector and costs V1 nothing.
+
+   WHAT V2 IS. Node 236:6669 "Current Design" draws the home page without the
+   announcement deck and without the Recent Observations rail: the greeting and
+   the search field, then straight into All Modules, the Command Centre banner
+   and the grid. Two of the three bands the page has been built around simply
+   are not in the frame.
+
+   AND THE GRADIENT MOVES WITH THEM. In V1 the white→teal 10% band belongs to
+   the announcements Main Frame (196:7748) and is drawn from the deck's own box
+   outwards. V2 has no deck, and node 250:6120 — the frame that holds the
+   modules — carries the same fill instead: `rgba(255,255,255,.1)` at the top
+   to `rgba(0,129,121,.1)` at the bottom, with the same 32px bottom corners
+   bleeding to both page edges. So the band is not deleted, it is re-parented,
+   and the page keeps the one thing the band is for: a lit top that separates
+   the greeting from the work.
+
+   THE ARRANGEMENT IS NOT TRANSCRIBED, AND CANNOT BE. Node 236:6669 is a
+   744-wide artboard laying its cards across FOUR columns; this page is five at
+   1024. The set of sixteen cards is the design's, card for card and size for
+   size, less the ink Focus Hub the ruling of 8 Sep took off, with Notes moved
+   to the head of it and Diet & Kitchen added to it the same afternoon — see
+   V2_LAYOUT in layoutStore.js — but which cell each lands in is the packer's
+   answer to five columns, not the artboard's to four. ═══════════════════ */
+
+/* V2 drops both bands. `display: none` and not a class on them: the elements
+   are still in the markup for V1 and nothing about them changes, so the
+   version is the only thing that decides. */
+:root[data-page-version='2'] .hero-stage,
+:root[data-page-version='2'] .obs-band { display: none; }
+
+/* …and the band it loses moves onto the module grid's own box. The geometry is
+   V1's, re-anchored: the negative gutters bleed it to the page edges, and the
+   32px is on the bottom corners only, exactly as node 250:6120 draws it.
+
+   `.modules-band` already carries `container-type: inline-size` for the grid's
+   row height, which brings layout containment and therefore makes it the
+   containing block this needs. Nothing here relies on that — the band would
+   position against the nearest one either way — but it is why the element is
+   safe to hang it on. */
+:root[data-page-version='2'] .modules-band { position: relative; }
+:root[data-page-version='2'] .modules-band::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  /* 24 above the section head, which is the Main Frame's own padding in the
+     node, and to the foot of the grid below */
+  top: calc(var(--s6) * -1);
+  bottom: calc(var(--s6) * -1);
+  left: calc(var(--pad-page) * -1);
+  right: calc(var(--pad-page) * -1);
+  border-radius: 0 0 32px 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .1) 0%, rgba(0, 129, 121, .1) 100%);
+  pointer-events: none;
+}
+/* the head needs the 24 the band is drawn to, or the grid starts under the
+   greeting with nothing between them */
+:root[data-page-version='2'] .modules-band { margin-top: var(--s6); }
+
+/* ── V2 HAS NO SECTION HEAD AT REST ──────────────────────────────────────
+   The user's ruling of 8 Sep 2026, given against this row on V2: remove it,
+   the action is in the profile. It is right on both counts. The row's only
+   resting content is "All Modules" and an Edit Modules button, and that button
+   is a second door to the profile menu's own first item — which is the rule
+   that menu was built on and the reason the Site header was cut to one button:
+   everything a person can do to their own page hangs off their own avatar.
+
+   THIS IS NOT A NEW BEHAVIOUR, IT IS THE ORIGINAL ONE. `.section-head` is
+   already zero-height and invisible at rest, and `body.is-editing` is already
+   what expands it — read the two rules in section 8. `.section-head--home` is
+   the 3 Sep override that pinned it open because node 154:4224 drew it that
+   way. V2 simply declines that override, and the page goes back to entering
+   edit mode by gesture: press and hold a card, right-click it, press E, or use
+   the avatar. That was the design before the artboard asked for a header, and
+   the note above the base rule still explains why.
+
+   `body:not(.is-editing)` RATHER THAN A SECOND RULE TO PUT IT BACK. This
+   selector is more specific than `body.is-editing .section-head`, so writing
+   the collapse unconditionally would have won in edit mode too and taken Add
+   Module and Done with it — and that Done is the only way out of edit mode on
+   the page itself. Scoping the collapse to the resting state means edit mode's
+   rule is untouched and the two cannot drift. */
+:root[data-page-version='2'] body:not(.is-editing) .section-head--home {
+  height: 0;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* AND OUT OF THE TAB ORDER. `height: 0` with `overflow: hidden` hides the
+     Edit Modules button from the eye and `pointer-events: none` from the
+     mouse, and it stays focusable — measured: the button still took focus and
+     still reported a 131x19 box. A keyboard user would tab to a control they
+     cannot see, on a page that has deliberately removed it. `visibility` is
+     the one that also takes it out of the tab order.
+
+     The delay is so the collapse can still be watched on the way out of edit
+     mode: `visibility` transitions discretely but its delay is honoured, so
+     the row stays visible for the height animation and then goes. Entering
+     edit mode this rule stops matching altogether, so it appears at once. */
+  visibility: hidden;
+  transition: height var(--t-base) var(--ease), opacity var(--t-base) var(--ease),
+              margin var(--t-base) var(--ease), visibility 0s linear var(--t-base);
+}
+
 /* ── 8 · modules section head ────────────────────────────────────────────
    NOT IN THE ARTBOARD, AND THEREFORE NOT IN THE RESTING PAGE.
 
@@ -3749,6 +3859,501 @@ body.is-editing .section-head--home { align-items: center; margin-bottom: var(--
 }
 .l-tree__label { flex: 1 1 auto; font-size: var(--fs-label); opacity: .78; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ══ TWO NEW CARD SURFACES ════════════════════════════════════════════════
+   Node 236:6669 introduces the first home-grid cards that are NOT the
+   module's own gradient: My Focus Hub comes in a #1F415B ink card and a white
+   one, and Notes is white. That is a third and fourth fill on a page whose
+   comment above says there are two, so it is worth saying why this is not the
+   `soft` fill returning.
+
+   `soft` was the module's gradient under a white veil — the SAME subject in a
+   quieter paint, and it failed because on a desaturated fill the veil removed
+   the colour that identifies the module. These two are not that. They are
+   cards with no module behind them: Focus Hub is whichever animal you pinned
+   and Notes is whoever wrote one, so there is no domain colour they could
+   carry and nothing is being drained out of them. A surface of their own is
+   the honest answer, and it is what the node draws.
+
+   RADIUS STAYS AT THE APP'S 16, NOT THE NODE'S 12. Node 236:6669 is a 744-wide
+   artboard — 4 columns of 162 with 144px rows — and it draws every card at 12,
+   modules included. The app follows the 1024 artboard, where the same cards are
+   16, and the build is pixel-exact to it. Three cards at 12 in a grid of 16s
+   would read as a mistake, so the widget takes the grid's radius and only its
+   INSIDE is transcribed. ═══════════════════════════════════════════════════ */
+.card[data-fill='plate'] { background: var(--c-white); color: var(--ink); }
+.card[data-fill='ink']   { background: var(--c-on-secondary-ctr); color: var(--on-dark); }
+
+/* A PASSIVE CARD MUST NOT OFFER TO BE PRESSED. `.card` is a control by default
+   — pointer cursor, a lift on hover, a squash on `:active` — and these two are
+   a div with controls inside them. Keeping the surface's affordances would
+   promise a press that does nothing and would fight the dots that do. The
+   lift stays: it is a hover state on the whole card and reads as "this is one
+   object", which is still true. What goes is the cursor and the press. */
+.card[role='group'] { cursor: default; }
+.card[role='group']:active { transform: none; }
+@media (hover: hover) { .card[role='group']:active { transform: translateY(-2px); } }
+body.is-editing .card[role='group'] { cursor: grab; }
+
+/* Both new layouts pad their own sections, because in the node the Focus Hub's
+   updates panel and the Notes head are FULL-BLEED — they carry a fill that
+   runs to the card's edge, which a padded card cannot draw. */
+.card[data-layout='focus'],
+.card[data-layout='note'] { padding: 0; }
+
+/* ══ LAYOUT · focus ═══════════════════════════════════════════════════════
+   MY FOCUS HUB — nodes 250:6500 (ink) and 250:6258 (plate), 7 Sep 2026.
+
+   The animal someone pinned, and what has happened to it. An identity block —
+   photograph, common name, binomial, accession — over a list of dated updates.
+   TWO VARIATIONS, and they are two real compositions rather than one in two
+   colours, so the differences are declared rather than derived:
+
+     ink (`focus.hub`)      the identity sits directly on the card, its sex and
+                            CITES badges OVER the photograph, an enclosure line
+                            under the accession, and a paging indicator in the
+                            head. The updates panel is a 20% black bleed.
+     plate (`focus.light`)  the identity sits in an inset tinted panel with a
+                            hairline, the badges are pills UNDER the text, there
+                            is no enclosure line and no indicator, and the
+                            updates sit on the card itself.
+
+   WHAT IS SHARED IS THE STRUCTURE, so one renderer draws both and the CSS
+   forks on `[data-fill]`. Everything that differs is either a datum the
+   variant supplies or one of the rules below. ══════════════════════════════ */
+.l-focus { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+
+/* ── the head: 14px Medium and a 0.1px track, which is Antz_Body_Medium ──
+   NOT `.c-head`. That is 600 at --fs-card-title with a negative track, which
+   is the right head for a card that names a module; this one names a feature
+   and the node sets it a size down and a weight lighter. */
+.l-focus__head {
+  flex: none;
+  display: flex; align-items: center; gap: 6px;
+  min-width: 0;
+}
+.l-focus__title {
+  flex: 1 1 auto; min-width: 0;
+  font-size: 14px; font-weight: 500; line-height: 17px; letter-spacing: .1px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── the identity block ── */
+.l-focus__id { flex: none; display: flex; align-items: center; gap: 12px; min-width: 0; }
+/* the photograph's own box. It exists so the ink card's badges have something
+   whose size they are a percentage OF — a sibling of the image could only be a
+   percentage of the row, which changes when the text beside it does. */
+.l-focus__shot { position: relative; flex: none; display: block; }
+.l-focus__photo {
+  position: relative; flex: none;
+  display: block; object-fit: cover;
+  background: rgba(31, 65, 91, .06);
+}
+.l-focus__facts { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+/* uppercase in the stylesheet, not in the data — the datum is 'Leopard' */
+.l-focus__name { font-size: 12px; font-weight: 600; letter-spacing: .1px; line-height: 15px; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-focus__latin { font-size: 12px; font-style: italic; line-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* AN ENCLOSURE HAS NO BINOMIAL. `sub` takes the same row as `latin` and is
+   upright, because italic on "Hoofstock · Section B" reads as a mistake rather
+   than as the convention it is on a species name. */
+.l-focus__sub { font-size: 12px; line-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-focus__ref { font-size: 12px; line-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── the badges: a sex tag and a CITES appendix ──
+   Two placements for the same two facts. On the ink card they are OVER the
+   photograph, so the CITES one takes a dark plate to hold against whatever the
+   picture is doing under it; on the plate card they are pills in the flow. */
+.l-focus__tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 500; line-height: 12px; text-align: center;
+  color: var(--on-dark);
+}
+.l-focus__tag--sex   { background: var(--c-secondary); }
+/* `plain` WAS `cites`. The node's second badge is a CITES appendix, so that
+   is what it was called — until the hub started carrying enclosures, whose
+   badge says "Barn". The tone is the general one now: cyan for sex, grey for
+   everything else. Renaming it and not the data is what left the enclosure's
+   badge with no background at all for one build, white on a pale panel. */
+.l-focus__tag--plain { background: var(--c-neutral-2); }
+
+/* ── the updates ── */
+.l-focus__updates { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.l-focus__legend {
+  flex: none;
+  font-size: 10px; font-weight: 600; line-height: 12px; text-transform: uppercase;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.l-focus__update { display: flex; align-items: center; gap: 12px; min-width: 0; }
+/* the date reads down, not across: the day over the weekday, both on a 12px
+   leading so the pair is 24 and sits against the two lines beside it */
+.l-focus__when { flex: none; width: 21px; text-align: center; }
+.l-focus__day  { display: block; font-size: 12px; font-weight: 600; line-height: 12px; }
+.l-focus__dow  { display: block; font-size: 10px; line-height: 12px; text-transform: capitalize; }
+.l-focus__what { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.l-focus__act  { font-size: 12px; font-weight: 500; line-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-focus__by   { font-size: 10px; line-height: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ══ the ink variation ═══════════════════════════════════════════════════ */
+.card[data-fill='ink'] .l-focus { gap: 0; }
+/* THE HEAD IS PADDED BY THE HEAD, not by the card. This variation's card is
+   padded 0 so the updates panel below can bleed its fill to the edges, which
+   means every block above it has to carry its own inset — the node's section
+   250:6501 pads all of 16 and is 137 tall, which is 16 + 17 head + 16 + 72
+   photo + 16. Getting this wrong is not subtle: without it the title sits on
+   the card's top edge, inside its own rounded corner. */
+.card[data-fill='ink'] .l-focus__head { padding: 16px; }
+.card[data-fill='ink'] .l-focus__top { flex: none; display: flex; flex-direction: column; gap: 16px; padding: 0 16px 16px; }
+.card[data-fill='ink'] .l-focus__photo { width: 72px; height: 72px; border-radius: 4px; }
+.card[data-fill='ink'] .l-focus__facts { gap: 4px; }
+/* THE BADGES SIT ON THE PICTURE. 21.231 and the 3.54 offsets are the node's,
+   which are 92px numbers scaled to the 72px box it actually draws — written as
+   the fractions they are so the block survives the photo changing size. */
+.card[data-fill='ink'] .l-focus__badges { position: absolute; inset: 0; pointer-events: none; }
+.card[data-fill='ink'] .l-focus__tag {
+  position: absolute; top: 4.9%;
+  height: 29.5%; padding: 0 7.4%;
+  border-radius: 6px;
+  font-size: 8.85px; line-height: 1;
+}
+/* THE CORNER IS THE POSITION, THE TONE IS THE COLOUR, and they are separate
+   rules because they answer to different things. Tying the corner to the tone
+   worked while every item was an animal with both a sex and a CITES badge; an
+   enclosure carries one, and it landed alone in the right-hand corner with the
+   left one empty. Order decides where, so one badge sits where the first badge
+   goes. */
+.card[data-fill='ink'] .l-focus__tag:first-child  { left: 4.9%; }
+.card[data-fill='ink'] .l-focus__tag:nth-child(2) { left: 62.5%; }
+.card[data-fill='ink'] .l-focus__tag--sex   { filter: drop-shadow(0 1.769px .885px rgba(0, 0, 0, .1)); }
+/* a dark plate, because this one sits over whatever the photograph is doing */
+.card[data-fill='ink'] .l-focus__tag--plain { background: rgba(0, 0, 0, .4); box-shadow: 0 1.769px 1.769px rgba(0, 0, 0, .1); text-shadow: 0 .885px 3.538px rgba(0, 0, 0, .25); }
+/* the 20% black bleed, which is why this card is padded 0 */
+.card[data-fill='ink'] .l-focus__updates {
+  flex: 1 0 0;
+  padding: 16px;
+  background: rgba(0, 0, 0, .2);
+}
+.card[data-fill='ink'] .l-focus__legend { color: var(--c-tertiary-ctr); }
+/* THE ROWS SHARE THE LEFTOVER SPACE on this variation and not on the other.
+   The node gives them `flex: 1 0 0` here and a fixed height there — 33px
+   against 29 — and that 4px is the panel's spare height divided by three
+   rather than a different row. */
+.card[data-fill='ink'] .l-focus__update { flex: 1 0 0; min-height: 0; }
+.card[data-fill='ink'] .l-focus__by { color: rgba(255, 255, 255, .75); }
+
+/* ══ the plate variation ═════════════════════════════════════════════════ */
+.card[data-fill='plate'] .l-focus { gap: 12px; padding: 16px; }
+.card[data-fill='plate'] .l-focus__title { color: var(--ink-head); }
+/* the identity gets a panel: a 20%-alpha cyan→grey wash behind a hairline */
+.card[data-fill='plate'] .l-focus__top {
+  flex: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px;
+  border: .5px solid rgba(0, 0, 0, .05);
+  border-radius: 12px;
+  background: linear-gradient(-89.17684deg, rgba(0, 214, 201, .2) 1.7294%, rgba(182, 205, 209, .2) 110.71%);
+}
+/* IT IS A FLEX ITEM IN A ROW HERE, so `flex: none` on `.l-focus__id` — which
+   is right on the ink card, where the parent is a COLUMN and the shorthand is
+   about height — makes it refuse to shrink. Latent at 374px, where the row's
+   natural width fits inside the panel; at 193 it overflowed the panel by 105px
+   and pushed the binomial and the CITES pill out through its right edge.
+   The gap is the node's 8 here (250:6263) against the ink row's 12 (250:6506). */
+.card[data-fill='plate'] .l-focus__id { flex: 1 1 auto; min-width: 0; gap: 8px; }
+.card[data-fill='plate'] .l-focus__photo { width: 92px; height: 92px; border-radius: 8px; }
+.card[data-fill='plate'] .l-focus__facts { gap: 8px; }
+.card[data-fill='plate'] .l-focus__name  { color: var(--c-on-primary-ctr); }
+.card[data-fill='plate'] .l-focus__latin,
+.card[data-fill='plate'] .l-focus__sub { color: var(--ink-mute); }
+.card[data-fill='plate'] .l-focus__ref   { color: var(--ink-head); }
+.card[data-fill='plate'] .l-focus__badges { display: flex; gap: 4px; }
+.card[data-fill='plate'] .l-focus__tag { height: 16px; border-radius: 4px; }
+.card[data-fill='plate'] .l-focus__tag--sex   { padding: 0 8px; background: var(--c-neutral-2); }
+.card[data-fill='plate'] .l-focus__tag--plain { padding: 0 6px; }
+.card[data-fill='plate'] .l-focus__updates { flex: 1 0 0; }
+.card[data-fill='plate'] .l-focus__legend { color: var(--c-tertiary); }
+/* the node indents these 8 from the panel above them, and nothing else */
+.card[data-fill='plate'] .l-focus__update { padding-left: 8px; }
+.card[data-fill='plate'] .l-focus__day  { color: #000000; }
+.card[data-fill='plate'] .l-focus__dow  { color: var(--ink-head); }
+.card[data-fill='plate'] .l-focus__act  { color: var(--ink-head); }
+.card[data-fill='plate'] .l-focus__by   { color: var(--ink-mute); }
+
+/* ══ LAYOUT · note ════════════════════════════════════════════════════════
+   NOTES — node 250:6297, 7 Sep 2026.
+
+   One note, on a plate tinted with the priority it carries, and a paging
+   indicator under it saying there are more. It is the nearest thing in the
+   catalogue to the Recent Observations card and it is deliberately NOT that:
+   the observation card is 4:3 of photograph with the entity frosted on it,
+   because a rail of them is browsed. This is one note inside a 2x2 cell on a
+   page of module tiles, so the photograph is a 44px thumbnail and the words
+   are the card. ══════════════════════════════════════════════════════════ */
+.l-note { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+/* 16, NOT THE NODE'S 14. The head frame is 336 wide inside a 340 card, so its
+   12px padding lands the glyph at 14 while the body's card below it starts at
+   16 — a two-pixel misalignment that comes from the frame being centred, not
+   from anyone drawing it. Both are 16 here. */
+.l-note__head {
+  flex: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 16px 0;
+  min-width: 0;
+}
+.l-note__icon { flex: none; display: block; width: 16px; height: 16px; }
+.l-note__title {
+  flex: 1 1 auto; min-width: 0;
+  font-size: 14px; font-weight: 500; line-height: 17px; letter-spacing: .1px;
+  color: var(--ink-head);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.l-note__body { flex: 1 0 0; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 16px; }
+
+/* the plate, tinted 10% of the note's priority */
+.l-note__plate {
+  flex: 1 0 0; min-height: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--note-tint, rgba(250, 97, 64, .1));
+  overflow: hidden;
+}
+.l-note__group { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+/* ── the entity it is about ── */
+.l-note__who { flex: none; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.l-note__thumb { flex: none; display: block; width: 44px; height: 44px; border-radius: 4.889px; object-fit: cover; background: rgba(31, 65, 91, .06); }
+.l-note__ident { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px; }
+.l-note__idents { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.l-note__aaid { font-size: 14px; font-weight: 500; letter-spacing: .1px; line-height: 17px; color: var(--ink-head); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-note__aname { font-size: 12px; line-height: 15px; color: var(--ink-head); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-note__more { flex: none; font-size: 14px; font-weight: 500; letter-spacing: .1px; color: var(--ink-head); }
+/* ── the note ── */
+.l-note__note { display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.l-note__kind { display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* A SOLID PILL WITH WHITE PUNCTUATION, which is the opposite of the
+   observation card's pale badge with coloured punctuation. Same four
+   priorities, same glyph colours — used as the FILL here. The node draws only
+   `high`; the other three are the same four the observation rail uses, so a
+   note of any priority is drawn rather than falling back to no colour. */
+.l-note__pri {
+  flex: none;
+  display: grid; place-items: center;
+  width: 20px; height: 20px; padding: 1.429px;
+  border-radius: 71.429px;
+  background: var(--note-pri, #FA6140);
+}
+.l-note__pri span { font-size: 12.86px; font-weight: 600; line-height: 1; letter-spacing: -.3px; color: var(--on-dark); }
+.l-note__pri img { display: block; width: 17.143px; height: 17.143px; }
+.l-note__cat { font-size: 16px; font-weight: 600; line-height: 20px; color: var(--ink-head); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.l-note__text {
+  font-size: 12px; line-height: 20px; color: var(--ink-head);
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* ── who wrote it, and the like ── */
+.l-note__foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.l-note__sig { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: 12px; line-height: 15px; color: var(--ink-head); }
+.l-note__sig b { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-note__sig time { flex: none; }
+.l-note__like {
+  flex: none;
+  display: flex; align-items: center; gap: 5.333px;
+  padding: 5.333px;
+  border: 0; background: none; font: inherit; color: inherit; cursor: pointer;
+}
+.l-note__like img { display: block; width: 16px; height: 16px; }
+.l-note__like b { font-size: 12px; font-weight: 400; line-height: 13.333px; color: var(--ink-head); min-width: 12px; text-align: left; }
+
+
+/* ══ PAGING · the dwell, the pages, and the dots that drive them ══════════
+   My Focus Hub holds several pinned animals and enclosures; Notes holds up to
+   five notes. Both show one at a time and advance on their own.
+
+   THE DWELL IS AN ANIMATION ON A 1px ELEMENT, and the card advances on its
+   `animationend` rather than on a timer — js/lib/carousel.js says why at
+   length. What lives here is the half of that mechanism which is CSS: the
+   duration, and the four states that pause it. Pausing the fill pauses the
+   advance, because the fill IS the clock.
+
+   `animation: none` UNDER REDUCED MOTION, AND NOT A SHORTER DURATION. The
+   page's global reduce block sets `animation-duration: .01ms !important` on
+   everything, so a dwell left in place there would end every frame and spin
+   the card. Removing the animation's NAME is what stops it; the card then
+   rests on its first item and is still fully navigable by hand. ═══════════ */
+:root { --pager-dwell: 7000ms; }
+
+.pager-dwell {
+  position: absolute; left: 0; bottom: 0;
+  width: 1px; height: 1px;
+  opacity: 0; pointer-events: none;
+  animation: pager-dwell var(--pager-dwell) linear forwards;
+}
+@keyframes pager-dwell { to { opacity: 0; } }
+
+/* A FINGER, A POINTER, A KEYBOARD, OR A TAB IN THE BACKGROUND. Each is a
+   reason the person has not finished with what is on screen. `:has` covers a
+   focus anywhere inside the card, which is how a dot being tabbed to holds the
+   card still while it is being used. */
+.card.is-swiping .pager-dwell,
+.card:focus-within .pager-dwell,
+body.is-hidden .pager-dwell,
+body.is-editing .pager-dwell { animation-play-state: paused; }
+@media (hover: hover) { .card:hover .pager-dwell { animation-play-state: paused; } }
+@media (prefers-reduced-motion: reduce) { .pager-dwell { animation: none; } }
+
+/* ── the pages ──
+   Absolutely stacked, so the card's height is the grid's and does not depend
+   on which item is showing — a taller note must not resize the cell. `at` is
+   the one on screen; `prev` and `next` are staged to either side so a turn
+   moves in the direction the gesture asked for; `out` is everything else. */
+/* `width: 100%` IS NOT DECORATION HERE. Every child of these is absolutely
+   positioned, so the box has no in-flow content and its shrink-to-fit width is
+   zero — and `.l-note__body` centres its children rather than stretching them,
+   so nothing else gave it a width either. The Notes card measured 0x229 with
+   every page, plate and word inside it at zero size, while still passing an
+   overflow check, because a box with no width cannot overflow. */
+.l-focus__pages,
+.l-note__pages { position: relative; flex: 1 0 0; min-height: 0; width: 100%; }
+.l-focus__page,
+.l-note__page {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+}
+.l-focus__page[data-pos='at'],
+.l-note__page[data-pos='at'] { opacity: 1; transform: none; }
+.l-focus__page[data-pos='prev'],
+.l-note__page[data-pos='prev'] { opacity: 0; transform: translateX(-6%); }
+.l-focus__page[data-pos='next'],
+.l-note__page[data-pos='next'] { opacity: 0; transform: translateX(6%); }
+.l-focus__page[data-pos='out'],
+.l-note__page[data-pos='out'] { opacity: 0; transform: none; }
+
+/* ── the dots, which are now controls ──
+   THE INDICATOR IS THE NAVIGATION. The node draws a dot per item and nothing
+   else — no arrows, no chevrons — so rather than adding a control the design
+   does not have, the thing it does draw is made pressable. Six pixels is not a
+   target, so each dot grows one: `-13px -3px` is 32 tall and meets its
+   neighbour exactly across the 6px gap, never overlapping it. */
+.dots__dot {
+  position: relative;
+  padding: 0; border: 0; font: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+.dots__dot::after { content: ''; position: absolute; inset: -13px -3px; }
+.dots--run .dots__dot::after { inset: -13px -3px; }
+.dots__dot:focus-visible { outline: 2px solid var(--c-white); outline-offset: 2px; }
+@media (hover: hover) { .dots__dot:hover { opacity: .85; } }
+.dots__dot[aria-current='true'] { opacity: 1; }
+@media (hover: hover) { .dots__dot[aria-current='true']:hover { opacity: 1; } }
+
+/* ══ FITTING THESE TWO TO A NARROW CARD ═══════════════════════════════════
+   SPAN_TABLE resolves `tall` to [1, 2] at TWO columns — one column wide, two
+   rows high — so on a phone these get about 193px where they are drawn at 374.
+   `tall` is kept as the default anyway, because it is [2, 2] at both four and
+   five columns and that is the 2-of-4 the artboard actually draws; the tablet
+   band is what this product is for, and trading fidelity across all of it for
+   a phone fallback is the wrong way round. `large` is offered beside it and is
+   [2, 2] at two columns, so a full-width card on a phone is one resize away.
+
+   WHAT A 193px CARD GETS INSTEAD. Both compositions put a photograph beside a
+   block of text, and at that width the text lost — measured at 430px, the
+   facts column came to 57px. Stacking the photograph above the text was the
+   first answer and was worse: it took the plate variation to 397px of content
+   in a 308px card, so it CLIPPED, which loses the bottom of the updates list
+   with nothing to say it is missing.
+
+   So the photograph gives up width and the identifiers give up their ellipsis.
+   AN ACCESSION NUMBER MUST BE COMPLETE OR IT IS NOT AN ACCESSION NUMBER —
+   "AID: 875…" cannot be read back, typed in, or searched for, so these two
+   lines wrap onto a second line rather than truncating, which is the one place
+   in either card where wrapping is better than eliding. The binomial keeps its
+   ellipsis: the design itself draws it truncated as "panthera abc..", so the
+   line is understood to be a shortened one. ═══════════════════════════════ */
+@container card (max-width: 300px) {
+  .card[data-fill='ink'] .l-focus__photo   { width: 56px; height: 56px; }
+  .card[data-fill='plate'] .l-focus__photo { width: 64px; height: 64px; }
+  .l-note__thumb { width: 36px; height: 36px; }
+  .l-focus__ref,
+  .l-note__aaid { white-space: normal; overflow: visible; text-overflow: clip; }
+  /* two pills side by side need 89px and do not have it */
+  .card[data-fill='plate'] .l-focus__badges { flex-wrap: wrap; }
+  /* 8px of indent against a 193px card is 8px the action title needs more */
+  .card[data-fill='plate'] .l-focus__update { padding-left: 0; }
+  /* "+2" drops under the accession rather than competing with it for 63px, and
+     the signature stacks instead of eliding the author away to nothing — at
+     193px the row kept "• 07 Sep 2026" and lost "Vantara admin" entirely,
+     which is the wrong half to keep. */
+  .l-note__ident { flex-wrap: wrap; }
+  .l-note__sig { flex-wrap: wrap; }
+  .l-note__sig b { white-space: normal; overflow: visible; text-overflow: clip; }
+
+  /* AND THE PLATE VARIATION GIVES UP ITS AIR, because by now it has run out
+     of room: a wrapped accession and two wrapped pills took its content to
+     332px inside a 308px card and it clipped the bottom update. Every number
+     below is spacing — the ink variation's own 4px rhythm rather than this
+     one's 8 — so nothing is dropped to make it fit, and it lands at 300 with
+     8px to spare. It is tight, and a 193px card for a composition drawn at
+     374 is a fallback rather than a size anyone designed. */
+  .card[data-fill='plate'] .l-focus { gap: 8px; }
+  .card[data-fill='plate'] .l-focus__facts { gap: 4px; }
+  .card[data-fill='plate'] .l-focus__photo { width: 56px; height: 56px; }
+  .card[data-fill='plate'] .l-focus__updates { gap: 4px; }
+
+  /* AND NOTES CLAMPS TO TWO LINES, WHICH IS A DECLARED TRUNCATION RATHER THAN
+     A SQUEEZED BOX. Add up what a 193px card is asked to hold — a wrapped
+     accession, the name, "+2", the priority row, four lines of note, and a
+     signature that now takes two lines — and it comes to 249px of content in
+     205px of plate. Flexbox answered that by compressing the note's own box to
+     28px against a 260px scrollHeight: one and a half lines, cut mid-sentence,
+     with no ellipsis, because `-webkit-line-clamp` only draws one at the line
+     it clamps AT and this box never reached it. Silent loss of the one thing
+     the card is for.
+
+     Two lines and an ellipsis fits, and it reads as what it is — a summary you
+     open to finish. `flex: none` is the guard: the box is now the clamp's
+     height and nothing can compress it again. tools/verify_v2.py asserts that
+     relationship at every width for exactly this reason. */
+  .l-note__group { gap: 8px; }
+  .l-note__text { -webkit-line-clamp: 2; flex: none; }
+}
+
+
+/* ══ THE PAGING INDICATOR ═════════════════════════════════════════════════
+   Shared by both cards that have more than one thing to show — the ink Focus
+   Hub pages through pinned animals, Notes through notes.
+
+   IT IS DRAWN, NOT EXPORTED. The node exports it as an SVG, and the export
+   carries the state in its fills — the current item full white, the rest at
+   55% — which is exactly the part that cannot be a picture: the whole job of
+   the control is to say WHICH one you are looking at. So the geometry is taken
+   off the export (6px dots on a 10px pitch, the current one a 22px pill where
+   Notes draws it, on a rgba(22,55,61,.28) track) and the state is a class.
+
+   The two nodes disagree about the current item's shape — 252:5790 draws it as
+   a round dot, 250:6335 as a pill — and both are kept, because a hub of three
+   animals and a stack of notes are different lengths and the pill is what
+   makes a long stack readable. `--dot-run` is which. ═══════════════════════ */
+.dots {
+  flex: none;
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 8px;
+  border-radius: 100px;
+  background: rgba(22, 55, 61, .28);
+}
+.dots__dot {
+  display: block;
+  width: 6px; height: 6px;
+  border-radius: 100px;
+  background: var(--c-white);
+  opacity: .55;
+  transition: width var(--t-base) var(--ease), opacity var(--t-base) var(--ease);
+}
+.dots__dot[aria-current='true'] { opacity: 1; }
+/* the pill form: only the current one stretches, and the gap opens to the 6 the
+   node draws between a pill and the dots after it */
+.dots--run { gap: 6px; }
+.dots--run .dots__dot[aria-current='true'] { width: 22px; }
+
 /* ══════════════════════════════════════════════════════════════════════════
    FITTING THE COMPOSITIONS TO THE SPACE
    A variation declares the sizes it supports, so no card is asked to draw
@@ -4479,7 +5084,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
   /* The cap itself is set in JS from the space under the anchor — see
      capToViewport() — and this is the promise that a menu taller than that
      scrolls rather than running off the bottom edge. It matters for the profile
-     menu now: four items on the home page, eighteen on a Site. */
+     menu now: six rows on the home page, eighteen on a Site. */
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -4569,7 +5174,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 /* Reset is the one item here that throws work away, so it is the one item that
    is allowed to look different. Warm rather than red: it is undoable in the
    sense that the default is always one tap away, and a scarlet row in a
-   four-item menu reads as "danger" when it means "start again". */
+   six-row menu reads as "danger" when it means "start again". */
 .pmenu__item.is-danger .pmenu__icon { background: #FFF1DC; color: #A9660F; }
 .pmenu__item.is-danger:hover { background: #FFF6E9; }
 .pmenu__item.is-danger:hover .pmenu__icon { background: #FFE7C4; }
@@ -7243,6 +7848,39 @@ body.is-hidden .qa-fab__halo,
 }
 </style>
 
+<!-- ══ WHICH HOME PAGE: V1 OR V2 ═══════════════════════════════════════════
+     Two compositions of the same home page, chosen with `?v=`:
+
+       V1  (the default, and `?v=1`)  the page as it has been built — the
+           announcement deck on its gradient band, the Recent Observations
+           rail, then the modules.
+       V2  (`?v=2`)  Figma node 236:6669 "Current Design" — header, search,
+           and straight into All Modules. No announcements and no observation
+           rail; the gradient band moves down to wrap the module grid, and the
+           grid seeds Notes at the top of it and My Focus Hub at the foot.
+
+     THIS RUNS BEFORE THE BODY IS PARSED, which is the whole reason it is a
+     separate script in the document rather than part of the application at the
+     foot of it. The two bands V2 drops are real markup: hidden by the
+     application they would already have been laid out and painted, and the
+     page would open on V2 by flashing V1. Stamping <html> here means the
+     stylesheet has the answer before the elements exist.
+
+     The application reads `?v=` again through js/lib/pageVersion.js. That is a
+     deliberate duplication of four lines, not an oversight — anything shared
+     would have to be defined in the script at the foot, which is exactly the
+     thing that runs too late. -->
+<script>
+(function () {
+  var v = '1';
+  try {
+    var q = new URLSearchParams(location.search).get('v');
+    if (q === '2') v = '2';
+  } catch (e) { /* no URLSearchParams, no version: V1 is the default anyway */ }
+  document.documentElement.dataset.pageVersion = v;
+})();
+</script>
+
 <body>
 
 <!-- ══ iPad status bar ══════════════════════════════════════════════════
@@ -8306,6 +8944,13 @@ const LAYOUT_FILL = {
   stack: 'solid', pulse: 'solid', heat: 'solid', trend: 'solid',
   strip: 'solid', vs: 'solid', rail: 'solid', ladder: 'solid',
   taxa: 'solid', shelf: 'solid', clutch: 'solid', month: 'solid',
+  /* NEITHER OF THESE IS THE MODULE'S GRADIENT. Node 236:6669's two new cards
+     have no module behind them — Focus Hub is whichever animal you pinned and
+     Notes is whoever wrote one — so they carry a surface of their own instead
+     of a domain colour they do not have. `plate` is the node's white; the ink
+     Focus Hub overrides this with `fill: 'ink'` on the variant. See the fills
+     in the stylesheet for why this is not the reverted `soft` fill. */
+  focus: 'plate', note: 'plate',
 }
 
 /* Every module's plain door, at the module's own gradient. */
@@ -8359,6 +9004,142 @@ const COMPACT = [
   priority: 'optional',
   data: {},
 }))
+
+/**
+ * WHAT IS PINNED — animals AND enclosures, which is why an item has a `kind`.
+ *
+ * Node 236:6669 draws one animal, and the ruling of 8 Sep 2026 is that the hub
+ * carries enclosures too. They are not two shapes: both are a photograph, a
+ * name, a reference and a list of what has happened, so the difference is in
+ * which optional fields a kind fills in.
+ *
+ *   animal      `latin` is the binomial and draws italic; `badges` are sex and
+ *               the CITES appendix.
+ *   enclosure   `sub` replaces the binomial and draws upright, because a barn
+ *               has no binomial and italic on a plain phrase reads as a
+ *               mistake; `badges` say what sort of enclosure it is.
+ *
+ * `badges` CARRY TWO LENGTHS. The ink variation's badge is 21px on a 72px
+ * photograph and the plate variation's is a pill with room for a word — the
+ * node draws "M" and "C 1" on the one and "Male" and "Cites 1" on the other.
+ * That is one fact at two lengths rather than two facts, so `short` sits beside
+ * `text` and the ink card asks for it. A badge with no `short` uses its text.
+ *
+ * THE UPDATES BELONG TO THE ITEM. Each pinned thing has its own history, so
+ * paging the card changes the list under it — which is the whole reason the
+ * list is inside the item rather than beside it.
+ *
+ * The three seeds are the same three subjects the observation rail opens with,
+ * deliberately: a note, an observation and a pinned item about Big Bull's gate
+ * or Zara's appetite should be the same event seen from three places, not
+ * three unrelated inventions.
+ */
+const FOCUS_ITEMS = [
+  {
+    id: 'focus-1', kind: 'animal',
+    name: 'Leopard', latin: 'Panthera pardus x panthera abc..',
+    ref: 'AID: 87546/24', ref2: 'Encl: DAA41',
+    badges: [{ tone: 'sex', text: 'Male', short: 'M' },
+             { tone: 'plain', text: 'Cites 1', short: 'C 1' }],
+    photo: { src: 'focus-animal.jpg', focus: '50% 30%' },
+    updates: [
+      { day: '04', dow: 'Fri', act: 'Transfer to Hospital',      by: 'By Medical User' },
+      { day: '05', dow: 'Sat', act: 'Hospital Monitoring Added', by: 'By Medical User' },
+      { day: '07', dow: 'Mon', act: 'Case Discharged',           by: 'By Medical User' },
+    ],
+  },
+  {
+    id: 'focus-2', kind: 'enclosure',
+    name: 'Hoofstock Barn', sub: 'Hoofstock · Section B',
+    ref: 'ENC: HB-04', ref2: '14 occupants',
+    badges: [{ tone: 'plain', text: 'Barn' }],
+    /* the same photograph the observation rail gives ENC : HB-04 */
+    photo: { src: 'hospital.jpg' },
+    updates: [
+      { day: '02', dow: 'Wed', act: 'Corrosion Reported',   by: 'By Anita Deshmukh' },
+      { day: '03', dow: 'Thu', act: 'Paddock Closed',       by: 'By Facility User' },
+      { day: '06', dow: 'Sun', act: 'Panel Replacement Due', by: 'By Maintenance' },
+    ],
+  },
+  {
+    id: 'focus-3', kind: 'animal',
+    name: 'Zara', latin: 'Panthera pardus fusca',
+    ref: 'AID: 44120/25', ref2: 'Encl: CAR-07',
+    badges: [{ tone: 'sex', text: 'Female', short: 'F' },
+             { tone: 'plain', text: 'Cites 1', short: 'C 1' }],
+    photo: { src: 'hero-leopard.jpg', focus: '50% 30%' },
+    updates: [
+      { day: '01', dow: 'Tue', act: 'Feed Refusal Logged',  by: 'By Dr. Meera Nair' },
+      { day: '05', dow: 'Sat', act: 'Protein Trial Started', by: 'By Nutrition' },
+      { day: '07', dow: 'Mon', act: 'Intake Under Review',  by: 'By Dr. Meera Nair' },
+    ],
+  },
+]
+
+/**
+ * THE NOTES, AND THERE ARE FIVE — the cap the ruling of 8 Sep 2026 sets, and
+ * the same number the card's indicator can hold without becoming a menu.
+ * `js/lib/carousel.js` enforces it rather than trusting this list to stay
+ * short: a sixth note added here is dropped by the card, not drawn off the
+ * edge of the dots.
+ *
+ * One note per subject, and every subject is one the observation rail is also
+ * carrying — the same five events, written as a keeper would leave them for
+ * the next shift rather than as the node's placeholder sentence about
+ * adherence to guidelines.
+ */
+const NOTES = [
+  {
+    id: 'note-1', priority: 'high', category: 'Medical',
+    entity: { id: 'AAID : 87546/24', name: 'Big Bull', more: 2,
+              photo: { src: 'obs-animal.png', focus: '50% 35%' } },
+    body: 'Wound dressed and re-checked this morning — the suture line is clean and dry, ' +
+          'with no discharge and no heat around it. He is bearing weight evenly and took a ' +
+          'full feed. Keep him in the night house for two more days, change the dressing ' +
+          'daily, and call the duty vet if the swelling comes back.',
+    by: 'Vantara admin', date: '07 Sep 2026', likes: 88,
+  },
+  {
+    id: 'note-2', priority: 'moderate', category: 'Maintenance',
+    entity: { id: 'ENC : HB-04', name: 'Hoofstock Barn',
+              photo: { src: 'hospital.jpg' } },
+    body: 'North gate stays closed until the lower rail is replaced — the panel flexes when ' +
+          'the herd leans on it and it will not hold a charge. Maintenance have the part on ' +
+          'order. Feed and water are being run through the side race in the meantime; do not ' +
+          'move the herd back through the gate on any shift until this note is cleared.',
+    by: 'Anita Deshmukh', date: '06 Sep 2026', likes: 24,
+  },
+  {
+    id: 'note-3', priority: 'moderate', category: 'Nutrition',
+    entity: { id: 'AAID : 44120/25', name: 'Zara', more: 1,
+              photo: { src: 'hero-leopard.jpg', focus: '50% 30%' } },
+    body: 'Protein trial starts Monday: beef out, horse in, same weight and the same two ' +
+          'feeds. Log what is left at every feed rather than at the end of the day — the ' +
+          'question is whether she refuses the meat or the timing. Weight is steady and she ' +
+          'is bright, so this is a diet question and not a clinical one yet.',
+    by: 'Dr. Meera Nair', date: '05 Sep 2026', likes: 12,
+  },
+  {
+    id: 'note-4', priority: 'critical', category: 'Utilities',
+    entity: { id: 'ENC : PR-02', name: 'Primate House',
+              photo: { src: 'diet-kitchen.jpg' } },
+    body: 'Supply to the outdoor drinker is isolated at the stopcock and the troop is on the ' +
+          'tub until it is fixed. The ground under the drinker is still mud and they are ' +
+          'walking through it to reach water, so check the tub is full twice a shift. ' +
+          'Plumbing are booked for Tuesday morning.',
+    by: 'Anita Deshmukh', date: '04 Sep 2026', likes: 41,
+  },
+  {
+    id: 'note-5', priority: 'low', category: 'Husbandry',
+    entity: { id: 'AAID : 21873/23', name: 'Kanha', more: 3,
+              photo: { src: 'species.jpg' } },
+    body: 'Thinning across the shoulders on four of the herd reads as the seasonal moult — ' +
+          'skin underneath is clean, no scurf and no scratching. Photograph the same four ' +
+          'animals from the same side once a week so a moult can be told from a problem if ' +
+          'it spreads. Nothing to treat at this stage.',
+    by: 'Suresh Yadav', date: '03 Sep 2026', likes: 7,
+  },
+]
 
 const VARIANTS = [
 
@@ -9746,6 +10527,79 @@ const VARIANTS = [
     supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'optional',
     data: { title: 'Delivery', word: 'Delivered', sub: '2,617 of 2,704 reached' },
   },
+
+  /* ══ MY FOCUS HUB · TWO VARIATIONS ══════════════════════════════════════
+     Nodes 250:6500 and 250:6258, both titled "My Focus Hub" and both placed on
+     node 236:6669 at once — which is how the file offers a choice rather than
+     drawing two cards for one page. They are two compositions of the same
+     information, so they are two entries against one layout and ONE list of
+     items; what differs is the surface, where the badges go, how long they
+     read, and whether the enclosure line is drawn.
+
+     BOTH PAGE, AND BOTH SAY SO. The node draws an indicator on the ink card
+     only. Since the ruling of 8 Sep 2026 both advance on their own, and a card
+     that moves by itself with nothing to say how many there are or where you
+     are in them is disorienting — so the plate card gains the indicator the
+     node does not draw it. It is also the navigation; see the stylesheet.
+
+     `passive`, WHICH IS WHAT LETS THEM HAVE CONTROLS AT ALL. The standing rule
+     in ModuleCard.js is that the whole card is the button and nothing inside it
+     is, because a control inside a control is what a `View X ›` floor was and
+     why it was reverted. A paging card satisfies that rule from the other end:
+     the surface stops being a control, so the dots inside it are legitimate.
+     These two cards went nowhere anyway — `onActivate` only announced them.
+
+     `tall` AND `large`, WHICH ARE THE SAME 2x2 AT FIVE COLUMNS. The node draws
+     the card 2 wide by 2 high and the app's grid is five columns, where
+     SPAN_TABLE resolves both names to [2, 2]. `large` is offered because at the
+     four-column band it is [3, 2] — a wider card this composition takes without
+     changing. Neither is offered a one-row size: the updates list is the point
+     and three rows of it cannot be drawn in 164px.
+
+     `secondary` — addable from Add Module, not on the default page. The user's
+     ruling of 7 Sep 2026, and the reason is in DEFAULT_LAYOUT's own note: the
+     default is a curated fifteen, and three 2x2 cards would put twelve more
+     cells above a module grid already reported as below the fold. */
+  {
+    id: 'focus.hub', moduleId: 'focus', name: 'Focus Hub',
+    layout: 'focus', purpose: 'MONITOR',
+    /* the node's #1F415B, which is MD3_Antz/OnSecondaryContainer */
+    fill: 'ink',
+    passive: true,
+    /* the sex and CITES badges sit ON the photograph here, and in the flow on
+       the other variation — see the stylesheet's two `[data-fill]` blocks */
+    badgesOnPhoto: true,
+    /* …and a 21px badge on a 72px photograph takes the short forms, "M" and
+       "C 1", where the plate card's pills carry the words */
+    shortBadges: true,
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'secondary',
+    data: { title: 'My Focus Hub', legend: 'Recent Updates', items: FOCUS_ITEMS },
+  },
+  {
+    id: 'focus.light', moduleId: 'focus', name: 'Focus Hub · Plate',
+    layout: 'focus', purpose: 'MONITOR',
+    passive: true,
+    /* NO `ref2`. Node 250:6258 draws no enclosure line under the accession —
+       not an omission on its part: the plate variation spends that row on the
+       badges instead, and both are visibly absent from the frame rather than
+       hidden in it. The datum is in the item either way; this is which
+       variation asks for it. */
+    hideRef2: true,
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'secondary',
+    data: { title: 'My Focus Hub', legend: 'Recent Updates', items: FOCUS_ITEMS },
+  },
+
+  /* ══ NOTES ══════════════════════════════════════════════════════════════
+     Node 250:6297. One note on a plate tinted with its priority, an indicator
+     saying there are more behind it, and since 8 Sep 2026 five of them. */
+  {
+    id: 'notes.recent', moduleId: 'notes', name: 'Notes',
+    layout: 'note', purpose: 'MONITOR',
+    passive: true,
+    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'secondary',
+    data: { title: 'Notes', items: NOTES },
+  },
+
 ]
 
 /** Fill in what every variation has in common so the catalogue states only
@@ -9865,6 +10719,73 @@ function createStore(initial) {
   __x.createStore = createStore;
 });
 
+__def('js/lib/pageVersion.js', function (__x, __req) {
+/**
+ * WHICH HOME PAGE THE APPLICATION IS DRAWING — '1' or '2'.
+ *
+ * Read once, from `?v=`, and anything but `2` is V1: an unknown value is a
+ * typo or a stale link, and the page it should answer with is the one that has
+ * always been there rather than an error.
+ *
+ * THIS IS THE SECOND PLACE `?v=` IS READ, and that is deliberate. The script
+ * above <body> reads it too, because the stylesheet has to know before the
+ * markup it hides is parsed — see the comment there. Four duplicated lines
+ * cost less than a module that cannot run early enough to be useful.
+ */
+const PAGE_VERSION = (() => {
+  try {
+    return new URLSearchParams(location.search).get('v') === '2' ? '2' : '1'
+  } catch {
+    return '1'
+  }
+})()
+
+const isV2 = () => PAGE_VERSION === '2'
+
+/**
+ * SWITCH THE PAGE — A NAVIGATION, AND IT CANNOT BE ANYTHING ELSE.
+ * ───────────────────────────────────────────────────────────────────────────
+ * `?v=` is read twice before this function could ever run: once by the script
+ * above <body>, so the stylesheet knows which bands to drop before the markup
+ * it hides is parsed, and once on boot to decide what to MOUNT — V1 builds the
+ * announcement deck and the observation rail, V2 never does. Neither can be
+ * re-run against a live document. Flipping a variable here would leave a page
+ * that says V1 with no deck in it, or V2 with a 6-second dwell timer running
+ * behind a hidden one. So the URL is written and the page comes back.
+ *
+ * That is also the better answer for a switch whose whole purpose is showing
+ * someone a composition: the version stays a LINK — shareable, bookmarkable,
+ * and the same URL for whoever opens it — rather than a preference buried in
+ * one browser's storage where a second person cannot see what you saw.
+ *
+ * V1 IS THE ABSENCE OF THE PARAMETER, not `?v=1`. The default page keeps the
+ * plain URL, so switching back deletes the parameter instead of setting it to
+ * one. Everything else on the URL is left exactly as it was — this owns the
+ * name of the parameter and nothing more.
+ *
+ * Returns false, and does nothing, when the page asked for is the page you are
+ * already on: a menu row that reloads the identical URL is a row that looks
+ * broken.
+ */
+function setPageVersion(v) {
+  try {
+    const url = new URL(location.href)
+    if (String(v) === '2') url.searchParams.set('v', '2')
+    else url.searchParams.delete('v')
+    if (url.href === location.href) return false
+    location.assign(url.href)
+    return true
+  } catch {
+    /* no URL constructor, no switching — the page is still the page it was */
+    return false
+  }
+}
+
+  __x.PAGE_VERSION = PAGE_VERSION;
+  __x.isV2 = isV2;
+  __x.setPageVersion = setPageVersion;
+});
+
 __def('js/state/layoutStore.js', function (__x, __req) {
 /**
  * LAYOUT STATE + PERSISTENCE
@@ -9886,8 +10807,18 @@ __def('js/state/layoutStore.js', function (__x, __req) {
 const { createStore } = __req('js/state/store.js');
 const { getVariant } = __req('js/data/cardVariants.js');
 const { normalise } = __req('js/lib/pack.js');
+const { isV2 } = __req('js/lib/pageVersion.js');
 
-const KEY = 'antz.home.layout'
+/**
+ * ONE KEY PER PAGE VERSION, and not one key with a version field in it.
+ *
+ * The two compositions seed different cards, so someone who arranges V2 and
+ * then opens V1 must find V1 as they left it rather than V2's cards packed
+ * into V1's page. Separate keys also mean the version gate below keeps
+ * working: a saved V2 layout cannot be read as a V1 one and repaired into
+ * something neither version drew.
+ */
+const KEY = isV2() ? 'antz.home.layout.v2' : 'antz.home.layout'
 
 /**
  * VERSION 4 — every card is a composition now rather than a stack of blocks,
@@ -9931,7 +10862,19 @@ const KEY = 'antz.home.layout'
    saved layout is still perfectly VALID — the ids resolve, repair() passes
    them through — so without a bump the one person who has actually used this
    page is the one who keeps seeing the card that was removed. */
-const VERSION = 8
+/* 8 → 9 · NOTES MOVED TO THE TOP OF V2 AND THE INK FOCUS HUB CAME OFF IT
+   (8 Sep 2026). The same case again, and the first time it is V2's list that
+   changed: `antz.home.layout.v2` is a different key but the SAME version
+   constant, so a browser that has opened ?v=2 before holds a perfectly valid
+   document with the dark blue card still in it and would go on drawing it.
+   The cost is the usual one — a hand-arranged V1 page is dropped too, because
+   one constant gates both keys. */
+/* 9 → 10 · DIET & KITCHEN WAS SEEDED ON V2 (8 Sep 2026, the same afternoon).
+   An ADDED card needs the bump as much as a removed one does: the saved
+   document is a complete list, not a diff, so a browser holding fifteen cards
+   goes on drawing fifteen and the new one never appears. This is the failure
+   that reads as "the change did not work". */
+const VERSION = 10
 
 /**
  * The cards a fresh install starts with.
@@ -10065,6 +11008,75 @@ const DEFAULT_LAYOUT = [
 ]
 
 /**
+ * THE SECOND PAGE'S CARDS — Figma node 236:6669, 7 Sep 2026.
+ *
+ * V2 is not V1 with two bands removed; its grid seeds a different set. Sixteen
+ * cards, read off the artboard row by row, and two of the three new widgets are
+ * two of them: Notes at the top of the page and the plate Focus Hub at the foot
+ * of it. The artboard drew a third — the ink Focus Hub, beside Pending
+ * Approvals — and the ruling of 8 Sep 2026 took it off; see the list itself.
+ *
+ * WHAT V1 HAS THAT THIS DOES NOT: Parivesh's wide door, and that is now the
+ * only one. The artboard draws neither it nor Diet & Kitchen's photograph —
+ * Diet was asked for on 8 Sep 2026 and is seeded here, which is the whole
+ * reason this is a separate list rather than a filter over V1's: the two pages
+ * can differ, and either can be ruled on, without becoming a special case of
+ * the other.
+ *
+ * THE ORDER IS THE ARTBOARD'S EXCEPT WHERE IT HAS BEEN RULED ON; THE
+ * ARRANGEMENT IS THE PACKER'S. Node 236:6669 is 744 wide and lays these across
+ * FOUR columns — Eggs/Audit/Users/Security filling one row of it. This page is
+ * five columns at 1024, so those rows cannot be reproduced and are not
+ * pretended to be: the cards go in in this order at these sizes and the packer
+ * answers for five columns. The set and the sizes are the design; the cells are
+ * arithmetic. Notes leading the page is not the artboard's order — it is the
+ * user's, 8 Sep 2026.
+ *
+ * TWO `secondary` CARDS ARE SEEDED HERE ON PURPOSE. `priority: 'primary'`
+ * means "one of the fifteen on the DEFAULT page", which is V1's page, and
+ * antz.checkDefaults() asserts that in both directions against DEFAULT_LAYOUT
+ * alone. The Focus Hubs and Notes are addable rather than default — the user's
+ * ruling of 7 Sep — and V2 seeds the two of them it still draws. The check
+ * validates this list for existence and supported size, and deliberately not
+ * for priority; see it for the distinction.
+ */
+const V2_LAYOUT = [
+  /* rows 1–2 · NOTES LEADS THE PAGE — the user's ruling of 8 Sep 2026, "Notes
+     put in the top". It is a 2x2, so it takes the first two columns of the
+     first two rows and the small cards fill in beside it. */
+  { variantId: 'notes.recent',       size: 'tall'   },
+  { variantId: 'medical.default',    size: 'small'  },
+  { variantId: 'housing.default',    size: 'small'  },
+  { variantId: 'species.stats',      size: 'medium' },
+  /* row 3 · DIET & KITCHEN JOINS THE PAGE — the user's ruling of 8 Sep 2026,
+     "show the diet on v2 also". Node 236:6669 does not draw it, which is why
+     it was absent rather than lost; it is here beside Hospital because that is
+     how the two photographic doors sit on V1, and a photograph on its own in a
+     row of tinted rectangles reads as an accident. */
+  { variantId: 'hospital.photo',     size: 'medium' },
+  { variantId: 'diet.photo',         size: 'medium' },
+  { variantId: 'pharmacy.default',   size: 'small'  },
+  { variantId: 'lab.default',        size: 'small'  },
+  /* THE INK FOCUS HUB WAS HERE, and came off the page on the same ruling —
+     "remove that dark blue one". The node offered two compositions of My Focus
+     Hub at once, the #1F415B ink card (`focus.hub`) and the white plate
+     (`focus.light`), which is the file offering a choice; the choice is now
+     made and the plate is it. The ink card is NOT deleted — it is still in the
+     catalogue and still addable from Add Module, exactly as Reports' door is —
+     it is simply no longer seeded. */
+  { variantId: 'approvals.pending',  size: 'medium' },
+  { variantId: 'administer.default', size: 'small'  },
+  { variantId: 'mortality.default',  size: 'small'  },
+  /* row 4 */
+  { variantId: 'eggs.default',       size: 'small'  },
+  { variantId: 'audit.default',      size: 'small'  },
+  { variantId: 'users.default',      size: 'small'  },
+  { variantId: 'security.default',   size: 'small'  },
+  /* last row · the plate hub, which is the only My Focus Hub on the page now */
+  { variantId: 'focus.light',        size: 'tall'   },
+]
+
+/**
  * Cards the user is not allowed to remove.
  *
  * Two, and only two. A command centre without the living collection or without
@@ -10139,7 +11151,7 @@ function seed() {
      `newRow`, so the artboard's deliberate gap in the last two rows was packed
      away on a fresh install and only appeared after a save/reload — the flag
      survived repair() but never made it out of the default. */
-  return DEFAULT_LAYOUT.map((d) => ({ ...d, uid: newUid() }))
+  return (isV2() ? V2_LAYOUT : DEFAULT_LAYOUT).map((d) => ({ ...d, uid: newUid() }))
 }
 
 function load() {
@@ -10267,6 +11279,7 @@ function resetLayout() {
   setCards(seed(), { reason: 'reset' })
 }
   __x.DEFAULT_LAYOUT = DEFAULT_LAYOUT;
+  __x.V2_LAYOUT = V2_LAYOUT;
   __x.VERSION = VERSION;
   __x.CORE_VARIANTS = CORE_VARIANTS;
   __x.isCore = isCore;
@@ -10612,6 +11625,52 @@ const MODULES = [
     category: 'admin',
     keywords: ['message', 'announcement', 'notice', 'broadcast', 'inbox', 'unread'],
     blurb: 'Announcements, messages and notices across the site.',
+  },
+
+  /* ── Two owners with no door ─────────────────────────────────────────────
+     Node 236:6669 adds two cards that are not about a module: My Focus Hub is
+     whichever animal you pinned and Notes is whoever wrote one. The catalogue
+     is keyed on modules, so they need an owner to be grouped and searchable —
+     but neither belongs in any existing module's list, and neither is a place
+     you can go. So they own cards and are absent from DOORS and COMPACT, which
+     is exactly what `approvals` already does.
+
+     A SPRITE, NOT AN EXPORTED FILE, and only here. The gallery paints this
+     glyph white on the module's gradient, and a sprite recolours with
+     `currentColor` where an export carries its own fill. `note-head.svg` is
+     the node's own Notes glyph and is drawn on the CARD, where it is #44544A
+     on white — the one place it fits. The artboard draws no glyph for either
+     module in its head, so nothing here is overriding a decision.
+
+     NO NEW COLOURS, per the note on Approvals above: the palette is the file's
+     gradients and nothing else, so both borrow. Which one is a legibility
+     decision, and here it is a literal one too — Approvals' navy ends at
+     rgb(39,72,97), which is the #1F415B the Focus Hub's own card is painted,
+     and Mortality's coral is the #FA6140 family Notes tints its plate with. */
+  {
+    id: 'focus',
+    /* THE PUSH-PIN, NOT THE MAP PIN. `pin` in the sprite is a teardrop with a
+       hole in it — it means a PLACE, and the subject here is an animal someone
+       chose to watch. `pin-push` is the one that means "I pinned this", which
+       is what the card is. It is also the glyph on the pin control beside every
+       row of the module list, and that overlap is accepted: a white push-pin in
+       a navy tile and a small grey one in a button are not mistakable for each
+       other, and the alternative was a wrong metaphor. */
+    sprite: 'pin-push',
+    gradient: '--g-approvals-wash',
+    name: 'My Focus Hub',
+    category: 'animal',
+    keywords: ['pinned', 'watch', 'starred', 'following', 'my animals', 'case'],
+    blurb: 'The animals you are watching, and what has happened to them.',
+  },
+  {
+    id: 'notes',
+    sprite: 'note',
+    gradient: '--g-mortality',
+    name: 'Notes',
+    category: 'animal',
+    keywords: ['note', 'observation', 'remark', 'comment', 'reminder', 'log'],
+    blurb: 'Notes written against an animal or an enclosure.',
   },
 ]
 
@@ -18953,6 +20012,176 @@ function forLevel(level) {
   __x.forLevel = forLevel;
 });
 
+__def('js/lib/carousel.js', function (__x, __req) {
+/**
+ * A CARD THAT PAGES THROUGH ITS ITEMS — the mechanism, once.
+ * ───────────────────────────────────────────────────────────────────────────
+ * My Focus Hub holds several pinned animals and enclosures; Notes holds up to
+ * five notes. Both show one at a time, advance on their own, and can be moved
+ * by hand. This is that behaviour, parameterised, so the two cards cannot
+ * drift apart — and so a third paging card costs a call rather than a copy.
+ *
+ * THERE IS NO TIMER, AND THAT IS THE WHOLE DESIGN. The dwell is a CSS
+ * animation on an invisible element and the card advances on its
+ * `animationend`. Everything follows from that:
+ *
+ *   · PAUSING IS CSS. Hover, focus, a finger mid-swipe, a backgrounded tab —
+ *     each is a selector that sets `animation-play-state: paused`, and pausing
+ *     the fill pauses the advance by construction. A timer would have to be
+ *     told about all four and would drift out of step with the bar the user
+ *     can see.
+ *   · REDUCED MOTION STOPS IT DEAD. The stylesheet sets `animation: none`
+ *     under `prefers-reduced-motion`, so no `animationend` ever fires and the
+ *     card simply rests on its first item, navigable by hand. Note that the
+ *     page's global reduce block sets `animation-duration: .01ms !important`,
+ *     so a dwell left running there would fire continuously and spin the card
+ *     — removing the animation NAME is what actually stops it, which is why
+ *     the rule is `animation: none` and not a duration.
+ *   · NOTHING LEAKS. The animation lives on an element inside the card, so
+ *     when the grid rebuilds or removes that card the dwell dies with it.
+ *     A `setInterval` would outlive its card and go on advancing a detached
+ *     DOM for the life of the page.
+ *
+ * This is the same mechanism HeroBanners.js uses for the announcement deck —
+ * see the note at `.hero-stage` — generalised out of it rather than reinvented.
+ */
+
+const MAX = 8            // more dots than this is a menu, not an indicator
+const SWIPE = 0.16       // fraction of the card's width a drag must cover to turn it
+
+/**
+ * @param {object}      o
+ * @param {HTMLElement} o.root    the card; owns the keys, the swipe and the pause states
+ * @param {HTMLElement} o.pages   the element whose children are the items
+ * @param {HTMLElement} [o.nav]   the indicator, whose buttons carry `data-goto`
+ * @param {function}    [o.onShow] called with (index, total) after each change
+ * @returns {{show:function, count:number, destroy:function}|null}
+ *          null when there is nothing to page — one item is not a carousel
+ */
+function createCarousel({ root, pages, nav, onShow } = {}) {
+  if (!root || !pages) return null
+  const items = [...pages.children].filter((e) => e.classList.contains('is-page'))
+  const n = Math.min(items.length, MAX)
+  /* ONE ITEM IS NOT A CAROUSEL. No dwell, no keys, no swipe, and the caller's
+     indicator is left empty — a control that says "1 of 1" is furniture. */
+  if (n < 2) return null
+
+  /* the dwell. Invisible, 1px, inert: it exists to have an animation. */
+  const dwell = document.createElement('span')
+  dwell.className = 'pager-dwell'
+  dwell.setAttribute('aria-hidden', 'true')
+  root.append(dwell)
+
+  let at = 0
+
+  /* Restart by removing the animation and forcing a reflow before putting it
+     back. Setting the same animation name again does NOT restart it, which is
+     the oldest trap in this API. */
+  function restart() {
+    dwell.style.animation = 'none'
+    void dwell.offsetWidth
+    dwell.style.animation = ''
+  }
+
+  function show(i, { user = false } = {}) {
+    at = ((i % n) + n) % n
+    items.forEach((el, k) => {
+      /* `prev` and `next` are the two the stylesheet can slide from the right
+         side; anything further away is simply out. */
+      const d = k === at ? 'at' : k === (at - 1 + n) % n ? 'prev' : k === (at + 1) % n ? 'next' : 'out'
+      el.dataset.pos = d
+      el.setAttribute('aria-hidden', String(k !== at))
+      /* nothing inside a hidden page is tabbable — a keyboard user must not
+         land on the like count of a note that is not on screen */
+      el.inert = k !== at
+    })
+    if (nav) {
+      for (const b of nav.querySelectorAll('[data-goto]')) {
+        const on = Number(b.dataset.goto) === at
+        b.setAttribute('aria-current', String(on))
+        b.tabIndex = on ? 0 : -1
+      }
+    }
+    onShow?.(at, n)
+    /* A HAND-DRIVEN MOVE RESTARTS THE CLOCK. Advancing off the end of a fill
+       that has already run is what makes a carousel feel like it is fighting
+       you: you press, it moves, and a moment later it moves again on its own. */
+    if (user) restart()
+  }
+
+  const go = (step) => show(at + step, { user: true })
+
+  dwell.addEventListener('animationend', () => { show(at + 1); restart() })
+
+  /* ── by hand ─────────────────────────────────────────────────────────── */
+  if (nav) {
+    nav.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-goto]')
+      if (!b || !nav.contains(b)) return
+      /* the card may be a link or sit inside one; a dot is not a doorway */
+      e.preventDefault()
+      e.stopPropagation()
+      show(Number(b.dataset.goto), { user: true })
+    })
+  }
+
+  root.addEventListener('keydown', (e) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key]
+    if (!step) return
+    e.preventDefault()
+    e.stopPropagation()
+    go(step)
+  })
+
+  /* A SWIPE, EXCEPT WHILE THE GRID OWNS THE POINTER. In edit mode a card is a
+     thing being dragged to a new cell, and a horizontal swipe is how it gets
+     there — so this stands down completely rather than competing for the
+     gesture. `setPointerCapture` is deliberately NOT used for the same reason:
+     it would take the pointer away from the grid's own drag controller. */
+  let from = null
+  root.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    if (document.body.classList.contains('is-editing')) return
+    from = { x: e.clientX, y: e.clientY }
+    root.classList.add('is-swiping')
+  })
+  root.addEventListener('pointermove', (e) => {
+    if (!from) return
+    /* a vertical drag is the page scrolling, and it ends the gesture rather
+       than turning the card sideways under a finger that meant to scroll */
+    if (Math.abs(e.clientY - from.y) > Math.abs(e.clientX - from.x)) { release() }
+  })
+  const release = () => { from = null; root.classList.remove('is-swiping') }
+  root.addEventListener('pointerup', (e) => {
+    if (!from) return
+    const dx = e.clientX - from.x
+    release()
+    if (Math.abs(dx) < root.getBoundingClientRect().width * SWIPE) return
+    /* a real swipe is not also a tap on whatever was under the finger */
+    e.preventDefault()
+    e.stopPropagation()
+    go(dx < 0 ? 1 : -1)
+  })
+  root.addEventListener('pointercancel', release)
+  root.addEventListener('pointerleave', release)
+
+  show(0)
+  restart()
+
+  return {
+    show,
+    count: n,
+    /* Nothing holds a timer, so there is nothing to clear — removing the card
+       removes the dwell. This exists for a caller that wants to stop the
+       advance while keeping the card, and for symmetry with the stores. */
+    destroy() { dwell.remove() },
+  }
+}
+
+  __x.createCarousel = createCarousel;
+  __x.CAROUSEL_MAX = MAX;
+});
+
 __def('js/components/ModuleCard.js', function (__x, __req) {
 /**
  * MODULE CARD
@@ -18989,6 +20218,8 @@ __def('js/components/ModuleCard.js', function (__x, __req) {
 const { getModule } = __req('js/data/modules.js');
 const { icon } = __req('js/icons.js');
 
+const { createCarousel, CAROUSEL_MAX } = __req('js/lib/carousel.js');
+
 const ASSET_ICON = 'assets/icon/'
 const ASSET_IMG = 'assets/img/'
 
@@ -19002,10 +20233,24 @@ function renderCard(variant, opts = {}) {
   const mod = getModule(variant.moduleId)
   const data = variant.data || {}
 
-  /* A card with a destination is a link, one without is a button, and a
-     preview is neither — see the note in the picker. */
-  const isLink = !isStatic && !!mod?.href
-  const el = document.createElement(isStatic ? 'div' : isLink ? 'a' : 'button')
+  /**
+   * A card with a destination is a link, one without is a button, a preview is
+   * neither — and a PASSIVE card is neither either, on purpose.
+   *
+   * `passive` is for a card that carries its own controls: My Focus Hub and
+   * Notes page through their items, and the dots that turn them cannot live
+   * inside a <button>. The standing rule below — the whole card is the button
+   * and nothing inside it is — is not being broken here, it is being satisfied
+   * from the other end: the surface stops being a control, so the controls
+   * inside it are the only ones. Neither card had anywhere to go anyway;
+   * `onActivate` did nothing for them but announce their name.
+   *
+   * `role="group"` rather than nothing: a div with an aria-label is ignored by
+   * most screen readers, and this one has a name worth keeping.
+   */
+  const isPassive = !!variant.passive
+  const isLink = !isStatic && !isPassive && !!mod?.href
+  const el = document.createElement(isStatic || isPassive ? 'div' : isLink ? 'a' : 'button')
   el.className = 'card'
   if (isLink) {
     el.href = mod.href
@@ -19014,8 +20259,13 @@ function renderCard(variant, opts = {}) {
     /* Chrome starts its own drag from an anchor, which would land on top of
        the pointer-driven reordering the grid uses. */
     el.draggable = false
-  } else if (!isStatic) {
+  } else if (!isStatic && !isPassive) {
     el.type = 'button'
+  }
+  if (isPassive) {
+    el.setAttribute('role', 'group')
+    /* the arrow keys turn it, so it has to be reachable */
+    el.tabIndex = 0
   }
 
   el.dataset.layout = variant.layout
@@ -19084,7 +20334,53 @@ function renderCard(variant, opts = {}) {
    */
   const build = LAYOUTS[variant.layout] || LAYOUTS.door
   el.innerHTML = build(mod, variant, data)
+
+  /**
+   * TWO LAYOUTS ARE ALSO A BEHAVIOUR, and this is where it attaches.
+   *
+   * `LAYOUTS` returns a string, so nothing in it can bind an event — which is
+   * exactly right for eighteen compositions that are pure presentation, and
+   * leaves the two that page with nowhere to live. This is that place: the
+   * element exists, its markup is in, and a layout that needs wiring gets
+   * called with it.
+   *
+   * NOT ON A PREVIEW. The picker renders up to nine of these at once as static
+   * plates; nine cards quietly advancing behind a chooser is noise, and the
+   * dots would be live controls in something that is a picture of a card. So a
+   * preview keeps the markup, shows the first item, and its dots are inert.
+   */
+  const wire = !isStatic && BEHAVIOUR[variant.layout]
+  if (wire) {
+    wire(el, variant, data)
+  } else if (isStatic) {
+    const nav = el.querySelector('.dots')
+    if (nav) {
+      nav.setAttribute('aria-hidden', 'true')
+      for (const b of nav.querySelectorAll('button')) { b.disabled = true; b.tabIndex = -1 }
+    }
+  }
   return el
+}
+
+/**
+ * BEHAVIOUR — the layouts that are more than markup.
+ *
+ * One entry per layout that needs wiring, keyed the same way `LAYOUTS` is, so
+ * a composition and its behaviour cannot be given different names. Both of
+ * these are the same call with different selectors, which is the point of
+ * having the mechanism in js/lib/carousel.js rather than in either of them.
+ */
+const BEHAVIOUR = {
+  focus: (el) => createCarousel({
+    root: el,
+    pages: el.querySelector('.l-focus__pages'),
+    nav: el.querySelector('.dots'),
+  }),
+  note: (el) => createCarousel({
+    root: el,
+    pages: el.querySelector('.l-note__pages'),
+    nav: el.querySelector('.dots'),
+  }),
 }
 
 /* What a screen reader reads: the module, the card, then its actual content,
@@ -19157,6 +20453,73 @@ function media(variant) {
   }
   if (variant.wash) out += `<span class="card__wash" style="background:${esc(variant.wash)}"></span>`
   return out
+}
+
+/**
+ * THE PAGING INDICATOR, WHICH IS ALSO THE NAVIGATION.
+ *
+ * `run` picks the current item's shape: a 22px pill where node 250:6335 draws
+ * it under a stack of notes, a round dot where 252:5790 draws it in the Focus
+ * Hub's head. The stylesheet under `.dots` says why the geometry is taken off
+ * the node's export rather than the export itself being used.
+ *
+ * A DOT IS A BUTTON SINCE 8 Sep 2026. The node draws an indicator and no other
+ * control — no arrows, no chevrons — so rather than adding a control the design
+ * does not have, the one it does draw was made pressable. js/lib/carousel.js
+ * wires them, keeps `aria-current` on the right one, and takes the others out
+ * of the tab order so a card is one stop and not five.
+ *
+ * Fewer than two items is not a carousel and gets no indicator: a control that
+ * says "1 of 1" is furniture. The cap is the carousel's, so a list that grows
+ * past it is dropped by the card rather than drawn off the end of this.
+ */
+function pager(n, label = 'item', run = false) {
+  const count = Math.min(Math.max(0, Number(n) || 0), CAROUSEL_MAX)
+  if (count < 2) return ''
+  let out = `<span class="dots${run ? ' dots--run' : ''}" role="group" ` +
+            `aria-label="${esc(label)}s, ${count}">`
+  for (let i = 0; i < count; i += 1) {
+    out += `<button type="button" class="dots__dot" data-goto="${i}"` +
+           (i === 0 ? ' aria-current="true"' : '') +
+           ` aria-label="Show ${esc(label)} ${i + 1} of ${count}"></button>`
+  }
+  return `${out}</span>`
+}
+
+/**
+ * A NOTE'S PRIORITY: the plate's tint, the pill's fill, and the punctuation.
+ *
+ * The same four the Recent Observations rail defines — node 188:6120 by way of
+ * `RecentObservationsFinal.html` — reused rather than restated, because a
+ * critical note and a critical observation are the same fact and a second set
+ * of four reds is how they drift apart. What differs is only the TREATMENT:
+ * the rail draws a pale badge with coloured punctuation, and node 250:6297
+ * draws a solid pill with white punctuation on a plate of the same colour at
+ * 10%. `solid` is the rail's glyph colour, which is the one that reads at 20px.
+ *
+ * The node draws `high` and nothing else; the other three exist so a note of
+ * any priority is drawn in its own colour rather than falling back to one.
+ */
+/**
+ * FIVE NOTES, AND THAT IS A CAP RATHER THAN A COUNT.
+ *
+ * The ruling of 8 Sep 2026 is "Notes maximum five". The seed happens to hold
+ * exactly five, so nothing would look wrong today if this were absent — which
+ * is the reason it is here: the sixth note that gets added to NOTES in six
+ * months is dropped by the card rather than silently drawn as a sixth dot.
+ * A rule that is only true because the data has not grown yet is not a rule.
+ *
+ * `CAROUSEL_MAX` is the mechanism's own guard at eight, for any paging card.
+ * This is tighter and belongs to Notes, so the two are combined rather than
+ * one being trusted to be the smaller.
+ */
+const NOTE_MAX = 5
+
+const NOTE_PRIORITY = {
+  critical: { label: 'Critical', solid: '#E93353', tint: 'rgba(233, 51, 83, .1)',  src: 'obs-flame.svg' },
+  high:     { label: 'High',     solid: '#FA6140', tint: 'rgba(250, 97, 64, .1)',  glyph: '!!!' },
+  moderate: { label: 'Moderate', solid: '#E4B819', tint: 'rgba(228, 184, 25, .1)', glyph: '!!' },
+  low:      { label: 'Low',      solid: '#00D6C9', tint: 'rgba(0, 214, 201, .1)',  glyph: '!' },
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -19533,6 +20896,147 @@ const LAYOUTS = {
    * the product has seven photographs and thousands of animals, so a card
    * that needs a picture of *this* tiger is a card that will be wrong.
    */
+  /**
+   * FOCUS · the animals and enclosures someone pinned, and what happened to
+   * each of them.
+   *
+   * Nodes 250:6500 (ink) and 250:6258 (plate) — ONE renderer for both, because
+   * they are the same three blocks in the same order: a head, an identity, and
+   * a list of dated updates. Everything that differs between the two is either
+   * a datum the item supplies or a rule in the stylesheet under `[data-fill]`.
+   *
+   * AN ITEM IS AN ANIMAL OR AN ENCLOSURE, and the fork is two optional fields
+   * rather than two templates: `latin` draws the italic binomial an animal
+   * has, `sub` the upright phrase a barn has instead. See FOCUS_ITEMS.
+   *
+   * EVERY ITEM IS RENDERED, not just the current one. The pages are stacked
+   * absolutely and the carousel moves between them, so a turn is a transition
+   * rather than a rebuild — and the photographs are all in the document from
+   * the start, which is what stops the second one flashing in grey when it
+   * first comes round.
+   */
+  focus: (mod, variant, data) => {
+    const items = (data.items || []).slice(0, CAROUSEL_MAX)
+    const badge = (b) =>
+      `<span class="l-focus__tag l-focus__tag--${b.tone === 'sex' ? 'sex' : 'plain'}">` +
+      `${esc(variant.shortBadges ? (b.short || b.text) : b.text)}</span>`
+
+    const page = (it) => {
+      const badges = (it.badges || []).map(badge).join('')
+      const photo = it.photo || {}
+      return `<span class="l-focus__page is-page">` +
+        `<span class="l-focus__top">` +
+          `<span class="l-focus__id">` +
+            /* the photograph carries the badges on the ink card, so they are
+               its children and are positioned against it — a sibling could
+               only be a percentage of the row, which the text beside it moves */
+            `<span class="l-focus__shot">` +
+              `<img class="l-focus__photo" src="${ASSET_IMG}${esc(photo.src || '')}" alt=""` +
+                ` loading="lazy" decoding="async"` +
+                (photo.focus ? ` style="object-position:${esc(photo.focus)}"` : '') + `>` +
+              (variant.badgesOnPhoto && badges
+                ? `<span class="l-focus__badges">${badges}</span>` : '') +
+            `</span>` +
+            `<span class="l-focus__facts">` +
+              `<span class="l-focus__name">${esc(it.name || '')}</span>` +
+              (it.latin ? `<span class="l-focus__latin">${esc(it.latin)}</span>` : '') +
+              (it.sub ? `<span class="l-focus__sub">${esc(it.sub)}</span>` : '') +
+              (it.ref ? `<span class="l-focus__ref">${esc(it.ref)}</span>` : '') +
+              (it.ref2 && !variant.hideRef2
+                ? `<span class="l-focus__ref">${esc(it.ref2)}</span>` : '') +
+              (!variant.badgesOnPhoto && badges
+                ? `<span class="l-focus__badges">${badges}</span>` : '') +
+            `</span>` +
+          `</span>` +
+        `</span>` +
+        `<span class="l-focus__updates">` +
+          `<span class="l-focus__legend">${esc(data.legend || 'Recent Updates')}</span>` +
+          (it.updates || []).map((u) =>
+            `<span class="l-focus__update">` +
+              `<span class="l-focus__when">` +
+                `<b class="l-focus__day">${esc(u.day)}</b>` +
+                `<span class="l-focus__dow">${esc(u.dow)}</span></span>` +
+              `<span class="l-focus__what">` +
+                `<span class="l-focus__act">${esc(u.act)}</span>` +
+                `<span class="l-focus__by">${esc(u.by)}</span></span>` +
+            `</span>`).join('') +
+        `</span></span>`
+    }
+
+    return `<span class="l-focus">` +
+      `<span class="l-focus__head">` +
+        `<span class="l-focus__title">${esc(data.title || 'My Focus Hub')}</span>` +
+        pager(items.length, 'pinned item') +
+      `</span>` +
+      `<span class="l-focus__pages">${items.map(page).join('')}</span>` +
+    `</span>`
+  },
+
+  /**
+   * NOTE · one note at a time, on a plate tinted with the priority it carries.
+   *
+   * Node 250:6297, and five of them since 8 Sep 2026 — the cap is in
+   * carousel.js rather than here, so a sixth note in the data is dropped by
+   * the card instead of drawn off the end of the indicator.
+   */
+  note: (mod, variant, data) => {
+    const items = (data.items || []).slice(0, Math.min(NOTE_MAX, CAROUSEL_MAX))
+
+    const page = (it) => {
+      const p = NOTE_PRIORITY[it.priority] || NOTE_PRIORITY.high
+      const e = it.entity || {}
+      const photo = e.photo || {}
+      return `<span class="l-note__page is-page">` +
+        `<span class="l-note__plate" style="--note-tint:${p.tint};--note-pri:${p.solid}">` +
+          `<span class="l-note__group">` +
+            `<span class="l-note__who">` +
+              `<img class="l-note__thumb" src="${ASSET_IMG}${esc(photo.src || '')}" alt=""` +
+                ` loading="lazy" decoding="async"` +
+                (photo.focus ? ` style="object-position:${esc(photo.focus)}"` : '') + `>` +
+              `<span class="l-note__ident"><span class="l-note__idents">` +
+                `<b class="l-note__aaid">${esc(e.id || '')}</b>` +
+                `<span class="l-note__aname">${esc(e.name || '')}</span></span>` +
+                (e.more ? `<span class="l-note__more">+${esc(e.more)}</span>` : '') +
+              `</span>` +
+            `</span>` +
+            `<span class="l-note__note">` +
+              `<span class="l-note__kind">` +
+                `<span class="l-note__pri" title="${esc(p.label)} priority">` +
+                  (p.src ? `<img src="${ASSET_ICON}${esc(p.src)}" alt="">`
+                         : `<span aria-hidden="true">${esc(p.glyph)}</span>`) +
+                  `<span class="sr-only">${esc(p.label)} priority</span></span>` +
+                `<span class="l-note__cat">${esc(it.category || '')}</span>` +
+              `</span>` +
+              `<span class="l-note__text">${esc(it.body || '')}</span>` +
+            `</span>` +
+          `</span>` +
+          `<span class="l-note__foot">` +
+            `<span class="l-note__sig"><b>${esc(it.by || '')}</b>` +
+              `<span aria-hidden="true">•</span>` +
+              `<time>${esc(it.date || '')}</time></span>` +
+            /* A COUNT, NOT A CONTROL. The observation rail's like is a real
+               button because that card owns its own state; this one is a
+               figure, the way the comment count is on the rail. The card's
+               only controls are the ones that turn it. */
+            `<span class="l-note__like">` +
+              `<img src="${ASSET_ICON}note-like.svg" alt="">` +
+              `<b>${esc(it.likes ?? 0)}</b>` +
+              `<span class="sr-only">likes</span></span>` +
+          `</span>` +
+        `</span></span>`
+    }
+
+    return `<span class="l-note">` +
+      `<span class="l-note__head">` +
+        `<img class="l-note__icon" src="${ASSET_ICON}note-head.svg" alt="">` +
+        `<span class="l-note__title">${esc(data.title || 'Notes')}</span>` +
+      `</span>` +
+      `<span class="l-note__body">` +
+        `<span class="l-note__pages">${items.map(page).join('')}</span>` +
+        pager(items.length, 'note', true) +
+      `</span></span>`
+  },
+
   entity: (mod, variant, data) =>
     glyph(mod, variant, 'card__mark') +
     `<span class="l-entity">` +
@@ -20463,13 +21967,19 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize, isCore 
     const variant = getVariant(item.variantId)
     if (variant) {
       const card = renderCard(variant, { size: item.size, w: item.w, h: item.h, uid: item.uid })
-      card.addEventListener('click', (e) => {
-        /* In edit mode a card is a thing being moved, not a door. The drag
-           controller cancels the click for a real drag; this catches the taps
-           that never moved far enough to become one. */
-        if (editing) { e.preventDefault(); return }
-        onActivate?.(variant, item)
-      })
+      /* A PASSIVE CARD IS NOT A DOOR. My Focus Hub and Notes carry their own
+         controls and go nowhere — see `passive` in ModuleCard.js — so they get
+         no activation handler at all rather than one that announces "Opening
+         Notes" when someone presses a dot inside them. */
+      if (!variant.passive) {
+        card.addEventListener('click', (e) => {
+          /* In edit mode a card is a thing being moved, not a door. The drag
+             controller cancels the click for a real drag; this catches the taps
+             that never moved far enough to become one. */
+          if (editing) { e.preventDefault(); return }
+          onActivate?.(variant, item)
+        })
+      }
       slot.append(card)
     }
 
@@ -20495,10 +22005,12 @@ function createModuleGrid({ root, onActivate, onAdd, onRemove, onResize, isCore 
       if (variant && old) {
         if (identityChanged) {
           const card = renderCard(variant, { size: item.size, w: item.w, h: item.h, uid: item.uid })
-          card.addEventListener('click', (e) => {
-            if (editing) { e.preventDefault(); return }
-            onActivate?.(variant, item)
-          })
+          if (!variant.passive) {
+            card.addEventListener('click', (e) => {
+              if (editing) { e.preventDefault(); return }
+              onActivate?.(variant, item)
+            })
+          }
           old.replaceWith(card)
         } else {
           /* span changed but the card did not — the container query and the
@@ -26361,15 +27873,26 @@ const LEVEL_NOUN = { sites: 'Site', site: 'Site', section: 'Section', enclosure:
 
 mountIconSprite()
 
-/* ── the announcement deck ──────────────────────────────────────────────
-   Under the hero: the announcements as a deck of cards. */
-const { createHeroBanners } = __req('js/components/HeroBanners.js')
-createHeroBanners({ root: document.getElementById('heroStage') })
+/* ── the two bands V2 does not have ─────────────────────────────────────
+   The announcement deck and the observation rail are V1's. Node 236:6669
+   draws neither, and the stylesheet has already hidden both — but hidden is
+   not absent, and mounting them anyway would build eleven cards, start a
+   6-second dwell timer and run an IntersectionObserver for a rail nobody can
+   see. So the version decides whether they exist, not just whether they show.
 
-/* ── recent observations ────────────────────────────────────────────────
-   The rail between the announcements and the modules, node 196:7243. */
-const { createRecentObservations } = __req('js/components/RecentObservations.js')
-createRecentObservations({ root: document.getElementById('recentObs') })
+   THE MARKUP STAYS EITHER WAY. Removing the two sections from the document
+   would mean two more `?v=` branches in the HTML for no gain: V1 needs them,
+   V2's CSS drops them before they paint, and an empty `.hero-stage` in the DOM
+   of a page that never displays it costs nothing. */
+const { PAGE_VERSION, isV2, setPageVersion } = __req('js/lib/pageVersion.js')
+if (PAGE_VERSION !== '2') {
+  const { createHeroBanners } = __req('js/components/HeroBanners.js')
+  createHeroBanners({ root: document.getElementById('heroStage') })
+
+  /* the rail between the announcements and the modules, node 196:7243 */
+  const { createRecentObservations } = __req('js/components/RecentObservations.js')
+  createRecentObservations({ root: document.getElementById('recentObs') })
+}
 
 /* ── quick actions ──────────────────────────────────────────────────────
    The corner FAB and its dock — the sixteen verbs of the mobile app's Quick
@@ -26577,10 +28100,10 @@ const profileMenu = createProfileMenu({
    *                    to save a button. They are gated exactly as before: the
    *                    role's permissions and the level, from QUICK_ACTIONS.
    *
-   * The menu is ordinary on the home page — three items, as it always was — and
-   * long on the Site. That asymmetry is the point rather than a cost: the home
-   * page has one thing to arrange and the Site has a role, a workspace and a
-   * subject.
+   * The menu is short on the home page — Edit, Add, the two page versions and
+   * Reset — and long on the Site. That asymmetry is the point rather than a
+   * cost: the home page has one thing to arrange and the Site has a role, a
+   * workspace and a subject.
    */
   items: (s) => {
     if (!s.onSite) {
@@ -26592,6 +28115,30 @@ const profileMenu = createProfileMenu({
         },
         { id: 'add', icon: 'widgets', label: 'Add Module',
           note: 'Choose a module to add to Home' },
+
+        /* ── THE TWO COMPOSITIONS OF THIS PAGE ────────────────────────────
+           A radio group, which is the same idiom the Site's "Viewing as" uses
+           and for the same reason: one at a time, ticked, and choosing one
+           changes what you are LOOKING AT rather than doing something to it.
+           So it is not an item with a verb for a label and it is not a
+           switch — `checked` gives it `menuitemradio` and the tick.
+
+           WHY IT IS HERE AT ALL, on a menu whose standing rule is
+           "everything a person can do to their own page". Which composition
+           of the home page you are looking at is exactly that, and the only
+           other way to reach V2 is to know to type `?v=2` — the same
+           invisible-affordance problem the whole menu was written to fix.
+
+           NO ICONS ON THESE TWO. The role rows carry none either: a glyph on
+           one row of a radio group competes with the tick that is the group's
+           actual state. And no note on the heading — the rows say it. */
+        null,
+        { heading: 'Home page' },
+        { id: 'ver:1', label: 'Version 1', checked: !isV2(),
+          note: 'Announcements, observations, then modules' },
+        { id: 'ver:2', label: 'Version 2', checked: isV2(),
+          note: 'Search, then straight into the modules' },
+
         null,
         { id: 'reset', icon: 'refresh', label: 'Reset Home Page',
           note: 'Back to the default arrangement', danger: true },
@@ -26647,10 +28194,15 @@ const profileMenu = createProfileMenu({
     const onSite = viewStore.get().view === 'site'
     const mode = onSite ? wsEdit : edit
 
-    /* Two namespaced families, so a role id and an action id can never collide
-       with a menu id — `admin` is a role and `map` is an action, and both are
-       plausible names for something else this menu might grow. */
+    /* Three namespaced families, so a role id, an action id or a version can
+       never collide with a menu id — `admin` is a role and `map` is an action,
+       and both are plausible names for something else this menu might grow. */
     if (id.startsWith('role:')) { setRole(id.slice(5)); return }
+    /* NOTHING AFTER THIS RUNS when it takes: setPageVersion navigates, and the
+       page that comes back builds itself from the URL. Choosing the version you
+       are already on returns false and is a no-op — the menu has closed, which
+       is the whole of what pressing it should do. */
+    if (id.startsWith('ver:')) { setPageVersion(id.slice(4)); return }
     if (id.startsWith('do:')) {
       const key = id.slice(3)
       wsEdit.announce(`${ACTION_NAMES[key] || key} — opening.`)
@@ -27752,7 +29304,7 @@ Object.assign(window, {
      */
     checkDefaults() {
       const { primaryVariants, getVariant } = __req('js/data/cardVariants.js')
-      const { DEFAULT_LAYOUT } = __req('js/state/layoutStore.js')
+      const { DEFAULT_LAYOUT, V2_LAYOUT } = __req('js/state/layoutStore.js')
 
       const seeded = new Set(DEFAULT_LAYOUT.map((d) => d.variantId))
       const problems = []
@@ -27766,6 +29318,21 @@ Object.assign(window, {
         if (v.priority !== 'primary') problems.push(`seeded but ${v.priority}, not primary: ${d.variantId}`)
         if (!v.supportedSizes.includes(d.size)) {
           problems.push(`seeded at a size it does not support: ${d.variantId} @ ${d.size}`)
+        }
+      }
+
+      /* V2's list, and NOT the primary rule. `primary` means "one of the
+         fifteen on the default page", which is the list above; V2 seeds three
+         cards that are deliberately `secondary` because node 236:6669 draws
+         them and the ruling was that they stay out of the default page. What
+         still has to hold is that every card it names exists and can be drawn
+         at the size it is asked for — the two ways this list could rot without
+         anyone noticing, since nothing opens V2 unless it is asked for. */
+      for (const d of V2_LAYOUT) {
+        const v = getVariant(d.variantId)
+        if (!v) { problems.push(`seeded on V2 but not in the catalogue: ${d.variantId}`); continue }
+        if (!v.supportedSizes.includes(d.size)) {
+          problems.push(`seeded on V2 at a size it does not support: ${d.variantId} @ ${d.size}`)
         }
       }
 

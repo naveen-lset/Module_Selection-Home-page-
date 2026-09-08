@@ -243,8 +243,30 @@ class Chrome:
             f.write(base64.b64decode(data))
         return path
 
-    def errors(self):
-        return [c for c in self.console if c[0] in ("error", "exception")]
+    def errors(self, dev_toolbar=False):
+        """Console errors — excluding the dev toolbar's own, by default.
+
+        `tools/agentation/agentation.js` is a localhost-only feedback toolbar
+        that loads on 127.0.0.1 and talks to a separate local server. When that
+        server is not running — which is most of the time — it logs a
+        `[Agentation]` warning and the page logs two
+        `net::ERR_CONNECTION_REFUSED` errors that have nothing to do with the
+        product: `tools/` is in `.vercelignore`, so none of it is ever served.
+
+        Every suite in this directory asserts a clean console, and every one of
+        them was failing on those two. A check that fails for a reason outside
+        the thing it checks is worse than no check, because the habit it teaches
+        is to ignore the red. So they are discounted here — but narrowly, and
+        only on evidence: the toolbar has to have reported its own failure
+        before a connection-refused error is attributed to it. Pass
+        `dev_toolbar=True` to see everything.
+        """
+        errs = [c for c in self.console if c[0] in ("error", "exception")]
+        if dev_toolbar:
+            return errs
+        if not any("[Agentation]" in str(c[1]) for c in self.console):
+            return errs
+        return [e for e in errs if "ERR_CONNECTION_REFUSED" not in str(e[1])]
 
     def quit(self):
         try:
