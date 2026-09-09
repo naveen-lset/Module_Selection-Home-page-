@@ -267,8 +267,11 @@ PILL = """(()=>{
     /* the grid mark is MASKED now, not an <img>: one asset, coloured off the
        pill's own `color`, so `currentColor` moves it and the × together */
     gridMask:(()=>{const g=document.querySelector('.qa-pill__grid');
-      if(!g)return null; const gs=getComputedStyle(g);
-      return {mask:(gs.maskImage||gs.webkitMaskImage||'none'), ink:gs.backgroundColor}})(),
+      if(!g)return null; const gs=getComputedStyle(g); const b=g.getBoundingClientRect();
+      return {mask:(gs.maskImage||gs.webkitMaskImage||'none'), ink:gs.backgroundColor,
+              size:(gs.maskSize||gs.webkitMaskSize||''),
+              pos:(gs.maskPosition||gs.webkitMaskPosition||''),
+              box:[Math.round(b.width),Math.round(b.height)]}})(),
     /* the chat disc */
     chat:!!ch, chatW:cr&&Math.round(cr.width), chatH:cr&&Math.round(cr.height),
     chatGap:(cr&&r)&&Math.round(cr.left-r.right),
@@ -290,7 +293,8 @@ MENU = """(()=>{
     material:cs.backgroundColor, radius:cs.borderRadius,
     veilBlur:v.backdropFilter||v.webkitBackdropFilter, veilOpacity:v.opacity,
     /* the dim itself, and the blur's radius — read as numbers so the check can
-       say "5–10%" rather than "there is a blur of some sort" */
+       name a range rather than say "there is a blur of some sort" */
+    veilColor:v.backgroundColor,
     veilAlpha:(()=>{const m=/rgba?\([^)]*?([\d.]+)\s*\)$/.exec(v.backgroundColor);
       return m?+m[1]:1})(),
     veilPx:(()=>{const m=/blur\(([\d.]+)px\)/.exec(v.backdropFilter||v.webkitBackdropFilter||'');
@@ -848,6 +852,22 @@ def main():
               r["gridMask"] and "qa-actions.svg" in r["gridMask"]["mask"]
               and r["gridMask"]["ink"] == "rgb(0, 0, 0)",
               f"{(r['gridMask'] or {}).get('ink')} via {(r['gridMask'] or {}).get('mask','')[-24:]}")
+        # …AT 18.33 IN A 20 BOX, WHICH IS THE ONE THING 295:5580 CAUGHT WRONG.
+        # The frame's glyph container is 20x20 (`fi_10348852`) holding artwork
+        # inset `5.21% 3.14% 3.15% 5.21%` — 18.33 square at 1.042 from the top
+        # left, the same number as the export's own 18.3294 viewBox. Sizing the
+        # mask `100% 100%` stretched it over the full 20 and drew the mark 9%
+        # too large: measured against the node's render, the glyph's ink box was
+        # (16,16,20,20) against the frame's (17,17,18,18), and every column of
+        # the glyph box differed while the label's did not. Fixed, both read
+        # (17,17,18,18) and the region's mean error halves, 14.19 → 7.33.
+        # The 20px BOX is asserted alongside the mask so a future change cannot
+        # satisfy this by shrinking the container instead.
+        check("…sized 18.33 inside the frame's 20px box, not stretched to it",
+              r["gridMask"]["box"] == [20, 20]
+              and r["gridMask"]["size"].startswith("18.33px 18.33px")
+              and r["gridMask"]["pos"].startswith("1.042px 1.042px"),
+              f"box {r['gridMask']['box']} mask {r['gridMask']['size']} at {r['gridMask']['pos']}")
 
         # THE DISC · 56 SINCE 295:5561, where every frame before drew the pair
         # the same height. It was in 270:4176 too and was never built; this is
@@ -922,9 +942,24 @@ def main():
         # A DIM, NOT A FROST — and this is the check that would catch the frost
         # coming back. "Do NOT create the strong frosted/blurred background
         # shown in the current design… approximately 5–10% visual reduction."
-        check("the dashboard behind stays readable: a 5–10% dim, blur under 3px",
-              m["veilOpacity"] == "1" and .05 <= m["veilAlpha"] <= .10 and m["veilPx"] <= 3,
-              f"alpha={m['veilAlpha']} blur={m['veilPx']}px")
+        # A LIGHT-BLACK FROST — the third ruling on this backdrop in two days,
+        # and it REVERSES the 8 Sep brief's "5-10% visual reduction" DO-NOT that
+        # this check used to enforce. 9 Sep, the user: the opening panel's
+        # background "Should be Light Black Blur more". So: black-based rather
+        # than the page's teal ink, and a real blur.
+        #
+        # THE UPPER BOUNDS ARE THE POINT OF THE CHECK, not the lower ones. The
+        # argument the brief made still stands even though its number does not
+        # — Quick Actions is sixteen verbs about the page underneath, so the
+        # dashboard has to stay discernible behind them. This fails if the dim
+        # creeps past 35% or the blur past 24px, which is where the page stops
+        # being readable rather than merely softened.
+        check("the backdrop is a light-black frost, and stops short of hiding the page",
+              m["veilOpacity"] == "1"
+              and m["veilColor"].startswith("rgba(0, 0, 0")
+              and .20 <= m["veilAlpha"] <= .35
+              and 10 <= m["veilPx"] <= 24,
+              f"{m['veilColor']} blur={m['veilPx']}px")
         check("the panel is wholly on screen", m["onScreen"], f"{m['w']}x{m['h']}")
         # THE LABEL COMES BACK WHILE IT IS OPEN, scrolled or not: the control
         # that opened the panel must not change shape under the finger.

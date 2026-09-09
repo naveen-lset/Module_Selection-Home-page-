@@ -7879,13 +7879,14 @@ body.is-site .card:active { transform: scale(.978); }
        blur: the page behind stays sharp until the menu opens.
      · The glyph: `assets/icon/qa-actions.svg`, the frame's own export
        (fi_10348852), committed rather than hand-drawn.
-     · WHAT IT DOES NOT DRAW is the open state, in this frame or any other.
-       It was first built to the instruction "it has to appear like the
-       profile menu selection, background should be blur" — and the brief of
-       8 Sep REVERSED both halves on its own explicit terms: the panel has its
-       own material now, not the profile menu's, and the backdrop is a 6% dim
-       rather than a frost. See `.qa-menu` and `.qa-veil`, which carry the
-       reversal and the reason. Nothing on this row shares that material.
+     · WHAT IT DOES NOT DRAW is the open state, in this frame or any other,
+       which is why it has been ruled on three times in two days. The panel
+       keeps its OWN material (not the profile menu's, per the brief of
+       8 Sep), while the backdrop went material → 6% dim → and on 9 Sep back
+       to a frost, "Light Black Blur more": black at 25% over a 14px blur. The
+       full history and the argument against a heavy frost are at `.qa-veil`;
+       `.qa-menu` carries the panel's own surface. Nothing on this row shares
+       either material.
 
    AND THE ONE BEHAVIOUR THAT IS PURELY THE USER'S. "When I scroll, Quick
    Access text will go, only icon has to show; once I scroll to the top it has
@@ -8269,12 +8270,24 @@ body.is-site .card:active { transform: scale(.978); }
    Committing that export would leave two files differing by one word, and the
    next colour would want a third. So the asset supplies the SHAPE as a mask
    and `currentColor` supplies the colour — the same source the × beside it
-   already draws from, so the pill's `color` now moves both marks at once. */
+   already draws from, so the pill's `color` now moves both marks at once.
+
+   AND IT IS 18.33 IN A 20 BOX, NOT 20 — which is the whole of what "not built
+   exactly like this" meant on 9 Sep. The frame's glyph is a 20x20 container
+   (`fi_10348852`) holding artwork inset `5.21% 3.14% 3.15% 5.21%`, i.e. 18.33
+   square at 1.042 from the top left, and the export's own viewBox is
+   18.3294x18.3292 — the same number, which is the confirmation. Sizing the mask
+   `100% 100%` stretched that artwork over the full 20 and drew the mark 9% too
+   large; against the node's render every column of the glyph box differed and
+   nothing else did. The inset is transcribed rather than centred because the
+   frame does not centre it: it leaves 1.042 above and left against 0.628 and
+   0.630 below and right. That 0.2px bias also means the morph rotates about a
+   point 0.2px off the mark's own centre, which is below anything visible. */
 .qa-pill__grid {
   width: 100%; height: 100%; opacity: 1; transform: rotate(0deg) scale(1);
   background: currentColor;
-  -webkit-mask: url(assets/icon/qa-actions.svg) center / 100% 100% no-repeat;
-          mask: url(assets/icon/qa-actions.svg) center / 100% 100% no-repeat;
+  -webkit-mask: url(assets/icon/qa-actions.svg) 1.042px 1.042px / 18.33px 18.33px no-repeat;
+          mask: url(assets/icon/qa-actions.svg) 1.042px 1.042px / 18.33px 18.33px no-repeat;
 }
 .qa-pill__x { opacity: 0; transform: rotate(-90deg) scale(.55); }
 .qa.is-open .qa-pill__grid { opacity: 0; transform: rotate(90deg) scale(.55); }
@@ -8311,31 +8324,42 @@ body.is-site .card:active { transform: scale(.978); }
 .qa.is-open .qa-pill { padding: 16px; gap: var(--s2); }
 .qa.is-open .qa-pill__t { max-width: 12em; opacity: 1; }
 
-/* ── the veil · A DIM, NOT A FROST ────────────────────────────────────────
-   THIS IS A REVERSAL AND THE BRIEF MAKES IT ONE. The panel first shipped with
-   the profile menu's own material behind it — rgba(16,44,48,.18) over
-   blur(6px) saturate(1.1) — on the instruction of 8 Sep, "it has to appear
-   like the profile menu selection, background should be blur". The brief of
-   the same day is explicit the other way: "Do NOT create the strong
-   frosted/blurred background shown in the current design… approximately 5–10%
-   visual reduction… The user should still understand where they are in the
-   dashboard."
+/* ── the veil · A FROST AGAIN, AND THIS IS THE THIRD RULING ON IT ─────────
+   Read the whole history before changing this, because every value here has
+   been set and unset by the user at least once:
 
-   Both are the user's and the later one wins, but it is worth saying WHY it
-   is also right: the profile menu is a small panel over a page you are
-   leaving alone, where a frost is a way of saying "come back to this". Quick
-   Actions is sixteen verbs about the page underneath — you pick "+ Note"
-   BECAUSE of what you can see behind it — so hiding that page is hiding the
-   context for the decision. 6% and a 2px blur keep the dashboard readable and
-   still put the panel plainly in front. */
+     1. It shipped as the profile menu's own material — rgba(16,44,48,.18)
+        over blur(6px) saturate(1.1) — on the instruction of 8 Sep, "it has to
+        appear like the profile menu selection, background should be blur".
+     2. The brief of the SAME DAY reversed it in a DO-NOT: "Do NOT create the
+        strong frosted/blurred background shown in the current design…
+        approximately 5–10% visual reduction… The user should still understand
+        where they are in the dashboard." That gave 6% and a 2px blur.
+     3. 9 Sep, the user again: the opening panel's background "Should be Light
+        Black Blur more". So it is black-based now rather than the page's teal
+        ink, at 25%, over a 14px blur.
+
+   THE LATEST INSTRUCTION WINS and (2)'s prohibition no longer holds — but it
+   is recorded rather than deleted, because the argument it made is the real
+   cost of this setting and is worth re-reading if it is ever revisited: Quick
+   Actions is sixteen verbs ABOUT the page underneath, and you pick "+ Note"
+   because of what you can see behind it, so a heavy frost hides the context
+   for the decision it is asking for. At 25% and 14px the dashboard's shapes
+   and colours still read while the panel sits plainly in front; going further
+   would start hiding it outright.
+
+   THE FROST DOES NOT REACH THE TWO FOOT CONTROLS, and that is paint order,
+   not an oversight: the veil is the FIRST child of `.qa` and the row is the
+   last, so the pill and the disc stay crisp above the dim. The control you
+   just pressed should not go soft underneath your finger. */
 .qa-veil {
   position: fixed;
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background: rgba(16, 44, 48, .06);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, .25);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   transition: opacity var(--qa-t-surface) var(--qa-ease);
 }
 .qa.is-open .qa-veil { opacity: 1; pointer-events: auto; }
