@@ -257,14 +257,27 @@ PILL = """(()=>{
     centred:rr&&Math.abs((rr.left+rr.right)/2 - innerWidth/2)<2,
     fromFoot:rr&&Math.round(innerHeight-rr.bottom),
     label:t&&t.textContent, labelW:t&&Math.round(t.getBoundingClientRect().width),
-    radius:cs&&cs.borderRadius, border:cs&&cs.borderTopColor,
+    radius:cs&&cs.borderRadius, borderW:cs&&cs.borderTopWidth,
     bg:cs&&cs.backgroundImage, bgColor:cs&&cs.backgroundColor,
+    /* THE MATERIAL, since node 295:5561 took the pair to glass. `ink` is read
+       because the label went black with the fill, and `backdrop` because a
+       40% fill with no filter behind it is not glass — it is a pale pill. */
+    ink:cs&&cs.color, backdrop:cs&&(cs.backdropFilter||cs.webkitBackdropFilter),
+    shadow:cs&&cs.boxShadow,
+    /* the grid mark is MASKED now, not an <img>: one asset, coloured off the
+       pill's own `color`, so `currentColor` moves it and the × together */
+    gridMask:(()=>{const g=document.querySelector('.qa-pill__grid');
+      if(!g)return null; const gs=getComputedStyle(g);
+      return {mask:(gs.maskImage||gs.webkitMaskImage||'none'), ink:gs.backgroundColor}})(),
     /* the chat disc */
     chat:!!ch, chatW:cr&&Math.round(cr.width), chatH:cr&&Math.round(cr.height),
     chatGap:(cr&&r)&&Math.round(cr.left-r.right),
     chatGlyph:!!img&&img.complete&&img.naturalWidth>0,
     chatGlyphW:img&&Math.round(img.getBoundingClientRect().width),
     chatLabel:ch&&ch.getAttribute('aria-label'),
+    chatBgColor:chs&&chs.backgroundColor, chatBgImage:chs&&chs.backgroundImage,
+    chatBackdrop:chs&&(chs.backdropFilter||chs.webkitBackdropFilter),
+    chatShadow:chs&&chs.boxShadow, chatBorderW:chs&&chs.borderTopWidth,
     scrolled:document.querySelector('.qa').classList.contains('is-scrolled')}})()"""
 
 MENU = """(()=>{
@@ -437,6 +450,37 @@ PRESS_VER = """(()=>{const b=document.querySelector('.pmenu__item[data-id="ver:%
 WHERE = """(()=>({v:document.documentElement.dataset.pageVersion, search:location.search,
   cards:document.querySelectorAll('#moduleGrid .card').length,
   deck:document.querySelectorAll('.hero--slide').length}))()"""
+# ── FREEZING WITHOUT GUESSING WHEN ────────────────────────────────────────
+# Both measurements below used to be `sleep(0.004)` then pause, and both were
+# a coin flip. `show()` clears `hidden`, measures its rows, and adds `is-open`
+# only on the NEXT animation frame — so 4ms in, the transitions usually did not
+# exist yet, `getAnimations()` came back EMPTY, nothing was paused, the real
+# reveal then ran free, and every check below read whatever it happened to
+# catch. That is why this file could pass twice and fail on a third run with
+# no code change between them: observed 9 Sep 2026, PASS / PASS / 4 FAILED,
+# reporting closed-state values (`0 of the way`, `grid=1 x=0`) for a panel
+# that was opening correctly.
+#
+# Awaiting the state class AND a non-empty `getAnimations()` inside the page
+# removes the guess entirely, and it is ONE round trip, so nothing can run
+# between the wait and the pause.
+#
+# `hidden` IS NEUTRALISED HERE AND NOT BEFORE THE CLICK, which looks like it
+# would be safer and is not: the override is a no-op SETTER over the IDL
+# property, while `[hidden] { display: none }` matches the ATTRIBUTE. Installed
+# before `show()` runs, it would swallow that method's own `hidden = false`,
+# the attribute would never come off, and the panel would sit at
+# `display: none` for the whole measurement.
+def freeze_at(c, cls):
+    c.eval("""(async()=>{
+        await new Promise(res=>{const tick=()=>{
+          const qa=document.querySelector('.qa');
+          if(qa&&qa.classList.contains('%s')&&document.getAnimations().length)return res(1);
+          requestAnimationFrame(tick)};tick()});
+        const m=document.querySelector('.qa-menu');
+        Object.defineProperty(m,'hidden',{get:()=>false,set:()=>{},configurable:true});
+        document.getAnimations().forEach(a=>a.pause());
+        return 1})()""" % cls, await_promise=True)
 
 
 def main():
@@ -766,20 +810,75 @@ def main():
         check(f"centred on the page, {want_b} from the foot",
               r["centred"] and near(r["fromFoot"], want_b, 1.5),
               f"centred={r['centred']} foot={r['fromFoot']}")
-        # FLAT SINCE NODE 280:3521, where 270:4176 drew a #37BD69 → #1F415B ramp
-        # and a radius of 24. `backgroundImage` is asserted to be `none` as well
-        # as the colour being right: a leftover gradient would sit ON TOP of the
-        # flat colour and the colour check alone would pass under it.
-        check("the frame's stadium, white border and flat green",
-              r["radius"] == "999px" and r["border"] == "rgb(255, 255, 255)"
-              and r["bgColor"] == "rgb(55, 189, 105)" and r["bg"] == "none",
-              f"{r['radius']} / {r['border']} / {r['bgColor']} / {r['bg'][:40]}")
+        # GLASS SINCE NODE 295:5561, where 280:3521 drew flat #37BD69 with a
+        # white label and a white 1px stroke. The fill is asserted as RGBA and
+        # not RGB on purpose: an opaque pill would satisfy a colour check and
+        # have no glass in it whatever. `backgroundImage` stays `none` because
+        # a leftover gradient would sit ON TOP of the fill and hide it.
+        check("the frame's stadium, white-at-40% and a black label",
+              r["radius"] == "999px" and r["borderW"] == "0px"
+              and r["bgColor"] == "rgba(255, 255, 255, 0.4)"
+              and r["ink"] == "rgb(0, 0, 0)" and r["bg"] == "none",
+              f"{r['radius']} / {r['bgColor']} / {r['ink']} / border {r['borderW']}")
+        # THE REFRACTION IS THE 9 SEP INSTRUCTION and the frame cannot draw it:
+        # over a flat artboard a 40% fill renders flat, so this is the one part
+        # of the material that only the build can be checked for.
+        check("…and both controls actually refract what is behind them",
+              "blur(20px)" in (r["backdrop"] or "")
+              and "saturate(1.8)" in (r["backdrop"] or "")
+              and "blur(20px)" in (r["chatBackdrop"] or ""),
+              f"pill {r['backdrop']} | disc {r['chatBackdrop']}")
+        # …BUT NOT EQUALLY, AND THAT IS THE RULING OF 9 SEP. The disc drops the
+        # pill's saturation because amplifying the backdrop is what let the
+        # backdrop's HUE win — see the departure note under `.qa-chat`.
+        check("…the disc refracting less hard than the pill, deliberately",
+              "saturate(1)" in (r["chatBackdrop"] or "")
+              and "saturate(1.8)" not in (r["chatBackdrop"] or ""),
+              r["chatBackdrop"])
+        # ONE DEPTH FOR THE PAIR, where the previous frame gave them two and
+        # both were transcribed. Compared as strings so they cannot drift.
+        check("…on one shared drop, the node's dy2/blur4 at 25%",
+              r["shadow"].startswith("rgba(0, 0, 0, 0.25) 0px 2px 4px 0px")
+              and r["shadow"] == r["chatShadow"],
+              f"same={r['shadow'] == r['chatShadow']} {r['shadow'][:46]}")
+        # THE MARK IS MASKED, NOT A SECOND ASSET. 295:5561 exports it identical
+        # to the committed file but `fill="black"`; if someone ever commits that
+        # export and reverts to an <img>, the mask goes and this fails.
+        check("…and the grid mark is the one asset, inked off the pill",
+              r["gridMask"] and "qa-actions.svg" in r["gridMask"]["mask"]
+              and r["gridMask"]["ink"] == "rgb(0, 0, 0)",
+              f"{(r['gridMask'] or {}).get('ink')} via {(r['gridMask'] or {}).get('mask','')[-24:]}")
 
-        # THE DISC · node 286:3997. It was in 270:4176 too and was never built;
-        # this is what stops it being dropped again.
-        check("the chat disc is beside it, 52 across", r["chat"]
-              and near(r["chatW"], 52, 1) and near(r["chatH"], 52, 1),
-              f"{r['chatW']}x{r['chatH']}")
+        # THE DISC · 56 SINCE 295:5561, where every frame before drew the pair
+        # the same height. It was in 270:4176 too and was never built; this is
+        # what stops it being dropped again.
+        check("the chat disc is beside it, 56 across — 4 more than the pill",
+              r["chat"] and near(r["chatW"], 56, 1) and near(r["chatH"], 56, 1)
+              and r["chatH"] > r["h"],
+              f"{r['chatW']}x{r['chatH']} vs pill {r['w']}x{r['h']}")
+        # ITS TINT: FITTED STOPS, AND ALPHAS THAT ARE NOT THE NODE'S.
+        #
+        # The STOPS are a measurement, not a preference. Figma's handles are at
+        # 0%/100% of a gradient that runs PAST the disc; projected onto the box
+        # they land at 50.5% and 94.8% along 142.21deg. Transcribing the handles
+        # instead compresses the ramp into the shape and darkens its whole upper
+        # half. Fitted against three sampled pixels, worst error 3/255.
+        #
+        # The ALPHAS are 55/35 where the node says 20/40, and that is a ruling
+        # of 9 Sep 2026 rather than a transcription error — DO NOT "restore" it
+        # to the node. At the node's alphas the disc takes whatever hue is
+        # behind it: measured 16°, orange, over V1's coral observation card
+        # against the node's own 189°, and three of V1's four priority colours
+        # are warm. At 55/35 it measures 191° over that card and 189° over the
+        # module grid. Both halves are asserted literally so either drifting
+        # back fails here with the reason attached.
+        check("…wearing the cyan→mint tint at its fitted stops and ruled alphas",
+              r["chatBgColor"] == "rgba(255, 255, 255, 0.35)"
+              and "142.21deg" in r["chatBgImage"]
+              and "rgba(0, 175, 214, 0.55) 50.5%" in r["chatBgImage"]
+              and "rgba(96, 221, 186, 0.55) 94.8%" in r["chatBgImage"]
+              and r["chatBorderW"] == "0px",
+              r["chatBgImage"][:96])
         check("…12 from the pill, which is the frame's gap",
               near(r["chatGap"], 12, 1), str(r["chatGap"]))
         check("…carrying the frame's own 24px glyph, loaded",
@@ -798,11 +897,14 @@ def main():
         sc = c.eval(PILL)
         check("scrolled: the label collapses to nothing",
               sc["scrolled"] and sc["labelW"] == 0, f"scrolled={sc['scrolled']} label={sc['labelW']}px")
-        check("…and the pill is a disc, not a pill",
-              abs(sc["w"] - sc["h"]) <= 2, f"{sc['w']}x{sc['h']}")
+        # A TRUE CIRCLE SINCE THE PADDING BECAME THE NODE'S 16 all round: the
+        # old 14 closed the pill to 48x52, a 4px oval that read as a near-miss.
+        check("…and the pill is a circle, not a near-miss",
+              abs(sc["w"] - sc["h"]) <= 1 and near(sc["w"], 52, 1),
+              f"{sc['w']}x{sc['h']}")
         # the disc has no label to lose and must not move or resize with it
         check("…while the chat disc holds its size",
-              near(sc["chatW"], 52, 1) and near(sc["chatH"], 52, 1),
+              near(sc["chatW"], 56, 1) and near(sc["chatH"], 56, 1),
               f"{sc['chatW']}x{sc['chatH']}")
 
         # the menu: the profile menu's material, the sixteen verbs, page blurred
@@ -914,6 +1016,9 @@ def main():
         errs = c.errors()
         check("no console errors", not errs, "; ".join(str(e)[:110] for e in errs[:3]))
 
+
+
+
     # ══ THE OPENING, WHICH IS THE WHOLE POINT OF THE REDESIGN ══════════════
     # The brief of 8 Sep 2026: the FAB should feel like it is TRANSFORMING INTO
     # the panel — not a modal, not sixteen blocks popping in, and the surface
@@ -933,20 +1038,13 @@ def main():
     with Chrome(width=WIDTH, height=900, reduced_motion=False) as c:
         c.goto(BASE + "index.html?v=2", settle=2.0)
 
-        def freeze():
-            c.eval("(()=>{document.getAnimations().forEach(a=>a.pause());"
-                   "const m=document.querySelector('.qa-menu');"
-                   "Object.defineProperty(m,'hidden',{get:()=>false,set:()=>{},configurable:true});"
-                   "return 1})()")
-
         def at(t):
             c.eval("(()=>{for(const a of document.getAnimations()){a.pause();"
                    "try{a.currentTime=%d}catch(e){}} return 1})()" % t)
             return json.loads(c.eval(STATE))
 
         c.eval("document.querySelector('.qa-pill').click(); 1")
-        time.sleep(0.004)
-        freeze()
+        freeze_at(c, "is-open")
 
         f0 = at(0)
         # THE FIRST FRAME IS THE PILL. A clip window --qa-h tall at the panel's
@@ -1021,11 +1119,10 @@ def main():
         c.eval("document.querySelector('.qa-pill').click(); 1")
         time.sleep(0.9)
         c.eval("document.querySelector('.qa-pill').click(); 1")
-        time.sleep(0.004)
-        c.eval("(()=>{document.getAnimations().forEach(a=>a.pause());"
-               "const m=document.querySelector('.qa-menu');"
-               "Object.defineProperty(m,'hidden',{get:()=>false,set:()=>{},configurable:true});"
-               "return 1})()")
+        # `is-closing` GOES ON SYNCHRONOUSLY, before `is-open` comes off and in
+        # the same style pass — see the note at that line in index.html — so it
+        # is the class that says the close has actually begun.
+        freeze_at(c, "is-closing")
 
         def at2(t):
             c.eval("(()=>{for(const a of document.getAnimations()){a.pause();"

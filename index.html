@@ -7859,25 +7859,33 @@ body.is-site .card:active { transform: scale(.978); }
    deleted rather than hidden, on the user's ruling of 8 Sep: "Remove Current
    Fab".
 
-   THE PILL WAS BUILT FROM NODE 270:4176 AND IS RE-READ HERE. That frame drew
-   the disc too and only the pill was built; 280:3521 draws the same pair and
-   redraws the pill flat. Both changes are that frame's, and the values are
-   under `.qa-pill` and `.qa-chat` with what each replaced.
+   THE ROW IS RE-READ FROM NODE 295:5561 (9 Sep 2026), the fourth frame to
+   draw it: 270:4176 drew the pair and only the pill was built, 280:3521
+   redrew the pill flat green, and this one takes BOTH controls to glass. Each
+   value is under `.qa-pill` and `.qa-chat` with what it replaced.
 
    THREE THINGS THE FRAME GIVES AND ONE IT DOES NOT.
-     · The pill: flat #37BD69, a 1px WHITE border, a stadium radius, 16/14
-       padding, a 20px glyph, 16px semibold label, and
-       `0 4px 16px rgba(0,0,0,.2)`. 109 from the foot.
+     · The pair: white at 40% on a stadium and a 56px disc, 16 padding all
+       round, a 20px glyph, a 16px semibold BLACK label, and one shared
+       `0 2px 4px rgba(0,0,0,.25)`. The disc adds a #00AFD6 → #60DDBA tint at
+       20%. 109 from the foot. There is no stroke on either any more.
+     · What the frame CANNOT give is the refraction: a 40% fill over a flat
+       artboard renders as flat, so the blur, the saturation and the rim are
+       this build's, under `--glass-*`. That is the liquid-glass half of the
+       9 Sep instruction, and the fill under it is the node's.
      · The wash: a 182px gradient across the foot, rgba(255,255,255,.2) at
        27.47% to rgba(119,119,119,.15) at 93.13%, with `filter: blur(10px)` on
        the shape itself — which is what the node does. It is NOT a backdrop
        blur: the page behind stays sharp until the menu opens.
      · The glyph: `assets/icon/qa-actions.svg`, the frame's own export
        (fi_10348852), committed rather than hand-drawn.
-     · WHAT IT DOES NOT DRAW is the open state. The user's instruction settles
-       it — "it has to appear like the profile menu selection, background
-       should be blur" — so the panel is the profile menu's own material and
-       the page behind it takes a real backdrop blur while it is open.
+     · WHAT IT DOES NOT DRAW is the open state, in this frame or any other.
+       It was first built to the instruction "it has to appear like the
+       profile menu selection, background should be blur" — and the brief of
+       8 Sep REVERSED both halves on its own explicit terms: the panel has its
+       own material now, not the profile menu's, and the backdrop is a 6% dim
+       rather than a frost. See `.qa-menu` and `.qa-veil`, which carry the
+       reversal and the reason. Nothing on this row shares that material.
 
    AND THE ONE BEHAVIOUR THAT IS PURELY THE USER'S. "When I scroll, Quick
    Access text will go, only icon has to show; once I scroll to the top it has
@@ -7896,9 +7904,43 @@ body.is-site .card:active { transform: scale(.978); }
      the screen" at every height, and #panel-modules' tail is derived from this
      token so the last row still clears it. */
   --qa-b:      40px;
-  --qa-h:      52px;    /* the pill's and the chat disc's height, from the node */
+  --qa-h:      52px;    /* the PILL's height, and the clip window's, from the node */
+  /* THE DISC IS NO LONGER THE PILL'S HEIGHT. Node 295:5561 draws the pill 52
+     and the disc 56 — both centred on the row's midline — where every frame
+     before it drew the pair the same size. `--qa-h` stays the PILL's, because
+     the panel's opening window is derived from it and the surface unfolds out
+     of the pill rather than out of the taller disc. So the disc takes a token
+     of its own, and anything that has to clear the whole row takes `--qa-row-h`. */
+  --qa-chat-h: 56px;
+  --qa-row-h:  56px;
   --qa-band:   182px;   /* the wash's height, from the node                   */
   --qa-cols:   4;       /* the menu's cells across — 4x4 holds the sixteen    */
+
+  /* ── LIQUID GLASS · what both foot controls are made of ─────────────────
+     Node 295:5561 fills the pill AND the disc with white at 40% and drops the
+     flat #37BD69 of 280:3521, taking the label to black with it. A 40% fill is
+     only glass if what is behind it is actually refracted, so the FILL is the
+     node's and the blur, the saturation and the rim are the material. Both
+     controls take the same set, so the pair cannot drift apart the way their
+     two shadows did under the previous frame.
+
+     `--glass-lift` IS THE ONE DELIBERATE DEVIATION. The node draws this row
+     over a flat #F9FFFC artboard, where a black label on 40% white is safe.
+     The real page scrolls a grid of saturated cards underneath it, and over a
+     dark one the same label falls under 3:1. Lifting the BACKDROP rather than
+     changing the node's fill keeps the stated colour and buys back the
+     contrast; controls already hold this exception — see the accent note in
+     the panel's cells. */
+  --glass-fill:   rgba(255, 255, 255, .4);   /* the node's own fill           */
+  --glass-blur:   20px;
+  --glass-sat:    180%;
+  --glass-lift:   1.06;
+  --glass-spec:   rgba(255, 255, 255, .75);  /* the top specular hairline     */
+  --glass-spec-h: rgba(255, 255, 255, .9);   /* …and under the pointer        */
+  --glass-bounce: rgba(255, 255, 255, .3);   /* light coming back up the foot */
+  --glass-rim:    rgba(255, 255, 255, .22);
+  --glass-rim-h:  rgba(255, 255, 255, .34);
+  --glass-depth:  rgba(31, 65, 91, .1);      /* the thickness at the foot     */
 
   /* ── THE PANEL, REDESIGNED · the brief of 8 Sep 2026 ────────────────────
      "Make the interaction feel like a premium Apple-style iPad system
@@ -8050,13 +8092,22 @@ body.is-site .card:active { transform: scale(.978); }
 }
 
 /* ── the pill ────────────────────────────────────────────────────────────
-   FLAT #37BD69 SINCE NODE 280:3521, where it was a #37BD69 → #1F415B ramp
-   from 270:4176, and a stadium where it was radius 24. The shadow deepened
-   with it: 0 4px 16px at 20% against the old 0 4px 6.2px at 15%. All three
-   are the newer frame's, read off node 286:3989.
+   GLASS SINCE NODE 295:5561, and this is the fourth colour it has worn in two
+   days: a #37BD69 → #1F415B ramp at radius 24 (270:4176), flat #37BD69 at a
+   stadium (280:3521), and now white at 40% with a BLACK label — the node's
+   `MD3_Antz/neutralPrimary`. The white 1px border went with the green: the
+   node reports no stroke, and the rim below is an inset shadow instead, so
+   the pill's measured box stays exactly 52 tall and the panel's clip origin
+   is unaffected by the change.
 
-   The disc beside it keeps the OLDER shadow, and that is not an oversight —
-   see `.qa-chat`. */
+   The shadow went the other way — SHALLOWER, 0 2px 4px at 25% against
+   0 4px 16px at 20%. It is now the SAME depth as the disc beside it, where
+   the previous frame gave the pair two different ones and both were
+   transcribed rather than averaged. One frame, one depth; the note under
+   `.qa-chat` that explained the difference is gone with it.
+
+   Padding is the node's 16 all round, where it was 14/16 — which is also what
+   makes the collapsed state below a true circle rather than 4px oval. */
 .qa-pill {
   pointer-events: auto;
   display: inline-flex;
@@ -8064,12 +8115,24 @@ body.is-site .card:active { transform: scale(.978); }
   justify-content: center;
   gap: var(--s2);
   height: var(--qa-h);
-  padding: 14px 16px;
-  border: 1px solid #FFFFFF;
+  padding: 16px;
+  border: 0;
   border-radius: var(--r-pill);
-  background: var(--c-primary);
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, .2);
-  color: #FFFFFF;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+          backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+  /* FIVE LAYERS, AND THE SAME FIVE IN EVERY STATE. The stack is written out
+     rather than held in one token because `box-shadow` is transitioned here,
+     and two lists interpolate only while they have the same layer count — a
+     hover that added or dropped a layer would snap instead of easing.
+     Top-down: the node's drop, the specular hairline, the light coming back
+     up off the foot, the rim all the way round, then the thickness. */
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .25),
+              inset 0 1px 0 0 var(--glass-spec),
+              inset 0 -1px 0 0 var(--glass-bounce),
+              inset 0 0 0 1px var(--glass-rim),
+              inset 0 -6px 12px -6px var(--glass-depth);
+  color: #000000;
   cursor: pointer;
   /* THE PRESS IS ITS OWN TIMING AND NOT THE PILL'S GENERAL ONE. The width
      changes on scroll over --t-base, which is a 220ms shape change and reads
@@ -8081,7 +8144,13 @@ body.is-site .card:active { transform: scale(.978); }
               transform var(--qa-t-press) var(--qa-ease-press),
               box-shadow var(--t-base) var(--ease);
 }
-.qa-pill:hover { box-shadow: 0 8px 22px -2px rgba(0, 0, 0, .26); }
+.qa-pill:hover {
+  box-shadow: 0 6px 14px -2px rgba(0, 0, 0, .28),
+              inset 0 1px 0 0 var(--glass-spec-h),
+              inset 0 -1px 0 0 var(--glass-bounce),
+              inset 0 0 0 1px var(--glass-rim-h),
+              inset 0 -6px 12px -6px var(--glass-depth);
+}
 .qa-pill:active { transform: scale(.96); }
 .qa-pill:focus-visible { outline: 3px solid var(--ui-link); outline-offset: 3px; }
 /* …AND IT STAYS COMPRESSED WHILE THE PANEL IS OPEN, a touch under its resting
@@ -8099,39 +8168,74 @@ body.is-site .card:active { transform: scale(.978); }
    surface under it is a real control with real states rather than a picture of
    one.
 
-   ITS RING IS A GRADIENT WHERE THE PILL'S IS FLAT WHITE, because the export
-   says so: white at the foot to #DDEBE9 at 10% at the head, which over the
-   disc's own 52px works out at roughly 72% white below and 50% above. Two
-   adjacent controls with different hairlines looks like an inconsistency and
-   is the file's own drawing; the pill's stroke is reported flat white and is
-   left flat. `background-clip` rather than `border-image` because the ring has
-   to follow a 26px radius, which border-image cannot do.
+   IT IS 56 WHERE THE PILL IS 52, and its gradient ring is gone: node 295:5561
+   reports no stroke on it, so the pill's rim and this one are now the same
+   inset shadow. Its shadow is the pill's too — the export's `feOffset dy=2`,
+   `stdDeviation=2`, alpha .25 reads as 0 2px 4px at 25%, which is exactly what
+   the pill reports. The two controls finally agree.
 
-   AND ITS SHADOW IS THE OLDER, SHALLOWER ONE — 0 4px 6.2px at 15%, straight
-   off the export's `feDropShadow` (dy 4, stdDeviation 3.1, alpha .15). The
-   pill's is 0 4px 16px at 20%. The frame gives the pair two different depths
-   and both are transcribed rather than averaged. */
+   WHAT IT KEEPS OF ITS OWN IS THE TINT — and it is STRONGER THAN THE NODE'S,
+   which is the one deliberate departure from 295:5561 and was ruled on
+   9 Sep 2026 after measuring it. The node fills the disc white at 40% with the
+   ramp at 20%, over a flat #F9FFFC artboard where that reads cyan at hue 189°.
+   The real page puts saturated cards under the foot, and at those alphas the
+   disc does not merely mute — it takes the BACKDROP's hue: measured 16°, pure
+   orange, over V1's coral observation card, and V1's priority palette is warm
+   in three of its four colours. A chat button that is cyan on one screen and
+   orange on the next has lost the thing that identifies it.
+
+   So the ramp goes to 55% and the white under it to 35%, and the disc drops
+   the backdrop saturation the pill keeps. Measured at those numbers: 191° over
+   the coral card and 189° over the module grid, both within 2° of the node's
+   own render. It transmits less of what is behind it than the pill does, and
+   that is the price of the identity holding.
+
+   IT DEPARTS BY REDEFINING TWO TOKENS AND NOTHING ELSE. `--glass-fill` and
+   `--glass-sat` are re-declared on this rule, so the blur, the brightness, the
+   rim, the specular and the shadow all still come from the shared set and the
+   pair cannot drift apart anywhere else.
+
+   THE RAMP'S STOPS ARE FITTED, NOT TRANSCRIBED. Figma places its handles at
+   (38.09, 25.74) → (59.44, 53.27) in the export's own 64-unit space, and those
+   run past the shape: CSS maps 0–100% onto the box's projection instead, so
+   the same two colours land at 50.5% and 94.8% along a 142.21deg axis, flat
+   either side. Transcribing the handles as 0%/100% would compress the ramp
+   into the disc and darken its whole upper half. Projected, then checked by
+   predicting three sampled pixels off the render — worst error 3/255. */
 .qa-chat {
   pointer-events: auto;
   flex: none;
   display: inline-grid;
   place-items: center;
-  width: var(--qa-h);
-  height: var(--qa-h);
+  width: var(--qa-chat-h);
+  height: var(--qa-chat-h);
   padding: 0;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: var(--r-pill);
-  background-image:
-    linear-gradient(#37BD69, #37BD69),
-    linear-gradient(0deg, rgba(255, 255, 255, .72) 0%, rgba(230, 240, 238, .5) 100%);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  box-shadow: 0 4px 6.2px 0 rgba(0, 0, 0, .15);
+  --glass-fill: rgba(255, 255, 255, .35);
+  --glass-sat:  100%;
+  background-color: var(--glass-fill);
+  background-image: linear-gradient(142.21deg,
+    rgba(0, 175, 214, .55) 50.5%,
+    rgba(96, 221, 186, .55) 94.8%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+          backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .25),
+              inset 0 1px 0 0 var(--glass-spec),
+              inset 0 -1px 0 0 var(--glass-bounce),
+              inset 0 0 0 1px var(--glass-rim),
+              inset 0 -6px 12px -6px var(--glass-depth);
   cursor: pointer;
   transition: transform var(--t-base) var(--ease-out),
               box-shadow var(--t-base) var(--ease);
 }
-.qa-chat:hover { box-shadow: 0 8px 16px -2px rgba(0, 0, 0, .22); }
+.qa-chat:hover {
+  box-shadow: 0 6px 14px -2px rgba(0, 0, 0, .28),
+              inset 0 1px 0 0 var(--glass-spec-h),
+              inset 0 -1px 0 0 var(--glass-bounce),
+              inset 0 0 0 1px var(--glass-rim-h),
+              inset 0 -6px 12px -6px var(--glass-depth);
+}
 .qa-chat:active { transform: scale(.94); }
 .qa-chat:focus-visible { outline: 3px solid var(--ui-link); outline-offset: 3px; }
 .qa-chat img { display: block; width: 24px; height: 24px; }
@@ -8158,7 +8262,20 @@ body.is-site .card:active { transform: scale(.978); }
   transition: opacity var(--qa-t-morph) var(--qa-ease),
               transform var(--qa-t-morph) var(--qa-ease);
 }
-.qa-pill__grid { width: 100%; height: 100%; opacity: 1; transform: rotate(0deg) scale(1); }
+/* THE GRID MARK IS MASKED, AND THAT IS WHY THERE IS STILL ONE ASSET. Node
+   295:5561 exports it byte-identical to the committed `qa-actions.svg` in
+   every respect but one — `fill="black"` where the file says `fill="white"`,
+   because the pill went to glass and the mark had to follow the label.
+   Committing that export would leave two files differing by one word, and the
+   next colour would want a third. So the asset supplies the SHAPE as a mask
+   and `currentColor` supplies the colour — the same source the × beside it
+   already draws from, so the pill's `color` now moves both marks at once. */
+.qa-pill__grid {
+  width: 100%; height: 100%; opacity: 1; transform: rotate(0deg) scale(1);
+  background: currentColor;
+  -webkit-mask: url(assets/icon/qa-actions.svg) center / 100% 100% no-repeat;
+          mask: url(assets/icon/qa-actions.svg) center / 100% 100% no-repeat;
+}
 .qa-pill__x { opacity: 0; transform: rotate(-90deg) scale(.55); }
 .qa.is-open .qa-pill__grid { opacity: 0; transform: rotate(90deg) scale(.55); }
 .qa.is-open .qa-pill__x { opacity: 1; transform: rotate(0deg) scale(1); }
@@ -8185,13 +8302,13 @@ body.is-site .card:active { transform: scale(.978); }
   transition: max-width var(--t-base) var(--qa-ease), opacity 140ms var(--ease);
 }
 /* SCROLLED: the words go and the pill becomes a disc around its glyph */
-.qa.is-scrolled .qa-pill { padding: 14px; gap: 0; }
+.qa.is-scrolled .qa-pill { padding: 16px; gap: 0; }
 .qa.is-scrolled .qa-pill__t { max-width: 0; opacity: 0; }
 /* …and while the menu is open it stays open-shaped, whatever the scroll says:
    the control that opened the panel should not change under the finger. The
    brief draws the open state as `[ × Quick Actions ]`, so the label is part of
    it rather than something the × replaces. */
-.qa.is-open .qa-pill { padding: 14px 16px; gap: var(--s2); }
+.qa.is-open .qa-pill { padding: 16px; gap: var(--s2); }
 .qa.is-open .qa-pill__t { max-width: 12em; opacity: 1; }
 
 /* ── the veil · A DIM, NOT A FROST ────────────────────────────────────────
@@ -8255,7 +8372,7 @@ body.is-site .card:active { transform: scale(.978); }
 .qa-menu {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--qa-b) + var(--qa-h) + var(--s2));
+  bottom: calc(var(--qa-b) + var(--qa-row-h) + var(--s2));
   /* the panel's width is the cells' — see --qa-cell-w */
   width: min(
     calc(var(--qa-cols) * var(--qa-cell-w)
@@ -8447,7 +8564,7 @@ body.is-site .card:active { transform: scale(.978); }
    and a gutter, and only this panel, because the Site panel carries no pill.
    IT WAS A LITERAL 48 and the pill has been 52 since node 280:3521 — four
    pixels of the last row sat under it. */
-#panel-modules { padding-bottom: calc(var(--qa-b) + var(--qa-h) + var(--s4)); }
+#panel-modules { padding-bottom: calc(var(--qa-b) + var(--qa-row-h) + var(--s4)); }
 
 /* ── narrow · TWO ACROSS, NOT THREE, AND NOTHING HIDDEN ───────────────────
    The brief specifies a 4x4 and forbids removing, hiding, categorising,
@@ -28524,7 +28641,7 @@ function createQuickActions({ root, onAction, onChat } = {}) {
          with the pill's colour, and the bars are what draw themselves out
          during the morph. See the stylesheet. */
       '<span class="qa-pill__g">' +
-        '<img class="qa-pill__grid" src="assets/icon/qa-actions.svg" alt="">' +
+        '<span class="qa-pill__grid" aria-hidden="true"></span>' +
         '<span class="qa-pill__x" aria-hidden="true"><i></i><i></i></span>' +
       '</span>' +
       '<span class="qa-pill__t">Quick Actions</span>' +
