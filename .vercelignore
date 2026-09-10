@@ -41,3 +41,13 @@ docs
 # `.gitignore` rather than adding to it, so being ignored by git buys nothing
 # here. 8 Sep 2026.
 .env*
+
+# Third-party design skills installed with `npx skills add` (10 Sep 2026), and
+# the lockfile that records them. 324KB of markdown that instructs an agent;
+# nothing in index.html fetches from either, and `/.agents/skills/...` would
+# have answered 200 on the live site. EXACTLY the case as `.claude` and
+# `assets/icon.zip` above — Vercel uploads the WORKING DIRECTORY, so an
+# untracked directory ships to production without ever being committed.
+# `.claude/skills/` is already covered by the `.claude` line.
+.agents
+skills-lock.json

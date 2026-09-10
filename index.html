@@ -667,14 +667,56 @@
   --z-drag:    500;
 }
 
+/* ══ TABULAR FIGURES ON EVERY NUMBER THAT IS DATA ══════════════════════════
+   Inter's default figures are PROPORTIONAL: a `1` is narrower than a `0`, so
+   a value re-rendering from 02 to 12 changes width, and a stacked column of
+   days (04 / 05 / 07) does not align on its own tens digit. On a dashboard
+   whose numbers refresh, that reads as the layout twitching.
+
+   SCOPED TO THE VALUES, NOT TO `body`. Tabular figures are wider and slightly
+   colder than proportional ones; they are right for a stat and wrong for the
+   note copy, where a date inside a sentence should sit in the sentence's own
+   rhythm. So this is a list of the classes whose text IS a number, taken from
+   a probe of the rendered page rather than guessed:
+   `.figure__value` 2,411 / 110,020, the Key Insights headline and tiles, the
+   two site stat families, the Focus Hub's day column and its AID references,
+   and the `<time>` stamps that sit in a stacked list.
+
+   `.l-note__more` (+2) is deliberately NOT here: it is one glyph beside an
+   avatar stack, never compared with anything above or below it. */
+.figure__value,
+.l-headline__value,
+.l-headline__tile-value,
+.l-stat__value,
+.site-stat__value,
+.site-fig__value,
+.l-focus__day,
+.l-focus__ref,
+time {
+  font-variant-numeric: tabular-nums;
+  /* the same thing again for the older Safari that shipped on the iPads this
+     is built for, where `font-variant-numeric` alone is ignored */
+  -webkit-font-feature-settings: "tnum" 1;
+          font-feature-settings: "tnum" 1;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    BREAKPOINTS
    The reference band is untouched. The others step the column count and the
    spacing so the same cards stay legible; nothing re-declares a component.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Mobile · < 768px · 2 columns ────────────────────────────────────────*/
-@media (max-width: 767px) {
+/* ── Mobile · < 744px · 2 columns ────────────────────────────────────────
+   THE BAND ENDS AT 743, NOT 767, BECAUSE 744 IS AN ARTBOARD. Node 321:3570 —
+   the design of 10 Sep 2026 — is drawn at 744 wide, which is an iPad mini in
+   portrait, and it specifies the TABLET treatment there: 24px page padding,
+   a 16px gutter, four columns of 162 and a 144-tall card. Left in the mobile
+   band, 744 took `--pad-page: 16px`, which made the columns 166 and the card
+   147.5 — the right shape at the wrong size, and every number in the
+   artboard off by four. Moving the boundary to 744 is what makes the node's
+   162 and 144 fall out of the existing derivation rather than being pinned
+   on top of it. */
+@media (max-width: 743px) {
   :root {
     --grid-cols: 2;
     --grid-gap:  12px;
@@ -686,8 +728,9 @@
   }
 }
 
-/* ── Tablet portrait · 768–899px · 4 columns ─────────────────────────────*/
-@media (min-width: 768px) and (max-width: 899px) {
+/* ── Tablet portrait · 744–899px · 4 columns ─────────────────────────────
+   THE LOWER BOUND IS THE 744 ARTBOARD (node 321:3570) — see the band above. */
+@media (min-width: 744px) and (max-width: 899px) {
   :root {
     --grid-cols: 4;
     /* 16, the node's own gutter, not 14. An iPad in portrait lands in this
@@ -695,8 +738,20 @@
     --grid-gap:  16px;
     --grid-row:  156px;
     --pad-page:  24px;
-    --search-h:  60px;
-    --hero-h:    188px;
+    /* ── NODE 321:3570, THE 744 ARTBOARD · 10 Sep 2026 ──────────────────
+       The values below are that node's, replacing the ones derived for the
+       1024 reference. They are scoped to THIS BAND and not to `:root`
+       deliberately: 321:3570 is drawn at 744 and the 1024 artboard states
+       its own figures — a 24/32 greeting, a 64 search, a 36 hero title — so
+       propagating these upward would overwrite one artboard with another
+       rather than implement either. Every number here is measured off the
+       node, and the two that are NOT changed are noted at the end. */
+    --search-h:  52px;   /* was 60 · node's Search field and scan button    */
+    --fs-greet:  20px;   /* was 24 · "Good Morning," DM Sans Regular        */
+    --fs-name:   28px;   /* was 32 · "Sourav Tambe", tracking -0.28         */
+    --fs-hero:   28px;   /* was 36 · "Antz Command Centre", Host Grotesk    */
+    --r-card:    12px;   /* was 16 · every module card in the node          */
+    --hero-h:    144px;  /* the node's banner, and the grid row it matches  */
   }
 }
 
@@ -777,7 +832,9 @@
 :root { --card-ar: 1.0926829; }        /* 179.2 / 164, node 196:7384 — the ratio */
 @supports (container-type: inline-size) {
   .modules-band { container-type: inline-size; }
-  @media (min-width: 768px) and (max-width: 899px) {
+  /* THE SAME LOWER BOUND, 744, and it has to move with the band above or the
+     derivation stops one pixel short of the artboard it was written for. */
+  @media (min-width: 744px) and (max-width: 899px) {
     #moduleGrid, .hero--estate { --grid-row: calc((100cqw - 48px) / 4 / 1.0926829); }
   }
 }
@@ -1000,7 +1057,7 @@ button { font: inherit; color: inherit; }
    the same 220px band puts far fewer, far larger plants behind the greeting.
    Shrinking the box scales the artwork with it — the plants get smaller and
    closer together, which is the finer texture the narrow column wants. */
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .foliage {
     /* The stops are absolute, so the box has to be deep enough to contain them
        or the band ends in a straight cut before the fade has begun. A phone
@@ -1177,6 +1234,29 @@ button { font: inherit; color: inherit; }
    Figma says and a finger still gets its 44. */
 .icon-btn, .avatar-btn { position: relative; }
 .icon-btn::after, .avatar-btn::after { content: ''; position: absolute; inset: -3px; }
+
+/* ── the two controls this rule had not reached ──────────────────────────
+   Hit-tested on the rendered page, walking outward from each edge until the
+   element stops answering: the bell and the avatar are a true 44 x 44 thanks
+   to the rule above, the scan button is 60, and these two were still their
+   drawn size — the pager dots 6 x 6 and the Edit link 131 x 19.
+
+   THE DOTS CANNOT REACH 44, AND THAT IS A LAYOUT FACT, NOT AN OVERSIGHT.
+   They sit on a 12px pitch — 6px drawn, 6px gap — so a hit area wider than
+   12 would overlap its neighbour and steal its press; and there are only
+   12px between the row and the bottom of the card, past which `overflow`
+   clips the target rather than merely hiding it. So this takes the pitch
+   exactly (12 wide, no overlap) and all the room the card has (30 tall),
+   which is a fivefold increase in area and still short of the floor. Closing
+   the rest needs the dots' own gap or the card's bottom padding to grow,
+   which is a visible change and wants ruling rather than assuming — the
+   swipe is the primary way through the deck either way.
+
+   The Edit link has room on both sides and takes the full 44. */
+.dots__dot { position: relative; }
+.dots__dot::after { content: ''; position: absolute; inset: -12px -3px; }
+.link-btn { position: relative; }
+.link-btn::after { content: ''; position: absolute; inset: -12px 0; }
 
 /* the avatar carries its presence badge at 70% inset on a white ring */
 .avatar-btn {
@@ -1881,7 +1961,7 @@ button { font: inherit; color: inherit; }
                 right-aligns them.
      TYPE LIST  eight radio rows go two-up rather than each stretching to
                 960px of mostly empty pill. */
-@media (min-width: 768px) {
+@media (min-width: 744px) {
   .gsx-sheet { width: min(720px, 100%); }
   .gsx-sheet__head,
   .gsx-sheet__body { padding-inline: var(--s6); }
@@ -2109,7 +2189,7 @@ body.is-searching { overflow: hidden; }
   color: var(--on-dark);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   /* 44px of side padding is a quarter of a phone. The mark comes down with it
      — box AND image together, which the previous override missed: it shrank
      the 68px box around an 84px image. */
@@ -2424,7 +2504,7 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    instead of the design — removed 4 Sep 2026. */
 /* a phone has no room for the photograph beside the copy: the panel takes
    the whole card and the type comes down a step */
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .hero-stage { --peek-1: 3px; --peek-2: 7px; --ann-h: 232px; }
   .ann__photo { display: none; }
   .ann__panel { border-radius: 30px; padding: 14px; }
@@ -2733,7 +2813,7 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 /* a phone has no room for a 320px card beside the gutters; the card narrows
    so a second one still peeks, and nothing inside it changes — the media is a
    ratio, so it narrows with the card and keeps its four by three. */
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .obs { --obs-w: min(320px, calc(100vw - 72px)); }
   .obs-head__title { font-size: 20px; line-height: 24px; }
   .obs-head { height: 24px; }
@@ -3237,7 +3317,7 @@ body.is-editing .section-head--home { align-items: center; margin-bottom: var(--
 .card[data-size='large'],
 .card[data-size='tall'],
 .card[data-size='full'] { padding: var(--s6); }
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .card, .card[data-size='medium'] { padding: var(--s4); }
   .card[data-size='large'], .card[data-size='tall'], .card[data-size='full'] { padding: var(--s5); }
 }
@@ -6156,7 +6236,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 
    Only the 12.9" iPad is 1024pt in portrait, so at the old breakpoint it was
    the single tablet that got this right. */
-@media (min-width: 768px) {
+@media (min-width: 744px) {
   /* The flag the picker's JS reads to know which arrangement is live. Same
      idea as --grid-cols: the stylesheet decides, and the script asks the
      cascade rather than keeping its own copy of the breakpoint. */
@@ -6233,7 +6313,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 }
 
 /* ══ mobile ══════════════════════════════════════════════════════════════ */
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .sheet { height: 94dvh; }
   .widget-row { gap: var(--s3); }
   .sheet__foot { grid-template-columns: minmax(0, 1fr); gap: var(--s3); }
@@ -6624,7 +6704,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 }
 .site-sync .icon { width: 13px; height: 13px; opacity: .7; }
 
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .site-head { padding: var(--s3) var(--s4); }
   /* One 38px button no longer needs a row of its own, and taking the full-width
      rule out is what lets the identity block keep the line it is on. */
@@ -6818,7 +6898,7 @@ body.is-dragging { -webkit-user-select: none; user-select: none; cursor: grabbin
 }
 .pmenu-catcher--veil.is-open { opacity: 1; }
 
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .pmenu--centre {
     width: calc(100vw - 32px);
     max-height: 82dvh;
@@ -7835,7 +7915,7 @@ body.is-site .card:active { transform: scale(.978); }
 }
 
 /* ══ mobile ════════════════════════════════════════════════════════════ */
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   .wdetail { height: 94dvh; }
   .wdetail__head { padding-top: var(--s6); gap: var(--s3); }
   .wdetail__plate { width: 44px; height: 44px; border-radius: 14px; }
@@ -8214,7 +8294,12 @@ body.is-site .card:active { transform: scale(.978); }
      as deliberate; a press that took 220ms to reach .96 reads as lag. The
      brief asks for ~100ms on a plain ease-out, so `transform` is pulled out of
      the shared line and given it. */
-  transition: padding var(--t-base) var(--qa-ease),
+  /* `padding` WAS IN THIS LIST AND NEVER CHANGED — 16px in the resting, the
+     scrolled and the open state alike, measured at every frame of the
+     collapse. It is replaced by `margin-inline`, which is what now holds the
+     chat disc still: see `.qa.is-scrolled .qa-pill`. `gap` stays, and it does
+     change (8 → 0), so it has to ease with the label rather than snap. */
+  transition: margin-inline var(--t-base) var(--qa-ease),
               gap var(--t-base) var(--qa-ease),
               transform var(--qa-t-press) var(--qa-ease-press),
               box-shadow var(--t-base) var(--ease);
@@ -8389,13 +8474,43 @@ body.is-site .card:active { transform: scale(.978); }
   transition: max-width var(--t-base) var(--qa-ease), opacity 140ms var(--ease);
 }
 /* SCROLLED: the words go and the pill becomes a disc around its glyph */
-.qa.is-scrolled .qa-pill { padding: 16px; gap: 0; }
+/* ══ THE COLLAPSE MOVES NEITHER CONTROL ═══════════════════════════════════
+   THE PILL WAS ALREADY STILL AND THE DISC WAS NOT. The row is centred and
+   holds the pill plus a 12px gap plus the 56px disc, so as the pill narrowed
+   from 165 to 52 the row narrowed with it and re-centred — which held the
+   PILL's centre at a fixed 350 (that was the point of putting it in a row)
+   and handed the entire 56px shift to the disc, measured travelling from
+   centre 472 to 416 and back on every scroll. On a touch tablet that is the
+   worse half of the trade: you reach for chat mid-scroll and it has moved.
+
+   THE FIX RESERVES THE PILL'S OPEN WIDTH rather than moving anything. The
+   collapsed pill takes symmetric margins of (open - 52) / 2, so the row's
+   total width never changes: the disc stays at 472 and the pill's circle
+   still lands centred on 350, exactly where its stadium was centred. Both
+   controls are now fixed and the price is the GAP, which opens from 12 to
+   ~68 while scrolled — two separate floating buttons rather than a pair,
+   which is what they are once the label is gone.
+
+   `--qa-pill-open-w` IS MEASURED, NOT ASSUMED, because the open width is the
+   label's: "Quick Actions" at the body size is 165 here, and a translation or
+   a font-size change makes it something else. See measurePill(). The margin
+   transitions on the same duration and easing as the label's `max-width`, so
+   the two track each other through the whole collapse instead of only
+   agreeing at the ends. */
+.qa.is-scrolled .qa-pill {
+  padding: 16px;
+  gap: 0;
+  margin-inline: calc((var(--qa-pill-open-w, 165px) - var(--qa-h)) / 2);
+}
 .qa.is-scrolled .qa-pill__t { max-width: 0; opacity: 0; }
 /* …and while the menu is open it stays open-shaped, whatever the scroll says:
    the control that opened the panel should not change under the finger. The
    brief draws the open state as `[ × Quick Actions ]`, so the label is part of
    it rather than something the × replaces. */
-.qa.is-open .qa-pill { padding: 16px; gap: var(--s2); }
+/* open puts the label back, so the reservation comes off with it — this rule
+   follows the scrolled one deliberately, since the two carry equal
+   specificity and both classes are present on an open, scrolled panel */
+.qa.is-open .qa-pill { padding: 16px; gap: var(--s2); margin-inline: 0; }
 .qa.is-open .qa-pill__t { max-width: 12em; opacity: 1; }
 
 /* ── the veil · A FROST AGAIN, AND THIS IS THE THIRD RULING ON IT ─────────
@@ -8418,14 +8533,18 @@ body.is-site .card:active { transform: scale(.978); }
         came from the PANEL's own material rather than from darkening the
         page. (3) lasted about two hours.
    5. 10 Sep, and THIS is the one in force: "Background of main page should
-        Black". Black at 82% over the same 16px blur, with saturation back to
-        1. This reverses (4) outright and goes past (3)'s 25%. 62% was tried
-        first and rejected on the render: with saturation still lifted it read
-        as dark teal murk rather than black, because what it was dimming was a
-        page full of greens and blues. The blur is kept rather than going to
-        flat opaque black so the dashboard's shapes still read faintly behind
-        the panel, which is the one thing every version of this instruction
-        has left intact.
+        Black", then — on being shown 82% — "I told little black Blur". A
+        LIGHT black tint: 30% over the same 16px blur, which is (3)'s 25%
+        again with the "more" it asked for.
+
+        TWO WRONG READINGS OF "BLACK" GOT THERE, AND BOTH ARE THE SAME
+        MISTAKE. 62% with saturation still lifted read as dark teal murk, so
+        it went to 82% with saturation at 1 — which was black, and blacked the
+        page OUT. The instruction was never about how black the tint is; it is
+        about the tint being black RATHER THAN WHITE, which (4) had made it.
+        The constant across all five rulings is that the page stays legible
+        behind the panel — "The user should still understand where they are in
+        the dashboard" — and 82% broke it while satisfying the word.
 
    THE PANEL STAYS LIGHT. The ruling names the PAGE's background, and the
    panel is a separate surface — white at 62% over this black now renders as
@@ -8450,7 +8569,7 @@ body.is-site .card:active { transform: scale(.978); }
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background: rgba(0, 0, 0, .82);
+  background: rgba(0, 0, 0, .3);
   /* SATURATION BACK TO 1, which the white settings needed and this one cannot
      have: `saturate(1.1)` lifted the page's colour THROUGH the tint, and at
      black 62% the result read as dark teal murk rather than as black — the
@@ -8627,14 +8746,13 @@ body.is-site .card:active { transform: scale(.978); }
   padding: var(--qa-mod-pad);
   border-radius: var(--qa-mod-panel-r);
   border: 0;
-  /* .92, NOT THE .62 IT WAS. The material is unchanged in intent — 4A rules a
-     WHITE panel around the modules — but 62% white is only white over a light
-     page. Over the black backdrop of 10 Sep it composites to a mid-grey slab,
-     which read as murk and took the dark "All modules" heading down with it.
-     Raising the alpha is what KEEPS 4A's ruling true under the new backdrop;
-     the frost is still doing visible work at .92 because the blur and the
-     saturation are what carry it, not the transparency. */
-  background: rgba(255, 255, 255, .92);
+  /* 4A'S OWN .62, AND IT WENT TO .92 AND BACK. Over an 82% black backdrop
+     62% white composited to a mid-grey slab, so the alpha was raised to keep
+     the panel reading as the white panel 4A rules. The backdrop is a LIGHT
+     30% tint now, so the compensation is unnecessary and the frost is real
+     again — a raised alpha is what you need when the layer behind is opaque,
+     which is a reason to check the backdrop rather than to change this. */
+  background: rgba(255, 255, 255, .62);
   -webkit-backdrop-filter: blur(30px) saturate(1.8);
           backdrop-filter: blur(30px) saturate(1.8);
   box-shadow: 0 1px 2px rgba(31, 65, 91, .08), 0 24px 60px -24px rgba(31, 65, 91, .32);
@@ -8885,7 +9003,7 @@ body.is-site .card:active { transform: scale(.978); }
 @media (max-width: 900px) {
   :root { --qa-pad: 16px; --qa-gap: 12px; --qa-cell-px: 12px; }
 }
-@media (max-width: 767px) {
+@media (max-width: 743px) {
   :root { --qa-b: 24px; --qa-band: 132px; }
 }
 @media (max-width: 620px) {
@@ -8917,6 +9035,256 @@ body.is-site .card:active { transform: scale(.978); }
   :root { --qa-t-close: 0ms; --qa-mod-open: 0ms; --qa-mod-close: 0ms; }
 }
 
+
+/* ══ NODE 321:3570 · THE 744 ARTBOARD, RULE OVERRIDES ═════════════════════
+   THESE LIVE AT THE END OF THE LAST SHEET ON PURPOSE. The token half of this
+   node — `--search-h`, `--fs-greet`, `--fs-name`, `--r-card`, `--hero-h` —
+   sits up in the 744-899 band and works from there, because a custom property
+   is read wherever it is consumed. These are RULE overrides, and at equal
+   specificity the later rule wins: written beside the tokens they lost to
+   `.greeting__word`, `.search__icon`, `.hero` and `.main-frame`, all declared
+   further down. Measured that way first — the band reported 20px type set in
+   a Sour Gummy face, a 24px glyph and a 24px banner radius.
+
+   Still scoped to the band: 321:3570 is the 744 artboard, and the 1024 one
+   states its own figures. */
+@media (min-width: 744px) and (max-width: 899px) {
+  /* THE GREETING'S FACE CHANGES WITH THE NODE. The build set "Good Morning,"
+     in Sour Gummy Light — the one string in the product that was not Inter, a
+     deliberate choice recorded at `.greeting__word`. 321:3570 sets it in DM
+     SANS REGULAR at opsz 14, the face already loaded for the large figures,
+     so this is a change of designer intent and not a substitution for
+     something missing. Flagged in the handover rather than assumed. */
+  .greeting__word {
+    font-family: var(--font-num);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 14;
+  }
+  /* the node's own tracking, which the 1024 artboard does not carry */
+  .greeting__name { letter-spacing: -0.28px; }
+  /* 22, not 24 — the node's `search glyph` is 22 square */
+  .search__icon { width: 22px; height: 22px; }
+  /* THE TITLE IS A CLAMP ON vw, so the band's `--fs-hero` never reached it:
+     `.hero__title` declares `clamp(24px, 3.4vw, 36px)` outright, which is
+     25.3 at 744. The node says 28. */
+  .hero__title { font-size: 28px; }
+  /* 16, not the build's 24: the node draws the banner one radius step above
+     the module cards' 12 */
+  .hero { border-radius: 16px; }
+  /* THE MAIN FRAME'S SURFACE IS ALREADY BUILT, and it is not on
+     `.main-frame`. V2 draws it as `.modules-band::before` — the same wash the
+     node states (teal 10% at the foot rising to white 10%, which is
+     `to top` read the other way) and the same `0 0 32px 32px`, on negative
+     insets so it bleeds to the page edges. Declaring `background` and a
+     radius on `.main-frame` as well would lay a second 10% wash over the
+     first and read at 20%. So only the PADDING moves here, and the surface
+     is re-registered to it below. */
+  .main-frame { padding: 32px var(--pad-page) 24px; }
+  /* THE BAND'S OWN 24 COMES OFF, or the frame's 32 is paid twice: the node
+     puts the banner directly under the Main Frame's padding — search ends at
+     182, banner begins at 214 — where the build charged 32 + 24 and landed it
+     at 238. `:root[data-page-version='2']` is needed to match the rule that
+     sets it; a bare `.modules-band` loses on specificity, measured. */
+  :root[data-page-version='2'] .modules-band { margin-top: 0; }
+  /* and the wash follows the padding it is drawn to: -32 reaches the Main
+     Frame's top edge at 182. Its FOOT is set further down, for every width. */
+  :root[data-page-version='2'] .modules-band::before { top: -32px; }
+
+  /* ── THE PLANTING IS THE ARTBOARD'S OWN IMAGE HERE ────────────────────
+     TWO DIFFERENT ASSETS, and that is the whole of this difference. The build
+     draws `assets/img/foliage.png` — 3574x490 RGBA, which tools/foliage.py
+     derived by lifting the artwork off its own ground and mirror-pairing it so
+     it tiles — through a feather mask, so what you see is transparent sprigs
+     over the page's cyan gradient. Node 321:3570 draws the RAW artwork
+     (1448x1086, RGB, no alpha) in a 293-tall box with a flat 5% black over
+     it, so its header is an opaque illustration with the artwork's own sky.
+
+     THE CROP IS RESOLVED, NOT EYEBALLED. The node sets the image to width
+     100% and height 190.44% of the box, offset -61.4% of the box. At 744 the
+     image is 1086 x (744/1448) = 558 tall, which is exactly 190.44% of 293,
+     and the offset is -180px — 32.24% of the image's own height. Expressed
+     against the box width, which is the viewport's, that is -24.18vw, so the
+     same band of the artwork shows at every width in this band rather than
+     the crop sliding as it would with a percentage background-position.
+
+     THE FEATHER COMES OFF WITH IT. The mask exists to dissolve a transparent
+     strip into the page; an opaque illustration with a hard bottom edge at
+     293 is what the node draws, and the Main Frame's own surface starts at
+     182 and covers the join. */
+  .foliage {
+    height: 293px;
+    background: url('assets/img/foliage-artboard.png') no-repeat 0 -24.18vw / 100% auto;
+    /* ── AND IT FEATHERS DOWN · ruled 10 Sep, "the image has to feather
+       down, so it has to match the background" ───────────────────────────
+       The node's foliage is an opaque 293-tall box and ends in a straight
+       cut, which is what shipped for about an hour: the illustration stopped
+       mid-scene against the pale page and read as a crop, not a horizon. The
+       feather the build's own planting used is put back, but over the
+       ARTBOARD image and with stops measured to this box rather than the
+       old 440 one.
+
+       THE HOLD ENDS AT 182, which is not a round number by accident — it is
+       where the search field ends and where the Main Frame's wash begins. So
+       the artwork is solid for exactly as long as it is behind the greeting
+       and the field, then dissolves across the 111px that overlap the top of
+       the module surface, reaching zero at its own bottom edge. Nothing has
+       to line up by eye: the two layers meet inside the fade. */
+    -webkit-mask-image: linear-gradient(to bottom,
+      #000 0, #000 182px,
+      rgba(0, 0, 0, .72) 214px,
+      rgba(0, 0, 0, .34) 252px,
+      transparent 293px);
+            mask-image: linear-gradient(to bottom,
+      #000 0, #000 182px,
+      rgba(0, 0, 0, .72) 214px,
+      rgba(0, 0, 0, .34) 252px,
+      transparent 293px);
+    /* the base rule composites two masks; this is one, so the intersect the
+       @supports block sets has to be neutralised or the fade never applies */
+    -webkit-mask-composite: source-over;
+            mask-composite: add;
+  }
+  /* THE NODE'S 5% BLACK, and it fades with the artwork rather than over it.
+     Left at a flat `inset: 0` this painted a 5% grey rectangle down to 293
+     and reinstated the straight edge the mask above had just removed — the
+     tint outlived the image it was tinting. So it carries the same ramp. */
+  .foliage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(0, 0, 0, .05) 0, rgba(0, 0, 0, .05) 182px,
+      rgba(0, 0, 0, .036) 214px,
+      rgba(0, 0, 0, .017) 252px,
+      rgba(0, 0, 0, 0) 293px);
+  }
+}
+
+/* ══ THE MODULE SURFACE REACHES THE FOOT OF THE PAGE ══════════════════════
+   Ruled 10 Sep: "Down empty remove". The wash ended 24px below the grid and
+   the page ran on for another 160 — `#panel-modules` reserves the pill's
+   footprint (--qa-b + --qa-row-h + --s4 = 112, correctly derived), the Main
+   Frame adds its 24 and `.page` its 48 — so the last 160px was bare page
+   below a rounded-off surface, with the Quick Actions pill floating in the
+   middle of it. That is the empty band in the review.
+
+   THE CONTENT SPACING IS NOT THE PROBLEM AND IS NOT TOUCHED. Every one of
+   those three tails is doing a job: the 112 is what stops the pill covering
+   the last card, which is checked. What was wrong is that the SURFACE stopped
+   before them. In the node the Main Frame is `flex-1` and its rounded foot is
+   the bottom of the frame, with the Button Row floating over it — so the
+   wash is extended by exactly the three tails instead, and the pill now sits
+   on the surface as it does in the artboard.
+
+   DERIVED FROM THE SAME TOKENS the tails are, so it cannot drift out of step
+   with them: change --qa-b or the row height and the wash follows. */
+:root[data-page-version='2'] .modules-band::before {
+  bottom: calc((var(--qa-b) + var(--qa-row-h) + var(--s4)
+                + var(--s6) + var(--s12)) * -1);
+}
+
+/* ══ THE PROFILE DOCKS INTO THE STICKY BAR ════════════════════════════════
+   Ruled 10 Sep 2026 · mockups/header-scroll.html premise 5, "the dock", with
+   the profile in place of the name.
+
+   IT RIDES `is-stuck`, WHICH ALREADY EXISTS. The mockup drove all six
+   premises from a continuous scroll-progress value written every frame, which
+   is right for comparing them and wrong for shipping one: this page's motion
+   audit found no per-frame scroll JS anywhere, and the search row already
+   toggles `.is-stuck` from an IntersectionObserver that the pill's collapse
+   shares. So the dock is a CSS transition on that class — no new observer, no
+   scroll listener, nothing running between frames.
+
+   IT ANIMATES `width`, WHICH IS USUALLY THE WRONG ANSWER. `transform` would
+   be cheaper, but the control has to take its place IN THE ROW and push the
+   search field's flex basis as it arrives; a transformed button would slide
+   over the field and cover the end of what you are typing. The field is the
+   only flex child, so this is one width transition against one flex
+   recalculation, in a row of three items — measured, not assumed.
+
+   AND IT IS `visibility`, NOT `display`. `display: none` cannot transition,
+   and an opacity-only hide leaves a 38px control in the tab order and in the
+   accessibility tree while it is invisible — reachable by keyboard, announced
+   by a screen reader, and impossible to see. `visibility: hidden` takes it
+   out of both and is transitionable in the step sense, so the delay below
+   lets it appear at the start of the open and vanish at the end of the
+   close. */
+.search-row__profile {
+  flex: none;
+  width: 0;
+  opacity: 0;
+  visibility: hidden;
+  /* it arrives from the right, which is where it lives in the header — the
+     control does not appear out of nowhere, it comes from where it was */
+  transform: translateX(10px) scale(.9);
+  transition: width var(--t-base) var(--ease),
+              opacity var(--t-fast) var(--ease),
+              transform var(--t-base) var(--ease),
+              margin-left var(--t-base) var(--ease),
+              visibility 0s linear var(--t-base);
+}
+.search-row.is-stuck .search-row__profile {
+  width: 38px;
+  margin-left: 4px;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0) scale(1);
+  transition: width var(--t-base) var(--ease),
+              opacity var(--t-base) var(--ease) 60ms,
+              transform var(--t-base) var(--ease),
+              margin-left var(--t-base) var(--ease),
+              visibility 0s linear 0s;
+}
+/* THE ROW CENTRES IT AGAINST A 52px FIELD. `.search-row` is `align-items:
+   flex-start` so the scan button lines up with the top of the field; a 38px
+   avatar on that baseline sits 7px high of the field's centre. */
+.search-row__profile { align-self: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* the control still has to arrive — it is the only route to the profile
+     once the header has gone — so what is removed is the travel, not the
+     appearance */
+  .search-row__profile {
+    transform: none;
+    transition: visibility 0s linear;
+  }
+}
+
+/* ══ KEY INSIGHTS GLOWS ═══════════════════════════════════════════════════
+   Ruled 10 Sep: "Key insights has to glow, like animate". The card is the
+   only one on the page whose numbers change on their own, and the glow is
+   what says so.
+
+   THE HALO IS THE CARD'S OWN TEAL — #00D6C9, the top stop of its gradient —
+   so it reads as the card brightening rather than as a coloured ring around
+   it. It breathes on a 3.2s ease-in-out, slow enough to be noticed rather
+   than watched, and it is the ONLY perpetual animation in the product: the
+   motion audit of this morning found none, which is why this one is
+   deliberate and singular rather than a house pattern.
+
+   `:has(> .l-headline)` IS THE SELECTOR because the card carries no variant
+   class of its own — it is a bare `.card` whose single child is the Key
+   Insights layout, and that layout appears once on the page. Targeting
+   `.l-headline` itself would inset the halo by the card's 16px padding and
+   glow a box inside a box. */
+@keyframes ki-glow {
+  /* NOT TO ZERO AT THE TROUGH. A halo that vanishes completely reads as a
+     flicker on the way back in; holding a little light means the card is
+     always slightly lifted and the pulse is a swell rather than a blink.
+     Two layers at the peak — a tight rim and a wide bloom — because one
+     wide shadow at this alpha goes muddy against the page's own teal. */
+  0%, 100% { box-shadow: 0 0 10px -4px rgba(0, 214, 201, .18); }
+  50%      { box-shadow: 0 0 8px -2px rgba(0, 214, 201, .5),
+                         0 0 34px 2px rgba(0, 214, 201, .42); }
+}
+.card:has(> .l-headline) {
+  animation: ki-glow 3.2s var(--ease, ease-in-out) infinite;
+}
+/* it is decoration, not information — the house rule for every other
+   animation in this file, and the audit's own point about perpetual motion */
+@media (prefers-reduced-motion: reduce) {
+  .card:has(> .l-headline) { animation: none; }
+}
 </style>
 
 <!-- ══ WHICH HOME PAGE: V1 OR V2 ═══════════════════════════════════════════
@@ -9032,6 +9400,35 @@ body.is-site .card:active { transform: scale(.978); }
     <!-- THE GRID BUTTON IS GONE (3 Sep 2026, evening). It opened Add Module; the
          designer's frame draws the scan control alone beside the field, and
          Edit in the Modules header is now the way into Add Module. -->
+
+    <!-- ══ THE PROFILE, DOCKED ═══════════════════════════════════════════
+         Ruled 10 Sep 2026 from mockups/header-scroll.html, premise 5 — the
+         dock — with the ruling that it carries the PROFILE and not the name.
+
+         IT EXISTS BECAUSE THE HEADER LEAVES AND THE PROFILE WITH IT. The
+         greeting row scrolls away at 130px, and the avatar is the only route
+         to Edit Modules, Reset Home Page and the workspace switch — "the
+         action is in the profile" is the 8 Sep ruling that put it there. So
+         once you were a screen down the page, everything a person can do to
+         their own page was unreachable without scrolling back up. The sticky
+         bar was already staying; this gives it the one control worth keeping.
+
+         IT IS THE SAME MENU, NOT A SECOND ONE. `createProfileMenu` now takes
+         both avatars and positions off whichever was pressed — see the note
+         at `anchors` there. Duplicating the MENU would have been two sources
+         of truth for the same state.
+
+         `aria-hidden` IS NOT SET HERE and must not be: the CSS holds it at
+         `visibility: hidden` until the bar sticks, which takes it out of the
+         accessibility tree and the tab order on its own, and reverses when it
+         appears. A hand-managed `aria-hidden` would have to be kept in step
+         with a CSS transition, which is how a control ends up announced and
+         invisible, or visible and silent. -->
+    <button type="button" class="avatar-btn search-row__profile" id="avatarBtnDock"
+            aria-label="Your account">
+      <img src="assets/img/avatar.png" alt="">
+      <span class="avatar-btn__badge"><img src="assets/icon/avatar-badge.svg" alt=""></span>
+    </button>
   </div>
 
   <div class="main-frame">
@@ -25400,6 +25797,21 @@ const { menuEntry, capToViewport, menuOrigin } = __req('js/components/PopMenu.js
 function createProfileMenu({ anchor, items, onSelect, getState }) {
   let open = false
 
+  /* ── ONE MENU, MORE THAN ONE TRIGGER ────────────────────────────────────
+     `anchor` may be a single element or a list. The avatar exists twice on
+     the home page since 10 Sep: once in the header, and once docked into the
+     sticky search bar, which is the only way back to the profile after the
+     header has scrolled away.
+
+     `live` IS THE ONE THAT WAS PRESSED, and everything positional reads it
+     rather than the first in the list. That is the whole reason this is not
+     simply two click handlers: `place()` measures the anchor's box, so a menu
+     opened from the docked avatar while the header avatar sits 200px above
+     the viewport would be pinned to a control nobody can see. Escape returns
+     focus to `live` for the same reason. */
+  const anchors = (Array.isArray(anchor) ? anchor : [anchor]).filter(Boolean)
+  let live = anchors[0]
+
   const menu = document.createElement('div')
   menu.className = 'pmenu'
   menu.setAttribute('role', 'menu')
@@ -25453,7 +25865,7 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
    * of the avatar, so it stops at the page margin instead.
    */
   function place() {
-    const r = anchor.getBoundingClientRect()
+    const r = live.getBoundingClientRect()
     const w = menu.offsetWidth
     const margin = 12
     const left = Math.max(margin, Math.min(r.right - w, window.innerWidth - w - margin))
@@ -25473,7 +25885,7 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
     catcher.hidden = false
     menu.hidden = false
     place()
-    anchor.setAttribute('aria-expanded', 'true')
+    for (const a of anchors) a.setAttribute('aria-expanded', String(a === live))
     requestAnimationFrame(() => menu.classList.add('is-open'))
     menu.querySelector('.pmenu__item')?.focus()
     document.addEventListener('keydown', onKeydown)
@@ -25485,7 +25897,7 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
     if (!open) return
     open = false
     menu.classList.remove('is-open')
-    anchor.setAttribute('aria-expanded', 'false')
+    for (const a of anchors) a.setAttribute('aria-expanded', 'false')
     catcher.hidden = true
     document.removeEventListener('keydown', onKeydown)
     window.removeEventListener('resize', place)
@@ -25496,7 +25908,7 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
   }
 
   function onKeydown(e) {
-    if (e.key === 'Escape') { e.preventDefault(); close(); anchor.focus(); return }
+    if (e.key === 'Escape') { e.preventDefault(); close(); live.focus(); return }
 
     const step = { ArrowDown: 1, ArrowUp: -1 }[e.key]
     if (!step) return
@@ -25506,9 +25918,19 @@ function createProfileMenu({ anchor, items, onSelect, getState }) {
     list[(i + step + list.length) % list.length]?.focus()
   }
 
-  anchor.setAttribute('aria-haspopup', 'menu')
-  anchor.setAttribute('aria-expanded', 'false')
-  anchor.addEventListener('click', () => (open ? close() : show()))
+  for (const a of anchors) {
+    a.setAttribute('aria-haspopup', 'menu')
+    a.setAttribute('aria-expanded', 'false')
+    /* the pressed control becomes `live` BEFORE show(), so the first place()
+       of the open already measures the right box. Pressing the OTHER avatar
+       while the menu is open re-places it rather than closing — the menu
+       follows the control you used last. */
+    a.addEventListener('click', () => {
+      if (open && a === live) return close()
+      live = a
+      open ? place() : show()
+    })
+  }
   catcher.addEventListener('click', close)
 
   return { open: show, close, get isOpen() { return open } }
@@ -29038,6 +29460,36 @@ function createQuickActions({ root, onAction, onChat } = {}) {
   const pill = root.querySelector('.qa-pill')
   const menu = root.querySelector('.qa-menu')
   const veil = root.querySelector('.qa-veil')
+
+  /* ── the pill's OPEN width, which the collapse reserves ─────────────────
+     Written to `--qa-pill-open-w` and read by `.qa.is-scrolled .qa-pill` to
+     hold the chat disc still — the argument is in the stylesheet. It has to
+     be measured rather than written down: the width is "Quick Actions" set
+     at the body size, which a translation or a type-scale change moves.
+
+     MEASURED ONLY WHILE THE LABEL IS ACTUALLY OUT, which is why this bails
+     when `is-scrolled` is on. Reading a collapsed pill would store 52, the
+     reservation would compute to zero, and the disc would go back to
+     travelling — silently, since nothing else would look wrong.
+
+     `offsetWidth`, NOT getBoundingClientRect(), so a press mid-scroll cannot
+     fold `transform: scale(.96)` into the stored number. */
+  function measurePill() {
+    if (root.classList.contains('is-scrolled')) return
+    const w = pill.offsetWidth
+    /* AND IT MUST BE WIDER THAN THE CIRCLE. The class coming off does not
+       mean the label is back — the expansion is a 220ms transition, and a
+       read taken during it returns something between 52 and 165. Storing
+       that shrinks the reservation and the disc starts travelling again, so
+       anything at or below the collapsed diameter is refused rather than
+       trusted. Found exactly this way: a re-measure on the way back to the
+       top stored 52px and quietly undid the fix. */
+    if (w > pill.offsetHeight) root.style.setProperty('--qa-pill-open-w', `${w}px`)
+  }
+  /* after layout, and again once webfonts have settled the label's width */
+  requestAnimationFrame(measurePill)
+  if (document.fonts?.ready) document.fonts.ready.then(measurePill)
+  addEventListener('resize', measurePill)
   /* `cells` is whatever the panel actually holds. The verb panel's row
      stagger measures it; the launcher only takes cells[0] to focus, since
      nothing about the modules' motion is per tile any more. */
@@ -29527,7 +29979,9 @@ const edit = createEditMode({
    control nobody can predict. Each item resolves against the live view — the
    same reasoning that already made the first item's label a function. */
 const profileMenu = createProfileMenu({
-  anchor: document.getElementById('avatarBtn'),
+  /* the header avatar, and the one docked into the sticky search bar */
+  anchor: [document.getElementById('avatarBtn'),
+           document.getElementById('avatarBtnDock')],
   getState: () => {
     const onSite = viewStore.get().view === 'site'
     const mode = onSite ? wsEdit : edit

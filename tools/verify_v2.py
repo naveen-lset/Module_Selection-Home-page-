@@ -257,6 +257,14 @@ PILL = """(()=>{
     centred:rr&&Math.abs((rr.left+rr.right)/2 - innerWidth/2)<2,
     fromFoot:rr&&Math.round(innerHeight-rr.bottom),
     label:t&&t.textContent, labelW:t&&Math.round(t.getBoundingClientRect().width),
+    /* THE TWO CENTRES, so the collapse can be checked for moving either
+       control. The pill was always still; the disc travelled 56px until the
+       reservation went in — see `.qa.is-scrolled .qa-pill`. */
+    pillCentre:r&&Math.round(r.left+r.width/2),
+    discCentre:cr&&Math.round(cr.left+cr.width/2),
+    gapToDisc:cr&&r&&Math.round(cr.left-r.right),
+    reservedW:getComputedStyle(document.querySelector('.qa'))
+                .getPropertyValue('--qa-pill-open-w').trim(),
     radius:cs&&cs.borderRadius, borderW:cs&&cs.borderTopWidth,
     bg:cs&&cs.backgroundImage, bgColor:cs&&cs.backgroundColor,
     /* THE MATERIAL, since node 295:5561 took the pair to glass. `ink` is read
@@ -888,8 +896,16 @@ def main():
               f"pill={r['pill']} fab={r['fab']}")
         # 40 AND NOT THE NODE'S 109 — the ruling of 8 Sep; see --qa-b in the
         # stylesheet for why the artboard's number does not survive a page that
-        # scrolls. Below 768 it is 24.
-        want_b = 40 if WIDTH >= 768 else 24
+        # scrolls. Below the phone boundary it is 24.
+        #
+        # THE BOUNDARY IS 744, NOT 768, and this line was the last thing left
+        # holding the old number. Node 321:3570 is drawn at 744 and specifies
+        # the TABLET treatment there, so the phone band was moved to
+        # `max-width: 743px` throughout the stylesheet — which makes 744 a
+        # tablet, and a tablet stands the pill 40 from the foot. Read at 744
+        # against the old 768 this asked for 24, got the correct 40, and
+        # failed a page that is right.
+        want_b = 40 if WIDTH >= 744 else 24
         check(f"centred on the page, {want_b} from the foot",
               r["centred"] and near(r["fromFoot"], want_b, 1.5),
               f"centred={r['centred']} foot={r['fromFoot']}")
@@ -1005,6 +1021,37 @@ def main():
         check("…while the chat disc holds its size",
               near(sc["chatW"], 56, 1) and near(sc["chatH"], 56, 1),
               f"{sc['chatW']}x{sc['chatH']}")
+        # ── AND NEITHER CONTROL MOVES · 10 Sep 2026 ─────────────────────────
+        # THIS IS THE CHECK THE OLD BEHAVIOUR WOULD HAVE FAILED. The row is
+        # centred and holds pill + 12 + disc, so a narrowing pill used to
+        # re-centre the row and hand the whole 56px to the disc: measured
+        # travelling from centre 472 to 416. The pill's own centre was always
+        # still, which is why watching only the pill hid it.
+        #
+        # The reservation holds the row's total width constant instead, so
+        # both centres are fixed and the GAP is what gives — 12 open, ~69
+        # collapsed. 2px of tolerance is sub-pixel rounding, not drift.
+        check("…and neither control has moved: both centres are where they were",
+              abs(sc["pillCentre"] - r["pillCentre"]) <= 2
+              and abs(sc["discCentre"] - r["discCentre"]) <= 2,
+              f"pill {r['pillCentre']}→{sc['pillCentre']}, "
+              f"disc {r['discCentre']}→{sc['discCentre']}")
+        # …WHICH IS THE GAP OPENING, and it is asserted so the mechanism is
+        # visible rather than implied: if this came back 12 the pill would be
+        # tracking the disc again and the check above would be passing for the
+        # wrong reason.
+        check("…the gap opening instead, from the frame's 12",
+              sc["gapToDisc"] > 50, f"{r['gapToDisc']} → {sc['gapToDisc']}")
+        # THE RESERVATION IS MEASURED, NOT ASSUMED. `--qa-pill-open-w` is the
+        # pill's own open width, written by measurePill(). A read taken while
+        # the pill is mid-expansion returns something between 52 and 165, and
+        # storing that silently shrinks the reservation until the disc moves
+        # again — which is exactly what a re-measure on the way back to the
+        # top did before it was guarded. So the stored value has to be the
+        # OPEN width and nothing else.
+        check("…off a measured open width, not a mid-transition one",
+              sc["reservedW"] == f"{r['w']}px",
+              f"reserved {sc['reservedW']} vs open {r['w']}px")
 
         # the menu: nineteen modules on a white material, page softened
         c.eval("document.querySelector('.qa-pill').click(); 1")
@@ -1021,14 +1068,11 @@ def main():
               f"tiles={m['tiles']} verbs={m['cells']} head={m['head']!r}")
         # A WHITE APPLE MATERIAL, where this was rgba(255,255,255,.94) at
         # radius 22 — and before that the profile menu's borrowed one. White at
-        # a 30px blur with saturation lifted, and now 92% rather than the 62%
-        # it wore over a light page. THE RULING OF 10 SEP NAMED THE PAGE'S
-        # BACKGROUND, NOT THIS — 4A still rules a white panel — but 62% white
-        # composites to a mid-grey slab over a black backdrop, so raising the
-        # alpha is what keeps that ruling true rather than a change of mind
-        # about the material.
+        # 62% over a 30px blur with saturation lifted — 4A's own value, which
+        # briefly went to 92% to stay white over an 82% black backdrop and
+        # came back when that backdrop went to a light 30% tint.
         check("a white material of its own, and a real blur behind it",
-              m["material"] == "rgba(255, 255, 255, 0.92)" and m["radius"] == "28px"
+              m["material"] == "rgba(255, 255, 255, 0.62)" and m["radius"] == "28px"
               and "blur(30px)" in (m["panelBlur"] or "")
               and "saturate(1.8)" in (m["panelBlur"] or ""),
               f"{m['material']} r={m['radius']} {m['panelBlur']}")
@@ -1044,10 +1088,15 @@ def main():
         # profile menu's material, then a 6% dim, then black at 25% over 14px,
         # then "Instead of Background Should White Blured like Apple
         # background", with 4A chosen — white at 22% over a 16px blur — and
-        # now, 10 Sep: "Background of main page should Black". Black at 82%
-        # over the same 16px blur, with saturation back to 1 — 62% with the
-        # saturation still lifted read as dark teal rather than black, since
-        # what it dims is a page full of greens and blues.
+        # now, 10 Sep: "Background of main page should Black", and then — on
+        # being shown 82% — "I told little black Blur". A LIGHT black tint:
+        # 30% over the same 16px blur, saturation at 1.
+        #
+        # THE UPPER BOUND IS WHAT THIS CHECK IS FOR. 62% and then 82% were
+        # both shipped past it by widening the range to match what had been
+        # built, which is backwards: the bound is the ruling that has survived
+        # all five revisions — the page stays legible behind the panel — and
+        # 82% satisfied the word "black" while breaking it.
         #
         # THE UPPER BOUND IS STILL THE POINT, and it is the one thing every
         # version of this instruction has kept: a launcher is a thing you
@@ -1057,7 +1106,7 @@ def main():
         check("the backdrop is a black blur, and stops short of hiding the page",
               m["veilOpacity"] == "1"
               and m["veilColor"].startswith("rgba(0, 0, 0")
-              and .7 <= m["veilAlpha"] <= .9
+              and .2 <= m["veilAlpha"] <= .4
               and 10 <= m["veilPx"] <= 24,
               f"{m['veilColor']} blur={m['veilPx']}px")
         check("the panel is wholly on screen", m["onScreen"], f"{m['w']}x{m['h']}")
@@ -1282,6 +1331,106 @@ def main():
         check("it ends on the pill: the surface gone, back at 96%",
               f["panelOpacity"] == 0 and 0.95 <= f["panelScale"] <= 0.97,
               f"opacity {f['panelOpacity']}, scale {f['panelScale']}")
+
+    # ══ THE NUMBERS, AND WHAT A FINGER CAN ACTUALLY HIT ═══════════════════
+    print("\nthe figures and the touch targets")
+    with Chrome(width=WIDTH, height=900) as c:
+        c.goto(BASE + "index.html?v=2", settle=2.0)
+        # TABULAR FIGURES ON THE VALUES · 10 Sep 2026. Inter's default figures
+        # are proportional, so a value re-rendering 02 → 12 changes width and a
+        # stacked day column does not align on its tens digit. Checked on the
+        # RESOLVED property of real elements rather than on the rule, since a
+        # later `font-variant-numeric` or a `font` shorthand further down would
+        # silently reset it — a `font` shorthand resets it to `normal`.
+        fig = json.loads(c.eval("""(()=>{
+          const want=['.figure__value','.l-headline__value','.l-headline__tile-value',
+                      '.l-stat__value','.site-stat__value','.site-fig__value',
+                      '.l-focus__day','.l-focus__ref','time'];
+          const bad=[], seen=[];
+          for(const sel of want){
+            for(const e of document.querySelectorAll(sel)){
+              const v=getComputedStyle(e).fontVariantNumeric;
+              seen.push(sel);
+              if(!/tabular-nums/.test(v)) bad.push(sel+':'+v);
+            }}
+          // and the note copy must NOT have it - proportional belongs in prose
+          const prose=document.querySelector('.l-note__body,.l-note__text,p');
+          return JSON.stringify({checked:[...new Set(seen)].length, bad:[...new Set(bad)],
+            n:seen.length,
+            prose:prose?getComputedStyle(prose).fontVariantNumeric:'(none found)'})})()"""))
+        check("every data figure is set in tabular numerals",
+              not fig["bad"] and fig["n"] > 0,
+              f"{fig['n']} figures across {fig['checked']} families"
+              if not fig["bad"] else f"proportional: {fig['bad']}")
+        # AND SCOPED · tabular figures are wider and colder, and a date inside
+        # a sentence should keep the sentence's rhythm. If this ever reads
+        # tabular, someone has put the property on `body`.
+        check("…and the prose is left proportional", fig["prose"] != "tabular-nums",
+              str(fig["prose"]))
+
+        # THE TOUCH TARGETS, HIT-TESTED RATHER THAN MEASURED — and the probe
+        # itself is the thing that has to be right here. Three ways it lied
+        # before this form:
+        #
+        #   1. THE BOX IS NOT THE TARGET. `::after { inset: -3px }` gives the
+        #      38px header controls a real 44; reading getBoundingClientRect()
+        #      reports 38 and calls it a failure.
+        #   2. `elementFromPoint` ONLY SEES THE VIEWPORT. The pager dots sit
+        #      far below the fold, so every probe returned null, no growth was
+        #      found, and 6x6 was reported for a control that is 12x32. The
+        #      element has to be scrolled into view first.
+        #   3. A HIDDEN CONTROL IS NOT A TARGET. "Edit Modules" is
+        #      `visibility: hidden; pointer-events: none` in the resting state
+        #      — it belongs to editing mode — so asserting a floor on it fails
+        #      on a control no finger can reach anyway.
+        #
+        # So: skip what is not interactive, scroll what is, and refuse to
+        # report a number at all if the centre itself is not hittable.
+        hit = json.loads(c.eval("""(()=>{
+          const out={};
+          const probe=(sel,name)=>{
+            const e=document.querySelector(sel); if(!e){out[name]='absent'; return}
+            const cs=getComputedStyle(e);
+            if(cs.visibility==='hidden'||cs.display==='none'||cs.pointerEvents==='none'){
+              out[name]='inert'; return}
+            e.scrollIntoView({block:'center'});
+            const r=e.getBoundingClientRect();
+            if(r.top<0||r.bottom>innerHeight){out[name]='offscreen'; return}
+            const hits=(x,y)=>{let n=document.elementFromPoint(x,y);
+              while(n){ if(n===e) return true; n=n.parentElement } return false};
+            if(!hits(r.left+r.width/2, r.top+r.height/2)){out[name]='covered'; return}
+            let L=0,R=0,T=0,B=0;
+            while(L<24 && hits(r.left-L-1, r.top+r.height/2)) L++;
+            while(R<24 && hits(r.right+R, r.top+r.height/2)) R++;
+            while(T<24 && hits(r.left+r.width/2, r.top-T-1)) T++;
+            while(B<24 && hits(r.left+r.width/2, r.bottom+B)) B++;
+            out[name]=[Math.round(r.width)+L+R, Math.round(r.height)+T+B];
+          };
+          probe('.icon-btn--bell','bell'); probe('.avatar-btn','avatar');
+          probe('.search-btn','scan');
+          probe('.dots__dot:nth-child(2)','pagerDot');
+          return JSON.stringify(out)})()"""))
+        # 44 IS THE FLOOR THE BRIEF SET. The bell and the avatar are drawn at
+        # 38 and reach it through the `::after`; the scan button is 64 outright.
+        big = {k: hit[k] for k in ("bell", "avatar", "scan") if isinstance(hit.get(k), list)}
+        short = {k: v for k, v in big.items() if min(v) < 44}
+        check("bell, avatar and scan all clear the 44px floor",
+              len(big) == 3 and not short,
+              ", ".join(f"{k} {v[0]}x{v[1]}" for k, v in big.items())
+              if not short else f"under 44: {short} (of {hit})")
+        # THE PAGER DOTS CANNOT REACH IT, AND THE NUMBER IS THE POINT. They sit
+        # on a 12px pitch — 6 drawn, 6 gap — so a target wider than 12 steals
+        # its neighbour's press; vertically it takes all the card has. 6x6 to
+        # 12x32 is ten times the area and still under the floor. Asserted as a
+        # floor so the gain cannot be lost, and left short rather than papered
+        # over: closing it needs the dots' gap or the card's padding to grow,
+        # which is a visible change and wants ruling.
+        d = hit.get("pagerDot")
+        check("…and the pager dots take all the room the layout allows",
+              isinstance(d, list) and d[0] == 12 and d[1] >= 30,
+              f"{d[0]}x{d[1]} on a 12px pitch, from 6x6"
+              if isinstance(d, list) else f"probe said: {d}")
+        check("no console errors", not c.errors(), str(c.errors()))
 
     print()
     if fails:

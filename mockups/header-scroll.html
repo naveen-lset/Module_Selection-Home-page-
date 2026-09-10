@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Header scroll motion — six premises</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Host+Grotesk:wght@600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   WHAT THE TOP DOES WHEN YOU SCROLL · six options, one frame
+
+   SIX PREMISES, NOT SIX TIMINGS. The point of a set like this is that
+   rejecting one tells you something. So each option here answers the question
+   differently — the planting LAGS, the header COLLAPSES, the artwork ERODES,
+   the picture DEFOCUSES, the name RELOCATES, the artwork EXITS — rather than
+   being the same move at six speeds. Pick a premise; the numbers are then
+   worth arguing about.
+
+   EVERY OPTION IS DRIVEN BY ONE NUMBER. `--p` is scroll progress, 0 → 1 over
+   the first 180px, and `--sy` is the raw offset in pixels. Nothing here has a
+   duration or a keyframe: the motion IS the scroll position, which is why it
+   can be scrubbed and why it cannot drift out of sync with the finger.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --ink: #1F415B;
+  --ink-soft: #44544A;
+  --add: #00AFD6;
+  --muted: #7A8684;
+  --font: Inter, -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --p: 0;
+  --sy: 0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 14px/1.5 var(--font);
+  color: var(--ink);
+  background: #EEF3F2;
+  padding: 28px;
+}
+h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -.2px; }
+.lede { margin: 0 0 22px; color: var(--ink-soft); max-width: 70ch; }
+
+.wrap { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+
+/* ── the picker ──────────────────────────────────────────────────────────*/
+.picker { flex: 0 0 300px; display: flex; flex-direction: column; gap: 8px; }
+.opt {
+  text-align: left;
+  border: 1px solid rgba(31, 65, 91, .12);
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: border-color 160ms, box-shadow 160ms, transform 120ms;
+}
+.opt:hover { border-color: rgba(0, 175, 214, .5); }
+.opt:active { transform: scale(.99); }
+.opt[aria-pressed="true"] {
+  border-color: #00AFD6;
+  box-shadow: 0 0 0 3px rgba(0, 175, 214, .16);
+}
+.opt b { display: block; font-size: 14px; font-weight: 600; }
+.opt span { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
+.opt i { display: block; font-size: 11px; color: #B0603A; margin-top: 5px; font-style: normal; }
+
+/* ── the device ──────────────────────────────────────────────────────────*/
+.stage { flex: 0 0 auto; }
+.device {
+  width: 744px;
+  height: 900px;
+  border-radius: 26px;
+  overflow: hidden;
+  position: relative;
+  background: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(31, 65, 91, .12), 0 30px 70px -30px rgba(31, 65, 91, .4);
+}
+.scroller { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; }
+
+/* the page, as the build draws it */
+.page {
+  position: relative;
+  min-height: 1500px;
+  background:
+    linear-gradient(180deg, rgba(175,239,235,.5) 0%, rgba(175,239,235,.275) 32%,
+                    rgba(242,255,248,.5) 69%, rgba(242,255,248,.5) 100%),
+    #FFFFFF;
+}
+.foliage {
+  position: absolute;
+  z-index: 0;
+  left: 0; right: 0; top: 0;
+  height: 293px;
+  pointer-events: none;
+  background: url('../assets/img/foliage-artboard.png') no-repeat 0 -24.18vw / 100% auto;
+  background-position-y: -180px;
+  /* the build's own feather: solid to the foot of the search field, then out */
+  --hold: 182px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 var(--hold),
+    rgba(0,0,0,.72) calc(var(--hold) + 32px),
+    rgba(0,0,0,.34) calc(var(--hold) + 70px), transparent 293px);
+          mask-image: linear-gradient(to bottom, #000 0, #000 var(--hold),
+    rgba(0,0,0,.72) calc(var(--hold) + 32px),
+    rgba(0,0,0,.34) calc(var(--hold) + 70px), transparent 293px);
+  transform-origin: 50% 0;
+}
+.foliage::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.05) 0, rgba(0,0,0,.05) 182px,
+              rgba(0,0,0,.036) 214px, rgba(0,0,0,.017) 252px, rgba(0,0,0,0) 293px);
+}
+
+.head {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 44px 24px 24px;
+}
+.greet { display: flex; flex-direction: column; gap: 4px; transform-origin: 0 50%; }
+.greet__word {
+  font-family: "DM Sans", var(--font); font-weight: 400; font-size: 20px;
+  line-height: 1.21; color: var(--add); margin: 0;
+}
+.greet__name {
+  font-size: 28px; font-weight: 600; line-height: 1.21;
+  letter-spacing: -.28px; margin: 0; white-space: nowrap;
+}
+.actions { display: flex; gap: 12px; align-items: center; }
+.disc {
+  width: 38px; height: 38px; border-radius: 999px; background: #FFFFFF;
+  box-shadow: 0 1.188px 9.5px rgba(0,0,0,.05);
+  display: grid; place-items: center;
+}
+.disc img { width: 20px; height: 20px; display: block; }
+.avatar { width: 38px; height: 38px; border-radius: 999px; display: block; }
+
+.searchrow {
+  position: sticky; top: 0; z-index: 3;
+  display: flex; gap: 8px; align-items: flex-start;
+  padding: 10px 24px; margin-block: -10px;
+}
+.searchrow::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: rgba(215,247,245,.78);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+          backdrop-filter: blur(14px) saturate(150%);
+  border-bottom: 1px solid rgba(195,206,199,.38);
+  box-shadow: 0 8px 20px -14px rgba(22,55,61,.38);
+  opacity: var(--p);
+}
+.search {
+  flex: 1 0 0; min-width: 0; height: 52px; border-radius: 100px; background: #FFFFFF;
+  box-shadow: 0 2px 16px rgba(0,0,0,.05);
+  display: flex; align-items: center; gap: 16px; padding: 0 24px;
+}
+.search img { width: 22px; height: 22px; display: block; }
+.search span { color: var(--muted); font-size: 16px; }
+.scan {
+  flex: none; width: 52px; height: 52px; border-radius: 999px; background: #FFFFFF;
+  box-shadow: 0 2px 16px rgba(0,0,0,.05); display: grid; place-items: center;
+}
+.scan img { width: 20px; height: 20px; display: block; }
+/* the name, when a premise docks it into the bar */
+.dockname {
+  flex: none; align-self: center; font-weight: 600; font-size: 16px;
+  white-space: nowrap; color: var(--ink);
+  max-width: 0; opacity: 0; overflow: hidden;
+}
+
+.frame { position: relative; z-index: 1; padding: 32px 24px 24px; }
+.band { position: relative; }
+.band::before {
+  content: ''; position: absolute; z-index: -1;
+  top: -32px; bottom: -140px; left: -24px; right: -24px;
+  border-radius: 0 0 32px 32px;
+  background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(0,129,121,.1));
+}
+.hero {
+  position: relative; height: 144px; border-radius: 16px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 20px 32px; margin-bottom: 16px;
+}
+.hero img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.4); }
+.hero .glyph { position: relative; align-self: flex-end; width: 44px; height: 44px; }
+.hero h2 {
+  position: relative; margin: 0; font-family: "Host Grotesk", var(--font);
+  font-weight: 600; font-size: 28px; letter-spacing: .88px; color: #FFFFFF;
+}
+.grid { display: grid; grid-template-columns: repeat(4, 162px); gap: 16px; }
+.card {
+  height: 144px; border-radius: 12px; padding: 16px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  color: #FFFFFF; position: relative;
+}
+.card b { font-weight: 500; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.card .g { width: 32px; height: 32px; }
+.card--w2 { grid-column: span 2; }
+.card img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.card .lab { position: relative; filter: drop-shadow(0 1px 3px rgba(0,0,0,.45)); }
+
+/* ── the scrub ───────────────────────────────────────────────────────────*/
+.scrub { margin-top: 14px; display: flex; align-items: center; gap: 12px; }
+.scrub input { flex: 1; }
+.scrub code {
+  font: 12px/1 ui-monospace, Menlo, monospace; color: var(--ink-soft);
+  background: #FFFFFF; padding: 6px 8px; border-radius: 6px; min-width: 128px;
+  border: 1px solid rgba(31,65,91,.1);
+}
+.hint { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+
+/* ══ PREMISE 1 · THE PLANTING LAGS ════════════════════════════════════════
+   The illustration scrolls SLOWER than the page — 0.45 of the offset — so it
+   sinks behind the content instead of travelling with it. The greeting rises
+   and fades on its own curve. Nothing changes size, so no layout moves and
+   the search bar docks exactly as it does today. */
+.m-parallax .foliage { transform: translateY(calc(var(--sy) * .45px)); }
+.m-parallax .greet {
+  transform: translateY(calc(var(--p) * -14px));
+  opacity: calc(1 - var(--p) * 1.15);
+}
+
+/* ══ PREMISE 2 · THE HEADER COLLAPSES ═════════════════════════════════════
+   The whole top condenses into a bar: the greeting gives up its height, the
+   planting compresses to 96px, and what is left is the search field docked
+   under a shallow band. This is the only premise that BUYS BACK VERTICAL
+   SPACE — worth ~150px, which is most of the landscape fold problem. It is
+   also the one that moves layout, so the page shifts under the finger. */
+.m-collapse .foliage {
+  height: calc(293px - var(--p) * 197px);
+  --hold: calc(182px - var(--p) * 140px);
+}
+.m-collapse .head {
+  padding-top: calc(44px - var(--p) * 32px);
+  padding-bottom: calc(24px - var(--p) * 16px);
+}
+.m-collapse .greet {
+  transform: scale(calc(1 - var(--p) * .28));
+  opacity: calc(1 - var(--p) * 1.4);
+  height: calc(62px - var(--p) * 62px);
+}
+.m-collapse .actions { transform: scale(calc(1 - var(--p) * .16)); }
+
+/* ══ PREMISE 3 · THE ARTWORK ERODES ══════════════════════════════════════
+   Nothing translates and nothing resizes. The feather's solid stop travels
+   UPWARD — 182px to 0 — so the illustration dissolves from its foot toward
+   the top and the page's own gradient takes over. The quietest of the six:
+   the header does not move at all, it just stops being a picture. */
+.m-erode .foliage { --hold: calc(182px - var(--p) * 182px); }
+.m-erode .foliage::after { opacity: calc(1 - var(--p)); }
+
+/* ══ PREMISE 4 · THE PICTURE PULLS FOCUS ══════════════════════════════════
+   A camera move. The artwork eases from 1.06 to 1.0 while blur rises to 7px
+   and saturation drops — so the background recedes optically rather than
+   physically, and the foreground text gains separation as you read down.
+   Costs a live `filter` on a large image, which is the one thing here with a
+   real per-frame price on an iPad. */
+.m-focus .foliage {
+  transform: scale(calc(1.06 - var(--p) * .06));
+  filter: blur(calc(var(--p) * 7px)) saturate(calc(1 - var(--p) * .35));
+}
+.m-focus .greet { opacity: calc(1 - var(--p) * .9); }
+
+/* ══ PREMISE 5 · THE NAME DOCKS ═══════════════════════════════════════════
+   The identity moves INTO the bar. "Good Morning," fades, the name slides
+   right and lands beside the search field, so the sticky bar carries who you
+   are once the greeting has gone. The bar earns its permanence; the cost is
+   that the field gives up width, which matters at 744. */
+.m-dock .greet__word { opacity: calc(1 - var(--p) * 2); }
+.m-dock .greet {
+  transform: translateY(calc(var(--p) * -18px));
+  opacity: calc(1 - var(--p) * 1.6);
+}
+.m-dock .dockname {
+  max-width: calc(var(--p) * 190px);
+  opacity: calc(var(--p) * var(--p));
+  margin-left: calc(var(--p) * 4px);
+}
+.m-dock .foliage { transform: translateY(calc(var(--sy) * .25px)); }
+
+/* ══ PREMISE 6 · THE ARTWORK EXITS ════════════════════════════════════════
+   Negative parallax: the illustration leaves FASTER than the page — 1.5x the
+   offset — so it clears the top early and the module surface is what you are
+   left with. The most decisive of the six, and the most likely to read as the
+   picture being yanked away rather than as depth. Included because it is the
+   opposite premise to the first, and the pair is the real question. */
+.m-exit .foliage { transform: translateY(calc(var(--sy) * -1.5px)); }
+.m-exit .greet { opacity: calc(1 - var(--p) * 1.6); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* every premise is scroll-driven, so there is no duration to zero — what
+     reduced motion has to do is stop the DECORATIVE part and keep the
+     functional part, which is the bar's plate and nothing else */
+  .foliage, .greet, .actions, .dockname { transform: none !important;
+    filter: none !important; opacity: 1 !important; }
+}
+</style>
+</head>
+<body>
+
+<h1>What the top does when you scroll</h1>
+<p class="lede">Six <em>premises</em>, not six timings — the planting lags, the header collapses, the
+artwork erodes, the picture defocuses, the name relocates, the artwork exits. Pick one and the
+numbers are worth arguing about. Every option is driven by one value: scroll progress over the
+first 180px. Scroll the frame, or scrub it.</p>
+
+<div class="wrap">
+  <div class="picker" id="picker">
+    <button class="opt" data-m="parallax" aria-pressed="true">
+      <b>1 · The planting lags</b>
+      <span>Illustration scrolls at 0.45×, so it sinks behind the content. Greeting rises and fades.</span>
+      <i>Nothing resizes — no layout shift.</i>
+    </button>
+    <button class="opt" data-m="collapse" aria-pressed="false">
+      <b>2 · The header collapses</b>
+      <span>Greeting gives up its height, planting compresses 293 → 96, search docks under a shallow band.</span>
+      <i>Buys back ~150px — but the page moves under your finger.</i>
+    </button>
+    <button class="opt" data-m="erode" aria-pressed="false">
+      <b>3 · The artwork erodes</b>
+      <span>Nothing moves. The feather's solid edge travels up 182 → 0, so the picture dissolves from its foot.</span>
+      <i>The quietest. Also the least noticeable.</i>
+    </button>
+    <button class="opt" data-m="focus" aria-pressed="false">
+      <b>4 · The picture pulls focus</b>
+      <span>Scale 1.06 → 1.0 with blur to 7px and saturation down. Optical recession, not physical.</span>
+      <i>A live filter on a large image — the one real per-frame cost.</i>
+    </button>
+    <button class="opt" data-m="dock" aria-pressed="false">
+      <b>5 · The name docks</b>
+      <span>Greeting fades; the name slides into the sticky bar, so the bar carries identity.</span>
+      <i>The search field gives up width — tight at 744.</i>
+    </button>
+    <button class="opt" data-m="exit" aria-pressed="false">
+      <b>6 · The artwork exits</b>
+      <span>Negative parallax at 1.5× — the illustration clears the top early and leaves the surface.</span>
+      <i>The opposite of 1. May read as yanked, not deep.</i>
+    </button>
+  </div>
+
+  <div class="stage">
+    <div class="device">
+      <div class="scroller m-parallax" id="scroller">
+        <div class="page">
+          <span class="foliage" aria-hidden="true"></span>
+
+          <header class="head">
+            <div class="greet">
+              <p class="greet__word">Good Morning,</p>
+              <p class="greet__name">Sourav Tambe 👋🏻</p>
+            </div>
+            <div class="actions">
+              <span class="disc"><img src="../assets/icon/bell.svg" alt=""></span>
+              <img class="avatar" src="../assets/img/avatar.png" alt="">
+            </div>
+          </header>
+
+          <div class="searchrow">
+            <div class="search">
+              <img src="../assets/icon/search.svg" alt="">
+              <span>Search “Animals”</span>
+            </div>
+            <span class="dockname">Sourav Tambe</span>
+            <span class="scan"><img src="../assets/icon/scan.svg" alt=""></span>
+          </div>
+
+          <div class="frame">
+            <div class="band">
+              <div class="hero">
+                <img class="bg" src="../assets/img/hero-banner.jpg" alt="">
+                <span class="scrim"></span>
+                <img class="glyph" src="../assets/icon/qa-actions.svg" alt="">
+                <h2>Antz Command Centre</h2>
+              </div>
+              <div class="grid">
+                <div class="card" style="background:linear-gradient(128deg,#8EBEA5,#338A5D)">
+                  <img class="g" src="../assets/icon/m-medical.svg" alt="">
+                  <b>Medical</b>
+                </div>
+                <div class="card" style="background:linear-gradient(128deg,#779B9F,#48737A)">
+                  <img class="g" src="../assets/icon/m-housing.svg" alt=""><b>Housing</b>
+                </div>
+                <div class="card card--w2">
+                  <img class="bg" src="../assets/img/species.jpg" alt="">
+                  <img class="g lab" src="../assets/icon/m-species.svg" alt="">
+                  <b class="lab">Species Management</b>
+                </div>
+                <div class="card card--w2">
+                  <img class="bg" src="../assets/img/hospital.jpg" alt="">
+                  <img class="g lab" src="../assets/icon/m-hospital.svg" alt=""><b class="lab">Hospital</b>
+                </div>
+                <div class="card card--w2" style="background:linear-gradient(205deg,#00D6C9,#1F415B)">
+                  <img class="g" src="../assets/icon/m-insights.svg" alt=""><b>Key Insights</b>
+                </div>
+                <div class="card card--w2">
+                  <img class="bg" src="../assets/img/diet-kitchen.jpg" alt="">
+                  <img class="g lab" src="../assets/icon/m-diet.svg" alt=""><b class="lab">Diet &amp; Kitchen</b>
+                </div>
+                <div class="card" style="background:linear-gradient(128deg,#B3C6BC,#9BB0A3)">
+                  <img class="g" src="../assets/icon/m-administer.svg" alt=""><b>Administer</b>
+                </div>
+                <div class="card" style="background:linear-gradient(128deg,#FB9984,#FB8066)">
+                  <img class="g" src="../assets/icon/m-mortality.svg" alt=""><b>Mortality</b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scrub">
+      <label for="sc">Scrub</label>
+      <input id="sc" type="range" min="0" max="420" value="0">
+      <code id="read">scroll 0 · p 0.00</code>
+    </div>
+    <p class="hint">The frame is 744 wide — the artboard. Scrolling it and scrubbing drive the same
+      value, so what you scrub is exactly what a finger gets.</p>
+  </div>
+</div>
+
+<script>
+/* ONE VALUE FEEDS ALL SIX. `--p` is progress over the first 180px and `--sy`
+   is the raw offset; every premise above is written against those two, so
+   nothing here knows which option is showing. That is also why the scrub and
+   a real scroll cannot disagree: the slider sets scrollTop and the same
+   listener does the rest. */
+const RUN = 180;
+const scroller = document.getElementById('scroller');
+const readout  = document.getElementById('read');
+const slider   = document.getElementById('sc');
+
+function apply() {
+  const sy = scroller.scrollTop;
+  const p  = Math.min(1, Math.max(0, sy / RUN));
+  scroller.style.setProperty('--sy', sy);
+  scroller.style.setProperty('--p', p.toFixed(4));
+  readout.textContent = `scroll ${Math.round(sy)} · p ${p.toFixed(2)}`;
+  if (+slider.value !== Math.round(sy)) slider.value = Math.min(420, Math.round(sy));
+}
+scroller.addEventListener('scroll', apply, { passive: true });
+slider.addEventListener('input', () => { scroller.scrollTop = +slider.value; });
+
+/* the picker swaps one class; the CSS is the whole of the difference */
+const picker = document.getElementById('picker');
+picker.addEventListener('click', (e) => {
+  const b = e.target.closest('.opt');
+  if (!b) return;
+  for (const o of picker.querySelectorAll('.opt')) o.setAttribute('aria-pressed', String(o === b));
+  scroller.className = 'scroller m-' + b.dataset.m;
+  apply();
+});
+
+apply();
+</script>
+</body>
+</html>
