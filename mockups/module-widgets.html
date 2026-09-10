@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ANTZ Module Widgets · 24, with their behaviour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=DM+Sans:opsz,wght@9..40,400..700&display=swap">
+
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   ANTZ MODULE WIDGETS — SIX EACH FOR FOUR MODULES, AND WHAT EACH ONE DOES
+   ══════════════════════════════════════════════════════════════════════════
+
+   THE FIRST VERSION OF THIS SHEET WAS REJECTED AND IT DESERVED TO BE. It had
+   ten dense concepts and every one of them was a picture: a widget with four
+   figures on it and no answer to the only two questions that matter — what
+   happens when I ADD it, and what happens when I TAP it. A widget that has
+   no destination is a decoration.
+
+   SO EVERY WIDGET HERE CARRIES A CONTRACT, printed under it, in three lines:
+
+     ADD       what the widget asks you to choose when you place it. Apple
+               calls this the configuration; most of ours need one, because
+               "Beds free" is meaningless until it knows which ward.
+     TAP       exactly where the whole widget opens. A route, not a mood.
+     IN PLACE  what you can press WITHOUT leaving the home screen, and what
+               changes when you do. Most widgets have nothing here, and that
+               is the honest answer — only four of the twenty-four can
+               complete a job in place.
+
+   AND THE FACES ARE MUCH SIMPLER. One figure, or one row of three, or one
+   short list of three. No widget below carries more than one idea, because
+   a widget is read in about a second from four feet away. Where the old
+   sheet put a chart, a legend and a button on a medium, this one puts a
+   number and the sentence that makes it mean something.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --u:    170px;
+  --gut:  16px;
+  --w-s:  var(--u);
+  --w-m:  calc(var(--u) * 2 + var(--gut));
+  --w-l:  var(--w-m);
+
+  --page:   #EEF1F0;
+  --rail:   rgba(255, 255, 255, .72);
+  --card:   #FFFFFF;
+  --ink:    #101413;
+  --ink-2:  #55605C;
+  --ink-3:  #8A9490;
+  --hair:   rgba(16, 20, 19, .07);
+
+  --lift:   0 1px 2px rgba(22, 40, 36, .06),
+            0 10px 28px -12px rgba(22, 40, 36, .18);
+  --lift-2: 0 2px 6px rgba(22, 40, 36, .08),
+            0 24px 48px -18px rgba(22, 40, 36, .26);
+
+  --r-w:    26px;
+  --r-tray: 34px;
+  --r-pill: 999px;
+
+  --m-medical:  #B91C1C;   /* docs/medical.md         accent */
+  --m-hospital: #39656E;   /* index.html --f-hospital        */
+  --m-pharmacy: #7C3AED;   /* docs/pharmacy.md        accent */
+  --m-species:  #0891B2;   /* docs/species-master.md  accent */
+
+  --ease:   cubic-bezier(.32, .72, 0, 1);
+  --ease-s: cubic-bezier(.34, 1.56, .64, 1);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --num:  'DM Sans', var(--font);
+}
+
+[data-mod='medical']  { --acc: var(--m-medical);  --acc-soft: #FBEAEA; --acc-ink: #8E1414; }
+[data-mod='hospital'] { --acc: var(--m-hospital); --acc-soft: #E4EDEF; --acc-ink: #2A4C53; }
+[data-mod='pharmacy'] { --acc: var(--m-pharmacy); --acc-soft: #EFE9FC; --acc-ink: #5B37A7; }
+[data-mod='species']  { --acc: var(--m-species);  --acc-soft: #E2F2F6; --acc-ink: #066880; }
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100dvh;
+  background: var(--page); color: var(--ink);
+  font-family: var(--font); font-size: 15px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 8% -10%,  rgba(255, 255, 255, .95), transparent 60%),
+    radial-gradient(90%  70% at 100% 0%,  rgba(198, 232, 226, .5),  transparent 55%);
+}
+
+.gal {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: 28px;
+  max-width: 1420px; margin: 0 auto; padding: 32px 32px 96px;
+}
+
+/* ── rail ─────────────────────────────────────────────────────────────── */
+.rail {
+  position: sticky; top: 32px; align-self: start;
+  padding: 14px; border-radius: var(--r-tray);
+  background: var(--rail);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+          backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: var(--lift), inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+.rail__search {
+  display: flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 12px; margin-bottom: 10px;
+  border-radius: var(--r-pill); background: rgba(16, 20, 19, .05);
+  color: var(--ink-3); font-size: 14px;
+}
+.rail__item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 12px; border-radius: 14px;
+  font-size: 15px; font-weight: 550; cursor: pointer;
+  transition: background 260ms var(--ease);
+}
+.rail__item + .rail__item { margin-top: 2px; }
+.rail__item:hover { background: rgba(16, 20, 19, .045); }
+.rail__item.is-on { background: rgba(16, 20, 19, .07); font-weight: 650; }
+.rail__n { margin-left: auto; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.chip {
+  flex: none; display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 9px;
+  background: var(--acc, var(--ink-3));
+  box-shadow: 0 1px 2px rgba(22, 40, 36, .22), inset 0 1px 0 rgba(255, 255, 255, .28);
+}
+.chip svg { width: 17px; height: 17px; color: #fff; }
+
+/* ── head ─────────────────────────────────────────────────────────────── */
+.pane { min-width: 0; }
+.head { padding: 8px 0 26px; max-width: 66ch; }
+.eyebrow {
+  display: inline-block; padding: 5px 11px; margin-bottom: 14px;
+  border-radius: var(--r-pill); background: rgba(16, 20, 19, .06);
+  font-size: 10px; font-weight: 650; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+h1 { margin: 0 0 10px; font-size: 33px; font-weight: 700; letter-spacing: -.022em; line-height: 1.13; text-wrap: balance; }
+.head p { margin: 0 0 8px; color: var(--ink-2); font-size: 15.5px; }
+
+/* the key that explains the contract, once */
+.key {
+  display: flex; flex-wrap: wrap; gap: 8px 20px;
+  margin-top: 16px; padding: 14px 16px;
+  border-radius: 18px; background: rgba(255, 255, 255, .6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .9);
+  font-size: 13px; color: var(--ink-2);
+}
+.key b {
+  display: inline-block; min-width: 62px;
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* ── a module section ─────────────────────────────────────────────────── */
+.mod { margin-top: 46px; scroll-margin-top: 24px; }
+.mod__hd { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.mod__hd h2 { margin: 0; font-size: 23px; font-weight: 700; letter-spacing: -.018em; }
+.mod__hd .chip { width: 34px; height: 34px; border-radius: 10px; }
+.mod__hd .chip svg { width: 19px; height: 19px; }
+.mod__c { padding: 3px 9px; border-radius: var(--r-pill); background: var(--acc-soft); color: var(--acc-ink); font-size: 11px; font-weight: 650; }
+.mod__note { margin: 0 0 18px; color: var(--ink-2); font-size: 14px; max-width: 76ch; }
+
+.grid { display: flex; flex-wrap: wrap; gap: 20px; }
+
+/* ── one entry: the widget, then its contract ─────────────────────────── */
+/* THE CONTRACT SITS BESIDE THE WIDGET, NOT UNDER IT. Stacked, one entry was
+   380 tall and only one fitted across a 668px pane, which made the sheet
+   10,807px long — you could not compare two widgets without scrolling past
+   both. Beside it, an entry is ~210 and the same page is half the height.
+   Done as a grid over the existing markup so the three children keep their
+   order for anything reading the DOM. */
+.ent {
+  display: grid;
+  grid-template-columns: auto minmax(240px, 300px);
+  grid-template-areas: "w hd" "w beh";
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  column-gap: 18px; row-gap: 8px;
+  width: fit-content;
+  padding: 18px; border-radius: var(--r-tray);
+  background: rgba(255, 255, 255, .55);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .9);
+}
+.ent > .w { grid-area: w; }
+.ent > .ent__hd { grid-area: hd; }
+.ent > .beh { grid-area: beh; }
+.ent__hd { display: flex; align-items: baseline; gap: 8px; }
+.ent__t { font-size: 14.5px; font-weight: 650; letter-spacing: -.01em; }
+.ent__sz {
+  padding: 2px 7px; border-radius: 6px; background: rgba(16, 20, 19, .06);
+  font-size: 10px; font-weight: 650; letter-spacing: .04em; color: var(--ink-3);
+  text-transform: uppercase;
+}
+.beh { margin: 0; font-size: 12.5px; line-height: 1.5; max-width: 46ch; }
+.beh > div { display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 10px; padding: 4px 0; }
+.beh > div + div { border-top: 1px solid var(--hair); }
+.beh dt {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--acc); padding-top: 3px;
+}
+.beh dd { margin: 0; color: var(--ink-2); }
+.beh dd b { color: var(--ink); font-weight: 600; }
+.beh dd.none { color: var(--ink-3); font-style: italic; }
+
+/* ══ THE WIDGET ══════════════════════════════════════════════════════════ */
+.w {
+  position: relative;
+  width: var(--w-s); height: var(--w-s);
+  padding: 15px; border-radius: var(--r-w);
+  background: var(--card); box-shadow: var(--lift);
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: transform 520ms var(--ease), box-shadow 520ms var(--ease);
+}
+.w:hover { transform: translateY(-3px); box-shadow: var(--lift-2); }
+.w--m { width: var(--w-m); }
+.w--tint { background: var(--acc); color: #fff; }
+.w--tint .w__lbl, .w--tint .w__sub { color: rgba(255, 255, 255, .74); }
+
+.w__hd { display: flex; align-items: center; gap: 8px; margin-bottom: auto; }
+.w__hd .chip { width: 21px; height: 21px; border-radius: 7px; }
+.w__hd .chip svg { width: 12px; height: 12px; }
+.w__lbl {
+  font-size: 11px; font-weight: 650; letter-spacing: .02em; color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.w__sp { flex: 1 1 auto; }
+
+/* ONE FIGURE, AND IT IS BIG. The whole simplification is here: where the
+   rejected sheet fitted four numbers on a medium, these fit one. */
+.w__n {
+  font-family: var(--num);
+  font-size: 46px; font-weight: 700; line-height: .9; letter-spacing: -.035em;
+  font-variant-numeric: tabular-nums;
+}
+.w__n--m { font-size: 38px; }
+.w__u { font-size: 14px; font-weight: 600; color: var(--ink-3); margin-left: 4px; letter-spacing: 0; }
+.w--tint .w__u { color: rgba(255, 255, 255, .7); }
+.w__sub { margin-top: 7px; font-size: 12.5px; color: var(--ink-2); }
+.w__sub b { font-weight: 600; color: var(--ink); }
+.w--tint .w__sub b { color: #fff; }
+
+/* the three-row list, which is the most any widget here carries */
+.li { display: flex; flex-direction: column; gap: 0; }
+.li__r { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+.li__r + .li__r { border-top: 1px solid var(--hair); }
+.li__t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.li__m { flex: none; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.li__m--acc { color: var(--acc); font-weight: 650; }
+
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); flex: none; }
+.bar { height: 6px; border-radius: 3px; background: rgba(16, 20, 19, .08); overflow: hidden; }
+.bar > i { display: block; height: 100%; border-radius: 3px; background: var(--acc); }
+
+/* the segmented bar — one tap target per segment, which is the point */
+.seg { display: flex; gap: 3px; height: 26px; }
+.seg i {
+  border-radius: 5px; background: var(--acc); cursor: pointer;
+  transition: transform 240ms var(--ease-s), filter 240ms var(--ease);
+}
+.seg i:hover { transform: scaleY(1.14); filter: saturate(1.3); }
+
+/* the sparkline, drawn as bars so every column is its own tap target */
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 44px; }
+.spark i {
+  flex: 1 1 0; border-radius: 3px 3px 1px 1px;
+  background: color-mix(in srgb, var(--acc) 32%, transparent);
+  cursor: pointer; transition: background 200ms var(--ease);
+}
+.spark i:hover, .spark i.on { background: var(--acc); }
+
+/* the action-only widget: one big key, nothing else */
+.big {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; flex: 1 1 auto; margin-top: 10px;
+  border: 0; border-radius: 18px;
+  background: var(--acc); color: #fff;
+  font: inherit; font-size: 15px; font-weight: 650; cursor: pointer;
+  transition: transform 240ms var(--ease-s), filter 240ms var(--ease);
+}
+.big:hover { filter: brightness(1.08); }
+.big:active { transform: scale(.97); }
+.big svg { width: 18px; height: 18px; }
+
+.act {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 32px; padding: 0 12px; border: 0; border-radius: var(--r-pill);
+  background: var(--acc-soft); color: var(--acc-ink);
+  font: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer;
+  transition: transform 240ms var(--ease-s);
+}
+.act:active { transform: scale(.96); }
+.act--solid { background: var(--acc); color: #fff; }
+
+.tap {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; border: 0; border-radius: 50%;
+  background: rgba(16, 20, 19, .055); color: var(--ink-2); cursor: pointer;
+  transition: transform 240ms var(--ease-s);
+}
+.tap:active { transform: scale(.92); }
+.tap svg { width: 15px; height: 15px; }
+.tap--acc { background: var(--acc); color: #fff; }
+
+.row { display: flex; align-items: center; gap: 8px; }
+.foot { margin-top: 10px; }
+.meta { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* the photo widget */
+.ph { position: absolute; inset: 0; }
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ph__s { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,12,14,0) 38%, rgba(6,12,14,.8) 100%); }
+.ph__b { position: relative; height: 100%; display: flex; flex-direction: column; padding: 15px; }
+.ph__lat { font-style: italic; font-size: 11px; color: rgba(255, 255, 255, .74); }
+
+/* the plan grid */
+.plan { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.plan i { aspect-ratio: 1; border-radius: 5px; background: rgba(16, 20, 19, .06); cursor: pointer; }
+.plan i.f { background: color-mix(in srgb, var(--acc) 30%, transparent); }
+.plan i.hot { background: var(--acc); }
+.plan i:hover { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+/* ══ TABLET ══════════════════════════════════════════════════════════════ */
+@media (max-width: 940px) {
+  :root { --u: 156px; }
+  .gal { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 22px 20px 72px; }
+  .rail { position: static; display: flex; gap: 8px; overflow-x: auto; padding: 10px; }
+  .rail__search { display: none; }
+  .rail__item { flex: none; margin: 0 !important; }
+  .rail__n { display: none; }
+  h1 { font-size: 27px; }
+  .w { padding: 13px; }
+  .w__n { font-size: 40px; }
+  .w__n--m { font-size: 33px; }
+  .ent { padding: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="g-medical" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 3v4a4 4 0 0 0 8 0V3"/><path d="M10 11v3a4 4 0 0 0 8 0v-1"/><circle cx="18" cy="11" r="2"/></g>
+  <g id="g-hospital" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 20V8l8-4 8 4v12"/><path d="M12 10v6M9 13h6"/></g>
+  <g id="g-pharmacy" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M9 9l6 6"/></g>
+  <g id="g-species" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="7" cy="8" rx="2" ry="2.6"/><ellipse cx="12.5" cy="6.4" rx="2" ry="2.8"/><ellipse cx="17.6" cy="9.4" rx="1.9" ry="2.4"/>
+    <path d="M12 13c-3 0-5 2.2-5 4.3C7 19.2 8.4 20 10 20h4c1.6 0 3-.8 3-2.7C17 15.2 15 13 12 13z"/></g>
+  <g id="g-search" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l4 4"/></g>
+  <g id="g-plus" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g>
+  <g id="g-arrow" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></g>
+  <g id="g-scan" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4 12h16"/></g>
+  <g id="g-clock" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></g>
+  <g id="g-alert" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></g>
+  <g id="g-bed" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V8M3 13h18v5M21 18v-4a3 3 0 0 0-3-3h-7"/><circle cx="7.5" cy="10" r="2"/></g>
+  <g id="g-vial" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v10.5a3.5 3.5 0 0 0 7 0V3M8 3h9M9.5 9h6"/></g>
+  <g id="g-lock" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></g>
+  <g id="g-chart" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6M4 19h16"/><path d="M8 15l3.5-4 3 2.5L20 8"/></g>
+  <g id="g-camera" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2L8 5h8l1.5 2h2A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.2"/></g>
+  <g id="g-check" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></g>
+</defs></svg>
+
+<div class="gal">
+
+  <aside class="rail">
+    <div class="rail__search"><svg width="17" height="17"><use href="#g-search"/></svg> Search Widgets</div>
+    <div class="rail__item is-on" data-go="medical"  data-mod="medical"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-medical"/></svg></span> Medical <span class="rail__n">6</span></div>
+    <div class="rail__item" data-go="hospital" data-mod="hospital"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-hospital"/></svg></span> Hospital <span class="rail__n">6</span></div>
+    <div class="rail__item" data-go="pharmacy" data-mod="pharmacy"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-pharmacy"/></svg></span> Pharmacy <span class="rail__n">6</span></div>
+    <div class="rail__item" data-go="species"  data-mod="species"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-species"/></svg></span> Species <span class="rail__n">6</span></div>
+  </aside>
+
+  <main class="pane">
+
+    <div class="head">
+      <span class="eyebrow">Widget catalogue · iPad 1024pt</span>
+      <h1>Twenty-four widgets, and what each one actually does</h1>
+      <p>Six per module. Each face carries <b>one</b> idea — a figure, or three rows, or a single key —
+         because a widget is read in a second from arm's length.</p>
+      <p>What makes these specifications rather than pictures is the contract under each one.</p>
+      <div class="key">
+        <span><b>Add</b> what it asks you to choose when you place it</span>
+        <span><b>Tap</b> the exact screen the whole widget opens</span>
+        <span><b>In place</b> what completes without leaving home — most say <i>nothing</i>, and that is honest</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════ MEDICAL ══════════════════ -->
+    <section class="mod" id="medical" data-mod="medical">
+      <div class="mod__hd">
+        <span class="chip"><svg viewBox="0 0 24 24"><use href="#g-medical"/></svg></span>
+        <h2>Medical</h2><span class="mod__c">#B91C1C</span>
+      </div>
+      <p class="mod__note">The module answers "who is unwell and what is owed on them". Two of the six
+         are worklists, one is an anomaly alarm, one is a pure action.</p>
+      <div class="grid">
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-medical"/></svg></span><span class="w__lbl">TREATMENT</span></div>
+            <div><span class="w__n">12</span></div>
+            <div class="w__sub">4 since Monday</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Under treatment</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>site</b>, or All sites. Defaults to the site you are rostered to today.</dd></div>
+            <div><dt>Tap</dt><dd><b>Medical → Cases</b>, pre-filtered to status <i>Active</i> and that site.</dd></div>
+            <div><dt>In place</dt><dd class="none">nothing — it is a number, and changing it needs a clinical decision</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--tint">
+            <div class="w__hd"><span class="chip" style="background:rgba(255,255,255,.22);box-shadow:none"><svg viewBox="0 0 24 24"><use href="#g-alert"/></svg></span><span class="w__lbl">CRITICAL</span></div>
+            <div><span class="w__n">2</span></div>
+            <div class="w__sub"><b>Zara</b> · flagged 40m ago</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Critical cases</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Nothing to choose. It is always every site you have access to — a critical case is not something you scope down.</dd></div>
+            <div><dt>Tap</dt><dd><b>Medical → Critical &amp; emergency</b>, the alert feed, newest first.</dd></div>
+            <div><dt>In place</dt><dd>Tapping the <b>named animal</b> goes straight to that case instead of the list. The tile turns solid red only while the count is above zero; at zero it reverts to a white card reading "None".</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--m">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-clock"/></svg></span><span class="w__lbl">FOLLOW-UPS DUE TODAY</span><span class="w__sp"></span><span class="meta">3</span></div>
+            <div class="li">
+              <div class="li__r"><span class="dot"></span><span class="li__t">Kanha · bloods to lab</span><span class="li__m">11:30</span></div>
+              <div class="li__r"><span class="dot" style="opacity:.35"></span><span class="li__t">Pen 4 · quarantine sign-off</span><span class="li__m">14:00</span></div>
+              <div class="li__r"><span class="dot" style="opacity:.35"></span><span class="li__t">Hoofstock · intake review</span><span class="li__m">16:15</span></div>
+            </div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Follow-ups due</span><span class="ent__sz">Medium</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick <b>mine</b> or <b>the site's</b>. Most people pick mine; a head vet picks the site's.</dd></div>
+            <div><dt>Tap</dt><dd><b>Medical → Follow-ups due</b>, the full list for today.</dd></div>
+            <div><dt>In place</dt><dd>Tapping <b>a row</b> opens that one follow-up, not the list. Three rows is the cap — the fourth would make the type too small to hit.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-check"/></svg></span><span class="w__lbl">MY ROUND</span></div>
+            <div><span class="w__n">7</span><span class="w__u">left</span></div>
+            <div class="foot"><div class="bar"><i style="width:71%"></i></div></div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">My round</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>round</b> — morning, evening, or the one you are assigned. It follows the roster after that.</dd></div>
+            <div><dt>Tap</dt><dd><b>Medical → My round</b>, the checklist, scrolled to the next animal.</dd></div>
+            <div><dt>In place</dt><dd class="none">nothing — logging a check needs the animal in front of you, so it opens the app</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--m">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-chart"/></svg></span><span class="w__lbl">OPEN CASES · 14 DAYS</span></div>
+            <div class="w__sp"></div>
+            <div class="spark">
+              <i style="height:38%"></i><i style="height:44%"></i><i style="height:36%"></i><i style="height:52%"></i>
+              <i style="height:48%"></i><i style="height:60%"></i><i style="height:55%"></i><i style="height:70%"></i>
+              <i style="height:64%"></i><i style="height:58%"></i><i style="height:72%"></i><i style="height:66%"></i>
+              <i style="height:80%"></i><i class="on" style="height:92%"></i>
+            </div>
+            <div class="w__sub" style="margin-top:8px">Up 6 over the fortnight</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Case trend</span><span class="ent__sz">Medium</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick the <b>window</b> — 7, 14 or 30 days.</dd></div>
+            <div><dt>Tap</dt><dd><b>Medical → Case status mix</b>, the full chart, at the same window.</dd></div>
+            <div><dt>In place</dt><dd><b>Tapping a column</b> opens the chart with <i>that day</i> selected, not the whole range — so a spike you noticed is one tap from the cases that caused it. This is the answer to "if I add a graph, what happens when I click it": a column is a date filter, never decoration.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-camera"/></svg></span><span class="w__lbl">OBSERVATION</span></div>
+            <button class="big">New <svg viewBox="0 0 24 24"><use href="#g-plus"/></svg></button>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Log an observation</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Optionally pin an <b>animal</b>. Pinned, the composer opens with it filled in; unpinned, it opens the scanner first.</dd></div>
+            <div><dt>Tap</dt><dd><b>Observation composer</b>, camera armed, location and time already stamped.</dd></div>
+            <div><dt>In place</dt><dd>Nothing completes on the home screen — but the widget shows a <b>tick for 4 seconds</b> after a save, so you know it landed without opening anything.</dd></div>
+          </dl>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════ HOSPITAL ══════════════════ -->
+    <section class="mod" id="hospital" data-mod="hospital">
+      <div class="mod__hd">
+        <span class="chip"><svg viewBox="0 0 24 24"><use href="#g-hospital"/></svg></span>
+        <h2>Hospital</h2><span class="mod__c">#39656E</span>
+      </div>
+      <p class="mod__note">Hospital is about capacity and what is happening in the building right now —
+         so four of the six are about space, and one is live.</p>
+      <div class="grid">
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-bed"/></svg></span><span class="w__lbl">FREE PENS</span></div>
+            <div><span class="w__n">6</span><span class="w__u">of 24</span></div>
+            <div class="w__sub">nearest · <b>B16</b></div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Free pens</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>ward</b>. Required — "6 free" is meaningless without one.</dd></div>
+            <div><dt>Tap</dt><dd><b>Hospital → Ward plan</b>, that ward, free pens highlighted.</dd></div>
+            <div><dt>In place</dt><dd>Tapping the <b>named pen</b> starts an admission into it directly.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--tint">
+            <div class="w__hd"><span class="chip" style="background:rgba(255,255,255,.22);box-shadow:none"><svg viewBox="0 0 24 24"><use href="#g-clock"/></svg></span><span class="w__lbl">IN THEATRE</span></div>
+            <div style="font-size:15px;font-weight:650;letter-spacing:-.01em">Big Bull</div>
+            <div class="w__sub">Laceration repair · <b>00:42</b></div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">In theatre now</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Nothing to choose.</dd></div>
+            <div><dt>Tap</dt><dd><b>Hospital → the procedure record</b> that is open.</dd></div>
+            <div><dt>In place</dt><dd>The clock runs on the home screen. <b>The widget removes itself</b> when nothing is in theatre — it does not sit there saying "0", because an empty theatre is not news.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--m">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-hospital"/></svg></span><span class="w__lbl">WARD B</span><span class="w__sp"></span><span class="meta">18 of 24</span></div>
+            <div class="w__sp"></div>
+            <div class="plan">
+              <i class="f"></i><i class="f"></i><i class="hot"></i><i class="f"></i><i></i><i class="f"></i><i class="f"></i><i></i>
+              <i class="f"></i><i class="f"></i><i class="f"></i><i></i><i class="hot"></i><i class="f"></i><i class="f"></i><i></i>
+            </div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Ward plan</span><span class="ent__sz">Medium</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>ward</b>.</dd></div>
+            <div><dt>Tap</dt><dd><b>Hospital → Ward plan</b>, full size.</dd></div>
+            <div><dt>In place</dt><dd><b>Every cell is its own target.</b> Tap an occupied pen for that animal's case; tap an empty one to admit into it. Solid cells are the two criticals.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-clock"/></svg></span><span class="w__lbl">QUARANTINE</span></div>
+            <div><span class="w__n">6</span><span class="w__u">days</span></div>
+            <div class="w__sub">Pen 4 clears <b>16 Sep</b></div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Next hold to clear</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>site</b>. It always shows the <i>soonest</i> hold, not a total.</dd></div>
+            <div><dt>Tap</dt><dd><b>Hospital → Quarantine holds</b>, sorted by clearing date.</dd></div>
+            <div><dt>In place</dt><dd>At zero days it turns amber and the label becomes <b>Sign off</b> — the one day it needs a person.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-arrow"/></svg></span><span class="w__lbl">ADMISSIONS</span></div>
+            <div><span class="w__n">3</span><span class="w__u">today</span></div>
+            <div class="w__sub">2 discharged</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Admissions today</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>site</b>.</dd></div>
+            <div><dt>Tap</dt><dd><b>Hospital → Admissions</b>, today's list.</dd></div>
+            <div><dt>In place</dt><dd class="none">nothing</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-bed"/></svg></span><span class="w__lbl">ADMIT</span></div>
+            <button class="big">Admit <svg viewBox="0 0 24 24"><use href="#g-plus"/></svg></button>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Admit an animal</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>default ward</b>, so the form opens on the right one.</dd></div>
+            <div><dt>Tap</dt><dd><b>Admission form</b>, ward pre-selected, first free pen suggested.</dd></div>
+            <div><dt>In place</dt><dd>Greys out and reads <b>Ward full</b> when there is no free pen — pressing it then would only produce an error two screens later.</dd></div>
+          </dl>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════ PHARMACY ══════════════════ -->
+    <section class="mod" id="pharmacy" data-mod="pharmacy">
+      <div class="mod__hd">
+        <span class="chip"><svg viewBox="0 0 24 24"><use href="#g-pharmacy"/></svg></span>
+        <h2>Pharmacy</h2><span class="mod__c">#7C3AED</span>
+      </div>
+      <p class="mod__note">Stock only matters as time. Four of these six are countdowns of one kind or
+         another, and the one register that needs an audit trail says so.</p>
+      <div class="grid">
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-alert"/></svg></span><span class="w__lbl">RUNS OUT FIRST</span></div>
+            <div><span class="w__n">4</span><span class="w__u">days</span></div>
+            <div class="w__sub"><b>Ketamine</b> 50mg/ml</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Runs out first</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>store</b>. Optionally restrict to <b>emergency</b> lines only.</dd></div>
+            <div><dt>Tap</dt><dd><b>Pharmacy → that item's stock record</b> — the item, not the list, because there is only one thing named here.</dd></div>
+            <div><dt>In place</dt><dd>Goes red when the runway is shorter than the supplier's lead time. That comparison is the whole widget.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-pharmacy"/></svg></span><span class="w__lbl">DISPENSE</span></div>
+            <button class="big">Dispense <svg viewBox="0 0 24 24"><use href="#g-scan"/></svg></button>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Dispense</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Nothing to choose.</dd></div>
+            <div><dt>Tap</dt><dd><b>Dispense flow</b>, scanner open.</dd></div>
+            <div><dt>In place</dt><dd>Scanning is the whole job, so the camera is the first screen rather than a menu. The last dispense shows for 4 seconds after it saves.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--m">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-vial"/></svg></span><span class="w__lbl">LOW STOCK</span><span class="w__sp"></span><span class="meta">3 of 214</span></div>
+            <div class="li">
+              <div class="li__r"><span class="li__t">Ketamine 50mg/ml</span><span class="li__m li__m--acc">4d</span></div>
+              <div class="li__r"><span class="li__t">Meloxicam 20mg</span><span class="li__m">9d</span></div>
+              <div class="li__r"><span class="li__t">Enrofloxacin 100ml</span><span class="li__m">21d</span></div>
+            </div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Low stock</span><span class="ent__sz">Medium</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>store</b>.</dd></div>
+            <div><dt>Tap</dt><dd><b>Pharmacy → Low stock</b>, the full table.</dd></div>
+            <div><dt>In place</dt><dd><b>Long-press a row</b> to add it to the next order without opening anything. That is the only write this module does from the home screen, and it is reversible from the order.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-clock"/></svg></span><span class="w__lbl">NEAR EXPIRY</span></div>
+            <div><span class="w__n">7</span><span class="w__u">items</span></div>
+            <div class="w__sub">soonest <b>22 Sep</b></div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Near expiry</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>horizon</b> — 30, 60 or 90 days.</dd></div>
+            <div><dt>Tap</dt><dd><b>Pharmacy → Near expiry</b>, sorted by date, that horizon applied.</dd></div>
+            <div><dt>In place</dt><dd class="none">nothing — writing off a batch needs a second pair of eyes</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-lock"/></svg></span><span class="w__lbl">CONTROLLED</span></div>
+            <div><span class="w__n">0</span></div>
+            <div class="w__sub">register balanced <b>09:40</b></div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Controlled register</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>store</b>. Only offered to roles that hold the register.</dd></div>
+            <div><dt>Tap</dt><dd><b>Pharmacy → Controlled drugs</b> — behind re-authentication, every time.</dd></div>
+            <div><dt>In place</dt><dd>The figure is <b>discrepancies</b>, so zero is the good state. Any non-zero turns the tile red and names the drug.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-chart"/></svg></span><span class="w__lbl">STOCK VALUE</span></div>
+            <div><span class="w__n w__n--m">₹8.4</span><span class="w__u">L</span></div>
+            <div class="w__sub">down 3% this month</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Stock value</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>store</b>, or All.</dd></div>
+            <div><dt>Tap</dt><dd><b>Pharmacy → Stock value</b>, the valuation with its month.</dd></div>
+            <div><dt>In place</dt><dd class="none">nothing — a finance figure is for reading</dd></div>
+          </dl>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════ SPECIES ══════════════════ -->
+    <section class="mod" id="species" data-mod="species">
+      <div class="mod__hd">
+        <span class="chip"><svg viewBox="0 0 24 24"><use href="#g-species"/></svg></span>
+        <h2>Species Management</h2><span class="mod__c">#0891B2</span>
+      </div>
+      <p class="mod__note">This module is a register, not an alarm — so most of its widgets open a
+         filtered view of the collection rather than a task.</p>
+      <div class="grid">
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-species"/></svg></span><span class="w__lbl">COLLECTION</span></div>
+            <div><span class="w__n w__n--m">2,411</span></div>
+            <div class="w__sub">species · <b>110,020</b> animals</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">The collection</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>site</b>, or All sites.</dd></div>
+            <div><dt>Tap</dt><dd><b>Species → Directory</b>, unfiltered.</dd></div>
+            <div><dt>In place</dt><dd class="none">nothing</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--m">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-chart"/></svg></span><span class="w__lbl">IUCN STATUS</span></div>
+            <div class="w__sp"></div>
+            <div class="seg">
+              <i style="flex:52; background:color-mix(in srgb, var(--acc) 26%, transparent)" title="Least concern · 1,254"></i>
+              <i style="flex:22; background:color-mix(in srgb, var(--acc) 50%, transparent)" title="Near threatened · 531"></i>
+              <i style="flex:16; background:color-mix(in srgb, var(--acc) 74%, transparent)" title="Vulnerable · 386"></i>
+              <i style="flex:10; background:#B91C1C" title="Endangered · 240"></i>
+            </div>
+            <div class="w__sub" style="margin-top:9px"><b>240</b> endangered or worse</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">IUCN status mix</span><span class="ent__sz">Medium</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>site</b>.</dd></div>
+            <div><dt>Tap</dt><dd><b>Species → IUCN status mix</b>, the full chart.</dd></div>
+            <div><dt>In place</dt><dd><b>Each band is its own target.</b> Tapping the red one opens the directory filtered to Endangered — so the widget is a set of four shortcuts wearing a chart, not a picture of a ratio.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w" style="padding:0">
+            <div class="ph"><img src="../assets/img/species.jpg" alt="An Asiatic lioness in dry scrub"><div class="ph__s"></div></div>
+            <div class="ph__b">
+              <span class="w__sp"></span>
+              <div style="font-size:14.5px;font-weight:650;color:#fff">Asiatic Lion</div>
+              <div class="ph__lat">Panthera leo persica</div>
+            </div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Species of the day</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Choose the pool it draws from — <b>the whole master</b>, or only species this site holds.</dd></div>
+            <div><dt>Tap</dt><dd><b>Species → that species' record</b>.</dd></div>
+            <div><dt>In place</dt><dd>Rotates once a day at 04:00. The one widget here with no operational job — it exists so the register gets looked at.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w w--m">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-plus"/></svg></span><span class="w__lbl">RECENTLY ADDED</span><span class="w__sp"></span><span class="meta">7 days</span></div>
+            <div class="li">
+              <div class="li__r"><span class="dot"></span><span class="li__t">Scarlet Macaw · 2 birds</span><span class="li__m">02 Sep</span></div>
+              <div class="li__r"><span class="dot" style="opacity:.35"></span><span class="li__t">Indian Python · 1</span><span class="li__m">31 Aug</span></div>
+              <div class="li__r"><span class="dot" style="opacity:.35"></span><span class="li__t">Bengal Tiger · 1 cub</span><span class="li__m">29 Aug</span></div>
+            </div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Recently added</span><span class="ent__sz">Medium</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>window</b> — 7 or 30 days.</dd></div>
+            <div><dt>Tap</dt><dd><b>Species → Recently added</b>.</dd></div>
+            <div><dt>In place</dt><dd>Tapping <b>a row</b> opens that accession, not the list.</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip" style="--acc:#B91C1C"><svg viewBox="0 0 24 24"><use href="#g-alert"/></svg></span><span class="w__lbl">DANGEROUS</span></div>
+            <div><span class="w__n">38</span></div>
+            <div class="w__sub">species needing two keepers</div>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Dangerous species</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Pick a <b>site</b>.</dd></div>
+            <div><dt>Tap</dt><dd><b>Species → Dangerous species</b>, with each one's handling rule.</dd></div>
+            <div><dt>In place</dt><dd class="none">nothing — this is a reference list, and it should not be editable from a home screen</dd></div>
+          </dl>
+        </div>
+
+        <div class="ent">
+          <div class="w">
+            <div class="w__hd"><span class="chip"><svg viewBox="0 0 24 24"><use href="#g-search"/></svg></span><span class="w__lbl">FIND</span></div>
+            <button class="big">Find a species <svg viewBox="0 0 24 24"><use href="#g-search"/></svg></button>
+          </div>
+          <div class="ent__hd"><span class="ent__t">Find a species</span><span class="ent__sz">Small</span></div>
+          <dl class="beh">
+            <div><dt>Add</dt><dd>Nothing to choose.</dd></div>
+            <div><dt>Tap</dt><dd><b>Search</b>, keyboard up, scope already set to Species so the first result is a taxon and not an animal.</dd></div>
+            <div><dt>In place</dt><dd>The scope is the point — the app's global search returns animals first, which is wrong for a biologist.</dd></div>
+          </dl>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.rail__item[data-go]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.rail__item').forEach(i => i.classList.remove('is-on'))
+    item.classList.add('is-on')
+    document.getElementById(item.dataset.go)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+})
+/* the chart targets are the argument, so they should respond to a press */
+document.querySelectorAll('.spark i, .seg i, .plan i').forEach(el => {
+  el.addEventListener('click', () => {
+    el.parentElement.querySelectorAll('i').forEach(s => s.classList.remove('on'))
+    el.classList.add('on')
+  })
+})
+</script>
+</body>
+</html>
