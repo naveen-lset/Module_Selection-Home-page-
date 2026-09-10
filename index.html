@@ -8347,6 +8347,29 @@ body.is-site .card:active { transform: scale(.978); }
   outline: 3px solid var(--ui-link);
   outline-offset: 3px;
 }
+
+/* ── …EXCEPT THE WAY IN, WHICH IS NOT THE BAR'S · ruled 10 Sep 2026 ──────
+   "Edit Modules remove here becouse it already in the Profile." It was put
+   here earlier the same day, on the reasoning that V2 collapses the Modules
+   header at rest and so leaves no visible way into the mode. That reasoning
+   was wrong about "no way": the profile menu carries Edit Modules / Done
+   Editing as its first item, which is the 8 Sep ruling that the action is in
+   the profile. A second entry point on top of the page was one too many —
+   and it floated over the cards it was offering to rearrange.
+
+   HIDDEN, NOT REMOVED, AND THE DIFFERENCE MATTERS. createEditMode swaps the
+   mode's buttons by `editBtn.replaceWith(doneBtn)` on the way in and
+   `doneBtn.replaceWith(editBtn)` on the way out, so this button is the
+   ANCHOR the swap happens at. Deleting it from the slot would leave
+   replaceWith with no parent to act on, silently, and Done would never
+   appear — leaving no way out of edit mode at all. So it stays in the
+   document and off the screen, which `display: none` also does for the tab
+   order and the accessibility tree.
+
+   What the bar still gains is the mode's own controls: Add Module and Done
+   arrive here while editing, which is the half of "One bottom bar with these
+   option has to come" that this ruling does not touch. */
+.qa-edit > .link-btn:not(.link-btn--done) { display: none; }
 /* the header dressed Done as a filled green control and Add Module as an
    outline; in the bar the glass is the common material and Done keeps only
    its weight, so the two read as one row rather than three materials */
@@ -8375,9 +8398,10 @@ body.is-site .card:active { transform: scale(.978); }
      with the others it would have become an empty 52px circle — and Done is
      the only way out of edit mode on the page itself. It keeps its word, and
      the row it sits in is two controls wide, so there is room. */
-  .qa-edit > .link-btn:not(.link-btn--done) > span,
+  /* Edit is gone from the bar entirely now, so Add Module is the only
+     control left with a glyph to fall back to. Done still keeps its word
+     for the reason below. */
   .qa-edit > .add-module-btn > span { display: none; }
-  .qa-edit > .link-btn:not(.link-btn--done),
   .qa-edit > .add-module-btn {
     width: var(--qa-h);
     padding: 0;

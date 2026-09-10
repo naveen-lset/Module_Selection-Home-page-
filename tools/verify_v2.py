@@ -912,6 +912,32 @@ def main():
         r = c.eval(PILL)
         check("the pill is there and the FAB is not", r["pill"] and not r["fab"],
               f"pill={r['pill']} fab={r['fab']}")
+        # AND THE BAR CARRIES NOTHING ELSE AT REST · ruled 10 Sep 2026,
+        # "Edit Modules remove here becouse it already in the Profile". An
+        # Edit control sat in this row for part of the day and floated over
+        # the cards it was offering to rearrange; the profile menu already
+        # holds that entry. The mode's OWN buttons still arrive here while
+        # editing, which is checked further down — so this pins the resting
+        # state only: two controls, the pill and the disc.
+        #
+        # THE ANCHOR IS ASSERTED PRESENT AND HIDDEN, not absent, and that is
+        # the real point of the check. createEditMode swaps Done in by
+        # `editBtn.replaceWith(doneBtn)`, so deleting that button from the
+        # slot would leave replaceWith with no parent to act on — silently —
+        # and there would be no way out of edit mode. Hidden is correct;
+        # gone is a trap, and it is the kind that passes a visual check.
+        bar = json.loads(c.eval("""(()=>{
+          const shown=[...document.querySelectorAll('.qa-row button')]
+            .filter(b=>getComputedStyle(b).display!=='none')
+            .map(b=>b.textContent.trim()||b.getAttribute('aria-label')||'?');
+          const a=document.querySelector('.qa-edit > .link-btn:not(.link-btn--done)');
+          return JSON.stringify({shown, anchorPresent:!!a,
+            anchorHidden:a?getComputedStyle(a).display==='none':null})})()"""))
+        check("…and the resting bar is the pill and the disc, nothing more",
+              bar["shown"] == ["Quick Actions", "Chat"], str(bar["shown"]))
+        check("…with the mode's swap anchor kept, and kept hidden",
+              bar["anchorPresent"] and bar["anchorHidden"],
+              f"present={bar['anchorPresent']} hidden={bar['anchorHidden']}")
         # 40 AND NOT THE NODE'S 109 — the ruling of 8 Sep; see --qa-b in the
         # stylesheet for why the artboard's number does not survive a page that
         # scrolls. Below the phone boundary it is 24.
