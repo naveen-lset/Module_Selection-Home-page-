@@ -3295,8 +3295,50 @@ body.is-editing .section-head--home { align-items: center; margin-bottom: var(--
   font: inherit;
   color: var(--on-dark);
   text-decoration: none;
+  /* ── A LONG PRESS IS A GESTURE HERE, NOT A TEXT SELECTION ─────────────
+     A card is held for 500ms to enter edit mode and for 200ms to pick it up
+     and drag it. On the way to either, iOS was doing what it does to any
+     ordinary run of text: selecting the card's label, painting it blue and
+     raising the grab handles — so the gesture that was meant to lift a card
+     highlighted the word "Medical" instead.
+
+     THE CALLOUT LINE BELOW WAS ALREADY HERE AND IS NOT ENOUGH. It suppresses
+     the Copy / Look Up bubble, which is the visible half of the behaviour;
+     the SELECTION underneath it is a separate property, and it was still
+     `auto` — measured on the rendered card, where a range across it returned
+     "Medical".
+
+     `body.is-dragging` sets `user-select: none` too, and that is also not
+     enough: it lands when the drag BEGINS, which is 200ms after the finger
+     went down and well after WebKit has already started the selection. The
+     property has to be off before the press, not applied in response to it.
+
+     No text is lost. A card is a button or an anchor — see the note above —
+     and a control's label is not prose anyone selects. */
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-touch-callout: none;
   transition: box-shadow var(--t-base) var(--ease), transform var(--t-base) var(--ease-out);
+}
+
+/* ── AND THE SAME PRESS MUST NOT OFFER THE PICTURE ──────────────────────
+   The other half of the long press. Where the finger lands on a module glyph,
+   an avatar or a photograph rather than on the label, iOS raises the image
+   action sheet — Save to Photos / Copy — which cancels the pointer stream the
+   hold is counting on, so the gesture does not merely look wrong, it does not
+   fire at all. `-webkit-user-drag` is the desktop equivalent: without it a
+   mouse press-and-hold starts a native image drag with its ghost, and the
+   same cancellation follows.
+
+   Scoped to what is actually held. `.hero-stage img` already carries the drag
+   half of this for the announcement deck's own swipe; this is the card grid,
+   which is where the two hold gestures live. */
+.card img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 @media (hover: hover) {
@@ -8246,6 +8288,130 @@ body.is-site .card:active { transform: scale(.978); }
   gap: var(--s3);
 }
 
+/* ══ EDIT IN THE BOTTOM BAR · ruled 10 Sep 2026 ═══════════════════════════
+   "Edit module has to come down like quick actions & chat are there, One
+   bottom bar with these option has to come", and then: "Edit time Quick &
+   Chat wont there."
+
+   THERE WAS NO VISIBLE WAY IN. On V2 the Modules header is collapsed to
+   `height: 0; visibility: hidden` at rest — see the rule at
+   `body:not(.is-editing) .section-head--home` — and the Edit Modules button
+   is inside it. So the only routes into the mode were a 500ms hold on a
+   card, the profile menu, or the E key: three gestures, none of them
+   visible. This puts the affordance on screen next to the two controls that
+   were already there.
+
+   THE SLOT IS `display: contents` so the buttons it holds are direct flex
+   children of the row and take the row's own 12px gap. Wrapping them in a
+   box of its own would have put a second gap inside the first and set Edit
+   fractionally out of step with the pill and the disc. */
+.qa-edit { display: contents; }
+
+/* the mode's own buttons, wearing the row's material rather than the
+   header's — a text link at the foot of a photograph is not legible, and
+   these now sit over the page rather than over the section head */
+.qa-edit > .link-btn,
+.qa-edit > .add-module-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  height: var(--qa-h);
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+          backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+  /* THE PILL'S FIVE LAYERS, IN THE SAME ORDER AND THE SAME COUNT. See the
+     note at `.qa-pill`: `box-shadow` is transitioned on these too, and two
+     lists interpolate only while their layer counts match. */
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .25),
+              inset 0 1px 0 0 var(--glass-spec),
+              inset 0 -1px 0 0 var(--glass-bounce),
+              inset 0 0 0 1px var(--glass-rim),
+              inset 0 -6px 12px -6px var(--glass-depth);
+  color: #000000;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform var(--qa-t-press) var(--qa-ease-press),
+              box-shadow var(--t-base) var(--ease);
+}
+.qa-edit > .link-btn:active,
+.qa-edit > .add-module-btn:active { transform: scale(.96); }
+.qa-edit > .link-btn:focus-visible,
+.qa-edit > .add-module-btn:focus-visible {
+  outline: 3px solid var(--ui-link);
+  outline-offset: 3px;
+}
+/* the header dressed Done as a filled green control and Add Module as an
+   outline; in the bar the glass is the common material and Done keeps only
+   its weight, so the two read as one row rather than three materials */
+.qa-edit > .link-btn .icon,
+.qa-edit > .add-module-btn .icon { width: 18px; height: 18px; }
+.qa-edit > .link-btn--done { background: var(--glass-fill); color: #000000; }
+
+/* ── ON A NARROW PHONE THE LABEL GOES AND THE GLYPH STAYS ────────────────
+   THE NUMBER IS DERIVED, NOT PICKED. With its label the Edit control is
+   ~155 wide, and the row is Edit + 12 + pill (168) + 12 + disc (56) = ~403.
+   Add the 16px the page keeps at each margin and the row needs 435 before
+   it touches the edges — measured at 390, where it came out 394 wide and
+   overflowed by 4px at both ends. 480 is that threshold with a little
+   headroom, and it is below the 620 the launcher's own tokens step at, so
+   nothing else moves with it.
+
+   THE PENCIL IS ENOUGH HERE because this is the pill's own collapse, one
+   breakpoint earlier: the same stadium, the same glyph-in-a-circle. The
+   accessible name has to survive the label going, which is what `aria-label`
+   is for — see the call site, where it is set alongside the visible text
+   rather than instead of it. */
+@media (max-width: 480px) {
+  /* DONE IS EXCLUDED, AND DELIBERATELY. This collapse trades a label for a
+     glyph, which only works where there IS a glyph: Edit carries a pencil
+     and Add Module a plus, and Done carries nothing but the word. Collapsed
+     with the others it would have become an empty 52px circle — and Done is
+     the only way out of edit mode on the page itself. It keeps its word, and
+     the row it sits in is two controls wide, so there is room. */
+  .qa-edit > .link-btn:not(.link-btn--done) > span,
+  .qa-edit > .add-module-btn > span { display: none; }
+  .qa-edit > .link-btn:not(.link-btn--done),
+  .qa-edit > .add-module-btn {
+    width: var(--qa-h);
+    padding: 0;
+  }
+}
+
+/* ── AND WHILE EDITING, THE OTHER TWO GO ─────────────────────────────────
+   "Edit time Quick & Chat wont there." Editing is a mode about the cards,
+   and a launcher that opens nineteen more of them mid-rearrange is a way to
+   lose the arrangement you were making. The bar becomes Add Module and Done
+   and nothing else.
+
+   `display: none`, AND IT HAS TO BE. `visibility: hidden` was written here
+   first and is wrong: it keeps the box. The row is centred on itself
+   (`left: 50%` and a −50% translate), so two invisible-but-present controls
+   would still be measured, and Add Module and Done would sit off to the
+   left of centre by half the pill and the disc — centred on a row that is
+   mostly nothing. `display` is also what takes them out of the tab order,
+   which is the other half of hiding a control properly.
+
+   The cost is that the swap cannot be eased, and that is the right trade:
+   the mode's own buttons replace each other instantly in the header too,
+   and a bar that dissolves while the grid behind it starts shaking is two
+   motions competing for the same moment. */
+body.is-editing .qa-pill,
+body.is-editing .qa-chat { display: none; }
+/* The launcher cannot be left open behind the mode either — entering edit
+   while the panel is up would strand a nineteen-tile sheet over the grid
+   being edited, with its own pill gone from under it. That is closed
+   properly, in `onEnter` at the call site, rather than hidden here: a CSS
+   `display: none` would leave the component still believing it is open, the
+   pill still reporting `aria-expanded="true"`, and the panel would spring
+   back on the way out of the mode. */
+
 /* ── the pill ────────────────────────────────────────────────────────────
    GLASS SINCE NODE 295:5561, and this is the fourth colour it has worn in two
    days: a #37BD69 → #1F415B ramp at radius 24 (270:4176), flat #37BD69 at a
@@ -8741,7 +8907,11 @@ body.is-site .card:active { transform: scale(.978); }
    pill as ONE surface instead — see the note over `--qa-mod-open` for why the
    nineteen tiles no longer move independently. */
 .qa--modules .qa-menu {
-  width: min(calc(4 * var(--qa-mod-w) + 3 * var(--qa-mod-gap) + 2 * var(--qa-mod-pad)),
+  /* THREE TILES WIDE AND TWO GUTTERS, which is the grid above stated as a
+     measure — 3x150 + 2x16 + 2x32 = 546, down from the four-column 712. The
+     two numbers are one decision: a panel sized for four with a grid set to
+     three would stretch the tiles past their own 150. */
+  width: min(calc(3 * var(--qa-mod-w) + 2 * var(--qa-mod-gap) + 2 * var(--qa-mod-pad)),
              calc(100vw - 32px));
   padding: var(--qa-mod-pad);
   border-radius: var(--qa-mod-panel-r);
@@ -8778,7 +8948,11 @@ body.is-site .card:active { transform: scale(.978); }
      164, both of which put the centre at 478. So the launcher keeps growing
      out of the pill when the label collapses on scroll, with nothing to
      recompute. */
-  transform-origin: calc(50% - (var(--qa-chat-h) + var(--s3)) / 2) 100%;
+  /* `--qa-origin-x` IS THE PILL'S CENTRE, measured against the row's, and
+     the fallback is the value the static calc gave while the row held only
+     the pill and the disc. See measurePill() for why a calc no longer does:
+     Edit joined the row on 10 Sep and its width is a piece of text. */
+  transform-origin: calc(50% + var(--qa-origin-x, calc((var(--qa-chat-h) + var(--s3)) / -2))) 100%;
   transform: translateX(-50%) scale(.96);
   transition: opacity var(--qa-mod-open) var(--qa-ease),
               transform var(--qa-mod-open) var(--qa-ease);
@@ -8801,8 +8975,16 @@ body.is-site .card:active { transform: scale(.978); }
   transition: opacity var(--qa-mod-close) var(--qa-ease),
               transform var(--qa-mod-close) var(--qa-ease);
 }
+/* ── THREE COLUMNS · ruled 10 Sep 2026 ────────────────────────────────────
+   "Quick access module has come in 3 coloums". It was four.
+
+   STATED, NOT INFERRED FROM THE WIDTH. This was `auto-fill, minmax(140px,
+   1fr)`, which is a rule that yields whatever the panel's measure allows —
+   four here, and something else the moment the panel or the tile changes.
+   The column count is now the instruction, so it is written as the
+   instruction: three, and the panel is sized from three below. */
 .qa--modules .qa-menu__grid {
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--qa-mod-gap);
 }
 /* the head arrives with the panel rather than after the last row: there are
@@ -24256,10 +24438,22 @@ const DEFAULT_LABELS = {
   saved:     'Layout saved.',
 }
 
-function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, labels }) {
+function createEditMode({ head, grid, root, getCards, onCommit, onExit, onEnter, onAdd, labels,
+                          actionsHost }) {
   const L = { ...DEFAULT_LABELS, ...(labels || {}) }
   const title = head.querySelector('.section-head__title')
-  const actions = head.querySelector('.section-head__actions')
+  /* ── WHERE THE MODE'S BUTTONS LIVE · 10 Sep 2026 ───────────────────────
+     The header's own actions bar by default, which is where this component
+     has always put them and where the Site Workspace still wants them. The
+     home page now passes the Quick Actions row instead — Edit came down to
+     the bottom bar with the pill and the chat disc.
+
+     ONLY THE HOST MOVES. Everything else about the mode is unchanged: the
+     same three buttons, the same enter/exit, the same announcements. Making
+     this a parameter rather than a second component is the same reasoning
+     that already gave the two grids one binding — the hold duration and the
+     label swap are one decision each, not two. */
+  const actions = actionsHost || head.querySelector('.section-head__actions')
 
   /* One live region for the whole feature. Screen readers need it present in
      the document before the message arrives, so it is built up front and only
@@ -24285,6 +24479,12 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, l
   editBtn.type = 'button'
   editBtn.className = 'link-btn'
   editBtn.innerHTML = `${icon('pencil')}<span>${L.edit}</span>`
+  /* THE NAME HAS TO OUTLIVE THE LABEL. Below 480 the bar keeps the glyph and
+     hides the word — see the media block at `.qa-edit` — and a button whose
+     only text is `display: none` is a button with no accessible name at all.
+     Set alongside the visible text rather than instead of it, so the two
+     always say the same thing. */
+  editBtn.setAttribute('aria-label', L.edit)
 
   const doneBtn = document.createElement('button')
   doneBtn.type = 'button'
@@ -24308,6 +24508,7 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, l
   addBtn.type = 'button'
   addBtn.className = 'add-module-btn'
   addBtn.innerHTML = `${icon('plus')}<span>${L.add}</span>`
+  addBtn.setAttribute('aria-label', L.add)   /* same reason as editBtn above */
   addBtn.addEventListener('click', () => onAdd?.())
 
   let editing = false
@@ -24321,6 +24522,12 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onAdd, l
   function enter() {
     if (editing) return
     editing = true
+    /* BEFORE THE MODE IS DRESSED, not after. Every route in comes through
+       here — the bar's Edit button, a 500ms hold on a card, the profile
+       menu and the E key — so this is the one place a launcher left open
+       can be shut, and shutting it first means the panel is gone before the
+       grid starts rearranging underneath it. */
+    onEnter?.()
     document.body.classList.add('is-editing')
     title.textContent = L.editTitle
     editBtn.replaceWith(doneBtn)
@@ -29387,6 +29594,19 @@ function createQuickActions({ root, onAction, onChat } = {}) {
        stylesheet: the pill used to centre itself and now sits in a row with
        the chat disc, which is what stops it moving when its label collapses. */
     '<div class="qa-row">' +
+    /* ── THE EDIT SLOT · ruled 10 Sep 2026 ─────────────────────────────
+       "Edit module has to come down like quick actions & chat are there,
+       One bottom bar with these option has to come." Edit was a text link
+       in the Modules header; it now stands in this row with the pill and
+       the disc, and the header keeps only its title.
+
+       AN EMPTY SLOT, FILLED BY createEditMode. The buttons themselves are
+       still that component's — it owns the enter/exit state, the label
+       swap and the announcement — so what moves is WHERE it mounts them,
+       not who makes them. Building them here would be a second source of
+       truth for one mode. The row is created before createEditMode runs,
+       which is what makes the slot findable; see the call site. */
+    '<div class="qa-edit" id="qaEdit"></div>' +
     '<button type="button" class="qa-pill" id="qaPill" aria-expanded="false" aria-haspopup="true" aria-controls="qaMenu">' +
       /* TWO MARKS IN ONE BOX, and the second one is the open state's. The grid
          is the frame's own export rather than a sprite glyph — the sixteen-verb
@@ -29485,6 +29705,31 @@ function createQuickActions({ root, onAction, onChat } = {}) {
        trusted. Found exactly this way: a re-measure on the way back to the
        top stored 52px and quietly undid the fix. */
     if (w > pill.offsetHeight) root.style.setProperty('--qa-pill-open-w', `${w}px`)
+
+    /* ── AND WHERE THE PANEL GROWS FROM ────────────────────────────────
+       The launcher unfolds out of the pill, so its transform-origin has to
+       point at the pill's centre — see `--qa-origin-x` in the stylesheet
+       for why that is not simply 50%.
+
+       THIS USED TO BE A STATIC CALC AND CAN NO LONGER BE. The old row was
+       pill + gap + disc, where the pill's offset from the row's centre is
+       -(gap + disc) / 2 with the pill's own width cancelling out — a
+       constant, and the stylesheet said so. Since Edit came down into the
+       row on 10 Sep there is a fourth item, and its width is the words
+       "Edit Modules": text, which a translation or a type change moves.
+
+       So it is MEASURED, and measured as the thing itself rather than as a
+       model of it — the pill's centre against the row's centre. That stays
+       true whatever the row comes to hold, which a formula naming each
+       child would not. Read here because this already runs at the three
+       moments that matter: after layout, once the webfonts have settled,
+       and on resize. */
+    const rowBox = pill.parentElement?.getBoundingClientRect()
+    const pillBox = pill.getBoundingClientRect()
+    if (rowBox && rowBox.width) {
+      const dx = (pillBox.left + pillBox.width / 2) - (rowBox.left + rowBox.width / 2)
+      root.style.setProperty('--qa-origin-x', `${Math.round(dx * 10) / 10}px`)
+    }
   }
   /* after layout, and again once webfonts have settled the label's width */
   requestAnimationFrame(measurePill)
@@ -29955,6 +30200,14 @@ const edit = createEditMode({
   head,
   grid,
   root: gridRoot,
+  /* THE BOTTOM BAR, NOT THE HEADER — the ruling of 10 Sep. The slot is built
+     by createQuickActions, which runs above this, so it is in the document by
+     now; if the launcher were ever created after this line the controls would
+     silently fall back to the header, which is why the fallback is a real
+     header lookup rather than a throw. */
+  actionsHost: document.getElementById('qaEdit'),
+  /* the pill goes with the mode, so the panel it opened cannot stay */
+  onEnter: () => quickActions?.close(),
   onAdd: () => picker.open(),
   getCards: () => layoutStore.get().cards,
   onCommit(next, opts = {}) {

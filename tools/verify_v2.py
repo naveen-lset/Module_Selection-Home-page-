@@ -204,12 +204,23 @@ PROBE = """(()=>{
                sub:hub.querySelectorAll('.l-focus__sub').length}:null,
   }})()"""
 
+# THE MODE'S CONTROLS ARE IN THE BOTTOM BAR SINCE 10 SEP, not in the head:
+# "Edit module has to come down like quick actions & chat are there". So this
+# reads the head for the thing the head still owns — that it comes back at all,
+# carrying the mode's title — and looks for Add Module and Done in the row.
+# Both are still reached by FOCUS rather than by presence, which is the point
+# of the check: a control that is in the DOM and cannot be focused is not a
+# control, and `visibility: hidden` on the collapse was how that happened once.
 EDIT_HEAD = """(()=>{const h=document.getElementById('modulesHead');
-  const done=h.querySelector('.link-btn--done'), add=h.querySelector('.add-module-btn');
+  const bar=document.querySelector('.qa-row');
+  const done=bar.querySelector('.link-btn--done'), add=bar.querySelector('.add-module-btn');
   if(done) done.focus(); const d=!!done&&document.activeElement===done;
   if(add) add.focus(); const a=!!add&&document.activeElement===add;
   return {h:+h.getBoundingClientRect().height.toFixed(1), vis:getComputedStyle(h).visibility,
-          done:d, add:a}})()"""
+          done:d, add:a,
+          /* …and the two the mode replaces are gone from the bar */
+          pill:getComputedStyle(document.querySelector('.qa-pill')).display,
+          chat:getComputedStyle(document.querySelector('.qa-chat')).display}})()"""
 
 HEAD_AWAY = """(()=>({editing:document.body.classList.contains('is-editing'),
   h:+document.getElementById('modulesHead').getBoundingClientRect().height.toFixed(1)}))()"""
@@ -795,10 +806,17 @@ def main():
         # not break: the head comes back, it is visible, and both controls can
         # be reached. The exact height is pinned only where one rule owns it.
         want_h = 44 if WIDTH >= 768 else None
-        check("the head comes back with Add Module and Done",
+        check("the head comes back, and the bar carries Add Module and Done",
               ed["vis"] == "visible" and ed["h"] > 0 and ed["done"] and ed["add"]
               and (want_h is None or near(ed["h"], want_h)), str(ed))
-        c.eval("document.querySelector('#modulesHead .link-btn--done').click()")
+        # …AND THE OTHER TWO ARE OFF THE BAR · "Edit time Quick & Chat wont
+        # there". `display: none` and not merely hidden, because the row is
+        # centred on itself: a pill that keeps its box would push Add Module
+        # and Done off centre by half of what is no longer there.
+        check("…while Quick Actions and Chat have left it",
+              ed["pill"] == "none" and ed["chat"] == "none",
+              f"pill {ed['pill']}, chat {ed['chat']}")
+        c.eval("document.querySelector('.qa-row .link-btn--done').click()")
         time.sleep(0.7)
         out = c.eval(HEAD_AWAY)
         check("…and Done puts it away again", not out["editing"] and out["h"] == 0, str(out))
@@ -1176,8 +1194,12 @@ def main():
               g["tileW"] == 150 and g["tileH"] == 70 and g["radius"] == 14
               and g["gapX"] == 16 and g["gapY"] == 16,
               f"{g['tileW']}x{g['tileH']} r{g['radius']} gap {g['gapX']}/{g['gapY']}")
-        check("…in four columns on a 712px panel with 32px padding",
-              g["cols"] == 4 and g["panelW"] == 712 and g["panelPad"] == "32px",
+        # THREE, NOT FOUR · ruled 10 Sep 2026, "Quick access module has come
+        # in 3 coloums". The panel is sized FROM the column count — 3x150 +
+        # 2x16 + 2x32 = 546 — so this asserts the pair together: a panel that
+        # kept its 712 while the grid went to three would stretch the tiles.
+        check("…in three columns on a 546px panel with 32px padding",
+              g["cols"] == 3 and g["panelW"] == 546 and g["panelPad"] == "32px",
               f"{g['cols']} cols, {g['panelW']}px, pad {g['panelPad']}")
         check("…standing 24 clear of the pill row, not 8",
               near(g["clearOfRow"], 24, 1), f"{g['clearOfRow']}px")
