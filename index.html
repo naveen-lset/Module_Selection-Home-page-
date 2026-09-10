@@ -8628,11 +8628,12 @@ body.is-editing .qa-chat { display: none; }
      the shared line and given it. */
   /* `padding` WAS IN THIS LIST AND NEVER CHANGED — 16px in the resting, the
      scrolled and the open state alike, measured at every frame of the
-     collapse. It is replaced by `margin-inline`, which is what now holds the
-     chat disc still: see `.qa.is-scrolled .qa-pill`. `gap` stays, and it does
-     change (8 → 0), so it has to ease with the label rather than snap. */
-  transition: margin-inline var(--t-base) var(--qa-ease),
-              gap var(--t-base) var(--qa-ease),
+     collapse. `margin-inline` replaced it and has now gone the same way with
+     the reservation it carried (see `.qa.is-scrolled .qa-pill`); the width
+     change is the LABEL's `max-width`, and the row re-centres off it. `gap`
+     stays, and it does change (8 → 0), so it has to ease with the label
+     rather than snap. */
+  transition: gap var(--t-base) var(--qa-ease),
               transform var(--qa-t-press) var(--qa-ease-press),
               box-shadow var(--t-base) var(--ease);
 }
@@ -8815,24 +8816,28 @@ body.is-editing .qa-chat { display: none; }
    centre 472 to 416 and back on every scroll. On a touch tablet that is the
    worse half of the trade: you reach for chat mid-scroll and it has moved.
 
-   THE FIX RESERVES THE PILL'S OPEN WIDTH rather than moving anything. The
-   collapsed pill takes symmetric margins of (open - 52) / 2, so the row's
-   total width never changes: the disc stays at 472 and the pill's circle
-   still lands centred on 350, exactly where its stadium was centred. Both
-   controls are now fixed and the price is the GAP, which opens from 12 to
-   ~68 while scrolled — two separate floating buttons rather than a pair,
-   which is what they are once the label is gone.
+   THE FIX RESERVED THE PILL'S OPEN WIDTH rather than moving anything: the
+   collapsed pill took symmetric margins of (open - 52) / 2, the row's total
+   width never changed, and both controls stayed put. The price was the GAP,
+   which opened from 12 to ~68 while scrolled — two separate floating buttons
+   rather than a pair.
 
-   `--qa-pill-open-w` IS MEASURED, NOT ASSUMED, because the open width is the
-   label's: "Quick Actions" at the body size is 165 here, and a translation or
-   a font-size change makes it something else. See measurePill(). The margin
-   transitions on the same duration and easing as the label's `max-width`, so
-   the two track each other through the whole collapse instead of only
-   agreeing at the ends. */
+   AND THE GAP IS WHAT THE USER SAW · ruled 10 Sep 2026 — "here this gab i
+   dont want. make centre when i scroll it." So the reservation is gone and
+   the row re-centres as it narrows: the two controls stay a pair 12 apart,
+   centred at the foot, in both states.
+
+   THE COST IS BACK ON THE DISC AND IT IS NOW THE CHOSEN ONE. The pair cannot
+   both hold a constant gap and hold still while one of them changes width —
+   the geometry does not allow it. Re-centring keeps the pill's circle on 350
+   where its stadium was centred and hands the whole shift to the disc, which
+   travels ~56px left as the label goes and back as it returns. That is the
+   trade the reservation was built to avoid; it is the one that was asked for.
+   `--qa-pill-open-w` went with it — nothing reads it now, so measurePill()
+   no longer writes it. */
 .qa.is-scrolled .qa-pill {
   padding: 16px;
   gap: 0;
-  margin-inline: calc((var(--qa-pill-open-w, 165px) - var(--qa-h)) / 2);
 }
 .qa.is-scrolled .qa-pill__t { max-width: 0; opacity: 0; }
 /* …and while the menu is open it stays open-shaped, whatever the scroll says:
@@ -29999,49 +30004,36 @@ function createQuickActions({ root, onAction, onChat } = {}) {
   const menu = root.querySelector('.qa-menu')
   const veil = root.querySelector('.qa-veil')
 
-  /* ── the pill's OPEN width, which the collapse reserves ─────────────────
-     Written to `--qa-pill-open-w` and read by `.qa.is-scrolled .qa-pill` to
-     hold the chat disc still — the argument is in the stylesheet. It has to
-     be measured rather than written down: the width is "Quick Actions" set
-     at the body size, which a translation or a type-scale change moves.
+  /* ── WHERE THE PANEL GROWS FROM ─────────────────────────────────────────
+     THIS USED TO MEASURE THE PILL'S OPEN WIDTH TOO, into `--qa-pill-open-w`,
+     which the collapse reserved as margin so neither control moved. The
+     reservation is gone — 10 Sep 2026, the gap it bought was not wanted —
+     and the property with it, so what is left is the origin.
 
-     MEASURED ONLY WHILE THE LABEL IS ACTUALLY OUT, which is why this bails
-     when `is-scrolled` is on. Reading a collapsed pill would store 52, the
-     reservation would compute to zero, and the disc would go back to
-     travelling — silently, since nothing else would look wrong.
+     IT DOES NOT BAIL ON `is-scrolled` ANY MORE. It used to, because a
+     collapsed pill reads 52 and would have stored a zero reservation. The
+     origin has no such problem: it is the pill's centre against the row's,
+     and re-centring holds that at -(gap + disc) / 2 in both states, so
+     measuring while scrolled returns the same number rather than a wrong
+     one.
 
-     `offsetWidth`, NOT getBoundingClientRect(), so a press mid-scroll cannot
-     fold `transform: scale(.96)` into the stored number. */
+     THE LAUNCHER UNFOLDS OUT OF THE PILL, so its transform-origin has to
+     point at the pill's centre — see `--qa-origin-x` in the stylesheet for
+     why that is not simply 50%.
+
+     THIS USED TO BE A STATIC CALC AND CAN NO LONGER BE. The old row was
+     pill + gap + disc, where the pill's offset from the row's centre is
+     -(gap + disc) / 2 with the pill's own width cancelling out — a constant,
+     and the stylesheet said so. Since Edit came down into the row on 10 Sep
+     there is a fourth item, and its width is the words "Edit Modules": text,
+     which a translation or a type change moves.
+
+     So it is MEASURED, and measured as the thing itself rather than as a
+     model of it — the pill's centre against the row's centre. That stays
+     true whatever the row comes to hold, which a formula naming each child
+     would not. Read here because this already runs at the three moments that
+     matter: after layout, once the webfonts have settled, and on resize. */
   function measurePill() {
-    if (root.classList.contains('is-scrolled')) return
-    const w = pill.offsetWidth
-    /* AND IT MUST BE WIDER THAN THE CIRCLE. The class coming off does not
-       mean the label is back — the expansion is a 220ms transition, and a
-       read taken during it returns something between 52 and 165. Storing
-       that shrinks the reservation and the disc starts travelling again, so
-       anything at or below the collapsed diameter is refused rather than
-       trusted. Found exactly this way: a re-measure on the way back to the
-       top stored 52px and quietly undid the fix. */
-    if (w > pill.offsetHeight) root.style.setProperty('--qa-pill-open-w', `${w}px`)
-
-    /* ── AND WHERE THE PANEL GROWS FROM ────────────────────────────────
-       The launcher unfolds out of the pill, so its transform-origin has to
-       point at the pill's centre — see `--qa-origin-x` in the stylesheet
-       for why that is not simply 50%.
-
-       THIS USED TO BE A STATIC CALC AND CAN NO LONGER BE. The old row was
-       pill + gap + disc, where the pill's offset from the row's centre is
-       -(gap + disc) / 2 with the pill's own width cancelling out — a
-       constant, and the stylesheet said so. Since Edit came down into the
-       row on 10 Sep there is a fourth item, and its width is the words
-       "Edit Modules": text, which a translation or a type change moves.
-
-       So it is MEASURED, and measured as the thing itself rather than as a
-       model of it — the pill's centre against the row's centre. That stays
-       true whatever the row comes to hold, which a formula naming each
-       child would not. Read here because this already runs at the three
-       moments that matter: after layout, once the webfonts have settled,
-       and on resize. */
     const rowBox = pill.parentElement?.getBoundingClientRect()
     const pillBox = pill.getBoundingClientRect()
     if (rowBox && rowBox.width) {
