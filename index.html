@@ -8377,6 +8377,78 @@ body.is-site .card:active { transform: scale(.978); }
 .qa-edit > .add-module-btn .icon { width: 18px; height: 18px; }
 .qa-edit > .link-btn--done { background: var(--glass-fill); color: #000000; }
 
+/* ══ THE EDITING BAR IS ONE CAPSULE · ruled 10 Sep 2026 ═══════════════════
+   "see Bottom there u can see the menu right, Same Way i want Add module
+   With Tick icon" — the App Store's floating app bar: ONE rounded white
+   container holding a glyph, a name, and a filled action button on the
+   right, floating over the page rather than sitting on a bar that spans it.
+
+   IT WAS TWO SEPARATE PILLS. Add Module and Done each carried the row's
+   glass, which read as two unrelated floating buttons; the reference reads
+   as one object because the container is the thing that floats and the
+   action sits INSIDE it. So the slot itself becomes the capsule here, and
+   the two buttons give up their own material to it.
+
+   `display: contents` IN THE RESTING STATE AND A BOX IN THIS ONE. At rest
+   the slot must not exist as a box at all — see the note above, where the
+   row's centring depends on it — so the capsule is scoped to `is-editing`
+   rather than declared on `.qa-edit` and unset. */
+body.is-editing .qa-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  height: var(--qa-h);
+  /* tight on the right, where the round action sits, and open on the left
+     where the label needs room off the glyph — the reference's own rhythm */
+  padding: 0 6px 0 18px;
+  border-radius: var(--r-pill);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+          backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-lift));
+  /* the pill's five layers, same order and same count — see `.qa-pill` */
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .25),
+              inset 0 1px 0 0 var(--glass-spec),
+              inset 0 -1px 0 0 var(--glass-bounce),
+              inset 0 0 0 1px var(--glass-rim),
+              inset 0 -6px 12px -6px var(--glass-depth);
+}
+
+/* ADD MODULE GIVES UP ITS OWN GLASS to the capsule it now sits in. Left as
+   a pill inside a pill it drew a second rim 6px inside the first, which is
+   the "cards inside cards" the reference does not do. */
+body.is-editing .qa-edit > .add-module-btn {
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+  box-shadow: none;
+}
+body.is-editing .qa-edit > .add-module-btn:active { transform: none; }
+
+/* …AND DONE BECOMES THE FILLED ROUND ACTION. The reference's Update button:
+   the one saturated thing in the capsule, so the eye lands on the way out
+   of the mode rather than on the way further into it. 40 inside a 52 leaves
+   6 top and bottom, which is the padding above. */
+body.is-editing .qa-edit > .link-btn--done {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--ui-link);
+  color: var(--on-dark);
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+  box-shadow: none;
+}
+/* the glyph alone here; the word is what names it in the workspace header */
+body.is-editing .qa-edit > .link-btn--done > span { display: none; }
+body.is-editing .qa-edit > .link-btn--done .icon { width: 20px; height: 20px; }
+body.is-editing .qa-edit > .link-btn--done:hover {
+  background: color-mix(in srgb, var(--ui-link) 86%, #000);
+}
+
 /* ── ON A NARROW PHONE THE LABEL GOES AND THE GLYPH STAYS ────────────────
    THE NUMBER IS DERIVED, NOT PICKED. With its label the Edit control is
    ~155 wide, and the row is Edit + 12 + pill (168) + 12 + disc (56) = ~403.
@@ -8398,14 +8470,11 @@ body.is-site .card:active { transform: scale(.978); }
      with the others it would have become an empty 52px circle — and Done is
      the only way out of edit mode on the page itself. It keeps its word, and
      the row it sits in is two controls wide, so there is room. */
-  /* Edit is gone from the bar entirely now, so Add Module is the only
-     control left with a glyph to fall back to. Done still keeps its word
-     for the reason below. */
-  .qa-edit > .add-module-btn > span { display: none; }
-  .qa-edit > .add-module-btn {
-    width: var(--qa-h);
-    padding: 0;
-  }
+  /* The capsule is Add Module's label plus a 40px action; at 320 that is
+     about 210 wide and fits with room to spare, so nothing has to collapse
+     any more. The label is the only thing naming the capsule — dropping it
+     would leave a plus and a tick with no subject — so it stays. */
+  body.is-editing .qa-edit { padding-left: 14px; }
 }
 
 /* ── AND WHILE EDITING, THE OTHER TWO GO ─────────────────────────────────
@@ -24513,7 +24582,14 @@ function createEditMode({ head, grid, root, getCards, onCommit, onExit, onEnter,
   const doneBtn = document.createElement('button')
   doneBtn.type = 'button'
   doneBtn.className = 'link-btn link-btn--done'
-  doneBtn.textContent = 'Done'
+  /* A TICK AND THE WORD, and which one shows is the host's business. The
+     bottom bar draws this as the App Store's floating capsule does — a
+     filled round button carrying the glyph alone — and hides the span; the
+     Site Workspace's header has room for both and shows both. Putting the
+     icon in the markup and letting CSS choose is what keeps one component
+     serving two hosts, which is why `actionsHost` exists at all. */
+  doneBtn.innerHTML = `${icon('check')}<span>Done</span>`
+  doneBtn.setAttribute('aria-label', 'Done')
 
   /**
    * ADD MODULE, AT THE TOP.

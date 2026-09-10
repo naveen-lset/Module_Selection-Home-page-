@@ -813,6 +813,42 @@ def main():
         # there". `display: none` and not merely hidden, because the row is
         # centred on itself: a pill that keeps its box would push Add Module
         # and Done off centre by half of what is no longer there.
+        # THE CAPSULE · ruled 10 Sep 2026 from the App Store's floating app
+        # bar: "Same Way i want Add module With Tick icon". ONE container
+        # holding the label and a filled round action, not two pills side by
+        # side — which is what it was, and which read as two unrelated
+        # buttons. So the shape is what is asserted: the slot is a real box
+        # with the row's radius, Add Module has given up its own shadow to
+        # it, and Done is a filled 40px circle carrying the tick.
+        cap = json.loads(c.eval("""(()=>{
+          const cap=document.querySelector('.qa-edit');
+          const add=cap.querySelector('.add-module-btn');
+          const done=cap.querySelector('.link-btn--done');
+          const cs=getComputedStyle(cap), ds=getComputedStyle(done);
+          const dr=done.getBoundingClientRect();
+          const tick=done.querySelector('svg');
+          return JSON.stringify({display:cs.display, radius:cs.borderRadius,
+            merged:getComputedStyle(add).boxShadow==='none',
+            doneW:Math.round(dr.width), doneH:Math.round(dr.height),
+            fill:ds.backgroundColor, round:ds.borderRadius,
+            tick:!!tick, wordHidden:getComputedStyle(done.querySelector('span')).display==='none',
+            name:done.getAttribute('aria-label')})})()"""))
+        # `flex`, NOT THE `inline-flex` THE RULE ASKS FOR, and that is correct:
+        # the capsule is itself a flex item of `.qa-row`, and a flex item's
+        # display is blockified — inline-flex computes to flex. What matters
+        # is that it is a BOX at all, where the resting state is `contents`.
+        check("the editing bar is one capsule, not two pills",
+              cap["display"] in ("flex", "inline-flex") and cap["radius"] == "999px"
+              and cap["merged"],
+              f"{cap['display']} r={cap['radius']} addMerged={cap['merged']}")
+        # 40 INSIDE THE 52, which is the reference's proportion and the
+        # reason the capsule's right padding is 6.
+        check("…with Done a filled round tick, and still named",
+              cap["doneW"] == 40 and cap["doneH"] == 40 and cap["tick"]
+              and cap["wordHidden"] and cap["name"] == "Done"
+              and cap["round"] == "999px" and cap["fill"] != "rgba(0, 0, 0, 0)",
+              f"{cap['doneW']}x{cap['doneH']} {cap['fill']} tick={cap['tick']} "
+              f"name={cap['name']!r}")
         check("…while Quick Actions and Chat have left it",
               ed["pill"] == "none" and ed["chat"] == "none",
               f"pill {ed['pill']}, chat {ed['chat']}")
