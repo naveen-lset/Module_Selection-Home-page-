@@ -392,11 +392,11 @@ TILES = """(()=>{
   const b=(e)=>e.getBoundingClientRect();
   const b0=b(t[0]), b1=b(t[1]), bRow2=b(t[4]);
 
-  /* WHICH INK DOES THIS COLOUR ACTUALLY WANT? Recomputed here from each
-     tile's own resolved background rather than trusted from the class, so
-     inkFor() in index.html cannot drift away from what it claims. WCAG
-     relative luminance, then whichever of white or the app's --ink wins.
-     --ink is #0F2A33, luminance ~0.0245. */
+  /* THE INK IS WHITE ON ALL NINETEEN · ruled 10 Sep. What is checked is no
+     longer WHICH ink each colour favours but that every tile actually got
+     white, plus the honest cost of that: the white-on-tile contrast, per
+     tile, recomputed from the resolved background. WCAG relative luminance
+     against white's 1.05. */
   const lum=(css)=>{
     const m=/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/.exec(css);
     if(!m) return null;
@@ -404,15 +404,9 @@ TILES = """(()=>{
       return v<=0.04045? v/12.92 : Math.pow((v+0.055)/1.055,2.4)});
     return 0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2];
   };
-  const wants=(css)=>{const L=lum(css);
-    return 1.05/(L+0.05) >= (L+0.05)/0.0745 ? 'light' : 'dark'};
-  const ratio=(css)=>{const L=lum(css);
-    return Math.max(1.05/(L+0.05),(L+0.05)/0.0745)};
-
-  const inkMismatch=t.filter(x=>{
-    const want=wants(getComputedStyle(x).backgroundColor);
-    const has=x.classList.contains('qa-mod--dark')?'dark':'light';
-    return want!==has}).map(x=>x.querySelector('.qa-mod__t').textContent);
+  /* white against the tile, which is the only ratio that applies now */
+  const ratio=(css)=>{const L=lum(css); return 1.05/(L+0.05)};
+  const nameOf=(x)=>x.querySelector('.qa-mod__t').textContent;
 
   return JSON.stringify({
     n:t.length,
@@ -430,11 +424,19 @@ TILES = """(()=>{
     panelPad:mcs.padding,
     panelW:Math.round(b(menu).width),
     clearOfRow:Math.round(b(document.querySelector('.qa-row')).top-b(menu).bottom),
-    /* the ink, checked against the colour rather than against itself */
-    dark:t.filter(x=>x.classList.contains('qa-mod--dark')).length,
-    light:t.filter(x=>!x.classList.contains('qa-mod--dark')).length,
-    inkMismatch:inkMismatch,
+    /* EVERY TILE'S RENDERED COLOUR, not the class that used to set it. The
+       `--dark` class is gone; a stray one would show up as a non-white ink
+       here rather than being counted. */
+    notWhite:t.filter(x=>getComputedStyle(x).color!=='rgb(255, 255, 255)').map(nameOf),
+    darkClass:t.filter(x=>x.classList.contains('qa-mod--dark')).length,
+    /* the cost, named tile by tile: white fails AA on most of these and the
+       3:1 non-text floor on the palest few. Recorded, not passed off. */
     worstRatio:Math.round(Math.min(...t.map(x=>ratio(getComputedStyle(x).backgroundColor)))*100)/100,
+    worstTile:nameOf(t.reduce((a,x)=>
+      ratio(getComputedStyle(x).backgroundColor)<ratio(getComputedStyle(a).backgroundColor)?x:a)),
+    underThree:t.filter(x=>ratio(getComputedStyle(x).backgroundColor)<3).map(nameOf),
+    /* which is why the shadow has to be there on every one of them */
+    withShadowInk:t.filter(x=>getComputedStyle(x).textShadow!=='none').length,
     /* the glyphs are the modules' own exported files, loaded */
     glyphsLoaded:t.filter(x=>{const i=x.querySelector('.qa-mod__g img');
       return i && i.complete && i.naturalWidth>0}).length,
@@ -472,40 +474,59 @@ PRESS_VER = """(()=>{const b=document.querySelector('.pmenu__item[data-id="ver:%
 WHERE = """(()=>({v:document.documentElement.dataset.pageVersion, search:location.search,
   cards:document.querySelectorAll('#moduleGrid .card').length,
   deck:document.querySelectorAll('.hero--slide').length}))()"""
-# ── THE FAN, RESOLVED INTO NUMBERS ────────────────────────────────────────
-# The launcher does not unfold: each tile flies out of the pill along its own
-# measured vector. So the thing to measure is not a clip window but the
-# DISTANCE from each tile's centre to the pill's, per frame. At t=0 every one
-# of them should be sitting on the pill; at the end, each at its grid slot.
-FAN = """(()=>{
+# ── THE OPENING, RESOLVED INTO NUMBERS ────────────────────────────────────
+# ONE SURFACE MOVES AND NOTHING ELSE DOES. Until 10 Sep each of the nineteen
+# tiles flew out of the pill on its own measured vector, and this probe
+# measured per-tile distances and launch ranks to prove the fan was a fan. The
+# ruling — "Animation not at all good" — replaced all of it with a 220ms
+# scale-and-fade of the panel from `50% 100%`, so what has to be measured now
+# is the opposite claim: the PANEL is travelling, and NO TILE IS.
+#
+# THE ORIGIN IS CHECKED AS A POINT ON THE SCREEN, not as the string "50% 100%".
+# A computed `transform-origin` of "356px 515px" tells you nothing on its own;
+# what matters is whether that point lands on the pill, so it is resolved into
+# viewport coordinates and compared with the pill's own centre. That is the
+# check that would catch the panel growing from its middle, or from a corner,
+# while the declaration still read plausibly.
+SURFACE = """(()=>{
   const qa=document.querySelector('.qa'), m=document.querySelector('.qa-menu');
   const pill=document.querySelector('.qa-pill').getBoundingClientRect();
   const px=pill.left+pill.width/2, py=pill.top+pill.height/2;
   const t=[...m.querySelectorAll('.qa-mod')];
-  const dist=(e)=>{const b=e.getBoundingClientRect();
-    return Math.hypot((b.left+b.width/2)-px,(b.top+b.height/2)-py)};
   const cs=(e)=>getComputedStyle(e);
-  const scaleOf=(e)=>{const mt=/matrix\(([-\d.]+)/.exec(cs(e).transform);
-    return mt? Math.round(+mt[1]*100)/100 : 1};
+  const mb=m.getBoundingClientRect();
+  const scaleOfEl=(e)=>{const mt=/matrix\(([-\d.]+)/.exec(cs(e).transform);
+    return mt? +mt[1] : 1};
+  const scaleOf=(e)=>Math.round(scaleOfEl(e)*1000)/1000;
+  /* THE ORIGIN, TURNED INTO A POINT IN THE VIEWPORT — and this is where the
+     first version of this probe was wrong. `transform-origin` resolves in the
+     element's UNTRANSFORMED coordinate space, while getBoundingClientRect()
+     returns the box AFTER the scale. Adding one to the other reported the
+     origin as 48px off the pill in a frame where the CSS was only 34px off,
+     so the number was part artifact and part real bug. The scale is divided
+     back out here: at scale s about origin o, a visual left edge sits at
+     (trueLeft + o) - o*s, so trueLeft + o — the fixed point of the transform —
+     is visualLeft + o*s. */
+  const o=cs(m).transformOrigin.split(' ').map(parseFloat);
+  const sc=scaleOfEl(m);
   return JSON.stringify({
     panelOpacity:+(+cs(m).opacity).toFixed(2),
+    panelScale:scaleOf(m),
     clip:cs(m).clipPath,
-    /* how far each tile is from the pill, and how bright */
-    dists:t.map(e=>Math.round(dist(e))),
-    ops:t.map(e=>+(+cs(e).opacity).toFixed(2)),
-    scales:t.map(scaleOf),
-    started:t.filter(e=>+cs(e).opacity>0.02).length,
-    landed:t.filter(e=>+cs(e).opacity>0.9 && scaleOf(e)===1).length,
-    /* the vectors themselves, to prove they are nineteen and not one */
-    vectors:t.map(e=>[e.style.getPropertyValue('--qa-dx'),e.style.getPropertyValue('--qa-dy')]),
-    /* which tile is nearest the pill and which furthest, by measured
-       distance — the fan is ordered by that, not by document order, so the
-       checks have to speak the same language */
-    nearestIdx:(()=>{let k=0; t.forEach((e,i)=>{if(dist(e)<dist(t[k]))k=i}); return k})(),
-    furthestIdx:(()=>{let k=0; t.forEach((e,i)=>{if(dist(e)>dist(t[k]))k=i}); return k})(),
-    /* the launch rank the page itself assigned, so the order it chose can be
-       compared against the distances rather than taken on trust */
-    ranks:t.map(e=>+e.style.getPropertyValue('--qa-i')),
+    /* where the panel is actually growing FROM, against where the pill is —
+       the fixed point of the scale, in viewport coordinates */
+    originDX:Math.round((mb.left+o[0]*sc)-px),
+    originDY:Math.round((mb.top+o[1]*sc)-py),
+    /* NO TILE MOVES · every one of them full opacity, full size, in every
+       frame, and — the real assertion — not one animation targeting a tile */
+    tileOps:t.map(e=>+(+cs(e).opacity).toFixed(2)),
+    tileScales:t.map(scaleOf),
+    tileAnims:document.getAnimations().filter(a=>a.effect&&a.effect.target
+      &&a.effect.target.classList
+      &&a.effect.target.classList.contains('qa-mod')).length,
+    /* and no tile carries the retired vectors or ranks */
+    strayVectors:t.filter(e=>e.style.getPropertyValue('--qa-dx')
+      ||e.style.getPropertyValue('--qa-i')).length,
     /* the pill's own morph is unchanged and still runs */
     grid:+(+cs(document.querySelector('.qa-pill__grid')).opacity).toFixed(2),
     x:+(+cs(document.querySelector('.qa-pill__x')).opacity).toFixed(2),
@@ -1000,34 +1021,43 @@ def main():
               f"tiles={m['tiles']} verbs={m['cells']} head={m['head']!r}")
         # A WHITE APPLE MATERIAL, where this was rgba(255,255,255,.94) at
         # radius 22 — and before that the profile menu's borrowed one. White at
-        # 62% over a 30px blur with saturation lifted: it brightens and
-        # desaturates the page behind rather than darkening it.
+        # a 30px blur with saturation lifted, and now 92% rather than the 62%
+        # it wore over a light page. THE RULING OF 10 SEP NAMED THE PAGE'S
+        # BACKGROUND, NOT THIS — 4A still rules a white panel — but 62% white
+        # composites to a mid-grey slab over a black backdrop, so raising the
+        # alpha is what keeps that ruling true rather than a change of mind
+        # about the material.
         check("a white material of its own, and a real blur behind it",
-              m["material"] == "rgba(255, 255, 255, 0.62)" and m["radius"] == "28px"
+              m["material"] == "rgba(255, 255, 255, 0.92)" and m["radius"] == "28px"
               and "blur(30px)" in (m["panelBlur"] or "")
               and "saturate(1.8)" in (m["panelBlur"] or ""),
               f"{m['material']} r={m['radius']} {m['panelBlur']}")
         # AND NO CLIP WINDOW, in any state. The verb panel unfolded out of the
-        # pill's measured box by transitioning `clip-path`; the launcher's
-        # tiles fly out individually, so a window over them would clip things
-        # already in flight. Asserted because `.qa.is-open .qa-menu` outranks
-        # the launcher's own rule on specificity and put the clip back once.
+        # pill's measured box by transitioning `clip-path`; the launcher scales
+        # up out of the pill as one surface instead, and a clip window would
+        # open over a panel that is already growing. Asserted because
+        # `.qa.is-open .qa-menu` outranks the launcher's own rule on
+        # specificity and put the clip back once.
         check("…and no clip window, which this panel does not unfold from",
               m["clip"] == "none", str(m["clip"]))
         # THE BACKDROP IS WHITE, AND THAT IS RULING FOUR on it in two days: the
         # profile menu's material, then a 6% dim, then black at 25% over 14px,
-        # and now — "Instead of Background Should White Blured like Apple
-        # background", with 4A chosen — white at 22% over a 16px blur. The
-        # frosted reading comes from the PANEL's material; this layer only
-        # softens the page.
+        # then "Instead of Background Should White Blured like Apple
+        # background", with 4A chosen — white at 22% over a 16px blur — and
+        # now, 10 Sep: "Background of main page should Black". Black at 82%
+        # over the same 16px blur, with saturation back to 1 — 62% with the
+        # saturation still lifted read as dark teal rather than black, since
+        # what it dims is a page full of greens and blues.
         #
-        # THE UPPER BOUNDS ARE STILL THE POINT. A launcher is a thing you reach
-        # for FROM a page, so the page has to stay discernible behind it; this
-        # fails past 35% or past a 24px blur.
-        check("the backdrop is a white blur, and stops short of hiding the page",
+        # THE UPPER BOUND IS STILL THE POINT, and it is the one thing every
+        # version of this instruction has kept: a launcher is a thing you
+        # reach for FROM a page, so the page has to stay discernible behind
+        # it. The blur is asserted as PRESENT for that reason — going to flat
+        # opaque black would pass an "is it black" check and lose the page.
+        check("the backdrop is a black blur, and stops short of hiding the page",
               m["veilOpacity"] == "1"
-              and m["veilColor"].startswith("rgba(255, 255, 255")
-              and .15 <= m["veilAlpha"] <= .35
+              and m["veilColor"].startswith("rgba(0, 0, 0")
+              and .7 <= m["veilAlpha"] <= .9
               and 10 <= m["veilPx"] <= 24,
               f"{m['veilColor']} blur={m['veilPx']}px")
         check("the panel is wholly on screen", m["onScreen"], f"{m['w']}x{m['h']}")
@@ -1102,22 +1132,34 @@ def main():
               f"{g['cols']} cols, {g['panelW']}px, pad {g['panelPad']}")
         check("…standing 24 clear of the pill row, not 8",
               near(g["clearOfRow"], 24, 1), f"{g['clearOfRow']}px")
-        # THE INK IS CHECKED AGAINST THE COLOUR, NOT AGAINST ITSELF. The probe
-        # recomputes which ink each tile's own background favours and compares
-        # it to the class the page actually set, so inkFor() cannot drift from
-        # what it claims. Ten want dark, nine want white.
-        check("every tile wears the ink its own colour favours",
-              not g["inkMismatch"],
-              "all agree" if not g["inkMismatch"] else f"disagree: {g['inkMismatch']}")
-        check("…which is ten dark and nine white",
-              g["dark"] == 10 and g["light"] == 9, f"{g['dark']} dark, {g['light']} white")
-        # AND THE HONEST NUMBER, RECORDED RATHER THAN PASSED OFF. Even with the
-        # better ink per tile the worst case is `security` at 3.88:1 — over the
-        # 3:1 floor for non-text, under the 4.5 a label wants. Five tiles sit
-        # between 3.88 and 4.31. This asserts the floor and no more; the form
-        # that clears AA outright is the icon-chip variant at 13.20:1.
-        check("…and the worst label contrast clears 3:1, though not AA's 4.5",
-              g["worstRatio"] >= 3.0, f"worst {g['worstRatio']}:1")
+        # ONE INK ON ALL NINETEEN · ruled 10 Sep 2026, "text All has to be
+        # white". This is the check that would have failed before the ruling:
+        # the page used to set `.qa-mod--dark` on ten of them, and the value
+        # read here is the RENDERED colour, so a returning class shows up as a
+        # non-white ink rather than as a count that agrees with itself.
+        check("every one of the nineteen labels is white",
+              not g["notWhite"] and g["darkClass"] == 0,
+              "all white" if not g["notWhite"]
+              else f"not white: {g['notWhite']} (+{g['darkClass']} --dark)")
+        # AND THE COST, RECORDED RATHER THAN PASSED OFF — this is what the
+        # per-tile ink was buying. White fails AA (4.5) on fifteen of the
+        # nineteen and the 3:1 non-text floor on the palest few: administer
+        # #A9B7AD at 1.60:1 is the worst. The ruling is explicit and the
+        # instruction is the authority, so this does NOT assert a floor it
+        # cannot meet; it pins the worst case so a REGRESSION is still visible
+        # — if it drops below 1.5 something has changed a colour token too.
+        # The ways back to AA, if it is ever wanted: colour on an icon chip
+        # with labels on a neutral wash (measured 13.20:1), or darken the four
+        # palest tokens until white clears 4.5 on all nineteen.
+        check("…and the palest tiles are the known ones, no worse",
+              g["worstRatio"] >= 1.5,
+              f"worst {g['worstTile']} {g['worstRatio']}:1; "
+              f"under 3:1 → {g['underThree']}")
+        # WHICH IS WHY THE SHADOW IS LOAD-BEARING NOW. At .35 it is the only
+        # thing separating a white label from administer / lab / parivesh, so
+        # a tile losing it is a real regression rather than lost polish.
+        check("…each carrying the shadow that makes white legible on them",
+              g["withShadowInk"] == 19, f"{g['withShadowInk']}/19")
         check("every glyph is the module's own file, loaded",
               g["glyphsLoaded"] == 19, f"{g['glyphsLoaded']}/19")
         check("no label runs out of its tile", g["labelOverflow"] == 0,
@@ -1134,102 +1176,84 @@ def main():
     #
     # FROZEN AND SEEKED, never slept through — and the freeze awaits the
     # animations rather than guessing when they exist; see freeze_at().
-    print("\nthe tiles flying out of the pill")
+    print("\nthe launcher opens as one surface")
     with Chrome(width=WIDTH, height=900, reduced_motion=False) as c:
         c.goto(BASE + "index.html?v=2", settle=2.0)
-        # ── FIRST PASS · an ordinary open, timed, to learn the geometry ─────
-        # The ranks cannot be read from a seeked frame. At t=0 every tile sits
-        # on the pill, so every distance is ~0 and "nearest" is whichever the
-        # loop saw first — that is how the ordering check below once passed
-        # while reading 0 against 0. And seeking FORWARD to the landed frame to
-        # get them is worse: a CSS transition that reaches its end is REMOVED
-        # from `getAnimations()`, so the panel's fade and the pill's morph
-        # finished permanently, could not be rewound, and three later checks
-        # failed on values from the future. So the geometry comes from a plain
-        # open with a sleep, and the freeze happens on a second one.
-        c.eval("document.querySelector('.qa-pill').click(); 1")
-        time.sleep(1.3)
-        landed = json.loads(c.eval(FAN))
-        NEAR, FAR = landed["nearestIdx"], landed["furthestIdx"]
-        # THE ORDER IS THE DISTANCE ORDER, and this is where that is proved:
-        # the nearest tile must hold rank 0 and the furthest rank 18.
-        # measureFan() sorts by measured distance; if it ever reverted to
-        # document order the TOP-LEFT tile — the furthest of the nineteen —
-        # would hold rank 0, which is exactly the bug this replaced.
-        check("the launch order is by distance from the pill, nearest first",
-              landed["ranks"][NEAR] == 0 and landed["ranks"][FAR] == 18,
-              f"nearest rank {landed['ranks'][NEAR]}, furthest {landed['ranks'][FAR]}")
-        check("…and all nineteen ranks are distinct",
-              sorted(landed["ranks"]) == list(range(19)),
-              str(sorted(landed["ranks"])[:6]) + "…")
+        # THE BUDGET IS THE RULING · 220ms, replacing a 560ms flight with
+        # 342ms of stagger behind it. Asserted off the token because that is
+        # what both the open and the close transitions read, and because the
+        # point of the ruling was the total time.
+        tok = c.eval("(()=>{const c=getComputedStyle(document.documentElement);"
+                     "return [c.getPropertyValue('--qa-mod-open').trim(),"
+                     "c.getPropertyValue('--qa-mod-close').trim()].join(' ')})()")
+        check("it opens in 220ms and closes in 180, not the fan's 900",
+              tok == "220ms 180ms", tok)
 
-        # ── SECOND PASS · closed, reopened, and frozen for the frames ───────
         c.eval("document.querySelector('.qa-pill').click(); 1")
         time.sleep(0.8)
+        c.eval("document.querySelector('.qa-pill').click(); 1")
+        time.sleep(0.6)
         c.eval("document.querySelector('.qa-pill').click(); 1")
         freeze_at(c, "is-open")
 
         def at(t):
             c.eval("(()=>{for(const a of document.getAnimations()){a.pause();"
                    "try{a.currentTime=%d}catch(e){}} return 1})()" % t)
-            return json.loads(c.eval(FAN))
+            return json.loads(c.eval(SURFACE))
 
         f0 = at(0)
-        # FRAME ZERO IS THE PILL. Every tile sits on it — which is the whole
-        # claim of this motion, and the one thing a wrong vector would break.
-        # A shared direction would put them in a line offset from the pill;
-        # nineteen correct vectors put all nineteen centres on the same point.
-        check("frame 0: all nineteen tiles are sitting on the pill",
-              max(f0["dists"]) <= 3, f"furthest {max(f0['dists'])}px from the pill")
-        check("…small and invisible, not yet arrived",
-              max(f0["ops"]) == 0 and max(f0["scales"]) <= 0.31,
-              f"opacity max {max(f0['ops'])}, scale max {max(f0['scales'])}")
-        check("…and the surface is fading in rather than unfolding",
-              f0["panelOpacity"] == 0 and f0["clip"] == "none",
-              f"panel {f0['panelOpacity']}, clip {f0['clip']}")
+        # FRAME ZERO · the panel is small and invisible, and it is small FROM
+        # THE PILL. .96 rather than the fan's .3: enough to read as arriving,
+        # not enough to look like a modal zoom.
+        check("frame 0: the panel is at 96% and invisible",
+              f0["panelOpacity"] == 0 and 0.95 <= f0["panelScale"] <= 0.97,
+              f"opacity {f0['panelOpacity']}, scale {f0['panelScale']}")
+        # …AND GROWING FROM THE PILL. The origin point resolved into viewport
+        # coordinates has to sit on the pill's centre horizontally; vertically
+        # it sits at the panel's bottom edge, which is 24px above the pill's
+        # own centre plus half the row — so the Y is checked as "below the
+        # panel and above the pill", not as zero.
+        check("…and it grows out of the pill, not out of its own middle",
+              abs(f0["originDX"]) <= 2 and -60 <= f0["originDY"] <= 0,
+              f"origin is {f0['originDX']}px, {f0['originDY']}px from the pill centre")
+        check("…with no clip window, which this panel does not unfold from",
+              f0["clip"] == "none", f0["clip"])
+        # THE WHOLE POINT OF THE RULING · not one tile is animating, in the
+        # first frame or any other. This is the check that fails if the fan
+        # comes back in any form: a keyframe, a transition, or a stray
+        # --qa-dx left on a tile by a returning measureFan().
+        check("no tile animates at all — the surface is the only thing moving",
+              f0["tileAnims"] == 0 and f0["strayVectors"] == 0,
+              f"{f0['tileAnims']} tile animations, {f0['strayVectors']} stray vectors")
+        check("…so all nineteen are full size and full opacity in frame 0",
+              min(f0["tileOps"]) == 1 and set(f0["tileScales"]) == {1},
+              f"opacity min {min(f0['tileOps'])}, scales {sorted(set(f0['tileScales']))}")
         check("…with the pill's glyph still the grid",
               f0["grid"] == 1 and f0["x"] == 0, f"grid={f0['grid']} x={f0['x']}")
-        # NINETEEN VECTORS, NOT ONE. Every tile carries its own --qa-dx/--qa-dy,
-        # measured after layout; if measureFan() ever stopped running they
-        # would all be empty and the tiles would fade in place.
-        check("every tile carries its own measured vector",
-              all(v[0] and v[1] for v in f0["vectors"])
-              and len(set(map(tuple, f0["vectors"]))) >= 15,
-              f"{len(set(map(tuple, f0['vectors'])))} distinct of 19")
 
-        # MID-FLIGHT · some have launched and some have not, which is the
-        # stagger, and the ones in the air are genuinely between the pill and
-        # their slot rather than snapped to either end.
-        f = at(160)
-        moving = [d for d, o in zip(f["dists"], f["ops"]) if o > 0.02]
-        check("mid-flight: the stagger means not all nineteen have left",
-              0 < f["started"] < 19, f"{f['started']} of 19 under way")
-        # …AND THE NEAR ONES WENT FIRST. The tile closest to the pill should be
-        # further along than the one in the far corner, which is the whole
-        # point of ranking the delays by distance.
-        check("…the near tiles leading, the far corner still to go",
-              f["ops"][NEAR] > f["ops"][FAR],
-              f"nearest {f['ops'][NEAR]} vs furthest {f['ops'][FAR]}")
-        check("…and the ones in the air are between the pill and their slot",
-              moving and min(moving) > 3, f"nearest airborne tile {min(moving) if moving else 0}px out")
-        check("…the surface part-way up too", 0 < f["panelOpacity"] < 1,
-              str(f["panelOpacity"]))
+        # MID-WAY · one movement, part-way through, on both properties at once.
+        f = at(110)
+        check("mid-open: the panel is part-way up and part-way out",
+              0 < f["panelOpacity"] < 1 and 0.96 < f["panelScale"] < 1,
+              f"opacity {f['panelOpacity']}, scale {f['panelScale']}")
+        check("…and the tiles are still not moving",
+              f["tileAnims"] == 0 and min(f["tileOps"]) == 1,
+              f"{f['tileAnims']} tile animations, opacity min {min(f['tileOps'])}")
 
-        # AND IT LANDS · all nineteen at full size, full opacity, spread out.
-        f = at(1400)
-        check("it lands: nineteen tiles, full size, at their slots",
-              f["landed"] == 19 and min(f["dists"]) > 20,
-              f"{f['landed']}/19 landed, nearest {min(f['dists'])}px from the pill")
-        check("…the surface fully there", f["panelOpacity"] == 1, str(f["panelOpacity"]))
+        # AND IT LANDS · full size, fully there, and the pill has become the ×.
+        f = at(400)
+        check("it lands: the panel at full size and fully there",
+              f["panelOpacity"] == 1 and f["panelScale"] == 1,
+              f"opacity {f['panelOpacity']}, scale {f['panelScale']}")
         check("…and the pill's glyph is the ×", f["grid"] == 0 and f["x"] == 1,
               f"grid={f['grid']} x={f['x']}")
 
-    # ══ THE CLOSING · THE TILES GO BACK THE WAY THEY CAME ══════════════════
-    print("\nthe tiles folding back into the pill")
+    # ══ THE CLOSING · THE SURFACE GOES BACK INTO THE PILL ══════════════════
+    print("\nthe launcher closes the same way")
     with Chrome(width=WIDTH, height=900, reduced_motion=False) as c:
         c.goto(BASE + "index.html?v=2", settle=2.0)
         c.eval("document.querySelector('.qa-pill').click(); 1")
-        time.sleep(1.2)
+        time.sleep(0.8)
         c.eval("document.querySelector('.qa-pill').click(); 1")
         # `is-closing` goes on synchronously, before `is-open` comes off
         freeze_at(c, "is-closing")
@@ -1237,29 +1261,27 @@ def main():
         def at2(t):
             c.eval("(()=>{for(const a of document.getAnimations()){a.pause();"
                    "try{a.currentTime=%d}catch(e){}} return 1})()" % t)
-            return json.loads(c.eval(FAN))
+            return json.loads(c.eval(SURFACE))
 
         f = at2(0)
-        check("frame 0 of the close: everything is still where it landed",
-              f["landed"] == 19, f"{f['landed']}/19 still in place")
-        # THE ORDER REVERSES, AND IT IS A DISTANCE ORDER · on opening, the
-        # tiles nearest the pill launch first and it spills outward; closing,
-        # --qa-i-r runs that backwards so the far corner goes first and the
-        # tile beside the pill is the last thing on screen. Measured by
-        # distance rather than by document order, because document order
-        # starts at the top-left — the furthest tile of the nineteen — and
-        # asserting on it is what hid this being wrong the first time.
-        near_i, far_i = f["nearestIdx"], f["furthestIdx"]
-        f = at2(140)
-        check("…and it reverses: the far corner leaves before the near tile",
-              f["ops"][far_i] < f["ops"][near_i],
-              f"furthest tile opacity {f['ops'][far_i]} vs nearest {f['ops'][near_i]}")
-        f = at2(600)
-        check("it ends on the pill: every tile back where it started",
-              max(f["dists"]) <= 4 and max(f["ops"]) < 0.05,
-              f"furthest {max(f['dists'])}px, brightest {max(f['ops'])}")
-        check("…the surface gone with them", f["panelOpacity"] == 0,
-              str(f["panelOpacity"]))
+        check("frame 0 of the close: the panel is still full size and there",
+              f["panelOpacity"] == 1 and f["panelScale"] == 1,
+              f"opacity {f['panelOpacity']}, scale {f['panelScale']}")
+        # IT REVERSES RATHER THAN CUTTING. The fan's close had a reverse
+        # distance order to prove; this one has only to shrink back toward the
+        # same origin, so what is asserted is that both properties are moving
+        # DOWN together and the tiles are still inert.
+        f = at2(90)
+        check("…it contracts back toward the pill, fading as it goes",
+              0 < f["panelOpacity"] < 1 and 0.96 <= f["panelScale"] < 1,
+              f"opacity {f['panelOpacity']}, scale {f['panelScale']}")
+        check("…and no tile is animating on the way out either",
+              f["tileAnims"] == 0 and min(f["tileOps"]) == 1,
+              f"{f['tileAnims']} tile animations, opacity min {min(f['tileOps'])}")
+        f = at2(400)
+        check("it ends on the pill: the surface gone, back at 96%",
+              f["panelOpacity"] == 0 and 0.95 <= f["panelScale"] <= 0.97,
+              f"opacity {f['panelOpacity']}, scale {f['panelScale']}")
 
     print()
     if fails:

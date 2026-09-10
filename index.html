@@ -7985,14 +7985,20 @@ body.is-site .card:active { transform: scale(.978); }
   --qa-mod-pad: 32px;   /* the panel's own, on every side                      */
   --qa-mod-r:   14px;
   --qa-mod-panel-r: 28px;
-  --qa-mod-fan: 560ms;  /* a tile's flight out of the pill                     */
-  --qa-mod-step: 18ms;  /* between tiles; by INDEX, not by row — see .qa-mod   */
-  /* ITS OWN CLOSE BUDGET, because the fan's reverse outlasts the verb
-     panel's. 260ms of flight plus the last tile's 18 x 10ms delay is 440ms,
-     where --qa-t-close is 320 — and `hidden` landing at 320 would cut the
-     final tiles off mid-exit. `ms()` reads tokens off the ROOT element, so
-     this cannot be a `.qa--modules` override; it has to be its own name. */
-  --qa-mod-close: 460ms;
+  /* THE LAUNCHER OPENS AS ONE SURFACE — 220ms of scale-and-fade out of the
+     pill, and not a single tile animating. This replaces --qa-mod-fan 560ms
+     and --qa-mod-step 18ms, a per-tile flight ruled out on 10 Sep 2026
+     ("Animation not at all good"); the full argument is over the opening
+     rules at `.qa--modules .qa-menu`. 220 is the shortest duration that
+     still reads as movement rather than a cut, and the launcher is now
+     usable in a quarter of the ~900ms the fan took.
+
+     ITS OWN CLOSE BUDGET STILL HAS TO EXIST, and still cannot be a
+     `.qa--modules` override: `ms()` reads tokens off the ROOT element, so it
+     has to be its own name. It no longer has to outlast a reverse flight,
+     though — 180ms of fade is the whole close, where this was 460. */
+  --qa-mod-open:  220ms;
+  --qa-mod-close: 180ms;
 
   /* ── ONE FIXED COLOUR PER MODULE · derived, not chosen ─────────────────
      Each is that module's own gradient sampled at the 50% point of its
@@ -8405,12 +8411,26 @@ body.is-site .card:active { transform: scale(.978); }
         where they are in the dashboard." That gave 6% and a 2px blur.
      3. 9 Sep, the user again: the opening panel's background "Should be Light
         Black Blur more" — black at 25% over a 14px blur.
-     4. 9 Sep, LATER THE SAME DAY, and this is the one in force: "Instead of
-        Background Should White Blured like Apple background", and then the
-        4A variant was chosen, which draws the page blurred with no dim at
-        all. So the tint is WHITE and almost absent — 22% over a 16px blur —
-        and the frosted-glass reading now comes from the PANEL's own material
-        rather than from darkening the page. (3) lasted about two hours.
+     4. 9 Sep, LATER THE SAME DAY: "Instead of Background Should White Blured
+        like Apple background", and then the 4A variant was chosen, which
+        draws the page blurred with no dim at all. So the tint went WHITE and
+        almost absent — 22% over a 16px blur — and the frosted-glass reading
+        came from the PANEL's own material rather than from darkening the
+        page. (3) lasted about two hours.
+   5. 10 Sep, and THIS is the one in force: "Background of main page should
+        Black". Black at 82% over the same 16px blur, with saturation back to
+        1. This reverses (4) outright and goes past (3)'s 25%. 62% was tried
+        first and rejected on the render: with saturation still lifted it read
+        as dark teal murk rather than black, because what it was dimming was a
+        page full of greens and blues. The blur is kept rather than going to
+        flat opaque black so the dashboard's shapes still read faintly behind
+        the panel, which is the one thing every version of this instruction
+        has left intact.
+
+   THE PANEL STAYS LIGHT. The ruling names the PAGE's background, and the
+   panel is a separate surface — white at 62% over this black now renders as
+   a pale slab rather than the near-white it was, which is what makes the
+   launcher read as glass sitting on a dimmed page.
 
    THE LATEST INSTRUCTION WINS and (2)'s prohibition no longer holds — but it
    is recorded rather than deleted, because the argument it made is the real
@@ -8430,9 +8450,14 @@ body.is-site .card:active { transform: scale(.978); }
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background: rgba(255, 255, 255, .22);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  backdrop-filter: blur(16px) saturate(1.1);
+  background: rgba(0, 0, 0, .82);
+  /* SATURATION BACK TO 1, which the white settings needed and this one cannot
+     have: `saturate(1.1)` lifted the page's colour THROUGH the tint, and at
+     black 62% the result read as dark teal murk rather than as black — the
+     page's own greens and blues coming up through it. Measured on the render
+     before changing it. */
+  -webkit-backdrop-filter: blur(16px) saturate(1);
+  backdrop-filter: blur(16px) saturate(1);
   transition: opacity var(--qa-t-surface) var(--qa-ease);
 }
 .qa.is-open .qa-veil { opacity: 1; pointer-events: auto; }
@@ -8593,16 +8618,23 @@ body.is-site .card:active { transform: scale(.978); }
    a formula over --qa-cols the way the verb panel's is.
 
    AND THE CLIP IS OFF. The verb panel unfolds out of the pill's measured box
-   by transitioning `clip-path`; this one does not — the tiles fly out of the
-   pill individually instead, so the surface just fades. Leaving the clip in
-   place would open a window over tiles that are already in flight. */
+   by transitioning `clip-path`; this one does not. It scales up out of the
+   pill as ONE surface instead — see the note over `--qa-mod-open` for why the
+   nineteen tiles no longer move independently. */
 .qa--modules .qa-menu {
   width: min(calc(4 * var(--qa-mod-w) + 3 * var(--qa-mod-gap) + 2 * var(--qa-mod-pad)),
              calc(100vw - 32px));
   padding: var(--qa-mod-pad);
   border-radius: var(--qa-mod-panel-r);
   border: 0;
-  background: rgba(255, 255, 255, .62);
+  /* .92, NOT THE .62 IT WAS. The material is unchanged in intent — 4A rules a
+     WHITE panel around the modules — but 62% white is only white over a light
+     page. Over the black backdrop of 10 Sep it composites to a mid-grey slab,
+     which read as murk and took the dark "All modules" heading down with it.
+     Raising the alpha is what KEEPS 4A's ruling true under the new backdrop;
+     the frost is still doing visible work at .92 because the blur and the
+     saturation are what carry it, not the transparency. */
+  background: rgba(255, 255, 255, .92);
   -webkit-backdrop-filter: blur(30px) saturate(1.8);
           backdrop-filter: blur(30px) saturate(1.8);
   box-shadow: 0 1px 2px rgba(31, 65, 91, .08), 0 24px 60px -24px rgba(31, 65, 91, .32);
@@ -8613,9 +8645,26 @@ body.is-site .card:active { transform: scale(.978); }
      read as a separate object underneath. 4A drew 23; 24 keeps the 4px
      rhythm the rest of this component is on. */
   bottom: calc(var(--qa-b) + var(--qa-row-h) + 24px);
-  transform: translateX(-50%);
-  transition: opacity var(--qa-t-surface) var(--qa-ease);
-  will-change: opacity;
+  /* THE ORIGIN IS THE PILL, AND IT IS NOT `50%`. This started as `50% 100%`
+     on the reasoning that the row is centred and so is the panel — which is
+     true and still gets the wrong point, because what is centred is the ROW,
+     and the row is the pill PLUS the chat disc. The pill's centre therefore
+     sits half a disc and half a gap to the LEFT of the row's centre:
+     -(56 + 12) / 2 = -34px. Measured to confirm it: page centre 512, panel
+     centre 512, pill centre 478.
+
+     THE OFFSET IS INDEPENDENT OF THE PILL'S WIDTH, which is why this can be
+     a static calc rather than a measurement. rowW = pillW + gap + disc and
+     the row is centred, so pillCentre - rowCentre = -(gap + disc) / 2 with
+     pillW cancelling out — verified at both the collapsed 52 and the labelled
+     164, both of which put the centre at 478. So the launcher keeps growing
+     out of the pill when the label collapses on scroll, with nothing to
+     recompute. */
+  transform-origin: calc(50% - (var(--qa-chat-h) + var(--s3)) / 2) 100%;
+  transform: translateX(-50%) scale(.96);
+  transition: opacity var(--qa-mod-open) var(--qa-ease),
+              transform var(--qa-mod-open) var(--qa-ease);
+  will-change: opacity, transform;
 }
 /* THE CLIP IS OFF IN ALL THREE STATES, and it needs saying three times:
    `.qa.is-open .qa-menu` and `.qa.is-closing .qa-menu` each carry three
@@ -8627,8 +8676,13 @@ body.is-site .card:active { transform: scale(.978); }
 .qa--modules .qa-menu,
 .qa--modules.is-open .qa-menu,
 .qa--modules.is-closing .qa-menu { clip-path: none; }
-.qa--modules.is-open .qa-menu { opacity: 1; transform: translateX(-50%); }
-.qa--modules.is-closing .qa-menu { opacity: 0; }
+.qa--modules.is-open .qa-menu { opacity: 1; transform: translateX(-50%) scale(1); }
+.qa--modules.is-closing .qa-menu {
+  opacity: 0;
+  transform: translateX(-50%) scale(.96);
+  transition: opacity var(--qa-mod-close) var(--qa-ease),
+              transform var(--qa-mod-close) var(--qa-ease);
+}
 .qa--modules .qa-menu__grid {
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--qa-mod-gap);
@@ -8643,17 +8697,21 @@ body.is-site .card:active { transform: scale(.978); }
    saturated flat colour separates itself, and at a 16px gutter those shadows
    laid grey into the gaps that read as dirt. Removed rather than softened.
 
-   THE INK IS PER TILE, AND IT HAS TO BE. Measured across the nineteen fixed
-   colours: a white label fails AA on FIFTEEN of them, a dark label on NINE,
-   and five sit mid-luminance and fail BOTH — `security` #79847D reads 3.88
-   white and 3.87 dark. A gradient always gave a label a dark end to sit on; a
-   flat fill has no dark end. So each tile takes whichever ink its own colour
-   favours, decided at render time from that colour's relative luminance, and
-   the worst case rises from 1.60:1 to 3.88:1 — over the 3:1 floor for
-   non-text, still under the 4.5 a label wants. Five stay under: security 3.88,
-   audit 4.11, and housing / followup / communication at 4.31. Raised with the
-   user; the alternative that clears AA outright is to move the colour onto an
-   icon chip and put the label on a neutral wash, measured 13.20:1.
+   THE INK IS WHITE ON ALL NINETEEN. Ruled 10 Sep 2026: "text All has to be
+   white". What this replaces decided the ink per tile from that colour's own
+   luminance, which measured better and LOOKED like two designs — ten dark
+   labels and nine white ones across one field of tiles, which is what the
+   ruling is about. One ink is one design.
+
+   THE MEASUREMENT IS KEPT HERE BECAUSE IT IS THE COST, not an argument
+   against the ruling. A white label fails AA on FIFTEEN of the nineteen, and
+   on the four palest it fails the 3:1 non-text floor too: administer #A9B7AD
+   reads 1.60:1, lab #D9C173 1.74, species-light and parivesh near 1.9. The
+   text-shadow below is what keeps those legible at all and is now doing real
+   work rather than polishing. If AA is ever wanted back, the way that clears
+   it without splitting the ink is to move the colour onto an icon chip and
+   put every label on a neutral wash — measured 13.20:1 — or to darken the
+   four palest tokens until white clears 4.5 on all nineteen.
 
    THE GLYPHS ARE `<img>` AND ARE NOT MASKED, which would have let them follow
    the ink. Five of the nineteen carry their own accent colours — pharmacy's
@@ -8675,14 +8733,15 @@ body.is-site .card:active { transform: scale(.978); }
   border: 0; border-radius: var(--qa-mod-r);
   background: var(--qa-mod-c);
   color: #FFFFFF;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, .22);
+  /* .22 while the ink was per tile and this only softened an edge; the ink is
+     white on all nineteen now, so on administer / lab / parivesh this is the
+     only thing separating the label from its tile — see the note above. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
   font: inherit;
   text-align: left;
   overflow: hidden;
   cursor: pointer;
 }
-/* the pale half of the palette, where a dark label wins on measurement */
-.qa-mod--dark { color: var(--ink); text-shadow: none; }
 .qa-mod__g { flex: none; width: 26px; height: 26px; }
 .qa-mod__g img { display: block; width: 100%; height: 100%; }
 .qa-mod__t {
@@ -8697,42 +8756,25 @@ body.is-site .card:active { transform: scale(.978); }
   box-shadow: inset 0 0 0 3px var(--ui-link), inset 0 0 0 5px rgba(255, 255, 255, .9);
 }
 
-/* ── the opening · each tile flies out of the pill ───────────────────────
-   THE VECTORS ARE MEASURED, NOT GUESSED. `--qa-dx/--qa-dy` are the offset
-   from each tile's own centre back to the PILL's centre, computed per tile
-   after the panel is laid out — see measureFan(). A single direction for all
-   nineteen would read as a slide; nineteen real vectors read as a fan out of
-   the control that was pressed.
+/* ── the opening · ONE MOVEMENT, AND NO TILE MOVES ──────────────────────
+   THE TILES USED TO FLY OUT OF THE PILL, each on its own measured vector,
+   staggered by distance over a 560ms flight — 900ms end to end with the
+   stagger. Ruled out 10 Sep 2026: "Animation not at all good". Nineteen
+   objects crossing one small panel in nineteen directions is a lot of motion
+   to read, it delayed the grid being usable by most of a second, and the
+   scale(.3) start meant every tile grew as it travelled, so nothing was
+   legible until it landed.
 
-   STAGGERED BY INDEX AND NOT BY ROW, which is the opposite of the verb
-   panel's rule and deliberately so: the verbs' stagger existed to make four
-   rows read as one edge travelling, where here the tiles are already
-   travelling in nineteen different directions and a per-row delay would fight
-   that. 18ms x 19 is 342ms of launching under a 560ms flight, so the last
-   tile leaves before the first has landed.
+   WHAT REPLACES IT IS THE PANEL AND NOTHING ELSE: `.qa--modules .qa-menu`
+   scales .96 → 1 from `50% 100%` — the pill — and fades, in 220ms. The tiles
+   have no animation, no opacity of their own and no custom properties; they
+   are simply drawn on a surface that arrives. This is how a launcher opens on
+   iOS and macOS, and at nineteen items it is the reading that scales.
 
-   FILL MODE IS `both`, NOT `backwards`: `backwards` fills only the delay and
-   then reverts to the declared `opacity: 0`, so every tile would animate in
-   and then vanish. That exact bug cost a debugging pass in the mockup. */
-.qa--modules .qa-mod { opacity: 0; }
-@keyframes qa-fan {
-  from { opacity: 0; transform: translate(var(--qa-dx, 0), var(--qa-dy, 0)) scale(.3); }
-  40%  { opacity: 1; }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes qa-fan-out {
-  from { opacity: 1; transform: none; }
-  to   { opacity: 0; transform: translate(var(--qa-dx, 0), var(--qa-dy, 0)) scale(.4); }
-}
-.qa--modules.is-open .qa-mod {
-  animation: qa-fan var(--qa-mod-fan) cubic-bezier(.17, .94, .27, 1) both;
-  animation-delay: calc(var(--qa-i, 0) * var(--qa-mod-step));
-}
-/* closing reverses the order too, so the tiles nearest the pill leave last */
-.qa--modules.is-closing .qa-mod {
-  animation: qa-fan-out 260ms var(--qa-ease) both;
-  animation-delay: calc(var(--qa-i-r, 0) * 10ms);
-}
+   NOTHING HERE MEASURES ANYMORE. measureFan() and the --qa-dx/--qa-dy/--qa-i
+   vectors went with the flight. The panel's origin is a static calc over the
+   row's own tokens — see `transform-origin` on `.qa--modules .qa-menu`, and
+   note that it is NOT 50%: the row is what is centred, not the pill. */
 
 /* ── one cell ────────────────────────────────────────────────────────────
    NOT SIXTEEN CARDS. The brief is emphatic twice over — "Do not make the
@@ -8861,18 +8903,18 @@ body.is-site .card:active { transform: scale(.978); }
   .qa-pill__grid, .qa-pill__x, .qa-pill__x i,
   .qa-menu__head, .qa-act { transition: none; }
   .qa-menu__head, .qa-act { --qa-delay: 0ms; }
-  /* the launcher's tiles do not fly: they are simply there, at full size and
-     full opacity, with no animation to cancel halfway */
-  .qa--modules .qa-mod,
-  .qa--modules.is-open .qa-mod,
-  .qa--modules.is-closing .qa-mod { animation: none; opacity: 1; transform: none; }
+  /* THE LAUNCHER'S TILES NEED NOTHING HERE. They had three rules cancelling
+     the fan's keyframes at full size and opacity; since 10 Sep no tile
+     animates in any mode, so there is nothing left to cancel. Killing the
+     panel's own transition is the whole of it — the scale lands at 1 in the
+     same frame `is-open` is set. */
   .qa--modules .qa-menu { transition: none; }
   .qa.is-open .qa-menu, .qa.is-closing .qa-menu { clip-path: inset(-60px round var(--qa-r)); }
   .qa--modules.is-open .qa-menu, .qa--modules.is-closing .qa-menu { clip-path: none; }
   /* and the close's own timeout comes down with it, so `hidden` lands on the
      next tick rather than leaving an invisible panel in the layout for a
      third of a second */
-  :root { --qa-t-close: 0ms; --qa-mod-close: 0ms; }
+  :root { --qa-t-close: 0ms; --qa-mod-open: 0ms; --qa-mod-close: 0ms; }
 }
 
 </style>
@@ -28907,25 +28949,6 @@ const QA_CONTENT = 'modules'
 const DOOR_IDS = new Set(DOORS.map((d) => d.moduleId))
 const QA_MODULES = MODULES.filter((m) => DOOR_IDS.has(m.id) && m.icon)
 
-/* ── which ink a tile's own colour wants ─────────────────────────────────
-   Read from the resolved `--f-*` token rather than kept in a second list, so
-   the colour has ONE source: change the token and the ink follows. WCAG
-   relative luminance, then whichever of white or `--ink` contrasts better.
-   Measured across the nineteen: TEN want dark and NINE want white, and the
-   worst case either way is `security` at 3.88:1 — see `.qa-mod`. */
-function inkFor(hex) {
-  const h = hex.trim().replace('#', '')
-  if (h.length !== 6) return 'light'
-  const ch = [0, 2, 4].map((i) => {
-    const v = parseInt(h.slice(i, i + 2), 16) / 255
-    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
-  })
-  const lum = 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
-  /* contrast against white is (1.05)/(lum+.05); against the ink it is
-     (lum+.05)/(L_ink+.05). --ink is #0F2A33, whose luminance is ~0.0245. */
-  return 1.05 / (lum + 0.05) >= (lum + 0.05) / 0.0745 ? 'light' : 'dark'
-}
-
 function createQuickActions({ root, onAction, onChat } = {}) {
   if (!root) return null
 
@@ -28968,19 +28991,15 @@ function createQuickActions({ root, onAction, onChat } = {}) {
       '<div class="qa-menu__grid">' +
       (isModules
         /* ── the nineteen module tiles ──────────────────────────────────
-           `--qa-mod-c` is the module's own fixed colour and `--qa-i` its
-           launch order; `--qa-i-r` is that reversed, so the close runs the
-           other way and the tiles nearest the pill are the last to leave.
-           The ink class is decided from the colour itself — see inkFor(). */
+           `--qa-mod-c` is the module's own fixed colour, and it is the only
+           custom property a tile carries — the launch-order pair `--qa-i` /
+           `--qa-i-r` went with the per-tile flight on 10 Sep.
+           THE INK IS WHITE ON ALL NINETEEN — ruled 10 Sep, "text All has to
+           be white". There is no per-colour decision any more; the cost it
+           buys back is recorded at `.qa-mod`. */
         ? QA_MODULES.map((m, i) => {
-            const c = getComputedStyle(document.documentElement)
-              .getPropertyValue(`--f-${m.id}`)
-            const dark = inkFor(c) === 'dark' ? ' qa-mod--dark' : ''
-            return `<button type="button" class="qa-mod${dark}" role="menuitem"` +
+            return `<button type="button" class="qa-mod" role="menuitem"` +
               ` data-module="${m.id}"` +
-              /* --qa-i / --qa-i-r are NOT set here: measureFan() ranks them
-                 by measured distance from the pill on every open, and two
-                 sources for the same order is how they drift apart. */
               ` style="--qa-mod-c: var(--f-${m.id})">` +
               /* the module's own exported glyph, as an <img> and never
                  recoloured: five of the nineteen carry accent colours of
@@ -29019,8 +29038,9 @@ function createQuickActions({ root, onAction, onChat } = {}) {
   const pill = root.querySelector('.qa-pill')
   const menu = root.querySelector('.qa-menu')
   const veil = root.querySelector('.qa-veil')
-  /* `cells` is whatever the panel actually holds — the row stagger reads it
-     for verbs, the fan reads it for modules */
+  /* `cells` is whatever the panel actually holds. The verb panel's row
+     stagger measures it; the launcher only takes cells[0] to focus, since
+     nothing about the modules' motion is per tile any more. */
   const cells = [...menu.querySelectorAll(isModules ? '.qa-mod' : '.qa-act')]
   let open = false
   let closing = 0
@@ -29058,39 +29078,8 @@ function createQuickActions({ root, onAction, onChat } = {}) {
      SAFE TO SET HERE, unlike the clip-path tokens the verb panel needs: those
      feed an ANIMATABLE property and setting them on a displayed panel starts
      a transition of its own, which is why they are written while `hidden` is
-     still on. `.qa-mod` has no transition at all — the motion is a keyframe
-     that has not begun — so nothing can start early off these. */
-  function measureFan(pillBox) {
-    const px = pillBox.left + pillBox.width / 2
-    const py = pillBox.top + pillBox.height / 2
-    const seen = []
-    for (const cell of cells) {
-      const b = cell.getBoundingClientRect()
-      const dx = px - (b.left + b.width / 2)
-      const dy = py - (b.top + b.height / 2)
-      cell.style.setProperty('--qa-dx', `${Math.round(dx)}px`)
-      cell.style.setProperty('--qa-dy', `${Math.round(dy)}px`)
-      seen.push({ cell, d: Math.hypot(dx, dy) })
-    }
-
-    /* ── THE ORDER IS BY DISTANCE, NOT BY DOM POSITION ─────────────────────
-       This was `--qa-i: i` set in the markup, which is document order — and
-       document order starts at the TOP-LEFT tile, the one furthest from the
-       pill. So the first thing to leave the pill was the tile with the longest
-       journey, which reads as a stray rather than a spill.
-
-       Ranked by measured distance instead: the tiles closest to the pill
-       launch first and it opens outward, which is the same principle the verb
-       panel's row stagger was built on — the reveal runs AWAY from the finger.
-       The reverse index closes it the other way, so the last thing on screen
-       is the tile beside the pill rather than one in the far corner. */
-    seen.sort((a, b) => a.d - b.d)
-    seen.forEach(({ cell }, rank) => {
-      cell.style.setProperty('--qa-i', String(rank))
-      cell.style.setProperty('--qa-i-r', String(seen.length - 1 - rank))
-    })
-  }
-
+     still on. This applies to the VERB panel's row stagger only; the module
+     launcher measures nothing per tile any more — see `--qa-mod-open`. */
   function measureRows() {
     const tops = []
     for (const cell of cells) {
@@ -29170,15 +29159,17 @@ function createQuickActions({ root, onAction, onChat } = {}) {
 
        So it is re-clamped from the panel's OWN measured bottom, which is the
        only number that accounts for wherever the panel actually sits. It has
-       to happen after `hidden` comes off (a hidden element has no box) and
-       BEFORE measureFan, because clamping changes the layout the vectors are
-       measured from. */
+       to happen after `hidden` comes off, because a hidden element has no
+       box. */
     if (isModules) {
       const mb = menu.getBoundingClientRect()
       menu.style.maxHeight = `${Math.max(180, Math.round(mb.bottom) - 12)}px`
     }
 
-    if (isModules) measureFan(box); else measureRows()
+    /* the launcher has nothing to measure: the panel's origin is its own
+       bottom-centre, which is already the pill. Only the verb panel's row
+       stagger needs a measurement. */
+    if (!isModules) measureRows()
     /* ONE FRAME BETWEEN LAYOUT AND MOTION. The measurements above are reads;
        `is-open` is the write that starts every transition. Setting it in the
        same frame would have the browser resolve the closed clip and the open
