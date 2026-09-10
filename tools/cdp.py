@@ -9,7 +9,7 @@ JavaScript in it. No third-party packages, no npm install.
         print(c.eval("antz.checkDefaults()"))
         print(c.console)          # anything the page logged or threw
 """
-import base64, hashlib, json, os, re, socket, struct, subprocess, sys, tempfile, time, urllib.request
+import base64, hashlib, json, os, re, shutil, socket, struct, subprocess, sys, tempfile, time, urllib.request
 
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
@@ -274,6 +274,15 @@ class Chrome:
         finally:
             self.proc.terminate()
             try:
-                self.proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                self.proc.kill()
+                try:
+                    self.proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    self.proc.kill()
+                    try:
+                        self.proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        pass
+            finally:
+                # Chrome is down (or unkillable); either way stop leaking the
+                # --user-data-dir. 230 of these once filled the disk.
+                shutil.rmtree(self.profile, ignore_errors=True)
