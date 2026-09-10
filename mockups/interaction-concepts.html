@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interaction Concepts · six ideas from the Swiggy and Zomato recordings · ANTZ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sour+Gummy:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  INTERACTION CONCEPTS · ANTZ · a mockup, 4 September 2026
+  ═══════════════════════════════════════════════════════════════════════════
+
+  THE ASK. Two screen recordings went into References/Animetions & App
+  Strcutres on 4 Sep: 39s of Swiggy and 36s of Zomato, both phone captures at
+  60fps. Read them for structure and motion, then say how ANTZ could show its
+  data with the same life. This page is that answer, pressable.
+
+  WHAT THE RECORDINGS ACTUALLY DO, measured frame by frame rather than
+  remembered — the timings below are what the six concepts are built to:
+
+    Zomato's assistant, from the tap
+      0.00–0.80s  the feed BLURS progressively into a wash; a lattice of dots
+                  fades in inside the blur. It is never dimmed and never
+                  covered — the page you were on is still visibly there.
+      0.80–1.80s  it settles near blank; the greeting fades in faint, then up.
+      1.80–2.80s  the greeting MIGRATES to the top while a composer rises from
+                  the bottom. Two things moving apart, not one thing arriving.
+      3.50s       answers arrive as a CARD RAIL, and a second group carries a
+                  soft radial glow behind it.
+      4.50s       dismissal scales the whole screen down into nothing.
+
+    Zomato's filter sheet
+      the page behind SCALES BACK to about .94 and rounds its corners, which
+      buys depth for nothing. The sheet is two panes: a left rail of facets
+      with an active marker, a right pane of icon chips, a footer holding
+      Close and a filled Show results.
+
+    Swiggy's verticals
+      one persistent row of illustrated tabs; switching swaps the page, the
+      accent colour AND the bottom navigation in a single cross-fade. The tabs
+      themselves never move.
+
+  WHAT IS DELIBERATELY NOT COPIED. Both apps are impulse surfaces: their job
+  is to make you want something. Ours is to make you notice what needs you. So
+  none of the festival art, the discount urgency or the appetite colour is
+  here. The rule this page is built to is that the CHROME may be delightful
+  and the CONTENT must stay sober — a card about a wound is easy to scan and
+  is not pretty. Priority colour, never appetite colour.
+
+  SIX CONCEPTS, ONE PAGE, so the choice is made by looking and pressing.
+
+    1  ASK ANTZ           the whole choreography above, in the product's own
+                          domain: a question in words, an answer in cards.
+    2  INTENT CHIPS       search that opens with answers instead of a box.
+    3  FILTER SHEET       the two-pane facet sheet, with a live result count.
+    4  BLUR, NOT DIM      the same overlay both ways, side by side.
+    5  WHERE ARE YOU      circular section photographs instead of a text list.
+    6  NUMBER + DELTA     one hero figure per card, and what it did since you
+                          were last here.
+
+  EVERYTHING IS WIRED. Motion is the whole argument, so nothing here is a
+  static picture — every concept plays. The type is the app's Inter, the
+  greeting keeps Sour Gummy, the palette is the app's own tokens and the
+  photographs are the ones already in assets/img. Reduced motion is honoured
+  throughout; with it on, every concept still reaches its end state.
+
+  Open at http://localhost:8000/mockups/interaction-concepts.html, or just
+  double-click the file. Nothing here touches index.html.
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+<style>
+/* ══ 1 · tokens, the app's own ═══════════════════════════════════════════ */
+:root{
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-greet:'Sour Gummy','Comic Sans MS',var(--font);
+  --font-num:'DM Sans',var(--font);
+
+  --ink:#16373D; --ink-2:#44544A; --ink-3:#7A8684; --line:rgba(195,206,199,.4);
+  --green:#006D35; --green-2:#2FA860; --cyan:#00AFD6; --teal:#00D6C9;
+  --amber:#E4B819; --coral:#F06D52; --crimson:#F21037; --surface:#fff;
+
+  --wash:linear-gradient(180deg,rgba(175,239,235,.5) 0%,rgba(175,239,235,.275) 32.4%,rgba(242,255,248,.5) 68.7%),
+         linear-gradient(90deg,#fff 0%,#fff 100%);
+  --ease:cubic-bezier(.16,1,.3,1);
+  --shadow:0 2px 10px rgba(76,78,100,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:var(--font); color:#E8F2F0; background:#0E1416;
+  -webkit-font-smoothing:antialiased; display:flex; flex-direction:column;
+}
+
+/* ══ 2 · the studio around the device ════════════════════════════════════ */
+.studio{flex:none;padding:20px 28px 0;display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.studio h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.studio h1 small{display:block;font-weight:400;font-size:12.5px;color:#7E9A97;margin-top:3px;letter-spacing:0}
+.rail{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.rail button{
+  font:inherit;font-size:12.5px;font-weight:500;color:#A9C4C1;cursor:pointer;
+  display:flex;align-items:center;gap:8px;padding:7px 13px 7px 8px;border-radius:999px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+  transition:background .18s var(--ease),color .18s var(--ease),border-color .18s var(--ease);
+}
+.rail button b{
+  width:19px;height:19px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.09);font-size:11px;font-weight:600;color:#C9DEDB;
+  transition:background .18s var(--ease),color .18s var(--ease);
+}
+.rail button:hover{background:rgba(255,255,255,.1);color:#E8F2F0}
+.rail button[aria-pressed=true]{background:#E8F2F0;color:#0E1416;border-color:#E8F2F0}
+.rail button[aria-pressed=true] b{background:#0E1416;color:#E8F2F0}
+
+.note{
+  flex:none;margin:14px 28px 0;padding:11px 16px;border-radius:12px;font-size:12.5px;line-height:1.5;
+  background:rgba(0,175,214,.09);border:1px solid rgba(0,175,214,.22);color:#B7D9E2;max-width:1180px;
+}
+.note b{color:#E8F2F0;font-weight:600}
+
+/* ══ 3 · the device ══════════════════════════════════════════════════════
+   1024 wide, the artboard's own width, scaled to whatever room is left so the
+   proportions are the product's rather than the window's. */
+.stagewrap{flex:1 1 auto;min-height:0;display:grid;place-items:start center;padding:18px 28px 28px;overflow:auto}
+.device{
+  width:1024px;height:1180px;flex:none;position:relative;overflow:hidden;
+  border-radius:26px;background:#fff;box-shadow:0 30px 90px rgba(0,0,0,.55);
+  transform-origin:top center;
+}
+.screen{position:absolute;inset:0;overflow:hidden;background:var(--wash) no-repeat}
+/* the page that everything happens ON or OVER */
+.page{position:absolute;inset:0;overflow:hidden;padding:0 32px;
+  transition:transform .42s var(--ease),filter .42s var(--ease),opacity .42s var(--ease),border-radius .42s var(--ease)}
+.foliage{position:absolute;left:0;right:0;top:0;height:300px;
+  background:url('../assets/img/foliage.png') repeat-x top center/auto 100%;opacity:.55;pointer-events:none}
+
+/* ── the home, rebuilt small: enough to be the ANTZ home, not a copy of it ─ */
+.greet{position:relative;padding:38px 0 0}
+.greet i{font-family:var(--font-greet);font-style:normal;font-size:22px;color:var(--cyan);display:block}
+.greet b{font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+.hrow{position:relative;display:flex;gap:8px;margin-top:20px}
+.field{
+  flex:1 1 auto;height:60px;border-radius:16px;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.05);
+  display:flex;align-items:center;gap:14px;padding:0 22px;color:var(--ink-3);font-size:17px;cursor:pointer;
+}
+.field svg{flex:none}
+.rnd{flex:none;width:60px;height:60px;border-radius:50%;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.05);display:grid;place-items:center;cursor:pointer;border:0}
+.band{
+  position:relative;margin:24px -32px 0;padding:0 32px 24px;
+  background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,127,127,.1));border-radius:0 0 32px 32px;
+}
+.ann{display:flex;padding:4px;border-radius:32px;background:#fff;box-shadow:var(--shadow);height:186px}
+.ann__p{flex:1 1 auto;min-width:0;display:flex;align-items:center;padding:16px;border-radius:30px 0 0 30px;
+  background:linear-gradient(-72deg,rgba(0,175,214,.1) 4%,rgba(55,189,105,.1) 108%)}
+.ann__c{display:flex;flex-direction:column;gap:11px;min-width:0}
+.chip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:2px 12px 2px 2px;border-radius:99px;
+  background:rgba(55,189,105,.1);font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink-2)}
+.chip img{width:26px;height:26px;display:block}
+.ann h3{margin:0;font-size:20px;font-weight:500;line-height:1.2;
+  background:linear-gradient(-44deg,#00AFD6,#37BD69);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ann p{margin:0;font-size:14px;line-height:20px;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ann small{font-size:12.5px;font-weight:500;color:var(--ink-3)}
+.ann__ph{flex:none;width:280px;border-radius:0 28px 28px 0;overflow:hidden;position:relative}
+.ann__ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+.shead{display:flex;align-items:center;justify-content:space-between;margin:26px 0 14px}
+.shead h2{margin:0;font-size:22px;font-weight:500;color:var(--ink-2)}
+.shead a{font-size:15px;font-weight:500;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:7px;cursor:pointer}
+
+.orail{display:flex;gap:10px;margin-right:-32px;padding-right:32px;overflow-x:auto;scrollbar-width:none}
+.orail::-webkit-scrollbar{display:none}
+.obs{flex:none;width:300px;height:300px;display:flex;flex-direction:column;padding:4px;border-radius:28px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
+.obs__t{flex:1 1 auto;min-height:0;padding:18px;border-radius:24px 24px 0 0;display:flex;flex-direction:column;gap:9px;position:relative;overflow:hidden}
+.obs__t h4{margin:0;font-size:17px;font-weight:500;color:#fff}
+.obs__t span{font-size:12.5px;line-height:15px;color:#fff;opacity:.94}
+.obs__pri{position:absolute;right:18px;top:16px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:600}
+.obs__b{flex:none;height:186px;margin-top:-52px;border-radius:20px 20px 24px 24px;background:#fff;box-shadow:var(--shadow);padding:13px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+.ent{display:flex;align-items:center;gap:10px;padding:9px;border-radius:11px;background:rgba(0,0,0,.05)}
+.ent img{width:36px;height:36px;border-radius:5px;object-fit:cover;flex:none}
+.ent b{display:block;font-size:12.5px;font-weight:500;color:var(--ink-2)}
+.ent small{display:block;font-size:12.5px;color:var(--ink-2)}
+.obs__b p{margin:0;font-size:13.5px;line-height:20px;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.obs[data-p=critical] .obs__t{background:linear-gradient(rgba(0,0,0,.1),rgba(0,0,0,.1)),#F21037}
+.obs[data-p=high] .obs__t{background:#F06D52}
+.obs[data-p=moderate] .obs__t{background:linear-gradient(rgba(0,0,0,.1),rgba(0,0,0,.1)),#FFB71D}
+.obs[data-p=low] .obs__t{background:linear-gradient(rgba(0,0,0,.1),rgba(0,0,0,.1)),#0FC1E8}
+.obs[data-p=critical] .obs__pri{background:#FDEBEE;color:#E93353}
+.obs[data-p=high] .obs__pri{background:#FEEFEC;color:#FA6140}
+.obs[data-p=moderate] .obs__pri{background:#FFFAE2;color:#E4B819}
+.obs[data-p=low] .obs__pri{background:#E5FBFA;color:#00D6C9}
+
+.mgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:14px}
+.mod{height:120px;border-radius:18px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;font-size:15px;font-weight:500}
+.mod img{width:30px;height:30px;filter:brightness(0) invert(1);opacity:.95}
+
+/* ══ 4 · CONCEPT 1 · ASK ANTZ ════════════════════════════════════════════
+   THE PAGE IS BLURRED, NOT COVERED. A scrim says "you are blocked"; a blur
+   says "this is still here and still yours". Both cost one composited layer,
+   so the choice is entirely about what it tells the reader. */
+.page.is-thinking{filter:blur(26px) saturate(1.25);transform:scale(1.04)}
+.page.is-gone{filter:blur(30px) saturate(1.15);opacity:.14;transform:scale(1.05)}
+
+.ask{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5}
+.ask.on{pointer-events:auto;opacity:1}
+/* the lattice, from the recording: a diamond of dots that breathes in a wave */
+.lattice{position:absolute;left:50%;top:34%;translate:-50% -50%;display:grid;grid-template-columns:repeat(5,7px);gap:6px;opacity:0}
+.lattice i{width:7px;height:7px;border-radius:50%;background:var(--ink-3);opacity:.55;transform:scale(.4)}
+.lattice i.h{visibility:hidden}
+.ask__head{position:absolute;left:0;right:0;top:44%;text-align:center;opacity:0}
+.ask__head b{display:block;font-family:var(--font-greet);font-weight:400;font-size:26px;color:var(--ink)}
+.ask__head span{display:block;margin-top:6px;font-size:15px;color:var(--ink-3);transition:opacity .3s var(--ease)}
+/* the prompt line has done its job once there is an answer, and leaving it up
+   put it straight through the first line of that answer */
+.ask.answered .ask__head span{opacity:0}
+.ask__body{position:absolute;left:0;right:0;top:150px;bottom:104px;overflow:auto;padding:0 32px;opacity:0;scrollbar-width:none}
+.ask__body::-webkit-scrollbar{display:none}
+.ask__lead{text-align:center;font-size:19px;font-weight:600;line-height:1.35;color:#B4443A;margin:6px 0 18px}
+.ask__lead em{display:block;font-style:normal;color:var(--ink-3);font-weight:400;font-size:14px;margin-top:6px}
+.arail{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.arail::-webkit-scrollbar{display:none}
+.acard{flex:none;width:264px;border-radius:20px;background:#fff;box-shadow:0 4px 18px rgba(76,78,100,.10);overflow:hidden}
+.acard>img{width:100%;height:124px;object-fit:cover;display:block}
+.acard div{padding:12px 13px 14px}
+.acard b{display:block;font-size:14px;font-weight:600;color:var(--ink)}
+.acard small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.acard .d{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:3px 9px;border-radius:99px;
+  font-family:var(--font-num);font-size:12.5px;font-weight:700;background:rgba(233,51,83,.1);color:#D0293F}
+.spark{display:block;width:100%;height:30px;margin-top:10px;overflow:visible}
+/* the glow the recording puts behind a grouped answer — decoration that
+   groups, rather than a box that separates */
+.glow{position:relative;margin:26px 0 10px;padding:22px 0 18px;text-align:center}
+/* KEPT SMALL ON PURPOSE. At full strength this reads as a stain across the
+   card rather than a group marker — the recording's glow is barely there and
+   only says "these two lines belong together". */
+.glow::before{content:'';position:absolute;left:50%;top:2px;translate:-50% 0;width:330px;height:112px;border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(250,97,64,.16),rgba(233,51,83,.07) 40%,transparent 62%);filter:blur(5px)}
+.glow h5{position:relative;margin:0;font-size:17px;font-weight:600;color:#B4443A;line-height:1.4}
+.glow h5 em{display:block;font-style:normal;font-weight:400;color:var(--ink-3);font-size:13.5px;margin-top:4px}
+.glow .orb{position:absolute;width:40px;height:40px;border-radius:50%;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.14)}
+.glow .orb.a{left:9%;top:26px;width:34px;height:34px}
+.glow .orb.b{right:10%;top:16px}
+.pillbtn{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:11px 20px;border-radius:99px;border:0;
+  background:var(--ink);color:#fff;font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.composer{position:absolute;left:32px;right:32px;bottom:26px;height:62px;border-radius:20px;background:#fff;
+  box-shadow:0 6px 26px rgba(0,0,0,.09);display:flex;align-items:center;gap:12px;padding:0 18px;opacity:0;transform:translateY(26px)}
+.composer input{flex:1 1 auto;border:0;outline:0;font:inherit;font-size:15px;color:var(--ink);background:none}
+.composer input::placeholder{color:var(--ink-3)}
+.composer .send{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:var(--green);color:#fff;display:grid;place-items:center;cursor:pointer}
+.ask__close{position:absolute;left:26px;top:26px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.85);
+  box-shadow:0 2px 10px rgba(0,0,0,.08);display:grid;place-items:center;cursor:pointer;opacity:0}
+.disclaim{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:11px;color:var(--ink-3);opacity:0}
+
+/* ══ 5 · CONCEPT 2 · INTENT CHIPS ════════════════════════════════════════ */
+.srch{position:absolute;inset:0;background:#fff;z-index:6;opacity:0;pointer-events:none;
+  transform:scale(.97);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.srch.on{opacity:1;pointer-events:auto;transform:none}
+.srch__top{display:flex;align-items:center;gap:14px;padding:26px 32px 0}
+.srch__top .f{flex:1 1 auto;height:52px;border-radius:14px;background:#F3F7F6;display:flex;align-items:center;gap:12px;padding:0 18px;font-size:16px;color:var(--ink)}
+.srch__i{font-family:var(--font-greet);font-style:normal;font-size:19px;color:#B4443A;padding:26px 32px 12px}
+.chiprow{display:flex;gap:10px;padding:0 32px 26px;overflow-x:auto;scrollbar-width:none}
+.chiprow::-webkit-scrollbar{display:none}
+.ichip{flex:none;display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;background:#fff;
+  border:1px solid var(--line);font-size:14px;font-weight:500;color:var(--ink-2);cursor:pointer;
+  transition:border-color .2s var(--ease),background .2s var(--ease),color .2s var(--ease)}
+.ichip:hover{border-color:var(--green);color:var(--green)}
+.ichip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:#fff}
+.ichip svg{flex:none}
+.kicker{padding:0 32px;font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--ink-3)}
+.circles{display:grid;grid-template-columns:repeat(6,1fr);gap:20px 16px;padding:16px 32px 0}
+.circles figure{margin:0;text-align:center;cursor:pointer}
+.circles img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;display:block;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.circles figure:hover img{transform:translateY(-4px) scale(1.04);box-shadow:0 10px 22px rgba(0,0,0,.16)}
+.circles figcaption{margin-top:9px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.circles small{display:block;font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.results{padding:18px 32px 0;opacity:0;transform:translateY(10px)}
+.rrow{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+.rrow img{width:44px;height:44px;border-radius:9px;object-fit:cover;flex:none}
+.rrow b{font-size:14.5px;font-weight:600;color:var(--ink);display:block}
+.rrow small{font-size:12.5px;color:var(--ink-3)}
+.rrow .tag{margin-left:auto;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(233,51,83,.1);color:#D0293F}
+
+/* ══ 6 · CONCEPT 3 · THE FILTER SHEET ════════════════════════════════════
+   The parent scales back and rounds. One transform, and the sheet suddenly
+   has somewhere to be in front OF. */
+.page.is-behind{transform:scale(.94) translateY(-14px);border-radius:26px;filter:brightness(.92)}
+.scrim{position:absolute;inset:0;background:rgba(10,20,22,.28);opacity:0;pointer-events:none;transition:opacity .34s var(--ease);z-index:7}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:74%;background:#fff;border-radius:26px 26px 0 0;z-index:8;
+  transform:translateY(100%);transition:transform .42s var(--ease);display:flex;flex-direction:column;box-shadow:0 -14px 40px rgba(0,0,0,.16)}
+.sheet.on{transform:none}
+.sheet__h{display:flex;align-items:baseline;justify-content:space-between;padding:22px 26px 14px}
+.sheet__h b{font-size:19px;font-weight:600;color:var(--ink)}
+.sheet__h a{font-size:13.5px;font-weight:500;color:#D0293F;cursor:pointer}
+.sheet__m{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:132px 1fr}
+.facets{border-right:1px solid var(--line);overflow:auto;padding:4px 0}
+.facet{display:flex;flex-direction:column;align-items:center;gap:6px;padding:15px 6px;font-size:12px;color:var(--ink-3);cursor:pointer;position:relative;text-align:center;font-weight:500}
+.facet svg{opacity:.75}
+.facet[aria-selected=true]{color:var(--green);font-weight:600}
+.facet[aria-selected=true] svg{opacity:1}
+.facet[aria-selected=true]::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--green)}
+.facet .dot{position:absolute;right:16px;top:12px;width:7px;height:7px;border-radius:50%;background:#D0293F;opacity:0;transition:opacity .2s}
+.facet.has .dot{opacity:1}
+.opts{overflow:auto;padding:6px 26px 20px}
+.opts h6{margin:20px 0 12px;font-size:16px;font-weight:600;color:var(--ink)}
+.opts h6:first-child{margin-top:8px}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:14px;border:1px solid var(--line);
+  background:#fff;font:inherit;font-size:13.5px;font-weight:500;color:var(--ink-2);cursor:pointer;
+  transition:border-color .2s var(--ease),background .2s var(--ease),color .2s var(--ease)}
+.opt[aria-pressed=true]{border-color:var(--green);background:rgba(0,109,53,.06);color:var(--green)}
+.sheet__f{flex:none;display:flex;align-items:center;gap:16px;padding:14px 26px 20px;border-top:1px solid var(--line)}
+.sheet__f .close{font:inherit;font-size:15px;font-weight:500;color:var(--ink-2);background:none;border:0;cursor:pointer;padding:12px 8px}
+.sheet__f .show{flex:1 1 auto;height:50px;border-radius:99px;border:0;background:var(--green);color:#fff;font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+
+/* ══ 7 · CONCEPT 4 · BLUR, NOT DIM ═══════════════════════════════════════ */
+.ab{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;z-index:9;opacity:0;pointer-events:none;transition:opacity .3s var(--ease)}
+.ab.on{opacity:1;pointer-events:auto}
+/* each half needs its OWN ground. Without it the real page shows through the
+   panel and doubles up behind the copy, which is a ghost, not a comparison. */
+.ab>div{position:relative;overflow:hidden;border-right:1px solid rgba(255,255,255,.5);background:var(--wash) no-repeat}
+.ab .mini{position:absolute;inset:0;width:1024px;height:1180px;padding:0 32px;transform:scale(.5);transform-origin:top left;pointer-events:none}
+.ab .cover{position:absolute;inset:0;display:grid;place-items:center}
+.ab .cover.dim{background:rgba(12,26,28,.55)}
+.ab .cover.blr{backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);background:rgba(255,255,255,.18)}
+.ab .lbl{position:absolute;left:0;right:0;bottom:0;padding:16px 20px;font-size:13px;line-height:1.5;background:rgba(14,20,22,.9);color:#CFE3E0}
+.ab .lbl b{display:block;color:#fff;font-size:14px;margin-bottom:3px}
+.ab .spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ══ 8 · CONCEPT 6 · NUMBER + DELTA ══════════════════════════════════════ */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.stat{padding:20px;border-radius:20px;background:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat span{font-size:13.5px;font-weight:500;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.stat b{display:block;font-family:var(--font-num);font-size:46px;font-weight:700;line-height:1.05;color:var(--ink);margin-top:10px;letter-spacing:-.02em}
+.stat .delta{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 10px;border-radius:99px;
+  font-family:var(--font-num);font-size:13px;font-weight:700;opacity:0;transform:translateY(6px)}
+.stat .delta.up{background:rgba(233,51,83,.1);color:#D0293F}
+.stat .delta.down{background:rgba(0,109,53,.1);color:var(--green)}
+.stat .delta.flat{background:rgba(122,134,132,.12);color:var(--ink-3)}
+.stat .since{display:block;margin-top:9px;font-size:12px;color:var(--ink-3)}
+.stat svg.trend{position:absolute;right:0;bottom:0;width:100%;height:52px;opacity:.85}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<div class="studio">
+  <h1>ANTZ · Interaction Concepts
+    <small>Six ideas read off the Swiggy and Zomato recordings, 4 Sep 2026. Everything plays — press it.</small></h1>
+  <div class="rail" id="rail">
+    <button data-c="1" aria-pressed="true"><b>1</b>Ask ANTZ</button>
+    <button data-c="2" aria-pressed="false"><b>2</b>Intent chips</button>
+    <button data-c="3" aria-pressed="false"><b>3</b>Filter sheet</button>
+    <button data-c="4" aria-pressed="false"><b>4</b>Blur, not dim</button>
+    <button data-c="5" aria-pressed="false"><b>5</b>Where are you working</button>
+    <button data-c="6" aria-pressed="false"><b>6</b>Number + delta</button>
+  </div>
+</div>
+
+<p class="note" id="note"></p>
+
+<div class="stagewrap">
+<div class="device" id="device">
+  <div class="screen">
+
+    <!-- ══ the home everything happens on ═════════════════════════════ -->
+    <div class="page" id="page">
+      <div class="foliage"></div>
+
+      <div class="greet"><i>Good Morning,</i><b>Sourav Tambe 👋🏻</b></div>
+
+      <div class="hrow">
+        <div class="field" id="fieldBtn">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7A8684" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          Search “Animals”, “Users”, “Site”
+        </div>
+        <button class="rnd" id="askBtn" title="Ask ANTZ">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16373D" stroke-width="1.7" stroke-linecap="round">
+            <path d="M12 3l1.7 4.6L18 9.3l-4.3 1.7L12 15.6l-1.7-4.6L6 9.3l4.3-1.7z"/><path d="M18 15l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9z"/></svg>
+        </button>
+      </div>
+
+      <div class="band">
+        <div style="height:24px"></div>
+        <div class="ann">
+          <div class="ann__p"><div class="ann__c">
+            <span class="chip"><img src="../assets/icon/ann-announcement.svg" alt="">ANNOUNCEMENT</span>
+            <h3>Quarterly health checks begin 7 September</h3>
+            <p>The veterinary hospital starts the quarterly round on 7 September, section by section, beginning with Hoofstock.</p>
+            <small>Hospital team &nbsp;•&nbsp; 22 Aug 2026</small>
+          </div></div>
+          <div class="ann__ph"><img src="../assets/img/hospital.jpg" alt=""></div>
+        </div>
+      </div>
+
+      <!-- observations, or the concept that replaces them -->
+      <div id="slot">
+        <div class="shead"><h2>Recent Observations</h2>
+          <a id="filterLink">Filter &amp; sort
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></a></div>
+        <div class="orail" id="orail"></div>
+      </div>
+
+      <div class="shead" style="margin-top:22px"><h2>All Modules</h2></div>
+      <div class="mgrid" id="mgrid"></div>
+    </div>
+
+    <!-- ══ concept 1 · Ask ANTZ ═══════════════════════════════════════ -->
+    <div class="ask" id="ask">
+      <button class="ask__close" id="askClose" aria-label="Close">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16373D" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="lattice" id="lattice"></div>
+      <div class="ask__head" id="askHead"><b>Hi Naveen!</b><span>What do you want to know?</span></div>
+      <div class="ask__body" id="askBody"></div>
+      <div class="composer" id="composer">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7A8684" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <input id="askInput" placeholder="Ask about an animal, an enclosure or a record">
+        <button class="send" aria-label="Send"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
+      </div>
+      <div class="disclaim" id="disclaim">Generated from your site’s own records. Check anything clinical before acting.</div>
+    </div>
+
+    <!-- ══ concept 2 · intent chips ═══════════════════════════════════ -->
+    <div class="srch" id="srch">
+      <div class="srch__top">
+        <button class="rnd" id="srchBack" style="width:44px;height:44px;box-shadow:none;background:#F3F7F6">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#16373D" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="f" id="srchField">Search…</div>
+      </div>
+      <div class="srch__i">Ask it, find it</div>
+      <div class="chiprow" id="chiprow"></div>
+      <div class="kicker">WHERE ARE YOU WORKING TODAY?</div>
+      <div class="circles" id="circles"></div>
+      <div class="results" id="results"></div>
+    </div>
+
+    <!-- ══ concept 3 · the filter sheet ═══════════════════════════════ -->
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet">
+      <div class="sheet__h"><b>Filter &amp; sort</b><a id="clearAll">Clear all</a></div>
+      <div class="sheet__m">
+        <div class="facets" id="facets"></div>
+        <div class="opts" id="opts"></div>
+      </div>
+      <div class="sheet__f">
+        <button class="close" id="sheetClose">Close</button>
+        <button class="show" id="showBtn">Show 24 observations</button>
+      </div>
+    </div>
+
+    <!-- ══ concept 4 · blur vs dim ════════════════════════════════════ -->
+    <div class="ab" id="ab">
+      <div><div class="mini" id="miniA"></div><div class="cover dim"><div class="spin"></div></div>
+        <div class="lbl"><b>Dimmed</b>The page is behind a wall. It reads as blocked, and the thing you were looking at is gone.</div></div>
+      <div><div class="mini" id="miniB"></div><div class="cover blr"><div class="spin" style="border-color:rgba(22,55,61,.25);border-top-color:#16373D"></div></div>
+        <div class="lbl"><b>Blurred</b>The page is still there and still yours. Shape and colour survive, so you keep your place.</div></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const anim = (el, k, o) => (RM.matches || !el) ? { finished: Promise.resolve() } : el.animate(k, o);
+const wait = (ms) => new Promise((r) => setTimeout(r, RM.matches ? 0 : ms));
+
+/* ── the page's own content ─────────────────────────────────────────────── */
+const OBS = [
+  { p:'critical', t:'Deep Flank Wound', g:'!!!', tags:'• Open Wound • Bleeding',
+    id:'AAID : 87546/24', n:'Big Bull', ph:'../assets/img/obs-animal.png',
+    b:'Found a 6cm laceration on the left flank during the morning check, still bleeding lightly. Separated him into the night house.' },
+  { p:'high', t:'Metal Work', g:'!!', tags:'• Rust and Corrosion • Structural Changes',
+    id:'ENC : HB-04', n:'Hoofstock Barn', ph:'../assets/img/hospital.jpg',
+    b:'The lower rail on the north gate has rusted through where it meets the post, and the whole panel now flexes.' },
+  { p:'moderate', t:'Feed Refusal', g:'!!', tags:'• Appetite • Diet Change',
+    id:'AAID : 44120/25', n:'Zara', ph:'../assets/img/hero-leopard.jpg',
+    b:'Third morning running that she has left the meat and taken only the browse. Weight is steady and she is bright.' },
+  { p:'low', t:'Coat Condition', g:'!', tags:'• Grooming • Routine Check',
+    id:'AAID : 21873/23', n:'Kanha', ph:'../assets/img/species.jpg',
+    b:'Slight thinning across the shoulders on four of the herd, most likely the seasonal moult rather than anything to treat.' },
+];
+const MODULES = [
+  ['Medical','m-medical','linear-gradient(128deg,#6FBF8F,#2E9E68)'],
+  ['Hospital','m-hospital','linear-gradient(128deg,#7FA9B8,#4E7F91)'],
+  ['Diet & Kitchen','m-diet','linear-gradient(128deg,#E4B06A,#C8843C)'],
+  ['Pharmacy','m-pharmacy','linear-gradient(128deg,#32BBB6,#0EC2B9)'],
+  ['Audit','m-audit','linear-gradient(128deg,#E0637F,#C43F60)'],
+];
+
+$('#orail').innerHTML = OBS.map((o) => `
+  <article class="obs" data-p="${o.p}">
+    <div class="obs__t"><span class="obs__pri">${o.g}</span><h4>${o.t}</h4><span>${o.tags}</span></div>
+    <div class="obs__b">
+      <div class="ent"><img src="${o.ph}" alt=""><span><b>${o.id}</b><small>${o.n}</small></span></div>
+      <p>${o.b}</p>
+    </div>
+  </article>`).join('');
+$('#mgrid').innerHTML = MODULES.map(([n, i, g]) => `
+  <div class="mod" style="background:${g}"><img src="../assets/icon/${i}.svg" alt="">${n}</div>`).join('');
+
+/* ── the lattice: a diamond of 25 cells, corners hidden ─────────────────── */
+const LAT = [0,0,1,0,0, 0,1,1,1,0, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0];
+$('#lattice').innerHTML = LAT.map((v) => `<i class="${v ? '' : 'h'}"></i>`).join('');
+
+/* ══ CONCEPT 1 · ASK ANTZ ══════════════════════════════════════════════════
+   THE CHOREOGRAPHY IS THE IDEA, so it is written as one readable sequence
+   rather than a pile of classes. Four beats, taken off the recording:
+   blur → lattice, settle → greeting, greeting migrates while the composer
+   rises, then answers arrive. Reversing it is the same four beats backwards,
+   which is why the dismissal scales the whole thing away instead of fading. */
+const page = $('#page'), ask = $('#ask'), lattice = $('#lattice'),
+      askHead = $('#askHead'), askBody = $('#askBody'), composer = $('#composer'),
+      askClose = $('#askClose'), disclaim = $('#disclaim');
+let asking = false;
+
+/* THREE, NOT FOUR, because the repository holds exactly three animal
+   photographs. A fourth card would have to carry a picture of a leaf, and a
+   card whose evidence is wrong is worse than a card that is not there.
+   THE LINE FALLS. It is weight over the last six weighings, so it descends —
+   an upward line under a red "-4.2 kg" chip reads as the opposite of what
+   happened, and a sparkline that contradicts its own label is a bug. */
+const ANSWER = `
+  <p class="ask__lead">Three animals lost more than 3% of body weight this month
+    <em>Weighed at the September round. Two already have an open case.</em></p>
+  <div class="arail">
+    ${[['Big Bull','AAID : 87546/24','-4.2 kg','../assets/img/obs-animal.png',[25,24,22,18,13,7]],
+       ['Zara','AAID : 44120/25','-2.8 kg','../assets/img/hero-leopard.jpg',[22,22,20,17,14,10]],
+       ['Kanha','AAID : 21873/23','-3.1 kg','../assets/img/species.jpg',[24,21,20,16,12,8]]]
+      .map(([n,id,d,ph,pts]) => `
+      <div class="acard">
+        <img src="${ph}" alt="">
+        <div><b>${n}</b><small>${id}</small>
+          <span class="d">▼ ${d}</span>
+          <svg class="spark" viewBox="0 0 240 30" preserveAspectRatio="none">
+            <polyline fill="none" stroke="#D0293F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+              points="${pts.map((v,i)=>`${i*48},${30-v}`).join(' ')}"/></svg>
+        </div>
+      </div>`).join('')}
+  </div>
+  <div class="glow">
+    <img class="orb a" src="../assets/img/hospital.jpg" alt="">
+    <img class="orb b" src="../assets/img/diet-kitchen.jpg" alt="">
+    <h5>Two of them are already flagged<em>Want me to open both cases and book the vet round?</em></h5>
+    <button class="pillbtn">Open both cases
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
+  </div>`;
+
+async function openAsk() {
+  if (asking) return; asking = true;
+  ask.classList.add('on');
+  askBody.innerHTML = ''; askBody.style.opacity = 0;
+  askHead.style.opacity = 0; composer.style.opacity = 0;
+
+  /* beat 1 · the page dissolves and the lattice breathes inside the blur */
+  page.classList.add('is-thinking');
+  anim(lattice, [{ opacity: 0 }, { opacity: 1 }], { duration: 260, fill: 'forwards' });
+  const dots = [...lattice.querySelectorAll('i:not(.h)')];
+  dots.forEach((d, i) => anim(d, [
+    { transform: 'scale(.4)', opacity: .35 }, { transform: 'scale(1)', opacity: .85 }, { transform: 'scale(.4)', opacity: .35 },
+  ], { duration: 1100, delay: i * 55, iterations: Infinity, easing: 'ease-in-out' }));
+  await wait(760);
+
+  /* beat 2 · it settles near blank, the greeting arrives where the eye is */
+  page.classList.add('is-gone');
+  await wait(300);
+  anim(lattice, [{ opacity: 1 }, { opacity: 0 }], { duration: 240, fill: 'forwards' });
+  askHead.style.opacity = 1;
+  anim(askHead, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
+    { duration: 520, easing: 'cubic-bezier(.16,1,.3,1)' });
+  await wait(620);
+
+  /* beat 3 · the greeting migrates up; the composer rises. Two things moving
+     APART is what makes the screen feel like it is opening rather than
+     loading — the recording spends a full second on exactly this. */
+  askHead.style.top = '96px';
+  anim(askHead, [{ transform: 'translateY(calc(44vh - 96px))' }, { transform: 'none' }],
+    { duration: 640, easing: 'cubic-bezier(.16,1,.3,1)' });
+  composer.style.opacity = 1;
+  anim(composer, [{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }],
+    { duration: 560, easing: 'cubic-bezier(.16,1,.3,1)' });
+  composer.style.transform = 'none';
+  askClose.style.opacity = 1; disclaim.style.opacity = 1;
+  await wait(560);
+
+  /* beat 4 · the answer, as cards */
+  ask.classList.add('answered');
+  askBody.innerHTML = ANSWER; askBody.style.opacity = 1;
+  const bits = [askBody.querySelector('.ask__lead'), ...askBody.querySelectorAll('.acard'), askBody.querySelector('.glow')];
+  bits.forEach((el, i) => anim(el, [
+    { opacity: 0, transform: 'translateY(22px) scale(.97)' }, { opacity: 1, transform: 'none' },
+  ], { duration: 560, delay: i * 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+}
+
+async function closeAsk() {
+  if (!asking) return;
+  /* the recording scales the whole screen down into nothing. It reads as
+     putting something back, where a fade reads as it never mattering. */
+  await anim(ask, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.86) translateY(30px)' }],
+    { duration: 420, easing: 'cubic-bezier(.4,0,.2,1)' }).finished;
+  ask.classList.remove('on', 'answered'); ask.style.transform = '';
+  askHead.style.top = '44%';
+  askClose.style.opacity = 0; disclaim.style.opacity = 0;
+  page.classList.remove('is-thinking', 'is-gone');
+  asking = false;
+}
+$('#askBtn').addEventListener('click', openAsk);
+askClose.addEventListener('click', closeAsk);
+$('#askInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') openAsk(); });
+
+/* ══ CONCEPT 2 · INTENT CHIPS ══════════════════════════════════════════════
+   An empty field asks the reader to know the schema. A chip hands them an
+   answer they can have in one press. These six are real questions a keeper
+   asks before 9am, not categories. */
+const INTENTS = [
+  'Animals off feed', 'Overdue vaccinations', 'Approvals waiting on me',
+  'Enclosures failing inspection', 'Weight loss this month', 'Births this week',
+];
+const PLACES = [
+  ['Carnivore', '12 enclosures', '../assets/img/hero-leopard.jpg'],
+  ['Hoofstock', '18 enclosures', '../assets/img/species.jpg'],
+  ['Primate', '9 enclosures', '../assets/img/species-b.jpg'],
+  ['Hospital', '6 wards', '../assets/img/hospital.jpg'],
+  ['Diet Kitchen', '4 stores', '../assets/img/diet-kitchen.jpg'],
+  ['Aviary', '22 enclosures', '../assets/img/followup.jpg'],
+];
+const HITS = [
+  ['Big Bull', 'AAID : 87546/24 · Hoofstock Barn', '../assets/img/obs-animal.png', 'off feed 3d'],
+  ['Zara', 'AAID : 44120/25 · Carnivore CAR-02', '../assets/img/hero-leopard.jpg', 'off feed 3d'],
+  ['Kanha', 'AAID : 21873/23 · Hoofstock HB-04', '../assets/img/species.jpg', 'off feed 2d'],
+];
+const SPARK = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4l1.4 3.8L17 9.2l-3.6 1.4L12 14.4l-1.4-3.8L7 9.2l3.6-1.4z"/></svg>';
+$('#chiprow').innerHTML = INTENTS.map((t) => `<button class="ichip" aria-pressed="false">${SPARK}${t}</button>`).join('');
+$('#circles').innerHTML = PLACES.map(([n, s, p]) => `<figure><img src="${p}" alt=""><figcaption>${n}<small>${s}</small></figcaption></figure>`).join('');
+
+const srch = $('#srch'), results = $('#results');
+$('#fieldBtn').addEventListener('click', () => srch.classList.add('on'));
+$('#srchBack').addEventListener('click', () => { srch.classList.remove('on'); results.style.opacity = 0; });
+$('#chiprow').addEventListener('click', (e) => {
+  const b = e.target.closest('.ichip'); if (!b) return;
+  [...$('#chiprow').children].forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+  $('#srchField').textContent = b.textContent.trim();
+  $('#srchField').style.color = 'var(--ink)';
+  results.innerHTML = `<div class="kicker" style="padding:0 0 6px">3 ANIMALS · SEPTEMBER</div>` +
+    HITS.map(([n, s, p, t]) => `<div class="rrow"><img src="${p}" alt=""><span><b>${n}</b><small>${s}</small></span><span class="tag">${t}</span></div>`).join('');
+  results.style.opacity = 1; results.style.transform = 'none';
+  [...results.querySelectorAll('.rrow')].forEach((r, i) => anim(r,
+    [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+    { duration: 420, delay: 60 + i * 60, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+});
+
+/* ══ CONCEPT 3 · THE FILTER SHEET ══════════════════════════════════════════
+   Two panes, and a footer that COUNTS. The count is the point: it turns
+   filtering from a form you fill in into a set you watch shrink. */
+const FACETS = [
+  ['Priority', 'M4 6h16M7 12h10M10 18h4', [['Critical'], ['High'], ['Moderate'], ['Low']]],
+  ['Section', 'M3 21V8l9-5 9 5v13M9 21v-6h6v6', [['Carnivore'], ['Hoofstock'], ['Primate'], ['Aviary']]],
+  ['Status', 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l3 2', [['Open'], ['Acknowledged'], ['Resolved'], ['Dismissed']]],
+  ['Raised by', 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0', [['Keepers'], ['Vets'], ['Facility'], ['Me']]],
+  ['When', 'M7 3v3M17 3v3M4 9h16M5 5h14v16H5z', [['Today'], ['This week'], ['This month'], ['Any time']]],
+];
+let active = 0; const chosen = new Map(FACETS.map((f) => [f[0], new Set()]));
+function drawFacets() {
+  $('#facets').innerHTML = FACETS.map(([n, d], i) => `
+    <div class="facet ${chosen.get(n).size ? 'has' : ''}" aria-selected="${i === active}" data-i="${i}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="${d}"/></svg>
+      ${n}<span class="dot"></span></div>`).join('');
+}
+function drawOpts() {
+  const [n, , opts] = FACETS[active]; const set = chosen.get(n);
+  $('#opts').innerHTML = `<h6>${n}</h6><div class="ogrid">` +
+    opts.map(([o]) => `<button class="opt" aria-pressed="${set.has(o)}">${o}</button>`).join('') + '</div>';
+}
+function count() {
+  let total = 24;
+  for (const s of chosen.values()) if (s.size) total = Math.max(3, Math.round(total * (0.42 + s.size * 0.14)));
+  return total;
+}
+function updateCount() {
+  const b = $('#showBtn'), n = count();
+  b.textContent = `Show ${n} observation${n === 1 ? '' : 's'}`;
+  anim(b, [{ transform: 'scale(1)' }, { transform: 'scale(1.035)' }, { transform: 'scale(1)' }], { duration: 260 });
+}
+$('#facets').addEventListener('click', (e) => {
+  const f = e.target.closest('.facet'); if (!f) return;
+  active = +f.dataset.i; drawFacets(); drawOpts();
+});
+$('#opts').addEventListener('click', (e) => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  const set = chosen.get(FACETS[active][0]); const on = b.getAttribute('aria-pressed') !== 'true';
+  on ? set.add(b.textContent) : set.delete(b.textContent);
+  b.setAttribute('aria-pressed', String(on)); drawFacets(); updateCount();
+});
+$('#clearAll').addEventListener('click', () => { for (const s of chosen.values()) s.clear(); drawFacets(); drawOpts(); updateCount(); });
+function openSheet() { $('#scrim').classList.add('on'); $('#sheet').classList.add('on'); page.classList.add('is-behind'); }
+function closeSheet() { $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on'); page.classList.remove('is-behind'); }
+$('#filterLink').addEventListener('click', openSheet);
+$('#sheetClose').addEventListener('click', closeSheet);
+$('#showBtn').addEventListener('click', closeSheet);
+$('#scrim').addEventListener('click', closeSheet);
+drawFacets(); drawOpts();
+
+/* ══ CONCEPT 6 · NUMBER + DELTA ════════════════════════════════════════════
+   One hero figure per card, and what it did since you were last here. A
+   number alone is not information; a number with its direction is. */
+const STATS = [
+  ['Pending approvals', 32, +7, 'since Tuesday', 'up', [14,15,18,19,24,26,32]],
+  ['Animals off feed', 6, -2, 'since yesterday', 'down', [11,10,10,9,8,7,6]],
+  ['Enclosures inspected', 41, 0, 'of 48 this week', 'flat', [6,13,19,25,31,37,41]],
+];
+function drawStats() {
+  return `<div class="shead" style="margin-top:0"><h2>This morning</h2></div><div class="stats">` + STATS.map(([l, v, d, s, k, pts]) => {
+    const max = Math.max(...pts), w = 300, h = 52;
+    const path = pts.map((p, i) => `${(i / (pts.length - 1)) * w},${h - (p / max) * (h - 10)}`).join(' ');
+    const col = k === 'down' ? '#006D35' : k === 'up' ? '#D0293F' : '#7A8684';
+    return `<div class="stat">
+      <span>${l}</span><b data-to="${v}">0</b>
+      <span class="delta ${k}">${k === 'up' ? '▲' : k === 'down' ? '▼' : '■'} ${d > 0 ? '+' : ''}${d || 'no change'}</span>
+      <span class="since">${s}</span>
+      <svg class="trend" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <polyline fill="none" stroke="${col}" stroke-opacity=".35" stroke-width="2" points="${path}"/></svg></div>`;
+  }).join('') + '</div>';
+}
+function playStats() {
+  document.querySelectorAll('.stat b').forEach((b, i) => {
+    const to = +b.dataset.to;
+    if (RM.matches) { b.textContent = to; return; }
+    const t0 = performance.now(), dur = 900 + i * 60;
+    (function step(t) {
+      const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      b.textContent = Math.round(to * e);
+      if (p < 1) requestAnimationFrame(step);
+    })(t0);
+  });
+  document.querySelectorAll('.stat .delta').forEach((d, i) => {
+    d.style.opacity = 1; d.style.transform = 'none';
+    anim(d, [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 460, delay: 700 + i * 90, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' });
+  });
+}
+
+/* ══ concept switching ═════════════════════════════════════════════════════ */
+const NOTES = {
+  1: '<b>1 · Ask ANTZ.</b> Press the sparkle beside the search field. The page blurs rather than dims, a lattice breathes inside it, the greeting migrates to the top while the composer rises, and the answer arrives as cards with a sparkline each. Close scales it away. This is the recording’s choreography in our own domain.',
+  2: '<b>2 · Intent chips.</b> The field opens a page that already has answers on it. Press a chip: these are the six questions a keeper asks before 9am, not categories. Underneath, sections are circular photographs, because people recognise a place faster than they read its name.',
+  3: '<b>3 · Filter sheet.</b> Press “Filter &amp; sort”. The page scales back and rounds its corners, which buys depth for one transform. Facets on the left with a marker and a dot when set, options on the right, and a footer that counts — filtering becomes a set you watch shrink.',
+  4: '<b>4 · Blur, not dim.</b> The same wait, both ways, at half scale. Left is blocked. Right is still yours. Same cost, opposite message.',
+  5: '<b>5 · Where are you working today.</b> Swiggy’s circular food tiles become sections and wards. A photograph of the Carnivore section is recognised before the words are read, which is the whole reason the pattern works on a phone at arm’s length.',
+  6: '<b>6 · Number + delta.</b> One hero figure per card with what it did since you were last here. A number alone is not information. The direction is the information, and the trend line behind it is the evidence.',
+};
+const savedSlot = $('#slot').innerHTML;
+/* ASYNC, AND THAT IS NOT A DETAIL. `closeAsk` takes 420ms and only clears its
+   own guard at the end; opening the next concept before it finished meant the
+   guard was still up and the open silently did nothing. Await the close. */
+async function show(c) {
+  c = +c;
+  [...$('#rail').children].forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.c === c)));
+  $('#note').innerHTML = NOTES[c];
+  await closeAsk(); closeSheet();
+  srch.classList.remove('on'); $('#ab').classList.remove('on');
+  $('#slot').innerHTML = savedSlot;
+  $('#orail').innerHTML = OBS.map((o) => `
+    <article class="obs" data-p="${o.p}">
+      <div class="obs__t"><span class="obs__pri">${o.g}</span><h4>${o.t}</h4><span>${o.tags}</span></div>
+      <div class="obs__b"><div class="ent"><img src="${o.ph}" alt=""><span><b>${o.id}</b><small>${o.n}</small></span></div><p>${o.b}</p></div>
+    </article>`).join('');
+  $('#filterLink').addEventListener('click', openSheet);
+
+  if (c === 2) srch.classList.add('on');
+  if (c === 3) setTimeout(openSheet, 300);
+  if (c === 4) {
+    /* both halves show the SAME page at half scale, so the only difference
+       the eye can find is the treatment on top of it */
+    $('#miniA').innerHTML = $('#miniB').innerHTML = page.innerHTML;
+    $('#ab').classList.add('on');
+  }
+  if (c === 5) {
+    $('#slot').innerHTML = '<div class="shead"><h2>Where are you working today?</h2></div>' +
+      '<div class="circles" style="padding:4px 0 0;grid-template-columns:repeat(6,1fr)">' +
+      PLACES.map(([n, s, p]) => `<figure><img src="${p}" alt=""><figcaption>${n}<small>${s}</small></figcaption></figure>`).join('') + '</div>';
+    [...$('#slot').querySelectorAll('figure')].forEach((f, i) => anim(f,
+      [{ opacity: 0, transform: 'translateY(18px) scale(.94)' }, { opacity: 1, transform: 'none' }],
+      { duration: 520, delay: i * 60, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+  }
+  if (c === 6) { $('#slot').innerHTML = drawStats(); playStats(); }
+  if (c === 1) setTimeout(openAsk, 240);
+}
+$('#rail').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) show(b.dataset.c); });
+
+/* fit the 1024 stage to whatever the window leaves */
+function fit() {
+  const wrap = $('.stagewrap'), d = $('#device');
+  const s = Math.min(1, (wrap.clientWidth - 56) / 1024, (wrap.clientHeight - 40) / 1180);
+  d.style.transform = `scale(${s})`;
+  d.style.marginBottom = `${-(1 - s) * 1180}px`;
+}
+addEventListener('resize', fit); fit();
+show(1);
+</script>
+</body>
+</html>

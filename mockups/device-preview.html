@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Device Preview</title>
+<style>
+  :root { --bg:#1c1c1e; --bar:#2c2c2e; --text:#f2f2f7; --muted:#9a9aa0; --accent:#0a84ff; --frame:#0b0b0d; --bezel:#2a2a2d; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font:14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  body { display:flex; flex-direction:column; }
+  .bar { display:flex; gap:8px; align-items:center; padding:10px 14px; background:var(--bar); border-bottom:1px solid #3a3a3c; flex-wrap:wrap; }
+  .bar label { color:var(--muted); }
+  select, input, button { font:inherit; border-radius:8px; border:1px solid #48484a; background:#1c1c1e; color:var(--text); padding:6px 10px; }
+  input { flex:1; min-width:220px; }
+  button { cursor:pointer; }
+  button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .dim { color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums; }
+  .stage { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:24px; }
+  .device { position:relative; transform-origin:center center; background:var(--frame); border-radius:var(--r); box-shadow:0 30px 80px rgba(0,0,0,.6), inset 0 0 0 2px #3c3c40; }
+  .screen { position:absolute; inset:var(--bezel-w); background:#fff; border-radius:calc(var(--r) - var(--bezel-w) + 4px); overflow:hidden; }
+  .screen iframe { width:100%; height:100%; border:0; display:block; background:#fff; }
+  .cam { position:absolute; width:10px; height:10px; border-radius:50%; background:#111; box-shadow:inset 0 0 0 2px #1f2a3a; }
+  .island { position:absolute; left:50%; top:11px; transform:translateX(-50%); width:120px; height:34px; border-radius:20px; background:#000; }
+  .home-ind { position:absolute; left:50%; bottom:8px; transform:translateX(-50%); width:120px; height:5px; border-radius:3px; background:rgba(0,0,0,.35); pointer-events:none; }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <label>Device</label>
+    <select id="device"></select>
+    <button id="rotate" title="Rotate">Rotate</button>
+    <label>Page</label>
+    <input id="url" value="/index.html#modules" spellcheck="false">
+    <button id="go">Load</button>
+    <button id="reload" title="Reload the page in the frame">Reload</button>
+    <span class="dim" id="dim"></span>
+  </div>
+  <div class="stage">
+    <div class="device" id="dev">
+      <div class="screen" id="scr"><iframe id="frame" title="preview"></iframe></div>
+    </div>
+  </div>
+<script>
+  // Logical CSS pixels for each device, portrait.
+  const DEVICES = [
+    { name:'iPad Pro 13"',   w:1024, h:1366, r:28, bezel:22, cam:'ipad' },
+    { name:'iPad Pro 11"',   w:834,  h:1194, r:26, bezel:20, cam:'ipad' },
+    { name:'iPad Air 11"',   w:820,  h:1180, r:26, bezel:20, cam:'ipad' },
+    { name:'iPad 10th gen',  w:820,  h:1180, r:24, bezel:22, cam:'ipad' },
+    { name:'iPad mini',      w:744,  h:1133, r:22, bezel:18, cam:'ipad' },
+    { name:'iPhone 16 Pro Max', w:440, h:956, r:56, bezel:14, cam:'island' },
+    { name:'iPhone 16',      w:393,  h:852,  r:52, bezel:14, cam:'island' },
+    { name:'iPhone SE',      w:375,  h:667,  r:40, bezel:60, cam:'none' },
+  ];
+  const sel = document.getElementById('device'), dev = document.getElementById('dev'),
+        scr = document.getElementById('scr'), frame = document.getElementById('frame'),
+        url = document.getElementById('url'), dim = document.getElementById('dim');
+  DEVICES.forEach((d,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=d.name; sel.appendChild(o); });
+  let landscape = false;
+  const saved = (()=>{ try { return JSON.parse(localStorage.getItem('devprev')||'{}'); } catch(e){ return {}; } })();
+  if (saved.i != null) sel.value = saved.i;
+  if (saved.land) landscape = true;
+  if (saved.url) url.value = saved.url;
+
+  function save(){ try { localStorage.setItem('devprev', JSON.stringify({ i:sel.value, land:landscape, url:url.value })); } catch(e){} }
+
+  function render(){
+    const d = DEVICES[sel.value];
+    const w = landscape ? d.h : d.w, h = landscape ? d.w : d.h;
+    const bz = d.bezel;
+    const outerW = w + bz*2, outerH = h + bz*2;
+    dev.style.setProperty('--r', d.r + 'px');
+    dev.style.setProperty('--bezel-w', bz + 'px');
+    dev.style.width = outerW + 'px'; dev.style.height = outerH + 'px';
+    // Remove old decorations
+    dev.querySelectorAll('.cam,.island,.home-ind').forEach(n=>n.remove());
+    if (d.cam === 'ipad') {
+      const c = document.createElement('div'); c.className='cam';
+      if (landscape) { c.style.left = (bz/2-5)+'px'; c.style.top='50%'; c.style.marginTop='-5px'; }
+      else { c.style.top = (bz/2-5)+'px'; c.style.left='50%'; c.style.marginLeft='-5px'; }
+      dev.appendChild(c);
+    } else if (d.cam === 'island') {
+      const isl = document.createElement('div'); isl.className='island';
+      if (landscape) { isl.style.cssText='left:'+(bz+11)+'px;top:50%;transform:translateY(-50%);width:34px;height:120px;'; }
+      scr.appendChild(isl);
+    }
+    if (d.cam !== 'none') { const hi=document.createElement('div'); hi.className='home-ind'; scr.appendChild(hi); }
+    // Scale to fit the stage
+    const stage = dev.parentElement.getBoundingClientRect();
+    const s = Math.min((stage.width-48)/outerW, (stage.height-48)/outerH, 1);
+    dev.style.transform = 'scale(' + s + ')';
+    dim.textContent = w + ' × ' + h + ' px' + (s<1 ? '  ·  shown at ' + Math.round(s*100) + '%' : '');
+    save();
+  }
+  function load(){ frame.src = url.value; save(); }
+
+  sel.onchange = render;
+  document.getElementById('rotate').onclick = ()=>{ landscape = !landscape; render(); };
+  document.getElementById('go').onclick = load;
+  document.getElementById('reload').onclick = ()=>{ frame.contentWindow.location.reload(); };
+  url.onkeydown = e=>{ if (e.key==='Enter') load(); };
+  window.onresize = render;
+  render(); load();
+</script>
+</body>
+</html>

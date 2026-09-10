@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Actions · six other ideas · ANTZ</title>
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  QUICK ACTIONS · SIX OTHER IDEAS, 8 Sep 2026. A mockup, nothing is wired.
+  ═══════════════════════════════════════════════════════════════════════════
+
+  WHY THIS PAGE EXISTS. `mockups/quick-actions.html` offered ten and they were
+  rejected, correctly: all ten were arrangements of ONE list of sixteen verbs.
+  A panel in four columns and a panel in a rail are not two ideas.
+
+  SO EACH OF THE SIX HERE DELETES A DIFFERENT PREMISE, and the premise it
+  deletes is written on it:
+
+    1 · SCAN TO ACT      that you choose a verb at all. The subject comes
+                         first and the verbs come to it, already filtered by
+                         the state that subject is in.
+    2 · WHAT'S WAITING   that the surface is for CREATING. It answers "what is
+                         due" instead, with the subject already attached.
+    3 · ON THE CARD      that there is a surface. The sixteen verbs go to the
+                         twelve cards that own them; the pill disappears.
+    4 · ONE VERB         that sixteen need equal billing. One primary action,
+                         everything else behind a chevron.
+    5 · SAY IT           that the input is a finger. A keeper in an enclosure
+                         has gloves, a hose and one hand.
+    6 · ONE COMPOSER     that there are sixteen actions. There is one — "what
+                         happened" — and the app decides what to file it as.
+
+  EVERY IDEA IS DRAWN INSIDE A 1024x768 iPAD IN LANDSCAPE, at real size, over
+  the page it opens on. Nothing is scaled.
+
+  WHAT IS REAL AND WHAT IS PROPOSED. The subjects, codes, names and photographs
+  are the app's own — Big Bull is `AAID : 87546/24` from js/data/observations.js,
+  the photograph is `assets/img/obs-animal.png`, Hoofstock Barn is `ENC : HB-04`.
+  The glyphs are lifted from js/icons.js; no icon here is invented, which is why
+  5 draws a waveform rather than a microphone — the sprite has no microphone and
+  a mockup is not the place to add one. What IS proposed is every mechanism: the
+  resolver, the state table, the classifier in 6.
+
+  THE ONE THING THAT MAKES 1, 2 AND 6 CHEAPER THAN THEY LOOK. The scan control
+  beside the search field already resolves a code to a record — its own note in
+  index.html says it is "the only thing in this build that finds a record from a
+  code — its index carries 478 identifiers" — and an observation's `entity`
+  already carries the kind, the code and the name. The handle a verb needs is
+  already modelled.
+
+  Open at http://localhost:8000/mockups/quick-actions-ideas.html.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* ══ 1 · TOKENS — copied from index.html ═══════════════════════════════════ */
+:root {
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --ink: #1F415B; --ink-head: #44544A; --ink-mute: #7A8684; --ink-2: #52697A;
+  --teal: #00ABAB; --link: #006D35; --line: #E3EBE8;
+  --petrol-050: #EEF5F6; --petrol-100: #DCE9EB; --petrol-600: #2C6B72; --petrol-700: #24565E; --petrol-800: #1F515B;
+  --coral: #FA6140; --amber: #FFB71D; --crit: #F21037;
+  --g-medical:  linear-gradient(128.5deg, #8EBEA5 6%, #67A886 35%, #4D9972 55%, #338A5D 94%);
+  --g-hospital: linear-gradient(128.8deg, #678A8F 6%, #487179 35%, #34616A 55%, #1F515B 94%);
+  --g-species:  linear-gradient(128.8deg, #529C76 6%, #2F8859 35%, #177A48 55%, #006D35 94%);
+  --g-diet:     linear-gradient(128.8deg, #FC947D 6%, #FB7E63 35%, #FB7051 55%, #FA6140 94%);
+  --g-housing:  linear-gradient(128.8deg, #779B9F 6%, #648A8F 35%, #567E85 55%, #48737A 94%);
+  --g-pharmacy: linear-gradient(128.8deg, #779B9F 6%, #648A8F 35%, #567E85 55%, #00D6C9 94%);
+  --g-users:    linear-gradient(128.8deg, #7B93A0 6%, #668091 35%, #587385 55%, #4A677A 94%);
+  --g-admin:    linear-gradient(128.8deg, #B3C6BC 6%, #A9BDB1 35%, #A2B7AA 55%, #9BB0A3 94%);
+  --pill: linear-gradient(180deg, #37BD69 0%, #1F415B 100%);
+  --menu-bg: rgba(255,255,255,.94);
+  --menu-sh: 0 1px 2px rgba(31,65,91,.1), 0 24px 60px -18px rgba(31,65,91,.38);
+  --card-sh: 0 1px 3px rgba(31,65,91,.06), 0 8px 24px -10px rgba(31,65,91,.14);
+  --r-pill: 999px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s7:28px; --s8:32px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--font); color: var(--ink); font-size: 15px; line-height: 1.45;
+       background: #F2F7F6; -webkit-font-smoothing: antialiased; padding-bottom: 80px; }
+button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+figure, figcaption { margin: 0; }   /* the UA's 40px would come off every frame */
+img { display: block; max-width: 100%; }
+.icon { width: 24px; height: 24px; display: block; fill: none; stroke: currentColor; stroke-width: 1.7;
+        stroke-linecap: round; stroke-linejoin: round; }
+
+/* ══ 2 · PAGE CHROME ══════════════════════════════════════════════════════ */
+.wrap { max-width: 1104px; margin: 0 auto; padding: 0 40px; }
+.mast { padding: 44px 0 8px; }
+.mast__kick { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+.mast h1 { margin: 6px 0 14px; font-size: 34px; line-height: 1.12; letter-spacing: -.02em; }
+.mast p { max-width: 76ch; color: var(--ink-2); line-height: 1.62; }
+.mast p + p { margin-top: 10px; }
+.mast code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .86em;
+             background: rgba(31,65,91,.07); padding: .1em .35em; border-radius: 4px; }
+.v { margin-top: 46px; }
+.v__cap { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+.v__n { flex: none; align-self: center; width: 30px; height: 30px; border-radius: 9px; display: grid;
+        place-items: center; background: var(--petrol-800); color: #fff; font-size: 14px; font-weight: 700; }
+.v__name { flex: none; font-size: 19px; font-weight: 700; color: var(--ink-head); letter-spacing: -.015em; }
+.v__kill { font-size: 13px; color: var(--coral); font-weight: 600; }
+.v__note { margin: 0 0 12px 42px; max-width: 92ch; font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
+.v__cost { margin: 10px 0 0 42px; max-width: 92ch; font-size: 13px; color: var(--ink-mute); }
+.v__cost b { color: var(--ink-head); font-weight: 600; }
+
+/* ══ 3 · THE iPAD ═════════════════════════════════════════════════════════ */
+.pad { position: relative; width: 1024px; height: 768px; max-width: 100%; border-radius: 22px; overflow: hidden;
+       box-shadow: 0 2px 6px rgba(31,65,91,.12), 0 30px 70px -30px rgba(31,65,91,.45);
+       outline: 1px solid rgba(31,65,91,.10); outline-offset: -1px; isolation: isolate;
+       background: linear-gradient(180deg, rgba(175,239,235,.5) 0%, rgba(175,239,235,.275) 32%, rgba(242,255,248,.5) 69%), #fff; }
+.pad__bg { position: absolute; inset: 0; padding: 24px; }
+.pad__bg--blur { filter: blur(7px); opacity: .9; }
+.pad__hero { height: 132px; border-radius: 16px; background: var(--g-hospital); opacity: .55; margin-bottom: 16px; }
+.pad__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.pad__c { height: 132px; border-radius: 12px; position: relative; }
+.pad__c--w { grid-column: span 2; }
+.pad__c--t { grid-row: span 2; height: auto; background: #fff; opacity: .96; }
+.pad__c b { position: absolute; left: 12px; bottom: 10px; color: #fff; font-size: 13px; font-weight: 500; }
+.pad__veil { position: absolute; inset: 0; background: rgba(16,44,48,.18);
+             backdrop-filter: blur(6px) saturate(1.1); -webkit-backdrop-filter: blur(6px) saturate(1.1); z-index: 2; }
+.pad__pill { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 4;
+             display: inline-flex; align-items: center; gap: var(--s2); padding: 14px 16px; border: 1px solid #fff;
+             border-radius: 24px; background: var(--pill); color: #fff; box-shadow: 0 4px 6.2px rgba(0,0,0,.15);
+             font-size: 16px; font-weight: 600; }
+.pad__pill .icon { width: 20px; height: 20px; stroke-width: 2; }
+
+.surf { position: absolute; z-index: 3; background: var(--menu-bg); border-radius: 18px; box-shadow: var(--menu-sh);
+        outline: 1px solid rgba(31,65,91,.07); outline-offset: -1px;
+        backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6); }
+.surf--above { left: 50%; transform: translateX(-50%); bottom: 102px; }
+.head { display: flex; align-items: baseline; gap: 10px; }
+.head b { font-size: 12px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; color: var(--petrol-600); }
+.head span { font-size: 12px; color: var(--ink-mute); }
+.hr { height: 1px; background: var(--line); }
+.verb { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 14px;
+        background: var(--petrol-800); color: #fff; font-size: 15px; font-weight: 600; }
+.verb--ghost { background: rgba(255,255,255,.9); color: var(--petrol-800);
+               box-shadow: inset 0 0 0 1px rgba(31,65,91,.14); }
+.verb .icon { width: 18px; height: 18px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--r-pill);
+        font-size: 11.5px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+.chip--state { background: rgba(250,97,64,.14); color: #C2492C; }
+.chip--ok { background: rgba(55,189,105,.16); color: #1E7A44; }
+
+/* ══ 4 · ONE · SCAN TO ACT ════════════════════════════════════════════════ */
+.s1-cam { position: absolute; inset: 0; z-index: 3; background: #0B1F24; }
+.s1-cam > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .78; }
+.s1-cam::after { content: ''; position: absolute; inset: 0;
+                 background: radial-gradient(58% 46% at 50% 40%, transparent 55%, rgba(4,16,19,.72) 100%); }
+.s1-br { position: absolute; z-index: 4; width: 300px; height: 300px; left: 50%; top: 208px; transform: translateX(-50%); }
+.s1-br i { position: absolute; width: 46px; height: 46px; border: 3px solid rgba(255,255,255,.92); border-radius: 6px; }
+.s1-br i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+.s1-br i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.s1-br i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; }
+.s1-br i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.s1-hint { position: absolute; z-index: 4; left: 0; right: 0; top: 132px; text-align: center; color: rgba(255,255,255,.86);
+           font-size: 15px; }
+.s1-hint b { display: block; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.s1-sheet { position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; padding: 22px 28px 26px;
+            border-radius: 26px 26px 0 0; background: rgba(255,255,255,.97);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: var(--menu-sh); }
+.s1-who { display: flex; align-items: center; gap: 14px; }
+.s1-who img { flex: none; width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
+.s1-who b { display: block; font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+.s1-who span { display: block; font-size: 13.5px; color: var(--ink-mute); }
+.s1-verbs { display: flex; gap: 10px; margin-top: 18px; }
+.s1-alt { margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--link); font-weight: 500; }
+.s1-alt .icon { width: 16px; height: 16px; }
+
+/* ══ 5 · TWO · WHAT'S WAITING ═════════════════════════════════════════════ */
+.s2-surf { width: 600px; padding: 18px 18px 14px; }
+.s2-surf > .head { padding: 2px 8px 12px; }
+.s2-row { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 10px; border-radius: 12px; text-align: left; }
+.s2-row + .s2-row { border-top: 1px solid var(--line); }
+.s2-row__d { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px;
+             background: var(--petrol-050); color: var(--petrol-700); }
+.s2-row__t { flex: 1; min-width: 0; }
+.s2-row__t b { display: block; font-size: 14.5px; font-weight: 600; }
+.s2-row__t span { display: block; font-size: 12.5px; color: var(--ink-mute); }
+.s2-row__w { flex: none; }
+.s2-row .icon.go { width: 18px; height: 18px; color: var(--ink-mute); }
+.s2-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px;
+           padding: 12px 10px 4px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-2); }
+.s2-foot b { color: var(--petrol-800); font-weight: 600; }
+
+/* ══ 6 · THREE · ON THE CARD ══════════════════════════════════════════════ */
+.s3-plus { position: absolute; right: 10px; top: 10px; width: 28px; height: 28px; border-radius: 50%;
+           background: rgba(255,255,255,.26); display: grid; place-items: center; color: #fff;
+           box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+.s3-plus .icon { width: 16px; height: 16px; stroke-width: 2.4; }
+.s3-pop { position: absolute; z-index: 5; left: 208px; top: 176px; width: 268px; padding: 10px;
+          border-radius: 16px; background: #fff; box-shadow: var(--menu-sh); }
+.s3-pop .head { padding: 4px 8px 8px; }
+.s3-pop__r { display: flex; align-items: center; gap: 11px; width: 100%; padding: 9px 8px; border-radius: 10px; text-align: left; }
+.s3-pop__r span { font-size: 14px; font-weight: 500; }
+.s3-pop__d { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px;
+             background: var(--petrol-050); color: var(--petrol-700); }
+.s3-pop__d .icon { width: 16px; height: 16px; }
+.s3-note { position: absolute; z-index: 5; right: 24px; bottom: 24px; max-width: 300px; padding: 12px 14px;
+           border-radius: 12px; background: rgba(31,65,91,.9); color: #fff; font-size: 12.5px; line-height: 1.45; }
+
+/* ══ 7 · FOUR · ONE VERB ══════════════════════════════════════════════════ */
+.s4-pill { position: absolute; z-index: 4; left: 50%; bottom: 40px; transform: translateX(-50%);
+           display: flex; align-items: stretch; border: 1px solid #fff; border-radius: 24px; overflow: hidden;
+           background: var(--pill); color: #fff; box-shadow: 0 4px 6.2px rgba(0,0,0,.15); }
+.s4-pill > b { display: flex; align-items: center; gap: 10px; padding: 14px 18px; font-size: 16px; font-weight: 600; }
+.s4-pill > i { display: grid; place-items: center; width: 46px; border-left: 1px solid rgba(255,255,255,.34); }
+.s4-pill .icon { width: 20px; height: 20px; stroke-width: 2; }
+.s4-more { position: absolute; z-index: 4; left: 50%; transform: translateX(-50%); bottom: 106px; width: 300px;
+           padding: 10px; border-radius: 16px; background: var(--menu-bg); box-shadow: var(--menu-sh);
+           backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.s4-more .head { padding: 4px 8px 8px; }
+.s4-r { display: flex; align-items: center; gap: 11px; width: 100%; padding: 9px 8px; border-radius: 10px; text-align: left; }
+.s4-r span { font-size: 14px; font-weight: 500; }
+.s4-r__d { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px;
+           background: var(--petrol-050); color: var(--petrol-700); }
+.s4-r__d .icon { width: 16px; height: 16px; }
+.s4-why { position: absolute; z-index: 4; left: 50%; transform: translateX(-50%); bottom: 8px;
+          font-size: 11.5px; color: rgba(31,65,91,.6); }
+
+/* ══ 8 · FIVE · SAY IT ════════════════════════════════════════════════════ */
+.s5-surf { width: 660px; padding: 24px 26px 22px; }
+.s5-wave { display: flex; align-items: center; justify-content: center; gap: 4px; height: 56px; }
+.s5-wave i { width: 5px; border-radius: 3px; background: linear-gradient(180deg, #37BD69, #1F415B); }
+.s5-say { margin-top: 16px; font-size: 21px; line-height: 1.35; letter-spacing: -.01em; text-align: center; }
+.s5-say em { font-style: normal; color: var(--ink-mute); }
+.s5-out { margin-top: 20px; padding: 14px; border-radius: 14px; background: rgba(255,255,255,.86);
+          box-shadow: inset 0 0 0 1px rgba(31,65,91,.1); display: flex; align-items: center; gap: 14px; }
+.s5-out img { flex: none; width: 46px; height: 46px; border-radius: 8px; object-fit: cover; }
+.s5-out__t { flex: 1; min-width: 0; }
+.s5-out__t b { display: block; font-size: 14.5px; font-weight: 600; }
+.s5-out__t span { display: block; font-size: 12.5px; color: var(--ink-mute); }
+.s5-btns { display: flex; gap: 10px; margin-top: 18px; justify-content: center; }
+.s5-hold { margin-top: 14px; text-align: center; font-size: 12px; color: var(--ink-mute); }
+
+/* ══ 9 · SIX · ONE COMPOSER ═══════════════════════════════════════════════ */
+.s6-surf { width: 640px; padding: 0; overflow: hidden; }
+.s6-h { padding: 20px 22px 14px; }
+.s6-h b { font-size: 20px; font-weight: 600; letter-spacing: -.015em; }
+.s6-h span { display: block; margin-top: 3px; font-size: 13px; color: var(--ink-mute); }
+.s6-sub { display: flex; align-items: center; gap: 12px; margin: 0 22px; padding: 10px 12px; border-radius: 12px;
+          background: rgba(238,245,246,.8); }
+.s6-sub img { flex: none; width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+.s6-sub__t { flex: 1; min-width: 0; }
+.s6-sub__t b { display: block; font-size: 14px; font-weight: 600; }
+.s6-sub__t span { display: block; font-size: 12px; color: var(--ink-mute); }
+.s6-sub__c { font-size: 13px; font-weight: 500; color: var(--link); }
+.s6-body { margin: 14px 22px 0; padding: 14px; border-radius: 12px; background: #fff;
+           box-shadow: inset 0 0 0 1px rgba(31,65,91,.1); font-size: 15px; line-height: 1.5; color: var(--ink); }
+.s6-body em { font-style: normal; color: var(--ink-mute); }
+.s6-shots { display: flex; gap: 8px; margin: 12px 22px 0; }
+.s6-shots img { width: 62px; height: 62px; border-radius: 10px; object-fit: cover; }
+.s6-shots .add { width: 62px; height: 62px; border-radius: 10px; display: grid; place-items: center;
+                 background: var(--petrol-050); color: var(--petrol-700);
+                 box-shadow: inset 0 0 0 1px rgba(31,65,91,.1); }
+.s6-foot { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 14px 22px;
+           border-top: 1px solid var(--line); background: rgba(255,255,255,.7); }
+.s6-file { flex: 1; font-size: 13px; color: var(--ink-2); }
+.s6-file b { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; padding: 5px 10px;
+             border-radius: var(--r-pill); background: rgba(250,97,64,.14); color: #C2492C; font-weight: 600; }
+.s6-file .icon { width: 14px; height: 14px; }
+
+/* ══ 10 · CLOSING ═════════════════════════════════════════════════════════ */
+.close { margin-top: 54px; padding-top: 26px; border-top: 1px solid rgba(31,65,91,.12); }
+.close h2 { font-size: 21px; font-weight: 700; letter-spacing: -.015em; color: var(--ink-head); margin-bottom: 14px; }
+.close table { border-collapse: collapse; font-size: 13.5px; width: 100%; max-width: 900px; }
+.close th, .close td { text-align: left; padding: 9px 14px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.close th { font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--petrol-600); }
+.close td b { color: var(--ink); }
+.close ul { margin: 18px 0 0; padding-left: 20px; max-width: 84ch; }
+.close li { margin-bottom: 10px; color: var(--ink-2); line-height: 1.62; }
+.close li strong { color: var(--ink); font-weight: 600; }
+@media (max-width: 1120px) { .wrap { padding: 0 20px; } .pad { width: 100%; height: auto; aspect-ratio: 4/3; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <p class="mast__kick">Mockup · 8 September 2026 · nothing here is wired</p>
+    <h1>Quick Actions, six other ideas</h1>
+    <p>The ten before this were all the same idea: <strong>a panel that lists sixteen verbs</strong>, in ten arrangements. Rejected, correctly. Each of the six here deletes a different premise instead, and the premise it deletes is printed on it in red.</p>
+    <p>Every one is drawn inside a 1024&times;768 iPad in landscape, at real size, over the page it opens on. The subjects are the app's own — Big&nbsp;Bull is <code>AAID : 87546/24</code> and Hoofstock&nbsp;Barn is <code>ENC : HB-04</code>, both from <code>observations.js</code> — and no glyph is invented, which is why 5 draws a waveform and not a microphone.</p>
+  </header>
+  <main id="page"></main>
+
+  <section class="close">
+    <h2>Which of the six, and what each one costs</h2>
+    <table>
+      <tr><th>Idea</th><th>Best when</th><th>Falls down when</th><th>Build</th></tr>
+      <tr><td><b>1 Scan to act</b></td><td>You are standing in front of the animal</td><td>No tag to scan, or a verb with no subject</td><td>Resolver exists; needs a state&nbsp;→&nbsp;verb table</td></tr>
+      <tr><td><b>2 What's waiting</b></td><td>The shift has a schedule — meds, feeds, rounds</td><td>Nothing is due; the tray is empty and the verb is gone</td><td>Needs a due-work service the app has not got</td></tr>
+      <tr><td><b>3 On the card</b></td><td>The home page is already the map of the work</td><td>The card you need is not on this page</td><td>Cheapest of the six — twelve cards, one popover</td></tr>
+      <tr><td><b>4 One verb</b></td><td>One action dominates a role's day</td><td>Nobody has measured which one that is</td><td>Trivial, and untrustworthy until measured</td></tr>
+      <tr><td><b>5 Say it</b></td><td>Gloves, a hose, one hand, an enclosure</td><td>A noisy house, or a name the parser mishears</td><td>Dictation plus a parser — the most new machinery</td></tr>
+      <tr><td><b>6 One composer</b></td><td>The keeper should not have to know the taxonomy</td><td>The classifier guesses wrong and files it silently</td><td>Needs a classifier, and an undo you can trust</td></tr>
+    </table>
+    <ul>
+      <li><strong>1 and 3 are the pair I would build.</strong> They answer the two halves of the same question — 3 when the subject is already on screen, 1 when it is in front of you and not on screen — and between them the sixteen-verb panel never has to exist. Neither needs a service that does not exist yet.</li>
+      <li><strong>2 is the most valuable and the least ready.</strong> "What is due" is what a command centre is for, but the app has no due-work service to ask; Pending Approvals is the only queue it can currently fill a row from.</li>
+      <li><strong>5 is the only one that changes who can use the product.</strong> A keeper with wet gloves cannot type, and that is not an edge case in this building — it is the job. Worth a real trial even though it is the most machinery.</li>
+      <li><strong>The four verbs with no subject</strong> — + Site, + Section, + User, Master — belong under the avatar in every one of these six. That menu already says it holds everything a person can do to their own page; the estate growing is that kind of act, not a keeper's.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const GLYPH = {
+  'note': '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  'pharmacy': '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+  'diet': '<path d="M3 2v7a2 2 0 0 0 2 2h1.5a2 2 0 0 0 2-2V2"/><path d="M5.8 2v20"/><path d="M20.5 15V2a4.5 4.5 0 0 0-4.5 4.5V13a2 2 0 0 0 2 2h2.5Zm0 0v7"/>',
+  'inbox': '<path d="M21 12h-5.4l-1.6 2.8h-4L8.4 12H3"/><path d="M5.45 5.11 3 12v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6l-2.45-6.89A2 2 0 0 0 16.66 4H7.34a2 2 0 0 0-1.89 1.11Z"/>',
+  'clock': '<circle cx="12" cy="12" r="9.2"/><path d="M12 6.8V12l3.4 2"/>',
+  'check': '<path d="M20 6 9 17l-5-5"/>',
+  'close': '<path d="M18 6 6 18M6 6l12 12"/>',
+  'plus': '<path d="M5 12h14M12 5v14"/>',
+  'chev-down': '<path d="m5 9 7 7 7-7"/>',
+  'chev-right': '<path d="m9 5 7 7-7 7"/>',
+  'arrow-right': '<path d="M4.5 12h15m-6.5-7 7 7-7 7"/>',
+  'search': '<circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.35-4.35"/>',
+  'alert': '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9.2v4.2M12 17.2h.01"/>',
+  'species': '<circle cx="5.6" cy="11.4" r="1.9"/><circle cx="9.7" cy="6.6" r="1.9"/><circle cx="14.3" cy="6.6" r="1.9"/><circle cx="18.4" cy="11.4" r="1.9"/><path d="M8.6 15.1c-1.2 1.1-1.9 2.3-1.9 3.5 0 1.8 1.4 3.1 3.2 3.1.8 0 1.3-.3 2.1-.3s1.3.3 2.1.3c1.8 0 3.2-1.3 3.2-3.1 0-1.2-.7-2.4-1.9-3.5-1-.9-2-1.8-3.4-1.8s-2.4.9-3.4 1.8Z"/>',
+  'medical': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.5 12h4l1-2 2 4.5 2-6 1.4 3.5h6.1"/>',
+  'hospital': '<path d="M6 22V4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V22"/><path d="M3 22h18"/><path d="M12 6.5v4M10 8.5h4"/><path d="M9.5 14h1M13.5 14h1M9.5 17.5h1M13.5 17.5h1"/>',
+  'housing': '<rect x="2.7" y="4.3" width="18.6" height="15.4" rx="2.6"/><path d="M12 16.5c1.9-2.1 3.2-3.8 3.2-5.5a3.2 3.2 0 0 0-6.4 0c0 1.7 1.3 3.4 3.2 5.5Z"/><circle cx="12" cy="10.9" r="1.1"/>',
+  'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  'eggs': '<path d="M12 21.5c5.2-.05 6.6-4.7 6.3-8.4C18 9.4 15 4.6 12 4.55 9 4.6 6 9.4 5.7 13.1c-.3 3.7 1.1 8.35 6.3 8.4Z"/><path d="M9.4 13.6a2.7 3.4 0 0 1 1.5-3"/>',
+  'comment': '<path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-3.9A8 8 0 1 1 20 12Z"/>',
+  'paperclip': '<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.2 3.2 0 0 1 4.5 4.5L10 17.5a1.4 1.4 0 0 1-2-2l7.5-7.5"/>',
+  'pencil': '<path d="M21.17 6.81a1 1 0 0 0-3.98-3.99L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.36a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5Z"/><path d="m15 5 4 4"/>',
+  'thumb': '<path d="M7 11v9H4v-9h3Z"/><path d="M7 11l4-7c1.5 0 2.5 1 2.5 2.5V10h5a2 2 0 0 1 2 2.3l-1 6A2 2 0 0 1 17.5 20H7"/>',
+  'layers': '<path d="m12 2.6 9 4.6-9 4.6-9-4.6Z"/><path d="m3.4 12.2 8.6 4.4 8.6-4.4"/><path d="m3.4 16.8 8.6 4.4 8.6-4.4"/>',
+  'megaphone': '<path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V5l-4 4H5a2 2 0 0 0-2 2Z"/><path d="M14 9.5a3 3 0 0 1 0 5"/><path d="M17 7a6.5 6.5 0 0 1 0 10"/>',
+  'd-area': '<path d="M12 2.6 2.8 6.4v11.2L12 21.4l9.2-3.8V6.4Z"/><path d="M12 2.6v18.8M2.8 12h18.4"/>',
+  'd-space': '<rect x="3" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="13.6" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="3" y="13.6" width="7.4" height="7.4" rx="1.6"/><path d="M13.6 17.3h7.4M17.3 13.6v7.4"/>',
+  'arrow-out': '<path d="M14 3.5h6.5V10"/><path d="m20.5 3.5-8 8"/><path d="M18 14v5.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V8A1.5 1.5 0 0 1 5 6.5h5.5"/>',
+  'fetal': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12.4 6.2 10 9.4h3.2l-2.3 3.6"/>',
+  'trend': '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  'pin-push': '<path d="M9 3h6l-.6 6.4 2.6 2.4V14H7v-2.2l2.6-2.4L9 3Z"/><path d="M12 14v7"/>'
+}
+const icon = (n, cls = '') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${GLYPH[n] || ''}</svg>`
+
+/* the home page behind, sharp or blurred, with the four-column geometry V2 draws */
+const bg = (blur = true, plus = false) => {
+  const P = plus ? `<span class="s3-plus">${icon('plus')}</span>` : ''
+  return `<div class="pad__bg ${blur ? 'pad__bg--blur' : ''}" aria-hidden="true">
+    <div class="pad__hero"></div>
+    <div class="pad__grid">
+      <div class="pad__c" style="background:var(--g-medical)">${blur ? '' : '<b>Medical</b>'}${P}</div>
+      <div class="pad__c" style="background:var(--g-housing)">${blur ? '' : '<b>Housing</b>'}${P}</div>
+      <div class="pad__c pad__c--w" style="background:var(--g-species)">${blur ? '' : '<b>Species Management</b>'}${P}</div>
+      <div class="pad__c pad__c--w" style="background:var(--g-hospital)">${blur ? '' : '<b>Hospital</b>'}${P}</div>
+      <div class="pad__c" style="background:var(--g-pharmacy)">${blur ? '' : '<b>Pharmacy</b>'}${P}</div>
+      <div class="pad__c" style="background:#D8C993">${blur ? '' : '<b>Lab</b>'}${P}</div>
+      <div class="pad__c pad__c--t"></div>
+      <div class="pad__c pad__c--w" style="background:var(--g-diet)">${blur ? '' : '<b>Diet &amp; Kitchen</b>'}${P}</div>
+      <div class="pad__c" style="background:var(--g-admin)">${blur ? '' : '<b>Administer</b>'}${P}</div>
+      <div class="pad__c" style="background:var(--g-diet)">${blur ? '' : '<b>Mortality</b>'}${P}</div>
+    </div>
+  </div>`
+}
+const PILL = (label = 'Quick Actions', g = 'd-space') => `<div class="pad__pill">${icon(g)}${label}</div>`
+const pad = (inner, { blur = true, veil = true, pill = PILL(), plus = false } = {}) =>
+  `<div class="pad">${bg(blur, plus)}${veil ? '<div class="pad__veil"></div>' : ''}${inner}${pill}</div>`
+
+const BULL = '../assets/img/obs-animal.png'
+const LEOPARD = '../assets/img/hero-leopard.jpg'
+const BARN = '../assets/img/hospital.jpg'
+
+const IDEAS = [
+
+['1', 'Scan to act', 'that you choose a verb at all',
+ 'The camera is the menu. Point it at the tag, and the sixteen verbs collapse to the two or three that apply to <em>this</em> animal in the state it is actually in — Big&nbsp;Bull is out with the herd and carrying an open flank wound, so Hospitalize is offered and Accession is not. The record is attached before you have typed anything.',
+ 'Cheapest part is the bit that looks hardest: the scan control already resolves a code to a record — 478 identifiers in its index. <b>The new work is a state&nbsp;→&nbsp;verb table per entity kind</b>, which is the same question permissions already ask.',
+ () => `<div class="pad">
+    ${bg(true)}
+    <div class="s1-cam"><img src="${BULL}" alt=""></div>
+    <div class="s1-hint"><b>Point at the tag</b>Or type a name — the field is one tap away</div>
+    <div class="s1-br"><i></i><i></i><i></i><i></i></div>
+    <div class="s1-sheet">
+      <div class="s1-who">
+        <img src="${BULL}" alt="">
+        <span style="flex:1;min-width:0">
+          <b>AAID : 87546/24 &nbsp;·&nbsp; Big Bull</b>
+          <span>Hoofstock Barn &nbsp;·&nbsp; out with the herd</span>
+        </span>
+        <span class="chip chip--state">Open case &nbsp;·&nbsp; deep flank wound</span>
+      </div>
+      <div class="s1-verbs">
+        <button class="verb">${icon('note')}Add note</button>
+        <button class="verb verb--ghost">${icon('pharmacy')}Dispense</button>
+        <button class="verb verb--ghost">${icon('hospital')}Hospitalize</button>
+      </div>
+      <div class="s1-alt">${icon('search')}Search by name, code or enclosure instead</div>
+    </div>
+  </div>`],
+
+['2', 'What&rsquo;s waiting', 'that the surface is for creating',
+ 'The pill stops asking what you want to make and says what is already due. Every row is a whole action with its subject attached — dispense <em>this</em> at <em>this</em> time to <em>this</em> animal — so the verb is never chosen, only confirmed. It is the same sixteen underneath; you meet them as work rather than as a menu.',
+ 'The most valuable and the least ready. <b>The app has no due-work service to ask</b> — Pending Approvals is the only queue it could fill a row from today. Everything else on this frame is a promise about data that does not exist yet.',
+ () => pad(`<div class="surf surf--above s2-surf">
+      <div class="head"><b>Waiting on you</b><span>this shift · 3 due, 1 late</span></div>
+      <button class="s2-row"><span class="s2-row__d">${icon('pharmacy')}</span>
+        <span class="s2-row__t"><b>Dispense 5&nbsp;ml Meloxicam</b><span>Big Bull &nbsp;·&nbsp; AAID : 87546/24 &nbsp;·&nbsp; prescribed by Dr. Meera Nair</span></span>
+        <span class="s2-row__w"><span class="chip chip--state">Due 14:00</span></span>${icon('arrow-right','go')}</button>
+      <button class="s2-row"><span class="s2-row__d">${icon('diet')}</span>
+        <span class="s2-row__t"><b>Log the morning feed</b><span>Hoofstock Barn &nbsp;·&nbsp; ENC : HB-04 &nbsp;·&nbsp; 14 animals</span></span>
+        <span class="s2-row__w"><span class="chip chip--state">2 h late</span></span>${icon('arrow-right','go')}</button>
+      <button class="s2-row"><span class="s2-row__d">${icon('note')}</span>
+        <span class="s2-row__t"><b>Note requested on the protein trial</b><span>Zara &nbsp;·&nbsp; AAID : 44120/25 &nbsp;·&nbsp; asked for by Nutrition</span></span>
+        <span class="s2-row__w"><span class="chip chip--ok">Today</span></span>${icon('arrow-right','go')}</button>
+      <button class="s2-row"><span class="s2-row__d">${icon('alert')}</span>
+        <span class="s2-row__t"><b>North gate panel still open</b><span>Hoofstock Barn &nbsp;·&nbsp; raised with maintenance 02 Sep</span></span>
+        <span class="s2-row__w"><span class="chip chip--state">6 days</span></span>${icon('arrow-right','go')}</button>
+      <div class="s2-foot"><span>Nothing else is due until 17:00.</span><b>All 32 approvals →</b></div>
+    </div>`, { pill: PILL('3 due', 'clock') })],
+
+['3', 'On the card', 'that there is a surface at all',
+ 'The sixteen verbs go home to the twelve cards that own them: Medical carries Case, Hospitalize and Fetal Death; Housing carries Site, Section and Enclosure. The home page stops being a wall of doors and becomes the menu, and the floating pill is deleted rather than redesigned — there is nothing left for it to open.',
+ 'The cheapest of the six by a wide margin: twelve cards, one popover, no new service and no new data. <b>Its limit is honest</b> — a verb whose card is not on your page is unreachable, so it needs the avatar menu behind it for everything else.',
+ () => pad(`<div class="s3-pop">
+      <div class="head"><b>Medical</b><span>3 actions</span></div>
+      <button class="s3-pop__r"><span class="s3-pop__d">${icon('medical')}</span><span>+ Medical case</span></button>
+      <button class="s3-pop__r"><span class="s3-pop__d">${icon('hospital')}</span><span>+ Hospitalize</span></button>
+      <button class="s3-pop__r"><span class="s3-pop__d">${icon('fetal')}</span><span>+ Fetal Death</span></button>
+    </div>
+    <div class="s3-note">Every card carries the verbs of its own module. No pill, no panel, nothing to open — the page you are already reading is the menu.</div>`,
+   { blur: false, veil: false, pill: '', plus: true })],
+
+['4', 'One verb, and a chevron', 'that sixteen deserve equal billing',
+ 'The pill becomes the single action this role does most, done in one tap with nothing to read. The other fifteen live behind a 46px chevron. It is the most decisive shape on this page and the least defensible: it is right the moment somebody measures which verb that is, and wrong until then.',
+ 'Trivial to build and untrustworthy until measured. <b>Shown so the idea can be rejected on evidence rather than instinct</b> — the app logs no action counts today, so the primary verb here is my guess, not a finding.',
+ () => pad(`<div class="s4-more">
+      <div class="head"><b>Or…</b><span>15 more</span></div>
+      <button class="s4-r"><span class="s4-r__d">${icon('pharmacy')}</span><span>Dispense Medicine</span></button>
+      <button class="s4-r"><span class="s4-r__d">${icon('medical')}</span><span>+ Medical</span></button>
+      <button class="s4-r"><span class="s4-r__d">${icon('inbox')}</span><span>+ Request</span></button>
+      <button class="s4-r"><span class="s4-r__d">${icon('species')}</span><span>+ Accession</span></button>
+      <div class="hr" style="margin:6px 8px"></div>
+      <button class="s4-r"><span class="s4-r__d">${icon('layers')}</span><span>Everything else…</span></button>
+    </div>
+    <div class="s4-why">“Log a note” is a guess. Nothing in the build counts which verb a keeper uses most.</div>`,
+   { pill: `<div class="s4-pill"><b>${icon('note')}Log a note</b><i>${icon('chev-down')}</i></div>` })],
+
+['5', 'Say it', 'that the input is a finger',
+ 'Hold the pill and talk. A keeper mid-round has gloves, a hose and one free hand, and the thing they have to record is a sentence they would say out loud anyway. The words are parsed into a subject and a verb — “Big&nbsp;Bull” resolves to the animal, “refused his feed” to a note — and shown as a record to confirm before it is filed.',
+ 'The most new machinery of the six: dictation, then a parser that can be wrong about a name in a noisy house. <b>And the only one that changes who can use the product at all</b> — which is why it is worth a real trial rather than an argument.',
+ () => pad(`<div class="surf surf--above s5-surf">
+      <div class="s5-wave">${[14,26,38,52,30,44,56,34,22,40,50,28,18,36,24,12]
+        .map((h) => `<i style="height:${h}px"></i>`).join('')}</div>
+      <p class="s5-say">“Big Bull refused his feed this morning, took only the browse<em>…</em>”</p>
+      <div class="s5-out">
+        <img src="${BULL}" alt="">
+        <span class="s5-out__t"><b>Note &nbsp;·&nbsp; Big Bull &nbsp;·&nbsp; AAID : 87546/24</b>
+          <span>Tagged “Appetite” · filed against the open flank-wound case</span></span>
+        <span class="chip chip--ok">${icon('check')} Understood</span>
+      </div>
+      <div class="s5-btns">
+        <button class="verb">${icon('check')}File it</button>
+        <button class="verb verb--ghost">${icon('pencil')}Edit first</button>
+        <button class="verb verb--ghost">${icon('close')}Discard</button>
+      </div>
+      <p class="s5-hold">Hold the pill to talk · release to stop</p>
+    </div>`, { pill: PILL('Listening…', 'comment') })],
+
+['6', 'One composer', 'that there are sixteen actions',
+ 'There is one action — <em>tell the system what happened</em> — and the app decides what kind of record that is. Write it, attach what you photographed, and the classification is offered as a chip you can overrule. The taxonomy of sixteen record types stops being the keeper&rsquo;s problem and becomes the product&rsquo;s.',
+ 'Needs a classifier and, more importantly, <b>an undo you can trust</b>: a wrong guess filed silently is worse than a menu you had to read. The chip is the whole safety mechanism — it must be visible before the save, not after.',
+ () => pad(`<div class="surf surf--above s6-surf">
+      <div class="s6-h"><b>What happened?</b><span>One entry. The app works out what to file it as.</span></div>
+      <div class="s6-sub">
+        <img src="${BULL}" alt="">
+        <span class="s6-sub__t"><b>Big Bull &nbsp;·&nbsp; AAID : 87546/24</b><span>Hoofstock Barn · scanned 14:06</span></span>
+        <span class="s6-sub__c">Change</span>
+      </div>
+      <div class="s6-body">Found a 6&nbsp;cm laceration on the left flank during the morning check, still bleeding lightly. Separated him into the night house and called the duty vet.<em> |</em></div>
+      <div class="s6-shots">
+        <img src="${BULL}" alt=""><img src="${BARN}" alt="">
+        <span class="add">${icon('paperclip')}</span>
+      </div>
+      <div class="s6-foot">
+        <span class="s6-file">This will be filed as${'&nbsp;'}<b>${icon('medical')}Medical case ${icon('chev-down')}</b></span>
+        <button class="verb">${icon('check')}Save</button>
+      </div>
+    </div>`, { pill: PILL('What happened?', 'pencil') })],
+
+]
+
+document.getElementById('page').innerHTML = IDEAS.map(([n, name, kills, note, cost, build]) =>
+  `<figure class="v">
+     <figcaption class="v__cap">
+       <span class="v__n" aria-hidden="true">${n}</span>
+       <span class="v__name">${name}</span>
+       <span class="v__kill">deletes: ${kills}</span>
+     </figcaption>
+     <p class="v__note">${note}</p>
+     ${build()}
+     <p class="v__cost">${cost}</p>
+   </figure>`).join('')
+</script>
+</body>
+</html>

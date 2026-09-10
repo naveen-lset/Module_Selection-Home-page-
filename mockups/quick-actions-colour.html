@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Actions · six premises with colour</title>
+<!--
+  ══════════════════════════════════════════════════════════════════════════
+  QUICK ACTIONS · SIX PREMISES, 9 September 2026
+
+  WHY THIS FILE EXISTS AND WHY IT IS NOT A THIRD SET OF ARRANGEMENTS.
+  Two sets have already been rejected:
+
+    · `quick-actions.html` — TEN APPROACHES. All ten were arrangements of the
+      same sixteen-item list on the same surface. Ten arrangements of one list
+      is one idea, which is why the set read as a single proposal.
+    · `quick-actions-ideas.html` — SIX OTHER IDEAS. All six DELETED the panel:
+      scan the tag, voice, a due-work queue, verbs on the twelve cards, ranked
+      by frequency, one composer. The user's answer was a prose brief that said
+      the opposite — keep all sixteen visible, and make the FAB transform into
+      the panel. That is what is built and live.
+
+  So the well to drill is neither "another layout" nor "no panel". The three
+  references the user sent (Pera Wallet's feature grid, a lifestyle card grid,
+  a four-panel services card) share exactly what the built panel does not have:
+  COLOUR, GROUPING, and CARDS THAT ARE NOT ALL EQUAL. Each concept below
+  changes what the panel is FOR, and takes one of those three properties
+  seriously.
+
+  EVERY CONCEPT COLLIDES WITH THE BRIEF OF 8 SEPTEMBER, WHICH IS THE POINT
+  AND MUST BE RULED ON. That brief's DO-NOT list is enforced by
+  tools/verify_v2.py today: one restrained surface, every cell the same neutral
+  wash, every glyph the same neutral tone, no cell with a border or shadow of
+  its own, no icon on a plate, all sixteen visible. The closing table says what
+  each concept costs against it. Nothing here is built.
+
+  NO GLYPH IS INVENTED — every one is lifted from js/icons.js, same as the two
+  earlier mockups. NO HUE IS INVENTED EITHER: the four family colours are the
+  product's own cyan #00AFD6, green #37BD69, coral #F06D52 and navy #1F415B.
+  The references use a violet the product does not have, and borrowing it would
+  put a fifth hue in the palette to carry four families.
+  ══════════════════════════════════════════════════════════════════════════
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* ══ TOKENS · copied from index.html ═════════════════════════════════════ */
+:root{
+  --c-primary:#37BD69; --navy:#1F415B; --cyan:#00AFD6; --coral:#F06D52;
+  --ink:#0F2A33; --ink-head:#2E5C64; --ink-2:#52697A; --ink-3:#7A8684; --ink-mute:#9AAAB4;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px;
+  --r-pill:999px;
+  --page:#F4F8F7;
+  --fam-estate-bg:rgba(0,175,214,.12);  --fam-estate-ink:#0B5C72; --fam-estate-pill:rgba(0,175,214,.16);
+  --fam-animals-bg:rgba(55,189,105,.12);--fam-animals-ink:#1E7A44; --fam-animals-pill:rgba(55,189,105,.17);
+  --fam-care-bg:rgba(240,109,82,.13);   --fam-care-ink:#A13F28;    --fam-care-pill:rgba(240,109,82,.17);
+  --fam-office-bg:rgba(31,65,91,.09);   --fam-office-ink:#1F415B;  --fam-office-pill:rgba(31,65,91,.12);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.6 Inter,-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+     -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 28px 96px}
+h1{margin:0 0 10px;font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.lede{margin:0 0 8px;max-width:88ch;font-size:16px;color:var(--ink-2)}
+.lede b{color:var(--ink-head);font-weight:600}
+.warn{margin:24px 0 0;max-width:88ch;padding:16px 18px;border-radius:12px;
+      background:rgba(240,109,82,.09);border:1px solid rgba(240,109,82,.22);font-size:14px;color:#7C3520}
+.warn b{font-weight:600}
+.rule{height:1px;background:rgba(31,65,91,.11);margin:44px 0}
+
+/* ══ a concept block ════════════════════════════════════════════════════ */
+.c{margin:0 0 8px}
+.c__head{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.c__n{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+      background:var(--navy);color:#fff;font-size:14px;font-weight:600}
+.c__name{margin:0;font-size:23px;font-weight:600;letter-spacing:-.01em}
+.c__from{margin-left:auto;font-size:12.5px;color:var(--ink-mute)}
+.c__premise{margin:0 0 16px 44px;max-width:92ch;font-size:14.5px;color:var(--ink-2)}
+.c__premise b{color:var(--ink-head);font-weight:600}
+.c__premise em{color:var(--ink);font-style:normal;font-weight:500}
+.c__cost{margin:14px 0 0 44px;max-width:92ch;font-size:13px;color:var(--ink-3)}
+.c__cost b{color:var(--ink-head);font-weight:600}
+
+/* ══ THE iPAD · 1024x768 landscape, real size ═══════════════════════════ */
+.pad{position:relative;width:1024px;height:768px;max-width:100%;border-radius:22px;overflow:hidden;
+     margin-left:44px;isolation:isolate;
+     box-shadow:0 2px 6px rgba(31,65,91,.12),0 30px 70px -30px rgba(31,65,91,.45);
+     outline:1px solid rgba(31,65,91,.10);outline-offset:-1px;
+     background:linear-gradient(180deg,rgba(175,239,235,.5) 0%,rgba(175,239,235,.275) 32%,rgba(242,255,248,.5) 69%),#fff}
+.pad__bg{position:absolute;inset:0;padding:24px}
+/* the page behind, blurred the way the LIVE build now blurs it */
+.pad__bg--frost{filter:blur(14px);opacity:.92}
+.pad__hero{height:120px;border-radius:16px;margin-bottom:16px;
+           background:linear-gradient(135deg,#2E9C8E,#1F415B);opacity:.5}
+.pad__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.pad__c{height:126px;border-radius:12px;background:rgba(31,65,91,.10)}
+.pad__c--w{grid-column:span 2;background:linear-gradient(135deg,#26A0A8,#1F415B);opacity:.55}
+.pad__c--g{background:linear-gradient(135deg,#37BD69,#1E7A44);opacity:.5}
+.pad__c--o{background:linear-gradient(135deg,#F06D52,#D8452B);opacity:.5}
+/* the frost, at the values that shipped 9 Sep */
+.pad__veil{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.25);
+           backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+/* the surface the concept is drawn on */
+.pad__surface{position:absolute;left:24px;right:24px;bottom:112px;z-index:3;
+              border-radius:22px;padding:20px;background:rgba(255,255,255,.94);
+              backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);
+              box-shadow:0 1px 2px rgba(31,65,91,.08),0 18px 44px -16px rgba(31,65,91,.26)}
+.pad__cap{margin:0 0 14px;font-size:12px;font-weight:600;letter-spacing:.10em;
+          text-transform:uppercase;color:var(--ink-head)}
+/* the live foot controls, glass since 295:5561 */
+.pad__row{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);z-index:4;
+          display:flex;align-items:center;gap:12px}
+.pad__pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:16px;
+           border-radius:var(--r-pill);background:rgba(255,255,255,.4);color:#000;
+           backdrop-filter:blur(20px) saturate(1.8) brightness(1.06);
+           -webkit-backdrop-filter:blur(20px) saturate(1.8) brightness(1.06);
+           box-shadow:0 2px 4px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.75),
+                      inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.22),
+                      inset 0 -6px 12px -6px rgba(31,65,91,.1);
+           font-size:16px;font-weight:600}
+.pad__chat{width:56px;height:56px;border-radius:var(--r-pill);display:grid;place-items:center;
+           background:rgba(255,255,255,.35);
+           background-image:linear-gradient(142.21deg,rgba(0,175,214,.55) 50.5%,rgba(96,221,186,.55) 94.8%);
+           backdrop-filter:blur(20px) saturate(1) brightness(1.06);
+           -webkit-backdrop-filter:blur(20px) saturate(1) brightness(1.06);
+           box-shadow:0 2px 4px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.75),
+                      inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.22)}
+svg{display:block;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round}
+
+/* ══ 1 · FOUR ROOMS ═════════════════════════════════════════════════════ */
+.rooms{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.room{border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column;
+      box-shadow:0 1px 2px rgba(31,65,91,.09),0 8px 20px -12px rgba(31,65,91,.22)}
+/* THE TINT FILLS AND THE FOOTER SITS ON THE BOTTOM EDGE. The four rooms are
+   grid siblings, so they share the tallest one's height — and Estate's four
+   pills fit on one line where Animals' wrap to two. Left to flow, the two
+   short cards ended their tint early and showed 60px of dead white under the
+   footer, which read as a rendering fault rather than a design. */
+.room__top{padding:16px 18px 18px;flex:1}
+.room__ttl{display:flex;align-items:center;gap:10px;margin:0 0 3px;font-size:19px;font-weight:600}
+.room__sub{margin:0 0 14px;font-size:13px;opacity:.72}
+.room__pills{display:flex;flex-wrap:wrap;gap:8px}
+.room__p{padding:7px 13px;border-radius:var(--r-pill);font-size:13.5px;font-weight:500;white-space:nowrap}
+.room__foot{display:flex;align-items:center;justify-content:space-between;
+            padding:12px 18px;background:#fff}
+.room__foot b{font-size:14.5px;font-weight:600;color:var(--ink)}
+.room__go{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+          background:rgba(31,65,91,.07);color:var(--ink-head)}
+.room--estate .room__top{background:var(--fam-estate-bg);color:var(--fam-estate-ink)}
+.room--estate .room__p{background:var(--fam-estate-pill);color:var(--fam-estate-ink)}
+.room--animals .room__top{background:var(--fam-animals-bg);color:var(--fam-animals-ink)}
+.room--animals .room__p{background:var(--fam-animals-pill);color:var(--fam-animals-ink)}
+.room--care .room__top{background:var(--fam-care-bg);color:var(--fam-care-ink)}
+.room--care .room__p{background:var(--fam-care-pill);color:var(--fam-care-ink)}
+.room--office .room__top{background:var(--fam-office-bg);color:var(--fam-office-ink)}
+.room--office .room__p{background:var(--fam-office-pill);color:var(--fam-office-ink)}
+
+/* ══ 2 · WEIGHTED ═══════════════════════════════════════════════════════ */
+.wt{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.wt__big{grid-column:span 2;border-radius:16px;padding:16px 18px;position:relative;overflow:hidden;
+         min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
+.wt__big h5{margin:0 0 5px;font-size:19px;font-weight:600}
+.wt__big p{margin:0;font-size:13px;line-height:1.5;opacity:.8;max-width:26ch}
+.wt__art{position:absolute;right:-8px;bottom:-12px;opacity:.22}
+.wt__new{position:absolute;top:14px;right:14px;padding:3px 9px;border-radius:var(--r-pill);
+         background:var(--c-primary);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.06em}
+.wt__mid{border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:96px;
+         justify-content:space-between;font-size:14px;font-weight:600}
+.wt__row{grid-column:span 4;display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.wt__chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:var(--r-pill);
+          background:rgba(31,65,91,.055);color:var(--ink-head);font-size:13px;font-weight:500}
+
+/* ══ 3 · SUBJECT FIRST ══════════════════════════════════════════════════ */
+.subj{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sc{border-radius:16px;overflow:hidden;position:relative;min-height:186px;display:flex;
+    flex-direction:column;justify-content:flex-end;padding:14px;color:#fff}
+.sc--a{background:linear-gradient(160deg,#3E7C6A,#16333B)}
+.sc--b{background:linear-gradient(160deg,#C9743F,#6E3218)}
+.sc--c{background:linear-gradient(160deg,#2E7E9C,#123448)}
+/* THE EYEBROW IS WIDTH-CAPPED, because it and the identifier are both
+   absolute on the same line: "BOVINE · OUT WITH THE HERD" ran straight under
+   `AAID : 87546/24` and the two became unreadable together. */
+.sc__eyebrow{position:absolute;top:13px;left:14px;max-width:55%;font-size:10.5px;font-weight:700;
+             letter-spacing:.09em;text-transform:uppercase;opacity:.85;
+             white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc__id{position:absolute;top:12px;right:14px;padding:3px 8px;border-radius:6px;
+        background:rgba(255,255,255,.18);font-size:10.5px;font-weight:600;letter-spacing:.02em}
+.sc__ttl{margin:0 0 3px;font-size:19px;font-weight:600}
+.sc__meta{margin:0 0 12px;font-size:12.5px;opacity:.82}
+.sc__acts{display:flex;flex-wrap:wrap;gap:7px}
+.sc__a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--r-pill);
+       background:rgba(255,255,255,.94);color:#123;font-size:12.5px;font-weight:600}
+.subj__all{margin-top:13px;display:flex;align-items:center;justify-content:center;gap:8px;
+           padding:11px;border-radius:12px;background:rgba(31,65,91,.055);
+           color:var(--ink-head);font-size:13.5px;font-weight:600}
+
+/* ══ 4 · COLOUR ONLY ════════════════════════════════════════════════════ */
+.co{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.co__cell{display:flex;align-items:center;gap:12px;padding:0 16px;height:64px;border-radius:14px;
+          font-size:13.5px;font-weight:500}
+.co__cell--estate{background:var(--fam-estate-bg);color:var(--fam-estate-ink)}
+.co__cell--animals{background:var(--fam-animals-bg);color:var(--fam-animals-ink)}
+.co__cell--care{background:var(--fam-care-bg);color:var(--fam-care-ink)}
+.co__cell--office{background:var(--fam-office-bg);color:var(--fam-office-ink)}
+.co__key{display:flex;gap:16px;margin:0 0 13px;font-size:11.5px;font-weight:600;letter-spacing:.04em;
+         text-transform:uppercase}
+.co__k{display:inline-flex;align-items:center;gap:6px}
+.co__sw{width:10px;height:10px;border-radius:3px}
+
+/* ══ 5 · TWO QUESTIONS ══════════════════════════════════════════════════ */
+.tq{display:grid;grid-template-columns:1fr 1fr;gap:18px;min-height:404px}
+.tq__col{display:flex;flex-direction:column}
+.tq__col h5{margin:0 0 3px;font-size:16px;font-weight:600}
+.tq__col p{margin:0 0 13px;font-size:12.5px;color:var(--ink-3)}
+.tq__creates{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+/* BOTH COLUMNS RUN TO THE SAME DEPTH. Eight cells against eight rows is only
+   balanced if the cells are as tall as the rows: at 56 against 11px padding
+   the left column finished 180px short and the whole concept read as an
+   afterthought beside a list. */
+.tq__creates,.tq__acts{height:100%}
+.tq__c{display:flex;align-items:center;gap:10px;padding:0 14px;border-radius:12px;
+       background:var(--fam-estate-bg);color:var(--fam-estate-ink);font-size:13.5px;font-weight:500}
+.tq__acts{display:flex;flex-direction:column;gap:9px}
+.tq__a{display:flex;align-items:center;gap:11px;padding:0 14px;flex:1;border-radius:12px;
+       background:var(--fam-care-bg);color:var(--fam-care-ink)}
+.tq__a b{font-size:13.5px;font-weight:600}
+.tq__a span{margin-left:auto;padding:5px 10px;border-radius:var(--r-pill);
+            background:rgba(255,255,255,.75);font-size:11.5px;font-weight:600}
+.tq__hint{margin:11px 0 0;font-size:12px;color:var(--ink-mute)}
+
+/* ══ 6 · THE STRIP ══════════════════════════════════════════════════════ */
+/* ITS OWN BACKDROP, AND THAT IS THE WHOLE CONCEPT. This one argued that the
+   page should stay readable while drawing it under the same 25%/14px frost as
+   the other five — which contradicted its only claim. `.pad--light` gives it a
+   10% dim over a 2px blur: the page behind is plainly still there, which is
+   what the concept is for and what makes it worth comparing. */
+.pad--light .pad__bg--frost{filter:blur(2px);opacity:1}
+.pad--light .pad__veil{background:rgba(0,0,0,.10);backdrop-filter:blur(2px);
+                       -webkit-backdrop-filter:blur(2px)}
+.strip{position:absolute;left:0;right:0;bottom:112px;z-index:3;padding:0 24px}
+.strip__cap{margin:0 0 10px;font-size:11.5px;font-weight:700;letter-spacing:.10em;
+            text-transform:uppercase;color:var(--ink-head);
+            text-shadow:0 1px 2px rgba(255,255,255,.7)}
+.strip__track{display:flex;gap:10px;overflow:hidden}
+.strip__s{flex:none;width:132px;height:104px;border-radius:14px;padding:12px;
+          display:flex;flex-direction:column;justify-content:space-between;
+          font-size:12.5px;font-weight:600;line-height:1.25;overflow:hidden;
+          box-shadow:0 2px 4px rgba(0,0,0,.18)}
+/* the labels are the app's own and one of them is three words — it has to wrap
+   inside the card rather than run off its right edge, which is what a fixed
+   132px card and a nowrap label did */
+.strip__s span{display:block;max-height:2.5em;overflow:hidden}
+.strip__s--estate{background:#D6F1F8;color:var(--fam-estate-ink)}
+.strip__s--animals{background:#DAF5E4;color:var(--fam-animals-ink)}
+.strip__s--care{background:#FBE0D8;color:var(--fam-care-ink)}
+.strip__s--office{background:#DFE6EC;color:var(--fam-office-ink)}
+.strip__s--ghost{width:56px;background:rgba(255,255,255,.28);box-shadow:none}
+.strip__note{margin:10px 0 0;font-size:11.5px;color:var(--ink-2);
+             text-shadow:0 1px 2px rgba(255,255,255,.7)}
+
+/* ══ closing table ══════════════════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse;margin:18px 0 0;font-size:13.5px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid rgba(31,65,91,.10);vertical-align:top}
+th{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-head);
+   border-bottom:1px solid rgba(31,65,91,.2)}
+td b{font-weight:600}
+.yes{color:#A13F28;font-weight:600}
+.ok{color:#1E7A44;font-weight:600}
+.close ul{max-width:92ch;padding-left:20px}
+.close li{margin:0 0 10px;font-size:14.5px;color:var(--ink-2)}
+.close li b{color:var(--ink-head);font-weight:600}
+@media (max-width:1120px){.pad{margin-left:0}.c__premise,.c__cost,.c__head{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Quick Actions · six premises, with colour</h1>
+<p class="lede">The built panel is sixteen identical grey cells on one surface. The three references
+you sent — Pera Wallet's feature grid, the lifestyle card grid, the four-panel services card — all
+share three things it does not have: <b>colour, grouping, and cards that are not all equal.</b>
+Each concept below changes what the panel is <em>for</em>, and takes one of those seriously.</p>
+<p class="lede">Two sets have already been rejected, and neither well is re-drilled here.
+<b>The ten approaches</b> were arrangements of the same list on the same surface — ten arrangements
+of one list is one idea. <b>The six other ideas</b> all deleted the panel: scan the tag, voice, a
+due-work queue, verbs on the twelve cards. Your brief answered that with the opposite instruction —
+keep all sixteen visible — so these six keep a panel and change its premise instead.</p>
+
+<div class="warn"><b>Every one of these breaks the brief of 8 September, and that is the decision to make.</b>
+That brief's DO-NOT list is enforced by <code>tools/verify_v2.py</code> today: one restrained surface,
+every cell the same neutral wash, every glyph the same neutral tone, no cell with a border or shadow
+of its own, no icon on a plate, all sixteen visible. Colour and grouping are precisely what it ruled
+out. The table at the end says what each concept costs against it. <b>Nothing here is built</b> —
+the live panel is unchanged.</div>
+
+<div class="rule"></div>
+<div id="out"></div>
+
+<div class="rule"></div>
+<section class="close">
+  <h2 style="font-size:24px;font-weight:600;margin:0 0 8px">What each one costs, and what I would try</h2>
+  <table>
+    <thead><tr><th style="width:15%">Concept</th><th style="width:29%">What it buys</th>
+      <th style="width:29%">What it costs</th><th style="width:13%">Breaks the brief</th>
+      <th style="width:14%">Taps to a verb</th></tr></thead>
+    <tbody>
+      <tr><td><b>1 Four rooms</b></td>
+        <td>You aim at a colour before you read a word. The panel teaches the estate's structure.</td>
+        <td>A second tap for every verb, and the four families have to be right — a verb in the wrong room is worse than an unsorted list.</td>
+        <td class="yes">Colour, plates, sixteen-visible</td><td>2</td></tr>
+      <tr><td><b>2 Weighted</b></td>
+        <td>A reading order instead of a scan. The two verbs you actually use are the size of their importance.</td>
+        <td><b>The weights are my guess.</b> The app logs no action counts, so the big cards are an assertion, not a finding.</td>
+        <td class="yes">Colour, plates, equal cells</td><td>1</td></tr>
+      <tr><td><b>3 Subject first</b></td>
+        <td>A verb with its subject already attached. No "+ Medical" then hunt for the animal.</td>
+        <td>Only works for subjects on the current page, and needs a state→verb table per entity kind. Closest to the rejected six.</td>
+        <td class="yes">Not a verb grid at all</td><td>1</td></tr>
+      <tr><td><b>4 Colour only</b></td>
+        <td>Answers "it looks monotonous" with the smallest possible move. Structure, spacing and motion all survive untouched.</td>
+        <td>Adds information but no hierarchy — sixteen equal cells, now in four colours. May not be enough of a change.</td>
+        <td class="ok">Colour rules only</td><td>1</td></tr>
+      <tr><td><b>5 Two questions</b></td>
+        <td>Splits a list that conflates two things: making a record, and acting on an animal that already exists.</td>
+        <td>Four verbs sit awkwardly in both halves, and the right column wants a subject picker it does not have yet.</td>
+        <td class="yes">Colour, two surfaces</td><td>1</td></tr>
+      <tr><td><b>6 The strip</b></td>
+        <td>The page stays visible — which is the brief's own worry, better served than the brief's own answer.</td>
+        <td>Sixteen no longer fit at once; it scrolls. That is the one prohibition the brief was most explicit about.</td>
+        <td class="yes">Sixteen-visible, colour</td><td>1 + scroll</td></tr>
+    </tbody>
+  </table>
+  <ul style="margin-top:24px">
+    <li><b>4 and 1 are the pair I would put in front of you first.</b> They are the two honest answers to
+      "it looks the same" — 4 adds the colour and nothing else, so it is a one-day change that cannot
+      break the motion; 1 accepts a second tap in exchange for a panel you aim at rather than read.
+      Everything about the unfold, the stagger and the clip origin survives in both.</li>
+    <li><b>2 should not be built until the app counts actions.</b> Its whole argument is that the sixteen
+      are unequal, and the app has no evidence of that today. Shown so the idea can be rejected on
+      measurement rather than instinct — the same reason the ranked idea was drawn in the earlier set.</li>
+    <li><b>3 is the strongest idea and the least like what you asked for.</b> It is a verb-with-subject
+      panel, which is where the rejected six were pointing, so it is here for completeness rather
+      than as a recommendation. If it appeals, that is a signal the brief itself wants revisiting.</li>
+    <li><b>6 deserves a mention it will not get from me as a recommendation.</b> It serves the brief's
+      stated <em>reason</em> — do not hide the dashboard, you pick "+ Note" because of what you can see
+      behind it — better than the brief's own frosted answer does. But it breaks the one rule that brief
+      stated most plainly, and after three rulings on the backdrop in two days that is your call, not mine.</li>
+    <li><b>The four families are the load-bearing assumption in 1, 4, 5 and 6.</b> Estate · Animals ·
+      Care · Records &amp; people, sixteen verbs splitting exactly four apiece. If that grouping is wrong,
+      four of the six concepts are wrong with it — worth checking before anything is built.</li>
+  </ul>
+</section>
+</div>
+
+<script>
+/* ══ GLYPHS · lifted from js/icons.js, nothing invented ═════════════════ */
+const GLYPH = {
+  'note':'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  'pharmacy':'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+  'inbox':'<path d="M21 12h-5.4l-1.6 2.8h-4L8.4 12H3"/><path d="M5.45 5.11 3 12v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6l-2.45-6.89A2 2 0 0 0 16.66 4H7.34a2 2 0 0 0-1.89 1.11Z"/>',
+  'check':'<path d="M20 6 9 17l-5-5"/>',
+  'plus':'<path d="M5 12h14M12 5v14"/>',
+  'chev-right':'<path d="m9 5 7 7-7 7"/>',
+  'arrow-right':'<path d="M4.5 12h15m-6.5-7 7 7-7 7"/>',
+  'alert':'<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9.2v4.2M12 17.2h.01"/>',
+  'species':'<circle cx="5.6" cy="11.4" r="1.9"/><circle cx="9.7" cy="6.6" r="1.9"/><circle cx="14.3" cy="6.6" r="1.9"/><circle cx="18.4" cy="11.4" r="1.9"/><path d="M8.6 15.1c-1.2 1.1-1.9 2.3-1.9 3.5 0 1.8 1.4 3.1 3.2 3.1.8 0 1.3-.3 2.1-.3s1.3.3 2.1.3c1.8 0 3.2-1.3 3.2-3.1 0-1.2-.7-2.4-1.9-3.5-1-.9-2-1.8-3.4-1.8s-2.4.9-3.4 1.8Z"/>',
+  'medical':'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.5 12h4l1-2 2 4.5 2-6 1.4 3.5h6.1"/>',
+  'hospital':'<path d="M6 22V4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V22"/><path d="M3 22h18"/><path d="M12 6.5v4M10 8.5h4"/><path d="M9.5 14h1M13.5 14h1M9.5 17.5h1M13.5 17.5h1"/>',
+  'housing':'<rect x="2.7" y="4.3" width="18.6" height="15.4" rx="2.6"/><path d="M12 16.5c1.9-2.1 3.2-3.8 3.2-5.5a3.2 3.2 0 0 0-6.4 0c0 1.7 1.3 3.4 3.2 5.5Z"/><circle cx="12" cy="10.9" r="1.1"/>',
+  'users':'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  'eggs':'<path d="M12 21.5c5.2-.05 6.6-4.7 6.3-8.4C18 9.4 15 4.6 12 4.55 9 4.6 6 9.4 5.7 13.1c-.3 3.7 1.1 8.35 6.3 8.4Z"/><path d="M9.4 13.6a2.7 3.4 0 0 1 1.5-3"/>',
+  'comment':'<path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-3.9A8 8 0 1 1 20 12Z"/>',
+  'layers':'<path d="m12 2.6 9 4.6-9 4.6-9-4.6Z"/><path d="m3.4 12.2 8.6 4.4 8.6-4.4"/><path d="m3.4 16.8 8.6 4.4 8.6-4.4"/>',
+  'megaphone':'<path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V5l-4 4H5a2 2 0 0 0-2 2Z"/><path d="M14 9.5a3 3 0 0 1 0 5"/><path d="M17 7a6.5 6.5 0 0 1 0 10"/>',
+  'd-area':'<path d="M12 2.6 2.8 6.4v11.2L12 21.4l9.2-3.8V6.4Z"/><path d="M12 2.6v18.8M2.8 12h18.4"/>',
+  'd-space':'<rect x="3" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="13.6" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="3" y="13.6" width="7.4" height="7.4" rx="1.6"/><path d="M13.6 17.3h7.4M17.3 13.6v7.4"/>',
+  'arrow-out':'<path d="M14 3.5h6.5V10"/><path d="m20.5 3.5-8 8"/><path d="M18 14v5.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V8A1.5 1.5 0 0 1 5 6.5h5.5"/>',
+  'fetal':'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12.4 6.2 10 9.4h3.2l-2.3 3.6"/>',
+  'grid':'<rect x="3" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="13.6" y="3" width="7.4" height="7.4" rx="1.6"/><rect x="3" y="13.6" width="7.4" height="7.4" rx="1.6"/><rect x="13.6" y="13.6" width="7.4" height="7.4" rx="1.6"/>',
+};
+const ic = (n, s = 20) =>
+  `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true">${GLYPH[n] || ''}</svg>`;
+
+/* ══ THE SIXTEEN · index.html's HOME_QUICK_ACTIONS, in four families ════ */
+const FAM = {
+  estate : { name:'Estate',            sub:'sites, sections, holdings',   key:'estate'  },
+  animals: { name:'Animals',           sub:'the collection itself',       key:'animals' },
+  care   : { name:'Care',              sub:'medical, pharmacy, outcomes', key:'care'    },
+  office : { name:'Records & people',  sub:'notes, requests, users',      key:'office'  },
+};
+const V = [
+  { id:'site',        label:'+ Site',                    icon:'d-area',    fam:'estate'  },
+  { id:'section',     label:'+ Section',                 icon:'d-space',   fam:'estate'  },
+  { id:'enclosure',   label:'+ Enclosure',               icon:'housing',   fam:'estate'  },
+  { id:'master',      label:'Master',                    icon:'layers',    fam:'estate'  },
+  { id:'accession',   label:'+ Accession',               icon:'species',   fam:'animals' },
+  { id:'transfer',    label:'Transfer Animal',           icon:'arrow-out', fam:'animals' },
+  { id:'missing',     label:'+ Missing/Escaped',         icon:'alert',     fam:'animals' },
+  { id:'eggs',        label:'+ Add eggs',                icon:'eggs',      fam:'animals' },
+  { id:'medical',     label:'+ Medical',                 icon:'medical',   fam:'care'    },
+  { id:'hospitalize', label:'+ Hospitalize',             icon:'hospital',  fam:'care'    },
+  { id:'dispense',    label:'Dispense Medicine',         icon:'pharmacy',  fam:'care'    },
+  { id:'fetal',       label:'+ Fetal Death',             icon:'fetal',     fam:'care'    },
+  { id:'note',        label:'+ Note',                    icon:'note',      fam:'office'  },
+  { id:'request',     label:'+ Request',                 icon:'inbox',     fam:'office'  },
+  { id:'user',        label:'+ User',                    icon:'users',     fam:'office'  },
+  { id:'announcement',label:'Announcement',              icon:'megaphone', fam:'office'  },
+];
+const of = (f) => V.filter((v) => v.fam === f);
+
+/* ══ the iPad shell · every concept is drawn inside one ═════════════════ */
+const PAGE = `
+  <div class="pad__bg pad__bg--frost">
+    <div class="pad__hero"></div>
+    <div class="pad__grid">
+      <div class="pad__c pad__c--w"></div><div class="pad__c pad__c--g"></div><div class="pad__c"></div>
+      <div class="pad__c"></div><div class="pad__c pad__c--o"></div><div class="pad__c pad__c--w"></div>
+    </div>
+  </div>
+  <div class="pad__veil"></div>`;
+const FOOT = `
+  <div class="pad__row">
+    <div class="pad__pill">${ic('grid', 20)}<span>Quick Actions</span></div>
+    <div class="pad__chat" style="color:#fff">${ic('comment', 24)}</div>
+  </div>`;
+/* `mod` exists for ONE concept: 6 argues the page should stay readable, so it
+   cannot be drawn under the same frost as the other five. Parameterised rather
+   than forked into a second shell. */
+const pad = (inner, mod = '') => `<div class="pad ${mod}">${PAGE}${inner}${FOOT}</div>`;
+const surface = (cap, inner) =>
+  `<div class="pad__surface"><p class="pad__cap">${cap}</p>${inner}</div>`;
+
+/* ══ 1 · FOUR ROOMS ═════════════════════════════════════════════════════ */
+const room = (f) => {
+  const g = FAM[f];
+  return `<div class="room room--${g.key}">
+    <div class="room__top">
+      <h5 class="room__ttl">${ic(of(f)[0].icon, 20)}${g.name}</h5>
+      <p class="room__sub">${g.sub}</p>
+      <div class="room__pills">${of(f).map((v) => `<span class="room__p">${v.label}</span>`).join('')}</div>
+    </div>
+    <div class="room__foot"><b>Open ${g.name}</b><span class="room__go">${ic('arrow-right', 16)}</span></div>
+  </div>`;
+};
+const C1 = pad(surface('Quick Actions',
+  `<div class="rooms">${['estate', 'animals', 'care', 'office'].map(room).join('')}</div>`));
+
+/* ══ 2 · WEIGHTED ═══════════════════════════════════════════════════════ */
+const big = (v, copy, fam, isNew) => `
+  <div class="wt__big" style="background:var(--fam-${fam}-bg);color:var(--fam-${fam}-ink)">
+    ${isNew ? '<span class="wt__new">NEW</span>' : ''}
+    <div class="wt__art">${ic(v.icon, 96)}</div>
+    <div><h5>${v.label}</h5><p>${copy}</p></div>
+  </div>`;
+const C2 = pad(surface('Quick Actions', `<div class="wt">
+  ${big(V.find((v) => v.id === 'note'), 'The thing you do twenty times a shift. Attach it to an animal, an enclosure or nothing at all.', 'office', false)}
+  ${big(V.find((v) => v.id === 'medical'), 'Open a case against an animal already in the collection, with its history to hand.', 'care', true)}
+  ${['dispense', 'hospitalize', 'accession', 'transfer'].map((id) => {
+    const v = V.find((x) => x.id === id);
+    return `<div class="wt__mid" style="background:var(--fam-${v.fam}-bg);color:var(--fam-${v.fam}-ink)">
+      ${ic(v.icon, 22)}<span>${v.label}</span></div>`;
+  }).join('')}
+  <div class="wt__row">${V.filter((v) => !['note', 'medical', 'dispense', 'hospitalize', 'accession', 'transfer'].includes(v.id))
+    .map((v) => `<span class="wt__chip">${ic(v.icon, 15)}${v.label}</span>`).join('')}</div>
+</div>`));
+
+/* ══ 3 · SUBJECT FIRST ══════════════════════════════════════════════════ */
+/* subjects are the app's own — observations.js */
+const SUBJ = [
+  { cls:'a', eyebrow:'Hoofstock · Section B', id:'ENC : HB-04', ttl:'Hoofstock Barn',
+    meta:'14 animals · 2 open cases', acts:['note', 'enclosure', 'missing'] },
+  { cls:'b', eyebrow:'Bovine · with the herd', id:'AAID : 87546/24', ttl:'Big Bull',
+    meta:'Open flank wound · last seen 06:40', acts:['hospitalize', 'dispense', 'medical'] },
+  { cls:'c', eyebrow:'Avian house · Pen 4', id:'ENC : AV-11', ttl:'Pen 4',
+    meta:'Clutch of 6 · due today', acts:['eggs', 'note', 'transfer'] },
+];
+const C3 = pad(surface('On this page', `<div class="subj">
+  ${SUBJ.map((s) => `<div class="sc sc--${s.cls}">
+    <span class="sc__eyebrow">${s.eyebrow}</span><span class="sc__id">${s.id}</span>
+    <h5 class="sc__ttl">${s.ttl}</h5><p class="sc__meta">${s.meta}</p>
+    <div class="sc__acts">${s.acts.map((id) => {
+      const v = V.find((x) => x.id === id);
+      return `<span class="sc__a">${ic(v.icon, 14)}${v.label.replace('+ ', '')}</span>`;
+    }).join('')}</div></div>`).join('')}
+</div>
+<div class="subj__all">${ic('grid', 16)}All sixteen actions${ic('chev-right', 14)}</div>`));
+
+/* ══ 4 · COLOUR ONLY ════════════════════════════════════════════════════ */
+const C4 = pad(surface('Quick Actions', `
+  <div class="co__key">
+    ${Object.values(FAM).map((g) => `<span class="co__k">
+      <i class="co__sw" style="background:var(--fam-${g.key}-ink)"></i>
+      <span style="color:var(--fam-${g.key}-ink)">${g.name}</span></span>`).join('')}
+  </div>
+  <div class="co">${V.map((v) => `<div class="co__cell co__cell--${v.fam}">
+    ${ic(v.icon, 20)}<span>${v.label}</span></div>`).join('')}</div>`));
+
+/* ══ 5 · TWO QUESTIONS ═════════════════════════════════════════════════ */
+const CREATES = ['site', 'section', 'enclosure', 'accession', 'user', 'request', 'note', 'announcement'];
+const ACTS = [
+  { id:'hospitalize', on:'Big Bull' }, { id:'dispense', on:'Big Bull' },
+  { id:'transfer', on:'pick animal' }, { id:'medical', on:'pick animal' },
+  { id:'missing', on:'pick animal' }, { id:'eggs', on:'Pen 4' },
+  { id:'fetal', on:'pick animal' }, { id:'master', on:'reference data' },
+];
+const C5 = pad(surface('Quick Actions', `<div class="tq">
+  <div class="tq__col"><h5>Add to the estate</h5><p>Makes a new record. Nothing has to exist first.</p>
+    <div class="tq__creates">${CREATES.map((id) => {
+      const v = V.find((x) => x.id === id);
+      return `<div class="tq__c">${ic(v.icon, 18)}<span>${v.label.replace('+ ', '')}</span></div>`;
+    }).join('')}</div></div>
+  <div class="tq__col"><h5>Do something now</h5><p>Acts on something already in the collection.</p>
+    <div class="tq__acts">${ACTS.map((a) => {
+      const v = V.find((x) => x.id === a.id);
+      return `<div class="tq__a">${ic(v.icon, 18)}<b>${v.label.replace('+ ', '')}</b>
+        <span>${a.on}</span></div>`;
+    }).join('')}</div>
+    <p class="tq__hint">Two of these have a subject already, because it is on the page behind.</p></div>
+</div>`));
+
+/* ══ 6 · THE STRIP ═════════════════════════════════════════════════════ */
+const C6 = pad(`<div class="strip">
+  <p class="strip__cap">Quick Actions</p>
+  <div class="strip__track">
+    ${V.slice(0, 7).map((v) => `<div class="strip__s strip__s--${v.fam}">
+      ${ic(v.icon, 22)}<span>${v.label.replace('+ ', '+&nbsp;')}</span></div>`).join('')}
+    <div class="strip__s strip__s--ghost"></div>
+  </div>
+  <p class="strip__note">Nine more to the right. The page behind is dimmed, not hidden — no full surface.</p>
+</div>`, 'pad--light');
+
+/* ══ render ════════════════════════════════════════════════════════════ */
+const CONCEPTS = [
+  { n:1, name:'Four rooms', from:'from your four-panel services card',
+    premise:`<b>The sixteen are not sixteen — they are four families of four.</b> The panel stops being a
+      list and becomes four colour-tinted rooms, each holding its own verbs as pills, each with a footer
+      you can open for the full set. You <em>aim at a colour</em> before you read a word, which is the
+      thing the reference does that the grey grid cannot.`,
+    cost:`Costs a second tap, and stakes everything on the grouping being right — <b>a verb in the wrong
+      room is worse than an unsorted list.</b> The unfold, the stagger and the clip origin all survive:
+      four cards stagger exactly as sixteen cells do.`, html:C1 },
+  { n:2, name:'Weighted', from:"from Pera Wallet's feature grid",
+    premise:`<b>Size encodes how often a thing is actually done.</b> Two verbs get a full card with a
+      sentence of copy and a large glyph, four get a medium tile, the remaining ten a chip. The panel
+      gains a <em>reading order</em> instead of a scan, and the NEW chip gives it somewhere to announce
+      capability that did not exist last month.`,
+    cost:`<b>The weights are my guess.</b> The app logs no action counts, so which two verbs earn the big
+      cards is an assertion. Drawn so the idea can be rejected on measurement rather than instinct —
+      and if it appeals, the first task is counting, not building.`, html:C2 },
+  { n:3, name:'Subject first', from:'from the lifestyle card grid',
+    premise:`<b>A verb without a subject is half an action.</b> The cards are the things on the page you
+      opened this from — Big Bull, Hoofstock Barn, Pen 4, each with its own colour and its real
+      identifier — and the verbs are the buttons on those cards, filtered to what applies to that thing
+      in the state it is in. You never pick "+ Hospitalize" and then hunt for the animal.`,
+    cost:`Only reaches subjects on the current page, so it needs the full sixteen behind it anyway, and it
+      wants a state→verb table per entity kind. <b>It is also the closest of the six to the ideas you
+      already rejected</b> — included because it is the strongest, not because I am recommending it.`,
+    html:C3 },
+  { n:4, name:'Colour only', from:'the smallest possible move',
+    premise:`<b>Change nothing but the colour.</b> The same 4×4, the same 64px cells, the same spacing and
+      the same motion — each cell simply wears its family's tint and ink, with a key above. This is the
+      literal answer to "it looks the same": <em>the only thing added is information.</em>`,
+    cost:`Adds information but no hierarchy — sixteen equal cells, now in four colours — so it may not be
+      enough of a change to be worth making. <b>Against that, it is the only one of the six that cannot
+      break the unfold</b>, and the only one whose verifier changes are a handful of colour assertions.`,
+    html:C4 },
+  { n:5, name:'Two questions', from:'a split, not a layout',
+    premise:`<b>The list conflates two different acts.</b> "+ Site" and "+ Note" make a record out of
+      nothing; "Dispense Medicine" and "Transfer Animal" do something to an animal that already exists
+      and cannot be chosen without it. So the panel asks two questions instead of one, and the right-hand
+      column <em>carries its subject on the row</em> — already filled in where the page behind supplies it.`,
+    cost:`Four verbs sit awkwardly in both halves, and the right column implies a subject picker the app
+      has not got. <b>The pay-off is that the awkward four are exactly the ones worth arguing about</b> —
+      the split makes a real question visible rather than hiding it in an alphabetical grid.`, html:C5 },
+  { n:6, name:'The strip', from:'a different shape, not a different grid',
+    premise:`<b>A full-width panel is the wrong shape for this.</b> The verbs become a horizontal band of
+      colour-coded cards above the pill, swiped rather than scanned, with the page dimmed but never
+      covered. This serves the brief's own stated <em>reason</em> — you pick "+ Note" because of what you
+      can see behind it — better than the brief's own frosted answer does.`,
+    cost:`<b>Sixteen no longer fit at once.</b> That is the single prohibition the 8 September brief was
+      most explicit about, so this concept cannot be adopted quietly — it needs that rule withdrawn on
+      purpose, the way the backdrop was withdrawn on 9 September.`, html:C6 },
+];
+document.getElementById('out').innerHTML = CONCEPTS.map((c, i) => `
+  <section class="c">
+    <div class="c__head"><span class="c__n">${c.n}</span>
+      <h3 class="c__name">${c.name}</h3><span class="c__from">${c.from}</span></div>
+    <p class="c__premise">${c.premise}</p>
+    ${c.html}
+    <p class="c__cost">${c.cost}</p>
+  </section>
+  ${i < CONCEPTS.length - 1 ? '<div class="rule"></div>' : ''}`).join('');
+</script>
+</body>
+</html>

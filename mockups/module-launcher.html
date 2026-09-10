@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Actions → the module launcher · six containers</title>
+<!--
+  ══════════════════════════════════════════════════════════════════════════
+  THE MODULE LAUNCHER · six containers, six openings · 9 September 2026
+
+  WHAT CHANGED, AND WHY THIS IS NOT A FOURTH SET OF THE SAME THING.
+  Three sets have now been rejected, and each rejection moved the target:
+
+    · `quick-actions.html` — TEN APPROACHES: ten arrangements of the sixteen
+      verbs on one surface. Ten arrangements of one list is one idea.
+    · `quick-actions-ideas.html` — SIX OTHER IDEAS: all six deleted the panel.
+      The answer was a prose brief saying the opposite.
+    · `quick-actions-colour.html` — SIX PREMISES: colour and grouping applied
+      to the sixteen verbs. Rejected with three specific corrections, which
+      this file is built from:
+
+        1. "It has to show all Modules"  → the panel lists THE APP'S MODULE
+           CARDS, not the sixteen verbs. All nineteen door modules, every one
+           of them, in every concept.
+        2. "Everything now same Container need Different" → the CONTAINER
+           itself differs per concept. The last set drew five concepts inside
+           one identical white rounded surface, so the differences were all
+           interior and the set read as one idea again. Here the container is
+           the variable: a bottom sheet, a centred dialog, a right drawer, no
+           container at all, four separate columns, and the pill itself grown.
+        3. "need Propre animetion when it opening" → each concept OPENS, with
+           its own animation, and they play. Press Replay, or scroll one into
+           view. Nothing here is a still.
+
+      And "padding on left & right need more padding" — every container is
+      inset further from the screen edges than the built panel's 24px, and
+      carries a larger interior gutter. Each concept states its own numbers.
+
+  NOTHING HERE IS DATA I INVENTED. The nineteen modules are `MODULES` in
+  index.html filtered to those with a door — focus, notes and insights are
+  the door-less widgets and are excluded, since a launcher lists what you can
+  open. Names, category and glyph are the app's own, the glyphs are the real
+  `assets/icon/m-*.svg`, and the GRADIENTS ARE THE APP'S OWN TOKENS, copied
+  verbatim out of index.html by a script rather than transcribed — see
+  [[figma-stops-run-past-the-shape]] for why hand-copying a ten-stop ramp is
+  how you get a diagonal seam.
+
+  ══ THE 9 SEPTEMBER RULING · OPTION 4, WITH FOUR CHANGES ═════════════════
+  "Option 4 is Good, But Dont Want Full Page. Instead of Background Should
+  White Blured like Apple background. Modules Colours fixed Colours Only."
+
+    · NOT FULL PAGE. The field was 912px wide from y=104 — the page with a
+      margin. It is now 4 columns x 5 rows of 150x70: a 636x398 block, 62% of
+      the width and 52% of the height.
+    · A WHITE APPLE MATERIAL, not the black 25% frost that shipped this
+      morning: white at 62% over blur(30px) saturate(1.8), which brightens and
+      desaturates the page rather than darkening it.
+    · FIXED COLOURS ONLY. The ten-stop gradients are gone from the tiles. Each
+      module now has one flat colour DERIVED from its own ramp at the 50%
+      point, so nothing was chosen by eye — see --f-* below.
+    · TWO VARIANTS, because "not full page" and "white blurred background"
+      disagree about how far the white travels: 4A keeps the material as a
+      panel around the block, 4B keeps it page-wide with a small block on it.
+      Everything else about them is identical.
+
+  THE FLAT PALETTE COST SOMETHING AND IT IS MEASURED, not asserted: a white
+  label fails AA on fifteen of the nineteen, a dark label on nine, and five
+  colours fail BOTH because they sit mid-luminance. A gradient always gave a
+  label a dark end to sit on; a flat fill has no dark end. Each tile now takes
+  whichever ink its own colour favours, worst case 3.88:1, and the toggle at
+  the top of the page offers the form that clears AA outright at 13.20:1.
+
+  NINETEEN IS PRIME, so the last row is short whatever the column count —
+  4x5 leaves three in the final row, 5x4 leaves four. The gap at the
+  bottom-right is arithmetic, not a layout mistake.
+
+  THE 8 SEPTEMBER BRIEF DOES NOT APPLY TO ANY OF THIS and that is worth
+  saying plainly: that brief governed a panel of sixteen VERBS. A launcher of
+  nineteen MODULES is a different component with a different job, so its
+  rules — one restrained surface, one neutral wash, no plates — are not being
+  broken here so much as left behind. If the launcher replaces the verb panel,
+  those verbs need somewhere to go; that question is open and flagged at the
+  foot of this file.
+  ══════════════════════════════════════════════════════════════════════════
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* ══ TOKENS ══════════════════════════════════════════════════════════════ */
+:root{
+  --navy:#1F415B; --ink:#0F2A33; --ink-head:#2E5C64; --ink-2:#52697A;
+  --ink-3:#7A8684; --ink-mute:#9AAAB4; --page:#F4F8F7;
+  --r-pill:999px;
+  /* the pill's centre inside the 1024x768 pad: the row is page-centred and
+     holds pill(168) + 12 + disc(56), so the pill's own centre sits 34px left
+     of the page's. Every animation that comes OUT of the pill uses this. */
+  --pill-x:478px; --pill-y:700px;
+
+  /* ── ONE FIXED COLOUR PER MODULE · 9 Sep ruling, "fixed Colours Only" ──
+     DERIVED, NOT PICKED. Each is its own gradient sampled at the 50% point
+     of that ramp's declared stops, so a module keeps the colour it already
+     reads as on the home page instead of one I chose for it.
+
+     THE TWO COLLISIONS ARE THE APP'S, and flattening makes them visible:
+     pharmacy and reports both resolve to #1ABEB6 (they share
+     --g-teal-card), and housing, followup and communication all land on
+     #5A8088 (--g-pharmacy and --g-followup hold identical values). So
+     nineteen modules wear SIXTEEN colours. A gradient hid this; a flat fill
+     cannot. Flagged rather than fixed — inventing three new hues is a
+     palette decision, not a mockup one. */
+  --f-medical: #549C76;
+  --f-hospital: #39656E;
+  --f-pharmacy: #1ABEB6;
+  --f-lab: #D4BA78;
+  --f-species: #1D7E4C;
+  --f-mortality: #FB8971;
+  --f-fetal: #F7778E;
+  --f-eggs: #46CADE;
+  --f-housing: #5A8088;
+  --f-diet: #FB7456;
+  --f-followup: #5A8088;
+  --f-parivesh: #47E2D7;
+  --f-audit: #D0526C;
+  --f-administer: #A4B8AC;
+  --f-users: #2F5A67;
+  --f-security: #79847D;
+  --f-reports: #1ABEB6;
+  --f-approvals: #305068;
+  --f-communication: #5A8088;
+  /* ── THE MODULE GRADIENTS · copied verbatim from index.html by script and
+     never hand-typed: they are ten-stop ramps, and transcribing one is how
+     you get a diagonal seam. The ALIASES are kept as aliases so the
+     structure matches the app's.
+
+     THE MAPPING IS NOT --g-<id>, and the surprises are the app's own:
+     `housing` wears --g-pharmacy, `pharmacy` wears --g-pharmacy-wash (which
+     is --g-teal-card), `reports` wears the SAME --g-teal-card, and
+     `communication` shares --g-followup — whose value is identical to
+     --g-pharmacy. So two of these nineteen tiles are teal twins and three
+     more are grey-green twins. Reproduced as-is rather than tidied: these
+     are the colours the app actually draws, and if the duplication is a bug
+     it is a bug worth seeing at this size.
+
+     THE GRADIENTS ARE NO LONGER DRAWN — the 9 Sep ruling is "fixed Colours
+     Only", so the tiles use the flat --f-* set below, derived from these.
+     These stay because that derivation is what they are for, and because
+     `body.ink` still paints them on the icon chip. */
+  --g-administer: linear-gradient(127.96481deg, rgb(179, 198, 188) 6.0%, rgb(176, 195, 184) 15.8%, rgb(173, 193, 181) 25.6%, rgb(169, 189, 177) 35.3%, rgb(165, 186, 174) 45.1%, rgb(162, 183, 170) 54.9%, rgb(157, 179, 166) 64.7%, rgb(154, 176, 162) 74.4%, rgb(155, 176, 163) 84.2%, rgb(155, 176, 163) 94.0%);
+  --g-approvals-wash: linear-gradient(148.47514deg, rgb(70, 99, 120) 6.0%, rgb(64, 95, 116) 15.8%, rgb(59, 90, 112) 25.6%, rgb(54, 86, 109) 35.3%, rgb(50, 81, 105) 45.1%, rgb(45, 78, 102) 54.9%, rgb(43, 75, 100) 64.7%, rgb(41, 73, 98) 74.4%, rgb(40, 73, 97) 84.2%, rgb(39, 72, 97) 94.0%);
+  --g-audit: linear-gradient(127.96481deg, rgb(201, 98, 120) 6.0%, rgb(203, 96, 118) 15.8%, rgb(204, 91, 115) 25.6%, rgb(205, 87, 112) 35.3%, rgb(207, 84, 110) 45.1%, rgb(210, 81, 107) 54.9%, rgb(213, 78, 106) 64.7%, rgb(215, 76, 104) 74.4%, rgb(215, 76, 104) 84.2%, rgb(214, 75, 103) 94.0%);
+  --g-diet: linear-gradient(127.96481deg, rgb(252, 148, 125) 6.0%, rgb(252, 141, 116) 15.8%, rgb(251, 133, 108) 25.6%, rgb(251, 126, 99) 35.3%, rgb(251, 119, 90) 45.1%, rgb(251, 112, 81) 54.9%, rgb(250, 104, 73) 64.7%, rgb(250, 97, 64) 74.4%, rgb(250, 97, 64) 84.2%, rgb(250, 97, 64) 94.0%);
+  --g-eggs: linear-gradient(127.96481deg, rgb(106, 220, 226) 6.0%, rgb(98, 216, 225) 15.8%, rgb(91, 213, 225) 25.6%, rgb(83, 209, 224) 35.3%, rgb(74, 205, 223) 45.1%, rgb(66, 200, 222) 54.9%, rgb(58, 195, 222) 64.7%, rgb(50, 191, 221) 74.4%, rgb(50, 191, 221) 84.2%, rgb(50, 191, 221) 94.0%);
+  --g-fetal: linear-gradient(127.96481deg, rgb(244, 147, 164) 6.0%, rgb(245, 141, 160) 15.8%, rgb(246, 134, 155) 25.6%, rgb(246, 128, 149) 35.3%, rgb(247, 122, 145) 45.1%, rgb(247, 116, 140) 54.9%, rgb(248, 110, 135) 64.7%, rgb(248, 103, 129) 74.4%, rgb(248, 103, 129) 84.2%, rgb(248, 103, 129) 94.0%);
+  --g-followup: linear-gradient(127.96481deg, rgb(119, 155, 159) 6.0%, rgb(114, 149, 155) 15.8%, rgb(107, 144, 149) 25.6%, rgb(100, 138, 143) 35.3%, rgb(93, 131, 138) 45.1%, rgb(86, 126, 133) 54.9%, rgb(79, 120, 128) 64.7%, rgb(72, 115, 122) 74.4%, rgb(72, 115, 122) 84.2%, rgb(72, 115, 122) 94.0%);
+  --g-hospital: linear-gradient(127.96481deg, rgb(103, 137, 143) 6.0%, rgb(93, 129, 136) 15.8%, rgb(82, 121, 128) 25.6%, rgb(72, 113, 121) 35.3%, rgb(62, 105, 113) 45.1%, rgb(52, 97, 106) 54.9%, rgb(41, 89, 98) 64.7%, rgb(31, 81, 91) 74.4%, rgb(31, 81, 91) 84.2%, rgb(31, 81, 91) 94.0%);
+  --g-lab: linear-gradient(127.96481deg, rgb(216, 201, 147) 6.0%, rgb(216, 198, 140) 15.8%, rgb(215, 195, 134) 25.6%, rgb(214, 192, 128) 35.3%, rgb(213, 188, 122) 45.1%, rgb(212, 185, 117) 54.9%, rgb(210, 183, 110) 64.7%, rgb(209, 180, 104) 74.4%, rgb(209, 180, 104) 84.2%, rgb(209, 180, 104) 94.0%);
+  --g-medical: linear-gradient(127.68923deg, rgb(142, 190, 165) 6.0%, rgb(129, 183, 155) 15.8%, rgb(116, 175, 145) 25.6%, rgb(103, 168, 134) 35.3%, rgb(90, 160, 123) 45.1%, rgb(77, 153, 114) 54.9%, rgb(65, 145, 103) 64.7%, rgb(51, 138, 93) 74.4%, rgb(51, 138, 93) 84.2%, rgb(51, 138, 93) 94.0%);
+  --g-mortality: linear-gradient(127.96481deg, rgb(251, 153, 132) 6.0%, rgb(251, 149, 128) 15.8%, rgb(251, 146, 123) 25.6%, rgb(251, 143, 119) 35.3%, rgb(251, 139, 115) 45.1%, rgb(251, 135, 111) 54.9%, rgb(251, 132, 107) 64.7%, rgb(251, 128, 102) 74.4%, rgb(251, 128, 102) 84.2%, rgb(251, 128, 102) 94.0%);
+  --g-parivesh: linear-gradient(127.96481deg, rgb(108, 231, 223) 6.0%, rgb(101, 230, 221) 15.8%, rgb(92, 229, 220) 25.6%, rgb(83, 227, 218) 35.3%, rgb(75, 226, 216) 45.1%, rgb(67, 225, 214) 54.9%, rgb(58, 223, 212) 64.7%, rgb(50, 222, 211) 74.4%, rgb(50, 222, 211) 84.2%, rgb(50, 222, 211) 94.0%);
+  --g-pharmacy: linear-gradient(127.96481deg, rgb(119, 155, 159) 6.0%, rgb(114, 149, 155) 15.8%, rgb(107, 144, 149) 25.6%, rgb(100, 138, 143) 35.3%, rgb(93, 131, 138) 45.1%, rgb(86, 126, 133) 54.9%, rgb(79, 120, 128) 64.7%, rgb(72, 115, 122) 74.4%, rgb(72, 115, 122) 84.2%, rgb(72, 115, 122) 94.0%);
+  --g-security: linear-gradient(127.96481deg, rgb(149, 158, 152) 6.0%, rgb(142, 152, 147) 15.8%, rgb(136, 147, 140) 25.6%, rgb(130, 140, 134) 35.3%, rgb(124, 135, 128) 45.1%, rgb(118, 129, 122) 54.9%, rgb(111, 123, 116) 64.7%, rgb(105, 117, 110) 74.4%, rgb(104, 117, 110) 84.2%, rgb(104, 117, 110) 94.0%);
+  --g-species: linear-gradient(127.96481deg, rgb(82, 156, 118) 6.0%, rgb(70, 149, 109) 15.8%, rgb(59, 143, 99) 25.6%, rgb(47, 136, 90) 35.3%, rgb(35, 129, 81) 45.1%, rgb(23, 122, 72) 54.9%, rgb(12, 116, 62) 64.7%, rgb(0, 109, 53) 74.4%, rgb(0, 109, 53) 84.2%, rgb(0, 109, 53) 94.0%);
+  --g-teal-card: linear-gradient(127.96481deg, rgb(50, 187, 182) 6.0%, rgb(46, 187, 181) 15.8%, rgb(39, 187, 181) 25.6%, rgb(33, 188, 181) 35.3%, rgb(28, 189, 181) 45.1%, rgb(23, 190, 182) 54.9%, rgb(19, 192, 184) 64.7%, rgb(16, 194, 185) 74.4%, rgb(15, 194, 185) 84.2%, rgb(14, 194, 185) 94.0%);
+  --g-users-wash: linear-gradient(127.96481deg, rgb(69, 108, 119) 6.0%, rgb(65, 105, 117) 15.8%, rgb(59, 100, 112) 25.6%, rgb(54, 96, 108) 35.3%, rgb(49, 92, 105) 45.1%, rgb(45, 89, 101) 54.9%, rgb(43, 87, 99) 64.7%, rgb(40, 86, 98) 74.4%, rgb(40, 85, 97) 84.2%, rgb(39, 85, 97) 94.0%);
+  --g-pharmacy-wash: var(--g-teal-card);
+  --g-reports-wash: var(--g-teal-card);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.6 Inter,-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+     -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 28px 96px}
+h1{margin:0 0 10px;font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.lede{margin:0 0 8px;max-width:88ch;font-size:16px;color:var(--ink-2)}
+.lede b{color:var(--ink-head);font-weight:600}
+.note{margin:24px 0 0;max-width:88ch;padding:16px 18px;border-radius:12px;
+      background:rgba(0,175,214,.08);border:1px solid rgba(0,175,214,.2);font-size:14px;color:#0B5C72}
+.note b{font-weight:600}
+.rule{height:1px;background:rgba(31,65,91,.11);margin:44px 0}
+
+/* ══ concept block ══════════════════════════════════════════════════════ */
+.c__head{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.c__n{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+      background:var(--navy);color:#fff;font-size:14px;font-weight:600}
+.c__name{margin:0;font-size:23px;font-weight:600;letter-spacing:-.01em}
+.c__replay{margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+           padding:8px 14px;border:0;border-radius:var(--r-pill);cursor:pointer;
+           background:var(--navy);color:#fff;font:600 13px Inter,sans-serif}
+.c__replay:hover{background:#16323f}
+.c__premise{margin:0 0 14px 44px;max-width:92ch;font-size:14.5px;color:var(--ink-2)}
+.c__premise b{color:var(--ink-head);font-weight:600}
+.c__premise em{color:var(--ink);font-style:normal;font-weight:500}
+.c__spec{margin:0 0 16px 44px;max-width:92ch;font-size:12.5px;color:var(--ink-mute)}
+.c__spec code{background:rgba(31,65,91,.06);padding:1px 5px;border-radius:4px;
+              font:500 11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-head)}
+.c__cost{margin:14px 0 0 44px;max-width:92ch;font-size:13px;color:var(--ink-3)}
+.c__cost b{color:var(--ink-head);font-weight:600}
+
+/* ══ THE iPAD · 1024x768 landscape, real size ═══════════════════════════ */
+.pad{position:relative;width:1024px;height:768px;max-width:100%;border-radius:22px;
+     overflow:hidden;margin-left:44px;isolation:isolate;
+     box-shadow:0 2px 6px rgba(31,65,91,.12),0 30px 70px -30px rgba(31,65,91,.45);
+     outline:1px solid rgba(31,65,91,.10);outline-offset:-1px;
+     background:linear-gradient(180deg,rgba(175,239,235,.5) 0%,rgba(175,239,235,.275) 32%,
+                rgba(242,255,248,.5) 69%),#fff}
+.pad__bg{position:absolute;inset:0;padding:24px;filter:blur(14px);opacity:.92}
+.pad__hero{height:120px;border-radius:16px;margin-bottom:16px;opacity:.5;
+           background:linear-gradient(135deg,#2E9C8E,#1F415B)}
+.pad__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.pad__c{height:126px;border-radius:12px;background:rgba(31,65,91,.10)}
+.pad__c--w{grid-column:span 2;background:linear-gradient(135deg,#26A0A8,#1F415B);opacity:.55}
+.pad__c--g{background:linear-gradient(135deg,#37BD69,#1E7A44);opacity:.5}
+.pad__c--o{background:linear-gradient(135deg,#F06D52,#D8452B);opacity:.5}
+/* ══ THE BACKDROP · A WHITE MATERIAL, NOT A BLACK DIM ══════════════════
+   9 Sep ruling: "Background Should White Blured like Apple background". So
+   the black 25% frost that shipped this morning is replaced here by white at
+   62% over a 30px blur with saturation lifted — which is what iOS's light
+   material actually is: it does not darken what is behind it, it desaturates
+   and brightens it until it reads as frosted glass rather than as a shadow.
+
+   NOTE WHAT THIS COSTS ELSEWHERE: the caption over it had to go from white
+   with a dark shadow to dark ink, and the white-glass pill now sits on a
+   white ground, so its rim carries the whole separation. Both are handled
+   below; neither is a problem in the live app, whose backdrop is unchanged. */
+.pad__veil{position:absolute;inset:0;z-index:2;opacity:0;
+           background:rgba(255,255,255,.62);
+           backdrop-filter:blur(30px) saturate(1.8);
+           -webkit-backdrop-filter:blur(30px) saturate(1.8)}
+.pad.play .pad__veil{animation:veil .34s ease forwards}
+@keyframes veil{from{opacity:0}to{opacity:1}}
+
+/* the live foot controls */
+.pad__row{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);z-index:5;
+          display:flex;align-items:center;gap:12px}
+.pad__pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;
+           padding:16px;border-radius:var(--r-pill);background:rgba(255,255,255,.4);color:#000;
+           backdrop-filter:blur(20px) saturate(1.8) brightness(1.06);
+           -webkit-backdrop-filter:blur(20px) saturate(1.8) brightness(1.06);
+           box-shadow:0 2px 4px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.75),
+                      inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.22),
+                      inset 0 -6px 12px -6px rgba(31,65,91,.1);
+           font-size:16px;font-weight:600;white-space:nowrap}
+.pad__chat{width:56px;height:56px;border-radius:var(--r-pill);display:grid;place-items:center;
+           color:#fff;background:rgba(255,255,255,.35);
+           background-image:linear-gradient(142.21deg,rgba(0,175,214,.55) 50.5%,rgba(96,221,186,.55) 94.8%);
+           backdrop-filter:blur(20px) saturate(1) brightness(1.06);
+           -webkit-backdrop-filter:blur(20px) saturate(1) brightness(1.06);
+           box-shadow:0 2px 4px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.75),
+                      inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.22)}
+svg{display:block;flex:none}
+
+/* ══ THE MODULE TILE · one component, five sizes ════════════════════════ */
+.m{position:relative;overflow:hidden;border-radius:14px;display:flex;align-items:center;
+   gap:11px;padding:0 14px;height:76px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.22);
+   background:var(--c)}
+
+/* ══ THE LEGIBILITY SWITCH · and the measurement behind it ══════════════
+   A white 13.5px semibold label on these gradients FAILS AA on fourteen of
+   the nineteen, measured off the render with the labels hidden: Parivesh
+   1.60:1, Lab 1.83, Eggs 1.87, Administer 2.10 — against the 4.5 a label
+   this size needs. Only Hospital, Users and Approvals are comfortably clear.
+
+   THIS IS NOT A NEW PROBLEM, IT IS AN INHERITED ONE MADE WORSE. The home
+   page draws these same gradients with white labels, and the artboard palette
+   winning over contrast is a standing ruling on those cards. But the home
+   cards are 179x164 with an 18px label; a launcher tile is 76px tall with a
+   13.5px one, and shrinking the card is what pushes a marginal case over.
+
+   So `body.ink` offers the alternative rather than arguing for it: the tile
+   goes to a neutral wash with dark ink, and the gradient survives on the
+   icon chip, where a white glyph on it is a graphic and not a word. Toggle
+   it at the top of the page and compare — the switch applies to all six
+   concepts at once so they stay comparable. */
+/* PER-TILE INK, BECAUSE NO SINGLE INK WORKS ON A FLAT PALETTE. Measured on
+   the nineteen fixed colours: a white label fails AA on FIFTEEN of them, a
+   dark label fails on NINE, and five sit in the mid band and fail BOTH —
+   security #79847D reads 3.88 white and 3.87 dark. A gradient hid this by
+   giving every label a dark end to sit on; a flat fill has no dark end.
+   So each tile takes whichever ink its own colour favours, which lifts the
+   worst case from 1.60:1 to 3.88:1 — above the 3:1 floor for non-text, still
+   under the 4.5 a label wants. The five that stay under are security 3.88,
+   audit 4.11, and housing / followup / communication at 4.31.
+   `body.ink` is the form that actually clears AA: it moves the colour onto
+   the icon chip and puts the label on a neutral wash, measured 13.20:1 at
+   worst. That is the trade — colour ON the tile, or colour that a label can
+   sit on. */
+.m--dark{color:var(--ink);text-shadow:none}
+body.ink .m,body.ink .m--dark{background:rgba(31,65,91,.055);color:var(--ink);text-shadow:none}
+body.ink .m__i{background:var(--c);border-radius:9px;padding:5px;width:32px;height:32px}
+body.ink .m--row .m__i,body.ink .m--sm .m__i{width:28px;height:28px;padding:4px;border-radius:8px}
+body.ink .k4__g .m{background:rgba(255,255,255,.94)}
+.m__i{flex:none;width:26px;height:26px;opacity:.95}
+.m__i img{display:block;width:100%;height:100%}
+.m__n{font-size:13.5px;font-weight:600;line-height:1.2;hyphens:manual}
+/* "Communication" is one 13-character word against 85px of label space, and it
+   was running off the tile's right edge. The app's own MODULES entry spells it
+   `Commu\u00ADnication` — a SOFT HYPHEN — precisely so it can break, so the
+   mockup carries the same character rather than inventing an abbreviation. */
+.m--row{height:56px;border-radius:12px;gap:10px;padding:0 12px}
+.m--row .m__i{width:22px;height:22px}
+.m--row .m__n{font-size:13px}
+.m--tall{height:auto;min-height:96px;flex-direction:column;align-items:flex-start;
+         justify-content:flex-end;padding:12px}
+.m--tall .m__i{width:28px;height:28px;margin-bottom:auto}
+.m--sm{height:66px;border-radius:12px;gap:9px;padding:0 11px}
+.m--sm .m__i{width:20px;height:20px}
+.m--sm .m__n{font-size:12px}
+
+/* the caption every container carries */
+.cap{margin:0 0 16px;font-size:12px;font-weight:600;letter-spacing:.10em;
+     text-transform:uppercase;color:var(--ink-head)}
+.cap--onfrost{color:var(--ink-head);text-shadow:none}
+
+/* ══ 1 · BOTTOM SHEET ═══════════════════════════════════════════════════
+   Anchored to the bottom edge, no gap under it. 32px clear of each side
+   against the built panel's 24, and a 40px interior gutter against its 20. */
+.k1{position:absolute;left:32px;right:32px;bottom:0;z-index:3;
+    padding:22px 40px 132px;border-radius:26px 26px 0 0;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
+    box-shadow:0 -2px 4px rgba(31,65,91,.06),0 -20px 50px -18px rgba(31,65,91,.3);
+    transform:translateY(100%)}
+.k1__grab{width:44px;height:5px;border-radius:3px;background:rgba(31,65,91,.18);
+          margin:0 auto 16px}
+.k1__g{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.pad.play .k1{animation:sheetUp .62s cubic-bezier(.16,1.02,.3,1) .06s forwards}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.pad.play .k1 .m{animation:sheetTile .34s ease-out both;
+                 animation-delay:calc(.30s + var(--i) * .012s);opacity:0}
+@keyframes sheetTile{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ══ 2 · CENTRED DIALOG ═════════════════════════════════════════════════
+   Inset 132px each side — far more air than a sheet — and it zooms out of
+   the pill rather than arriving from an edge. */
+.k2{position:absolute;left:132px;right:132px;top:96px;z-index:3;
+    padding:32px 40px 34px;border-radius:28px;background:rgba(255,255,255,.97);
+    backdrop-filter:blur(26px) saturate(1.4);-webkit-backdrop-filter:blur(26px) saturate(1.4);
+    box-shadow:0 2px 5px rgba(31,65,91,.1),0 40px 90px -30px rgba(31,65,91,.44);
+    /* the pill's centre, expressed inside this box: 478-132, 700-96 */
+    transform-origin:346px 604px;transform:scale(.16);opacity:0}
+.k2__g{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.pad.play .k2{animation:dlgZoom .52s cubic-bezier(.2,.9,.24,1) .04s forwards}
+@keyframes dlgZoom{from{transform:scale(.16);opacity:0}
+                   55%{opacity:1}to{transform:scale(1);opacity:1}}
+.pad.play .k2 .m{animation:dlgTile .3s ease-out both;
+                 animation-delay:calc(.26s + var(--i) * .014s);opacity:0}
+@keyframes dlgTile{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+
+/* ══ 3 · RIGHT DRAWER ═══════════════════════════════════════════════════
+   Full height on the right, 40px off every edge it touches, 36px interior. */
+.k3{position:absolute;right:40px;top:40px;bottom:40px;width:452px;z-index:3;
+    padding:28px 36px;border-radius:24px;background:rgba(255,255,255,.97);
+    backdrop-filter:blur(26px) saturate(1.4);-webkit-backdrop-filter:blur(26px) saturate(1.4);
+    box-shadow:0 2px 5px rgba(31,65,91,.1),-24px 30px 80px -30px rgba(31,65,91,.4);
+    transform:translateX(calc(100% + 40px))}
+.k3__g{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pad.play .k3{animation:drawerIn .5s cubic-bezier(.22,.95,.28,1) forwards}
+@keyframes drawerIn{from{transform:translateX(calc(100% + 40px))}to{transform:none}}
+/* the cascade runs right-to-left, away from the edge it came from */
+.pad.play .k3 .m{animation:drawerTile .34s ease-out both;
+                 animation-delay:calc(.20s + var(--col) * .05s + var(--row) * .022s);opacity:0}
+@keyframes drawerTile{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+
+/* ══ 4 · NO CONTAINER ═══════════════════════════════════════════════════
+   There is no panel. The tiles land straight on the frost with 56px of air
+   each side, and each one flies out of the pill along its own vector. */
+/* ══ NOT THE PAGE · 9 Sep ruling, "Dont Want Full Page" ════════════════
+   The first draft ran left:56 to right:56 from y=104 — 912 wide on a 1024
+   screen, which is the page with a margin rather than a launcher. The field
+   is now FOUR columns by FIVE rows of 150x70: a 636x398 block, 62% of the
+   width and 52% of the height, centred and standing clear of the pill.
+
+   TWO VARIANTS, BECAUSE "not full page" AND "white blurred background" PULL
+   IN DIFFERENT DIRECTIONS and only one of them can be right:
+     4A keeps the MATERIAL small too — a rounded white panel hugging the
+        block, with the real page visible all around it.
+     4B keeps the material FULL-SCREEN, which is what Apple actually does —
+        a compact block of tiles floating on a page-wide frost.
+   The tiles, the colours and the fan are identical in both. The only
+   difference is how far the white travels. */
+/* ══ SPACING · 9 Sep, "Need Propre Spacing No Need Shadow" ═════════════
+   One rhythm, and every number a multiple of 4: a 16px gutter between tiles
+   where it was 12, 32px of panel padding where it was 26/28, and 20px under
+   the caption where it was 16. The field is 4 x 150 + 3 x 16 = 648, and the
+   panel is that plus 64 = 712. Positions are derived from the pill rather
+   than eyeballed: the pill row's top edge is at 768 - 40 - 56 = 672, and both
+   variants are placed to finish clear of it. */
+.k4{position:absolute;left:50%;top:196px;width:648px;margin-left:-324px;z-index:3}
+.k4__g{display:grid;grid-template-columns:repeat(4,150px);gap:16px;justify-content:center}
+.k4__g .m{height:70px}
+.k4 .cap{margin-bottom:20px}
+/* 4A · the material is a panel around the block, 32px of it on every side */
+.k4--panel{padding:32px;width:712px;margin-left:-356px;top:132px;
+           border-radius:28px;background:rgba(255,255,255,.62);
+           backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);
+           box-shadow:0 1px 2px rgba(31,65,91,.08),0 24px 60px -24px rgba(31,65,91,.32)}
+/* …and with a panel of its own, the page-wide frost must NOT also be on */
+.k4actx .pad__veil{display:none}
+/* NO SHADOW ON THE TILES · 9 Sep. They had a two-layer drop to lift them off
+   the frost, which was needed when the field ran the width of the page and had
+   nothing else framing it. Inside a panel — or on a white material at this
+   size — a saturated flat colour separates itself, and the shadows were adding
+   grey into the gutters that read as dirt at 16px spacing. Removed, not
+   softened: `.m` carries no shadow at all now. */
+/* --dx/--dy are measured per tile on play: the vector back to the pill */
+.pad.play .k4__g .m{animation:fan .56s cubic-bezier(.17,.94,.27,1) both;
+                 animation-delay:calc(var(--i) * .018s);opacity:0}
+@keyframes fan{from{opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(.3)}
+               40%{opacity:1}to{opacity:1;transform:none}}
+
+/* ══ 5 · FOUR COLUMNS ═══════════════════════════════════════════════════
+   Four separate containers, not one — a gap of real page between them, so
+   the categories are objects rather than headings. 36px sides, 22 interior. */
+.k5{position:absolute;left:36px;right:36px;bottom:112px;z-index:3;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:end}
+.k5__col{border-radius:20px;padding:18px 16px;background:rgba(255,255,255,.96);
+         backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);
+         box-shadow:0 2px 4px rgba(31,65,91,.08),0 18px 40px -18px rgba(31,65,91,.3);
+         transform:translateY(24px);opacity:0}
+.k5__t{margin:0 0 12px;font-size:11.5px;font-weight:700;letter-spacing:.09em;
+       text-transform:uppercase;color:var(--ink-head)}
+.k5__s{display:flex;flex-direction:column;gap:9px}
+.pad.play .k5__col{animation:colRise .46s cubic-bezier(.2,.92,.26,1) both;
+                   animation-delay:calc(.06s + var(--ci) * .09s)}
+@keyframes colRise{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+
+/* ══ 6 · THE PILL, GROWN ════════════════════════════════════════════════
+   The container IS the pill. Its box morphs from 168x52 at the foot into a
+   tall rounded panel — one object the whole way, never a second surface. */
+.k6{position:absolute;left:50%;bottom:40px;z-index:4;overflow:hidden;
+    width:640px;margin-left:-286px;   /* keeps the pill's own centre at 478 */
+    padding:26px 38px 30px;border-radius:26px;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
+    box-shadow:0 2px 4px rgba(0,0,0,.2),0 26px 60px -22px rgba(31,65,91,.42)}
+.k6__g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.pad.play .k6{animation:pillGrow .58s cubic-bezier(.18,.96,.28,1) forwards}
+@keyframes pillGrow{
+  from{width:168px;margin-left:-50px;height:52px;padding:0;border-radius:26px}
+  to  {width:640px;margin-left:-286px;height:auto;padding:26px 38px 30px;border-radius:26px}}
+.pad.play .k6 .m{animation:growTile .32s ease-out both;
+                 animation-delay:calc(.34s + var(--row) * .05s);opacity:0}
+@keyframes growTile{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
+/* while it grows, the pill underneath is the thing that is growing, so hide it */
+.pad.play .k6ctx .pad__row{animation:pillHide .1s linear .04s forwards}
+@keyframes pillHide{to{opacity:0}}
+.k6ctx .pad__row{opacity:1}
+
+/* FILL MODE IS `both`, NOT `backwards`, AND THAT WAS A REAL BUG. `backwards`
+   fills only the period BEFORE the animation starts — which is what the
+   staggered delays need — but after it ends the element reverts to its
+   declared style, and these all declare `opacity: 0`. So every tile animated
+   in and then disappeared, and concept 5's columns slid up and dropped back
+   down 24px. Caught by seeking each animation past its end rather than
+   watching it play: at t=2000 the first fan tile read `opacity 0`, and
+   `.k5__col` was back at `translateY(24px)`. `both` keeps the end state.
+
+   ══ reduced motion · show the end state, never the journey ═════════════ */
+@media (prefers-reduced-motion:reduce){
+  .k1,.k2,.k3{transform:none!important;opacity:1!important}
+  .k5__col{transform:none!important;opacity:1!important}
+  .pad__veil{opacity:1!important}
+  .pad *{animation:none!important}
+  .pad .m{opacity:1!important;transform:none!important}
+}
+
+/* ══ closing table ══════════════════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse;margin:18px 0 0;font-size:13.5px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid rgba(31,65,91,.1);vertical-align:top}
+th{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+   color:var(--ink-head);border-bottom:1px solid rgba(31,65,91,.2)}
+.close ul{max-width:92ch;padding-left:20px}
+.close li{margin:0 0 10px;font-size:14.5px;color:var(--ink-2)}
+.close li b{color:var(--ink-head);font-weight:600}
+@media (max-width:1120px){.pad{margin-left:0}.c__premise,.c__spec,.c__cost,.c__head{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The module launcher · Option 4, revised</h1>
+<p class="lede">Option 4 with your four changes. <b>Not full page</b> — the field is a 636×398 block,
+62% of the width and 52% of the height, where it was 912px wide before. <b>A white Apple material</b>
+instead of the black frost: white at 62% over a 30px blur, which brightens and desaturates the page
+rather than darkening it. <b>Fixed colours only</b> — the gradients are gone, and each module's flat
+colour is derived from its own ramp at the 50% point rather than picked by eye. The fan you liked is
+unchanged: every tile still flies out of the pill along its own measured vector.</p>
+<p class="lede"><b>Two variants, because two of your instructions pull against each other.</b>
+"Not full page" and "white blurred background" disagree about how far the white should travel —
+<b>4A</b> keeps the material as a panel around the block, <b>4B</b> keeps it page-wide with the small
+block floating on it. The tiles, the colours and the animation are identical in both. Press Replay, or
+scroll one into view.</p>
+
+<div class="note"><b>The 8 September brief does not govern this component.</b> That brief was about a
+panel of sixteen <em>verbs</em> — one restrained surface, one neutral wash, no plates, no colour. A
+launcher of nineteen <em>modules</em> is a different thing doing a different job, so those rules are
+not so much broken here as left behind. <b>But it leaves a real question open:</b> if this replaces
+the verb panel, the sixteen verbs need somewhere to live. See the last note at the foot.</div>
+
+<p class="lede" style="margin-top:22px">
+  <button id="inkBtn" type="button" class="c__replay" style="margin:0">Switch to dark labels</button>
+  <span style="margin-left:12px;font-size:13.5px;color:var(--ink-mute)">
+    A white label on these gradients fails AA on <b style="color:#A13F28">14 of the 19</b> —
+    Parivesh 1.60:1, Lab 1.83, Eggs 1.87. Toggle to compare; it applies to all six at once.</span></p>
+
+<div class="rule"></div>
+<div id="out"></div>
+
+<div class="rule"></div>
+<section class="close">
+  <h2 style="font-size:24px;font-weight:600;margin:0 0 8px">The six, side by side</h2>
+  <table>
+    <thead><tr><th style="width:14%">Container</th><th style="width:20%">Opening</th>
+      <th style="width:24%">What it is good at</th><th style="width:26%">What it costs</th>
+      <th style="width:16%">Side padding</th></tr></thead>
+    <tbody>
+      <tr><td><b>1 Bottom sheet</b></td><td>Springs up from the bottom edge, tiles settling after it</td>
+        <td>The most familiar gesture on a tablet, and the tiles land nearest the thumb.</td>
+        <td>Covers the lower two-thirds; the page you were reading is mostly gone.</td>
+        <td>32 outside · 40 inside</td></tr>
+      <tr><td><b>2 Centred dialog</b></td><td>Zooms out of the pill, then the tiles scale in</td>
+        <td>The most air of the six, and the zoom makes the pill visibly the origin.</td>
+        <td>A centred modal is the most interruptive shape there is — it says "stop".</td>
+        <td>132 outside · 40 inside</td></tr>
+      <tr><td><b>3 Right drawer</b></td><td>Slides in from the right, tiles cascading away from that edge</td>
+        <td>Leaves two-thirds of the page visible and reads as navigation rather than a modal.</td>
+        <td>Three narrow columns; the longer module names wrap to two lines.</td>
+        <td>40 all round · 36 inside</td></tr>
+      <tr><td><b>4A / 4B</b> · chosen</td>
+        <td>Every tile flies out of the pill along its own measured vector</td>
+        <td>The tiles <em>are</em> the interface. A 636×398 field, 62% of the width — not the page.</td>
+        <td>A flat palette gives a label no dark end to sit on: five tiles cannot reach AA with any
+          single ink. See the two above.</td>
+        <td>4A: a 692px panel · 4B: page-wide</td></tr>
+      <tr><td><b>5 Four columns</b></td><td>Columns rise in sequence, left to right</td>
+        <td>The categories become objects, not headings — real page shows between them.</td>
+        <td>Four unequal columns (4/4/5/6) leave a ragged top edge by construction.</td>
+        <td>36 outside · 16 inside</td></tr>
+      <tr><td><b>6 The pill, grown</b></td><td>The pill's own box morphs into the panel</td>
+        <td>One object the whole way. Closest in spirit to the unfold that already ships.</td>
+        <td>Animating <code>width</code> and <code>padding</code> is layout work every frame — the one
+          concept here with a real performance question on an iPad.</td>
+        <td>192 outside · 38 inside</td></tr>
+    </tbody>
+  </table>
+  <ul style="margin-top:24px">
+    <li><b>3 and 5 are the two I would put in front of you.</b> Both answer "everything is the same
+      container" with a genuinely different shape rather than a restyle, and both leave the page
+      readable — which was the whole argument behind the 8 September backdrop rule, and is still true
+      whatever the frost is set to today.</li>
+    <li><b>6 is the honest continuation of what already ships</b> and the one I would build if the
+      answer is "keep the current feel, change the contents". It reuses the existing premise — the
+      control transforms into the surface — so the motion work already done is not thrown away.
+      Its cost is real though: <code>width</code> and <code>padding</code> keyframes drive layout on
+      every frame where the live panel animates <code>clip-path</code>, which does not.</li>
+    <li><b>The one decision left inside Option 4 is where the colour lives.</b> On the tile, as drawn,
+      the nineteen fixed colours are unmistakable but five labels land between 3.88 and 4.31:1 — over
+      the 3:1 floor, under the 4.5 a label wants. On the icon chip, with the label on a neutral wash,
+      the worst case is 13.20:1 and every module keeps its colour. The toggle at the top of this page
+      switches between them; nothing else about the concept changes.</li>
+    <li><b>THE OPEN QUESTION, and it is bigger than the container.</b> The sixteen verbs — + Site,
+      + Note, Dispense Medicine, Transfer Animal — are what the pill opens today, and every concept
+      here replaces them with modules. <em>Those verbs still need somewhere to live.</em> Three
+      possibilities, none of them free: the verbs move one level down, so a module tile opens its own
+      verbs (two taps, and the launcher becomes a menu); the verbs move to the avatar menu, which
+      already claims to hold everything a person can do; or the launcher and the verb panel are two
+      different controls, which means a second FAB. <b>Worth settling before any of these is built</b>,
+      because it decides whether a module tile navigates or expands.</li>
+  </ul>
+</section>
+</div>
+
+<script>
+/* ══ THE NINETEEN · index.html's MODULES, filtered to those with a door ══
+   focus, notes and insights are excluded on purpose: they are the door-less
+   widgets, and a launcher lists what can be opened. `short` exists only for
+   the three names that will not fit a 118px column in concept 3. */
+const M = [
+  { id:'medical',      name:'Medical',            cat:'medical', grad:'--g-medical', ink:'dark'    },
+  { id:'hospital',     name:'Hospital',           cat:'medical', grad:'--g-hospital', ink:'light'    },
+  { id:'pharmacy',     name:'Pharmacy',           cat:'medical', grad:'--g-pharmacy-wash', ink:'dark'    },
+  { id:'lab',          name:'Lab',                cat:'medical', grad:'--g-lab', ink:'dark'    },
+  { id:'species',      name:'Species Management', cat:'animal', grad:'--g-species', ink:'light', short:'Species' },
+  { id:'mortality',    name:'Mortality',          cat:'animal', grad:'--g-mortality', ink:'dark'     },
+  { id:'fetal',        name:'Fetal Death',        cat:'animal', grad:'--g-fetal', ink:'dark'     },
+  { id:'eggs',         name:'Eggs',               cat:'animal', grad:'--g-eggs', ink:'dark'     },
+  { id:'housing',      name:'Housing',            cat:'operations', grad:'--g-pharmacy', ink:'light' },
+  { id:'diet',         name:'Diet & Kitchen',     cat:'operations', grad:'--g-diet', ink:'dark', short:'Diet' },
+  { id:'followup',     name:'Follow Up',          cat:'operations', grad:'--g-followup', ink:'light' },
+  { id:'parivesh',     name:'Parivesh',           cat:'operations', grad:'--g-parivesh', ink:'dark' },
+  { id:'audit',        name:'Audit',              cat:'operations', grad:'--g-audit', ink:'light' },
+  { id:'administer',   name:'Administer',         cat:'admin', grad:'--g-administer', ink:'dark'      },
+  { id:'users',        name:'Users',              cat:'admin', grad:'--g-users-wash', ink:'light'      },
+  { id:'security',     name:'Security',           cat:'admin', grad:'--g-security', ink:'light'      },
+  { id:'reports',      name:'Reports',            cat:'admin', grad:'--g-reports-wash', ink:'dark'      },
+  { id:'approvals',    name:'Approvals',          cat:'admin', grad:'--g-approvals-wash', ink:'light'      },
+  { id:'communication',name:'Commu\u00ADnication', cat:'admin', grad:'--g-followup', ink:'light', short:'Comms' },
+];
+const CATS = [
+  { id:'medical',    label:'Medical'          },
+  { id:'animal',     label:'Animals'          },
+  { id:'operations', label:'Operations'       },
+  { id:'admin',      label:'Records & people' },
+];
+/* the glyphs are the real files; the gradients are the real tokens */
+const tile = (m, i, cls = '', useShort = false, extra = '') =>
+  `<div class="m ${cls} ${m.ink === 'dark' ? 'm--dark' : ''}" style="--c:var(--f-${m.id});--i:${i};${extra}">
+     <span class="m__i"><img src="../assets/icon/m-${m.id}.svg" alt=""></span>
+     <span class="m__n">${useShort && m.short ? m.short : m.name}</span>
+   </div>`;
+
+const PAGE = `
+  <div class="pad__bg">
+    <div class="pad__hero"></div>
+    <div class="pad__grid">
+      <div class="pad__c pad__c--w"></div><div class="pad__c pad__c--g"></div><div class="pad__c"></div>
+      <div class="pad__c"></div><div class="pad__c pad__c--o"></div><div class="pad__c pad__c--w"></div>
+    </div>
+  </div>
+  <div class="pad__veil"></div>`;
+const chat = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+  stroke-width="1.7" stroke-linecap="round"><path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-3.9A8 8 0 1 1 20 12Z"/></svg>`;
+const grid = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="2" y="2"
+  width="8.4" height="8.4" rx="1.6"/><rect x="13.6" y="2" width="8.4" height="8.4" rx="1.6"/><rect x="2"
+  y="13.6" width="8.4" height="8.4" rx="1.6"/><rect x="13.6" y="13.6" width="8.4" height="8.4" rx="1.6"/></svg>`;
+const FOOT = `<div class="pad__row"><div class="pad__pill">${grid}<span>Quick Actions</span></div>
+  <div class="pad__chat">${chat}</div></div>`;
+const pad = (inner, ctx = '') => `<div class="pad ${ctx}">${PAGE}${inner}${FOOT}</div>`;
+
+/* ── 1 · bottom sheet ── */
+const K1 = pad(`<div class="k1"><div class="k1__grab"></div><p class="cap">All modules</p>
+  <div class="k1__g">${M.map((m, i) => tile(m, i)).join('')}</div></div>`);
+
+/* ── 2 · centred dialog ── */
+const K2 = pad(`<div class="k2"><p class="cap">All modules</p>
+  <div class="k2__g">${M.map((m, i) => tile(m, i)).join('')}</div></div>`);
+
+/* ── 3 · right drawer · three columns, so --col and --row drive the cascade ── */
+const K3 = pad(`<div class="k3"><p class="cap">All modules</p>
+  <div class="k3__g">${M.map((m, i) =>
+    tile(m, i, 'm--sm', true, `--col:${i % 3};--row:${Math.floor(i / 3)}`)).join('')}</div></div>`);
+
+/* ── 4 · no container ── */
+const field = `<p class="cap cap--onfrost">All modules</p>
+  <div class="k4__g">${M.map((m, i) => tile(m, i)).join('')}</div>`;
+/* 4A · the white material is a panel hugging the block; no page-wide frost */
+const K4A = pad(`<div class="k4 k4--panel">${field}</div>`, 'k4actx');
+/* 4B · the white material is the whole page; the block just floats on it */
+const K4B = pad(`<div class="k4">${field}</div>`);
+
+/* ── 5 · four columns, each its own container ── */
+const K5 = pad(`<div class="k5">${CATS.map((c, ci) => `
+  <div class="k5__col" style="--ci:${ci}"><p class="k5__t">${c.label}</p>
+    <div class="k5__s">${M.filter((m) => m.cat === c.id)
+      .map((m, i) => tile(m, i, 'm--row')).join('')}</div></div>`).join('')}</div>`);
+
+/* ── 6 · the pill, grown · four columns so --row drives the reveal ── */
+const K6 = pad(`<div class="k6"><p class="cap">All modules</p>
+  <div class="k6__g">${M.map((m, i) =>
+    tile(m, i, 'm--sm', true, `--row:${Math.floor(i / 4)}`)).join('')}</div></div>`, 'k6ctx');
+
+const CHOSEN = [
+  { n:'4A', name:'White panel around the block', spec:'636×398 field · a 692px panel, 28px of material each side · the page visible all around',
+    premise:`<b>The material is a panel, and it stops where the tiles stop.</b> White at 62% over a 30px
+      blur — iOS's light material, which brightens and desaturates what is behind it rather than
+      darkening it — sized to hug the 636×398 field with 28px on every side. The real page shows around
+      it, so the launcher reads as <em>an object on the page</em> rather than a state the page is in.`,
+    cost:`Two frosted surfaces would fight, so <b>the page-wide veil is switched off entirely in this
+      variant</b> — the panel's own material is the only frost. The cost is that the tiles' separation
+      now comes from a soft shadow rather than from contrast against a dim, which is thinner over a
+      busy photograph than over the grid.`, html:K4A },
+  { n:'4B', name:'Full-screen material, compact block', spec:'636×398 field · the material covers the page · no panel of its own',
+    premise:`<b>The block is small; the material is not.</b> This is the way Apple actually does it — a
+      page-wide frost with a compact arrangement floating on it — so the tiles need no container at all,
+      which was the part of Option 4 you kept. The launcher still occupies 62% of the width and 52% of
+      the height, so it is <em>not</em> a full-page panel even though the frost is full-page.`,
+    cost:`<b>It hides the page it is about.</b> A white frost at this strength is gentler than the black
+      dim it replaces, but a page-wide material is still a page-wide material — and if the argument for
+      a launcher is that you jump from where you are, obscuring where you are is the thing to weigh.`,
+    html:K4B },
+];
+const REST = [
+  { n:1, name:'Bottom sheet', spec:'32px clear of each side · 40px interior gutter · anchored to the bottom edge',
+    premise:`<b>The container is a sheet, not a floating card.</b> It meets the bottom edge with no gap
+      under it, so it reads as something pulled up from off-screen rather than a panel placed on top —
+      and the tiles land in the half of the screen a thumb can actually reach.`,
+    cost:`The sheet <b>springs</b> rather than eases: a <code>cubic-bezier(.16,1.02,.3,1)</code> that
+      overshoots slightly at the top of its travel, which is what makes it feel pulled instead of
+      pushed. The tiles then settle in a fast 12ms-per-tile cascade, after the sheet has stopped.`,
+    html:K1 },
+  { n:2, name:'Centred dialog', spec:'132px clear of each side · 40px interior · 96px from the top',
+    premise:`<b>The container is a dialog, and it zooms out of the pill.</b> Far more air than any of the
+      others — 132px of page on each side — and the growth origin is the pill's own centre, so the thing
+      you pressed is visibly where the surface came from even though it lands in the middle of the screen.`,
+    cost:`<code>transform-origin: 346px 604px</code> is the pill's centre expressed inside the dialog's
+      own box, which is how the zoom points back at it. <b>A centred modal is the most interruptive
+      shape available</b> — worth choosing on purpose, not by default.`, html:K2 },
+  { n:3, name:'Right drawer', spec:'40px off every edge it touches · 36px interior · 452px wide',
+    premise:`<b>The container is a drawer down the right-hand side.</b> Two-thirds of the page stays
+      visible and unfrosted-looking beside it, so this reads as <em>navigation</em> rather than as a
+      modal — which is what a module launcher actually is.`,
+    cost:`The cascade runs <b>right to left, away from the edge the drawer came from</b>, so the motion
+      continues the entrance instead of fighting it — <code>--col</code> at 50ms against
+      <code>--row</code> at 22ms. Cost: three columns at 118px, so the long names need their short form.`,
+    html:K3 },
+  { n:5, name:'Four columns', spec:'36px clear of each side · 16px between columns · 16px interior',
+    premise:`<b>Four containers, not one.</b> Real page shows between them, which is the point: the
+      categories stop being headings inside a surface and become objects with edges. They rise in
+      sequence, left to right, so you read the grouping as it arrives.`,
+    cost:`The four categories are 4, 4, 5 and 6 modules, so <b>the columns are unequal and the top edge
+      is ragged by construction</b> — they are bottom-aligned to make that deliberate rather than
+      accidental. If that reads as untidy, this concept needs the categories rebalanced, not restyled.`,
+    html:K5 },
+  { n:6, name:'The pill, grown', spec:'192px clear of each side · 38px interior · grows from 168×52',
+    premise:`<b>The container is the pill.</b> Its box morphs from 168×52 at the foot of the screen into a
+      640px panel — one object the whole way, never a second surface arriving over the first. This is the
+      closest of the six to the premise that already ships, where the FAB transforms into the panel.`,
+    cost:`<b>It animates <code>width</code>, <code>height</code> and <code>padding</code>, which is
+      layout work on every frame</b> — where the live panel animates <code>clip-path</code>, which is
+      not. That is a real performance question on an iPad and the reason the shipped version was built
+      the way it was. <code>margin-left</code> is keyframed alongside the width to hold the pill's own
+      centre at 478px while it grows.`, html:K6 },
+];
+
+const card = (c, last) => `
+  <section class="c" data-c="${c.n}">
+    <div class="c__head"><span class="c__n">${c.n}</span><h3 class="c__name">${c.name}</h3>
+      <button class="c__replay" type="button">${grid}Replay</button></div>
+    <p class="c__premise">${c.premise}</p>
+    <p class="c__spec">${c.spec}</p>
+    ${c.html}
+    <p class="c__cost">${c.cost}</p>
+  </section>
+  ${last ? '' : '<div class="rule"></div>'}`;
+
+document.getElementById('out').innerHTML =
+  CHOSEN.map((c, i) => card(c, i === CHOSEN.length - 1)).join('')
+  + `<div class="rule"></div>
+     <h2 style="font-size:24px;font-weight:600;margin:0 0 8px">The other five, superseded</h2>
+     <p class="lede" style="margin-bottom:28px">Kept for comparison, not proposed. They now wear the
+       same two changes — <b>the nineteen fixed colours and the white Apple material</b> — so the
+       difference you are looking at is still only the container. Each is a full-page or near-full-page
+       surface, which is what Option 4 was chosen over.</p>`
+  + REST.map((c, i) => card(c, i === REST.length - 1)).join('');
+
+/* ══ PLAY · the fan's vectors are MEASURED, not guessed ═════════════════
+   Concept 4 sends each tile back to the pill, which means the pill's centre
+   minus the tile's own centre — per tile, after layout. Written as --dx/--dy
+   so the keyframe can stay declarative. */
+const PILL = { x: 478, y: 700 };
+function measureFan(pd) {
+  const box = pd.getBoundingClientRect();
+  pd.querySelectorAll('.k4__g .m').forEach((el) => {
+    const b = el.getBoundingClientRect();
+    const cx = b.left - box.left + b.width / 2;
+    const cy = b.top - box.top + b.height / 2;
+    el.style.setProperty('--dx', `${Math.round(PILL.x - cx)}px`);
+    el.style.setProperty('--dy', `${Math.round(PILL.y - cy)}px`);
+  });
+}
+function play(pd) {
+  pd.classList.remove('play');
+  measureFan(pd);
+  /* one frame between the reset and the replay, or the browser coalesces the
+     two style changes and the animation never restarts */
+  void pd.offsetWidth;
+  requestAnimationFrame(() => pd.classList.add('play'));
+}
+/* the switch is global so the six stay comparable */
+const inkBtn = document.getElementById('inkBtn');
+inkBtn.addEventListener('click', () => {
+  const on = document.body.classList.toggle('ink');
+  inkBtn.textContent = on ? 'Switch to white labels' : 'Switch to dark labels';
+});
+
+document.querySelectorAll('section.c').forEach((sec) => {
+  const pd = sec.querySelector('.pad');
+  sec.querySelector('.c__replay').addEventListener('click', () => play(pd));
+});
+/* …and each one plays itself once, the first time it is scrolled to */
+const seen = new WeakSet();
+new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (!e.isIntersecting || seen.has(e.target)) return;
+    seen.add(e.target); play(e.target);
+  });
+}, { threshold: 0.45 }).observe ? document.querySelectorAll('.pad').forEach((pd) => {
+  new IntersectionObserver((entries, obs) => {
+    entries.forEach((e) => { if (e.isIntersecting) { play(pd); obs.disconnect() } });
+  }, { threshold: 0.45 }).observe(pd);
+}) : null;
+</script>
+</body>
+</html>

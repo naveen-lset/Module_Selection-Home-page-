@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Banners · Announcements, Notes, Key Insights · ANTZ</title>
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  HOME BANNERS · three ways to bring Announcements, Notes and Key Insights
+  onto the tablet home page — a mockup, 3 Sep 2026. Nothing here is wired.
+  ═══════════════════════════════════════════════════════════════════════════
+
+  THE ASK. On the phone (mockups/Announcement & Notes/*.HEIC) the three live as
+  a feed: an Announcement card with a tag, a title, the author, a body, a
+  "Read More" and an attached image; a "This Month" card with Natality and
+  Mortality figures and a "Key Insights >" link; and Notes as blue-gradient
+  cards with a title, tags, author, site, and like / comment / bookmark. The
+  reference for the tablet is the JioHotstar home: one wide banner, the
+  picture on the left, the copy on the right, a single "Explore" button, and
+  the next card peeking out behind it.
+
+  THREE APPROACHES, ONE PAGE, SO THE CHOICE IS MADE BY LOOKING.
+    A  ONE HERO         Hotstar taken literally. One banner, one slide at a
+                        time, the three content types as slides. Quietest.
+    B  HERO + RAIL      The Announcement takes the Hotstar banner; Key
+                        Insights and the latest Note sit beside it. Everything
+                        is on screen at once; nothing waits behind a dot.
+    C  SWITCHER         Hotstar's JioHotstar | TADKA pill becomes a segmented
+                        control over one banner; the banner takes the colour of
+                        the type that is selected (Notes are blue on the phone,
+                        Announcements green). Most interactive, least glanceable.
+
+  WHAT IS DELIBERATELY THE SAME IN ALL THREE. The copy is the phone's copy,
+  verbatim. Type sits on the app's Inter. Colours are the app's tokens —
+  petrol ink, #2FA860 announcement green, the Notes blue, the Figma greens for
+  buttons — and the photographs are the ones already in assets/img. The
+  4/8pt scale from the search-surface audit is kept: paddings 16 / 24 / 32,
+  gaps 8 / 12 / 16, radii 16 / 20 / 24.
+
+  Open at http://localhost:8000/mockups/home-banners.html on the iPad, or in
+  a 1024px window. It lays out from 768 up; below that the phone feed is the
+  right answer and this page does not try to be one.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --ink:        #1F415B;
+    --ink-2:      #52697A;
+    --ink-3:      #7A8684;
+    --ink-head:   #44544A;
+    --petrol-050: #EEF5F6;
+    --petrol-100: #DCE9EB;
+    --petrol-200: #B6CDD1;
+    --petrol-800: #1F515B;
+    --petrol-900: #16373D;
+    --line:       rgba(31, 65, 91, .10);
+    --page:       #E6EEE9;             /* the phone's page green */
+    --card:       #FFFFFF;
+    --green:      #2FA860;             /* announcement tag */
+    --green-ink:  #1E7A44;             /* AA on white, from Global Search */
+    --green-050:  #E5F5EC;
+    --teal:       #00ABAB;
+    --blue-a:     #5CC6EE;             /* the Notes gradient on the phone */
+    --blue-b:     #2D9FD0;
+    --coral:      #FA6140;
+    --coral-050:  #FDECEA;
+    --cyan-050:   #E0F6F5;
+    --cyan-ink:   #00AFD6;
+    --pad-page:   32px;
+    --gap:        16px;
+    --r-banner:   24px;
+    --r-card:     16px;
+    --shadow:     0 2px 10px 0 rgba(76, 78, 100, .18);
+    --shadow-lift: 0 12px 32px -12px rgba(22, 55, 61, .32);
+  }
+  @media (max-width: 1023px) { :root { --pad-page: 24px; --gap: 14px; } }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--page); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+  body { font-size: 15px; line-height: 1.45; padding-bottom: 96px; }
+  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+  img { display: block; max-width: 100%; }
+
+  /* ── the page frame: the home page's own header, so the banner is judged
+        where it will live, under the greeting and the search field ─────── */
+  .page { max-width: 1136px; margin: 0 auto; padding: 0 var(--pad-page); }
+  .top {
+    display: flex; align-items: center; gap: 12px;
+    padding: 20px 0 8px;
+  }
+  .search {
+    flex: 1 1 auto; display: flex; align-items: center; gap: 16px;
+    height: 56px; padding: 0 24px; border-radius: 999px;
+    background: #F4FAF8; box-shadow: var(--shadow); color: var(--ink-3); font-size: 17px;
+  }
+  .search .ham { width: 22px; height: 2px; background: var(--ink); box-shadow: 0 -7px 0 var(--ink), 0 7px 0 var(--ink); border-radius: 2px; margin-right: 8px; }
+  .search .mag { margin-left: auto; width: 20px; height: 20px; border: 2.5px solid var(--ink); border-radius: 50%; position: relative; }
+  .search .mag::after { content: ''; position: absolute; width: 2.5px; height: 8px; background: var(--ink); right: -4px; bottom: -6px; transform: rotate(-45deg); border-radius: 2px; }
+  .round { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: #FFFFFF; box-shadow: var(--shadow); font-size: 22px; }
+  .round--star { background: #F6E7A6; }
+
+  /* ── section chrome for the mockup itself ────────────────────────────── */
+  .approach { margin-top: 40px; }
+  .approach:first-of-type { margin-top: 24px; }
+  .approach__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 12px; }
+  .approach__letter {
+    flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--petrol-800); color: #fff; font-weight: 700; font-size: 16px; align-self: center;
+  }
+  .approach__title { font-size: 20px; font-weight: 700; color: var(--ink-head); letter-spacing: -.01em; }
+  .approach__note { font-size: 14px; color: var(--ink-2); max-width: 64ch; }
+  .approach__note strong { color: var(--ink); font-weight: 600; }
+
+  /* ── shared pieces ───────────────────────────────────────────────────── */
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 28px; padding: 0 12px 0 8px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .chip i { width: 16px; height: 16px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10px; font-style: normal; }
+  .chip--ann  { background: var(--green-050); color: var(--green-ink); }
+  .chip--ann i { background: var(--green); color: #fff; }
+  .chip--note { background: #E4F3FA; color: #1D6E96; }
+  .chip--note i { background: var(--blue-b); color: #fff; }
+  .chip--ins  { background: var(--petrol-050); color: var(--petrol-800); }
+  .chip--ins i { background: var(--petrol-800); color: #fff; }
+  .chip--on-dark { background: rgba(255,255,255,.18); color: #fff; }
+  .chip--on-dark i { background: #fff; color: var(--blue-b); }
+
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 14px; color: var(--ink-2); }
+  .meta .who { font-weight: 500; color: var(--ink); }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #F7C6A3, #E8865B); flex: none; }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .6; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 44px; padding: 0 22px; border-radius: 12px; font-weight: 600; font-size: 15px;
+  }
+  .btn--primary { background: var(--green-ink); color: #fff; }
+  .btn--ghost   { background: var(--petrol-050); color: var(--petrol-800); }
+  .btn--on-dark { background: rgba(255,255,255,.92); color: var(--petrol-900); }
+
+  .react { display: flex; align-items: center; gap: 8px; }
+  .react span {
+    display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 999px;
+    background: var(--petrol-050); color: var(--ink-2); font-size: 14px; font-weight: 500;
+  }
+
+  .dots { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+  .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--petrol-200); }
+  .dots i.on { width: 20px; border-radius: 3px; background: var(--petrol-800); }
+
+  /* ══ A · ONE HERO ═══════════════════════════════════════════════════════ */
+  .stack { position: relative; padding-right: 24px; }
+  /* the next two slides, peeking out behind the banner as Hotstar draws them */
+  .stack::before, .stack::after {
+    content: ''; position: absolute; top: 14px; bottom: 14px; right: 12px;
+    border-radius: var(--r-banner); background: #FFFFFF; box-shadow: var(--shadow); opacity: .9;
+  }
+  .stack::after { top: 28px; bottom: 28px; right: 0; opacity: .6; }
+  .stack::before { left: 12px; }
+  .stack::after  { left: 24px; }
+
+  .hero {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+    min-height: 272px; border-radius: var(--r-banner); overflow: hidden;
+    background: var(--card); box-shadow: var(--shadow-lift);
+  }
+  .hero__media { position: relative; min-width: 0; overflow: hidden; }
+  .hero__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero__media .badge { z-index: 1; }
+  .hero__media .badge {
+    position: absolute; left: 16px; top: 16px;
+    display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px;
+    border-radius: 999px; background: rgba(22, 55, 61, .72); color: #fff; font-size: 13px; font-weight: 600;
+    backdrop-filter: blur(8px);
+  }
+  .hero__body {
+    display: flex; flex-direction: column; gap: 12px; min-width: 0;
+    padding: 24px 28px 24px 28px;
+  }
+  .btn { white-space: nowrap; }
+  .hero__title { font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -.015em; color: var(--ink); }
+  .hero__text { font-size: 15px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hero__foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+  .react span { height: 34px; padding: 0 12px; }
+
+  /* the same frame, when the slide is a Key Insight: numbers instead of a photo */
+  .hero--ins .hero__media { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 24px; background: linear-gradient(160deg, #F7FCFB, #E8F4F2); }
+  .stat { min-width: 0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; }
+  .stat--nat { background: var(--cyan-050); }
+  .stat--mor { background: var(--coral-050); }
+  .stat b { font-size: 44px; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat--nat b { color: var(--cyan-ink); }
+  .stat--mor b { color: #E4432E; }
+  .stat span { font-size: 15px; color: var(--ink-2); }
+
+  /* the same frame, when the slide is a Note: the phone's blue */
+  .hero--note { background: linear-gradient(118deg, var(--blue-a) 0%, var(--blue-b) 100%); color: #fff; }
+  .hero--note .hero__title, .hero--note .hero__text, .hero--note .meta, .hero--note .meta .who { color: #fff; }
+  .hero--note .hero__text { opacity: .92; }
+  .hero--note .meta { opacity: .92; }
+  .hero--note .hero__media { display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; padding: 24px 28px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tags span { height: 30px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.2); display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; }
+  .bang { position: absolute; right: 24px; top: 24px; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,.9); color: var(--blue-b); display: grid; place-items: center; font-weight: 700; font-size: 22px; }
+  .site { display: flex; align-items: center; gap: 12px; }
+  .site .a { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.28); display: grid; place-items: center; font-family: Georgia, serif; font-style: italic; font-size: 20px; }
+  .site b { display: block; font-size: 16px; font-weight: 600; }
+  .site span { font-size: 14px; opacity: .9; }
+
+  /* a smaller row of the two other slides, so A can be judged whole */
+  .slides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-top: 24px; }
+  .slides .hero { min-height: 232px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); box-shadow: var(--shadow); }
+  @media (max-width: 1023px) { .slides .hero__foot .react { display: none; } .slides .hero--ins .hero__media { grid-template-columns: 1fr; } }
+  .slides .hero__title { font-size: 22px; }
+  .slides .hero__body { padding: 20px 24px; }
+  .slides .stat b { font-size: 36px; }
+  .slides .hero--ins .hero__media { padding: 20px; }
+  .slides .hero--note .hero__media { padding: 20px 24px; }
+  .slides__label { grid-column: 1 / -1; font-size: 13px; color: var(--ink-3); font-weight: 500; letter-spacing: .04em; text-transform: uppercase; margin-bottom: -4px; }
+
+  /* ══ B · HERO + RAIL ═════════════════════════════════════════════════════ */
+  .split { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--gap); }
+  .split .hero { min-height: 312px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  @media (max-width: 1023px) { .split .hero { min-height: 352px; } }
+  .rail { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+  .mini {
+    flex: 1 1 0; min-height: 0; border-radius: 20px; padding: 16px; background: var(--card); box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;
+  }
+  .mini__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .mini__title { font-size: 17px; font-weight: 700; color: var(--ink); }
+  .mini__sub { font-size: 13px; color: var(--ink-2); }
+  .mini__link { font-size: 14px; font-weight: 600; color: var(--green-ink); white-space: nowrap; }
+  .mini .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+  .mini .stat { padding: 10px 12px; border-radius: 12px; }
+  .mini .stat b { font-size: 30px; }
+  .mini .stat span { font-size: 13px; }
+  .mini--note { background: linear-gradient(118deg, var(--blue-a) 0%, var(--blue-b) 100%); color: #fff; }
+  .mini--note .mini__title, .mini--note .mini__sub, .mini--note .mini__link { color: #fff; }
+  .mini--note .mini__sub { opacity: .92; }
+  .mini--note .tags span { height: 26px; font-size: 13px; }
+  .mini--note .who-line { margin-top: auto; font-size: 13px; opacity: .92; }
+  .mini--note .who-line b { font-weight: 600; }
+  .mini--note .bang { top: 16px; right: 16px; width: 32px; height: 32px; font-size: 18px; border-radius: 8px; }
+
+  /* ══ C · SWITCHER ═══════════════════════════════════════════════════════ */
+  .seg {
+    display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px;
+    background: #FFFFFF; box-shadow: var(--shadow); margin-bottom: var(--gap);
+  }
+  .seg button {
+    height: 44px; padding: 0 20px; border-radius: 999px; font-size: 15px; font-weight: 600; color: var(--ink-2);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .seg button .n { height: 22px; min-width: 22px; padding: 0 6px; border-radius: 999px; background: var(--petrol-050); color: var(--ink-2); font-size: 12px; display: inline-grid; place-items: center; }
+  .seg button.on { color: #fff; }
+  .seg button.on .n { background: rgba(255,255,255,.22); color: #fff; }
+  .seg button.on--ann  { background: var(--green-ink); }
+  .seg button.on--note { background: linear-gradient(118deg, var(--blue-a), var(--blue-b)); }
+  .seg button.on--ins  { background: var(--petrol-800); }
+  .seg-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .seg-row .all { font-size: 15px; font-weight: 600; color: var(--green-ink); margin-bottom: var(--gap); }
+
+  .wide { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--gap); }
+  .wide .hero { min-height: 256px; grid-template-columns: 1fr; }
+  .wide .hero--note .hero__media { flex: 1 1 auto; }
+  .wide .hero--note .hero__body { padding-top: 0; }
+  .wide .hero--note .hero__foot { margin-top: 0; }
+
+
+  /* ══ D · FITTING A WITHOUT LOSING THE GRID ═══════════════════════════════
+     The user's read on A, 3 Sep 2026: good, but it takes too much of the tab,
+     and the page is for the module cards. Three ways to keep A's shape and
+     give the height back. Each is followed by a row of real module cards so
+     what survives above the fold is visible, not described. */
+  .tactic { margin-top: 28px; }
+  .tactic__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+  .tactic__title { font-size: 16px; font-weight: 700; color: var(--ink-head); }
+  .tactic__title small { font-weight: 500; color: var(--ink-3); margin-left: 8px; font-size: 13px; }
+  .tactic__cost { flex: none; font-size: 13px; font-weight: 600; color: var(--petrol-800); background: var(--petrol-050); border-radius: 999px; height: 26px; padding: 0 10px; display: inline-flex; align-items: center; }
+  .tactic__cost.zero { color: var(--green-ink); background: var(--green-050); }
+
+  /* the module grid, as the home page draws it: 5 × 164 at 1024, 4 at 768 */
+  .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 164px; gap: var(--gap); margin-top: var(--gap); }
+  @media (max-width: 1023px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .grid .m:nth-child(n+5):not(.keep) { display: none; } }
+  .m { position: relative; border-radius: 16px; padding: 16px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-shadow: var(--shadow); }
+  .m img { width: 36px; height: 36px; filter: brightness(0) invert(1); }
+  .m b { font-size: 18px; font-weight: 500; letter-spacing: -.01em; }
+  .m--medical  { background: linear-gradient(128deg, #8EBEA5 6%, #5C9A7C 100%); }
+  .m--species  { background: linear-gradient(128deg, #529C76 6%, #2E7A55 100%); }
+  .m--hospital { background: linear-gradient(128deg, #67898F 6%, #3E626A 100%); }
+  .m--pharmacy { background: linear-gradient(128deg, #779B9F 6%, #4F787E 100%); }
+  .m--lab      { background: linear-gradient(128deg, #D8C993 6%, #C9B36A 100%); }
+  .m--eggs     { background: linear-gradient(128deg, #6ADCE2 6%, #3FC0D2 100%); }
+  .m--audit    { background: linear-gradient(128deg, #C96278 6%, #B44A66 100%); }
+  .m--mortality{ background: linear-gradient(128deg, #FB9984 6%, #F97A62 100%); }
+  .m.wide { grid-column: span 2; }
+  .grid-note { font-size: 13px; color: var(--ink-3); margin-top: 8px; }
+
+  /* D1 · the hero the page already has, with the announcement as a slide */
+  .hero--fold { min-height: 204px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hero--fold .hero__body { padding: 20px 76px 20px 24px; gap: 8px; }
+  .hero--fold .hero__foot { margin-right: -52px; }
+  .hero--fold .hero__title { font-size: 22px; }
+  .hero--fold .hero__text { -webkit-line-clamp: 1; }
+  .slides .hero--fold .hero__body { padding-right: 24px; }
+  .slides .hero--estate .est-title { font-size: 22px; }
+  .slides .hero--estate .est-mark { width: 44px; height: 44px; }
+  .slides .hero--fold .hero__foot { margin-right: 0; }
+  .hero--fold .mark { position: absolute; right: 20px; top: 16px; width: 44px; height: 44px; opacity: .9; }
+  .hero--fold .mark img { width: 100%; height: 100%; transform: rotate(-45deg); }
+  .hero--fold .btn { height: 38px; padding: 0 16px; font-size: 14px; border-radius: 10px; }
+  .hero--fold .react span { height: 30px; padding: 0 10px; font-size: 13px; }
+  /* the slider: Hotstar's stack behind, one 204px slide in front, swipe or dots */
+  .car { position: relative; z-index: 1; overflow: hidden; border-radius: var(--r-banner); box-shadow: var(--shadow-lift); touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .car__track { display: flex; transition: transform 420ms cubic-bezier(.22,.61,.36,1); will-change: transform; }
+  .car.is-dragging .car__track { transition: none; }
+  .car__track > .hero { flex: 0 0 100%; min-width: 0; box-shadow: none; border-radius: 0; }
+  .stack--car .car { min-height: 204px; }
+  .hero--estate { grid-template-columns: 1fr; color: #fff; }
+  .hero--estate .hero__media { display: flex; flex-direction: column; justify-content: space-between; padding: 20px 32px; min-height: 204px; }
+  .hero--estate .hero__media > img { object-position: 50% 82%; }
+  .hero--estate .hero__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,.6) 100%); }
+  .hero--estate .est-mark { position: relative; z-index: 1; align-self: flex-end; width: 56px; height: 56px; }
+  .hero--estate .est-mark img { width: 100%; height: 100%; transform: rotate(-45deg); }
+  .hero--estate .est-title { position: relative; z-index: 1; font-size: 30px; font-weight: 700; letter-spacing: -.02em; }
+  .hero--fold.hero--ins .hero__media { padding: 18px 20px; }
+  .hero--fold.hero--ins .stat b { font-size: 36px; }
+  .hero--fold.hero--note .hero__media { padding: 18px 24px; }
+  .hero--fold .hero__body .chip.chip--on-dark { align-self: flex-start; }
+  .fold-dots i { cursor: pointer; }
+  .fold-dots { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+  .fold-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--petrol-200); }
+  .fold-dots i.on { width: 20px; border-radius: 3px; background: var(--petrol-800); }
+  .fold-dots i.est { background: var(--ink-3); }
+
+  /* D2 · a strip: one line under the search, the feed behind a tap */
+  .strip {
+    display: flex; align-items: center; gap: 14px; height: 56px; padding: 0 8px 0 8px;
+    border-radius: 999px; background: var(--card); box-shadow: var(--shadow); min-width: 0;
+  }
+  .strip .thumb { flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; }
+  .strip .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .strip .chip { height: 24px; font-size: 11px; flex: none; }
+  .strip .t { flex: 1 1 auto; min-width: 0; font-size: 15px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .strip .t span { font-weight: 400; color: var(--ink-2); }
+  .strip .more { flex: none; font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px; }
+  .strip .more i { display: inline-grid; grid-auto-flow: column; gap: 4px; }
+  .strip .more i b { width: 6px; height: 6px; border-radius: 50%; background: var(--petrol-200); }
+  .strip .more i b:first-child { background: var(--petrol-800); width: 14px; border-radius: 3px; }
+  .strip .go { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--petrol-050); color: var(--petrol-800); font-size: 18px; font-weight: 600; }
+
+  /* D3 · widgets in the grid */
+  .w { position: relative; border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: var(--shadow); display: flex; flex-direction: column; min-width: 0; }
+  .w--ann { grid-column: span 2; flex-direction: row; }
+  .w--ann .pic { flex: 0 0 42%; position: relative; }
+  .w--ann .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .w--ann .copy { flex: 1 1 auto; min-width: 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .w--ann .copy .chip { height: 22px; font-size: 10px; padding: 0 8px 0 6px; align-self: flex-start; }
+  .w--ann .copy .chip i { width: 12px; height: 12px; font-size: 8px; }
+  .w--ann .copy h4 { font-size: 16px; line-height: 1.2; font-weight: 700; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .w--ann .copy .meta { font-size: 12px; margin-top: auto; }
+  .w--ann .copy .meta .avatar { width: 20px; height: 20px; }
+  .w--ins { padding: 14px; gap: 8px; }
+  .w--ins .h { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 700; color: var(--ink); }
+  .w--ins .h span { font-weight: 500; color: var(--green-ink); font-size: 12px; }
+  .w--ins .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1 1 auto; }
+  .w--ins .stat { padding: 8px 6px; border-radius: 10px; gap: 2px; }
+  .w--ins .stat b { font-size: 26px; }
+  .w--ins .stat span { font-size: 11px; }
+  .w--note { padding: 14px; color: #fff; background: linear-gradient(118deg, var(--blue-a) 0%, var(--blue-b) 100%); gap: 4px; justify-content: flex-end; }
+  .w--note .bang { top: 12px; right: 12px; width: 28px; height: 28px; font-size: 16px; border-radius: 7px; }
+  .w--note h4 { font-size: 18px; font-weight: 700; }
+  .w--note p { font-size: 13px; opacity: .92; }
+  .w--note small { font-size: 11px; opacity: .9; margin-top: 4px; }
+
+  /* ── the mockup's own foot ───────────────────────────────────────────── */
+  .legend { margin-top: 48px; padding: 20px 24px; border-radius: 16px; background: #FFFFFF; box-shadow: var(--shadow); font-size: 14px; color: var(--ink-2); }
+  .legend li { line-height: 1.5; }
+  .legend h3 { font-size: 15px; color: var(--ink-head); margin-bottom: 8px; }
+  .legend ul { padding-left: 18px; display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- the home page's own header, for context -->
+  <div class="top">
+    <div class="search"><span class="ham"></span>Search<span class="mag"></span></div>
+    <div class="round round--star">⭐</div>
+    <div class="round">🔔</div>
+  </div>
+
+  <!-- ═══ A ═══ -->
+  <section class="approach">
+    <div class="approach__head">
+      <span class="approach__letter">A</span>
+      <div>
+        <div class="approach__title">One hero, slides for the three</div>
+        <p class="approach__note">Hotstar taken literally: <strong>one banner, one thing at a time.</strong> Picture left, copy right, one button. Announcements, the month's Key Insights and the newest Note are the slides; the next two peek out behind. Quietest of the three, and the only one that fits above the module grid without pushing it.</p>
+      </div>
+    </div>
+
+    <div class="stack">
+      <article class="hero">
+        <div class="hero__media">
+          <img src="../assets/img/species.jpg" alt="">
+          <span class="badge">📎 1 image</span>
+        </div>
+        <div class="hero__body">
+          <span class="chip chip--ann"><i>📣</i>Announcement</span>
+          <h2 class="hero__title">World African wild dog day</h2>
+          <div class="meta"><span class="avatar"></span><span class="who">Kunal Singh</span><span class="dot"></span>7d ago</div>
+          <p class="hero__text">Did you know that African wild dogs are the ultimate team players?</p>
+          <div class="hero__foot">
+            <span class="btn btn--primary">Read more</span>
+            <div class="react"><span>👍 0</span><span>💬 1</span></div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="dots"><i class="on"></i><i></i><i></i></div>
+
+    <div class="slides">
+      <span class="slides__label">Slides 2 and 3 in the same frame</span>
+      <article class="hero hero--ins">
+        <div class="hero__media">
+          <div class="stat stat--nat"><b>0</b><span>Natality</span></div>
+          <div class="stat stat--mor"><b>0</b><span>Mortality</span></div>
+        </div>
+        <div class="hero__body">
+          <span class="chip chip--ins"><i>📈</i>This month</span>
+          <h2 class="hero__title">01 Sep – 03 Sep 2026</h2>
+          <p class="hero__text">Births and deaths across the collection so far this month, against the same days last year.</p>
+          <div class="hero__foot"><span class="btn btn--ghost">Key Insights ›</span></div>
+        </div>
+      </article>
+      <article class="hero hero--note">
+        <div class="hero__media">
+          <span class="bang">!</span>
+          <div class="tags"><span>Nest Box</span><span>Enrichment</span><span>New Structure</span></div>
+          <div class="site"><span class="a">a</span><span><b>Bhitarkanika</b><span>Adirampattinam</span></span></div>
+        </div>
+        <div class="hero__body">
+          <span class="chip chip--on-dark"><i>✎</i>Note</span>
+          <h2 class="hero__title">Carpentry</h2>
+          <div class="meta"><span class="who">Sowmya 09</span><span class="dot"></span>10d ago</div>
+          <div class="hero__foot"><span class="btn btn--on-dark">Open note</span><div class="react" style="opacity:.92"><span style="background:rgba(255,255,255,.2);color:#fff">👍 0</span><span style="background:rgba(255,255,255,.2);color:#fff">🔖</span></div></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══ B ═══ -->
+  <section class="approach">
+    <div class="approach__head">
+      <span class="approach__letter">B</span>
+      <div>
+        <div class="approach__title">Hero for the Announcement, a rail for the rest</div>
+        <p class="approach__note">The Announcement gets the Hotstar banner; <strong>Key Insights and the latest Note sit beside it,</strong> the way the phone stacks them. Everything is on screen at once and nothing waits behind a dot — the numbers are readable at a glance, which is what a Key Insight is for. Tallest of the three.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <article class="hero">
+        <div class="hero__media">
+          <img src="../assets/img/hero-leopard.jpg" alt="" style="object-position: 50% 30%">
+          <span class="badge">📎 1 image</span>
+        </div>
+        <div class="hero__body">
+          <span class="chip chip--ann"><i>📣</i>Announcement</span>
+          <h2 class="hero__title">Did you know?</h2>
+          <div class="meta"><span class="avatar"></span><span class="who">Kunal Singh</span><span class="dot"></span>16d ago</div>
+          <p class="hero__text">The orangutan is one of humankind's closest relatives — we share nearly 97% of the same DNA.</p>
+          <div class="hero__foot">
+            <span class="btn btn--primary">Read more</span>
+            <div class="react"><span>👍 0</span><span>💬 1</span></div>
+          </div>
+        </div>
+      </article>
+
+      <div class="rail">
+        <div class="mini">
+          <div class="mini__head">
+            <div><div class="mini__title">This Month</div><div class="mini__sub">01 Sep 2026 – 03 Sep 2026</div></div>
+            <span class="mini__link">Key Insights ›</span>
+          </div>
+          <div class="stats">
+            <div class="stat stat--nat"><b>0</b><span>Natality</span></div>
+            <div class="stat stat--mor"><b>0</b><span>Mortality</span></div>
+          </div>
+        </div>
+        <div class="mini mini--note">
+          <span class="bang">!</span>
+          <div class="mini__head">
+            <div><div class="mini__title">Hygiene</div><div class="mini__sub">Unclean Environment</div></div>
+          </div>
+          <div class="tags"><span>Note</span><span>Adirampattinam</span></div>
+          <div class="who-line"><b>Neeta Zoo With Approval</b> · 8d ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+  </section>
+
+  <!-- ═══ C ═══ -->
+  <section class="approach">
+    <div class="approach__head">
+      <span class="approach__letter">C</span>
+      <div>
+        <div class="approach__title">A switcher over one shelf</div>
+        <p class="approach__note">Hotstar's JioHotstar | TADKA pill, turned into a segmented control. <strong>The shelf shows two cards of whichever type is selected</strong> and takes that type's colour — green for Announcements, the phone's blue for Notes, petrol for Insights. Shown with Notes selected. Most interactive; the two types not selected are invisible until you tap.</p>
+      </div>
+    </div>
+
+    <div class="seg-row">
+      <div class="seg">
+        <button>Announcements <span class="n">2</span></button>
+        <button class="on on--note">Notes <span class="n">2</span></button>
+        <button>Key Insights <span class="n">1</span></button>
+      </div>
+      <span class="all">View all notes ›</span>
+    </div>
+
+    <div class="wide">
+      <article class="hero hero--note">
+        <div class="hero__media">
+          <span class="bang">!</span>
+          <span class="chip chip--on-dark"><i>✎</i>Note</span>
+          <h2 class="hero__title" style="margin-top:8px">Hygiene</h2>
+          <div class="tags"><span>Unclean Environment</span></div>
+        </div>
+        <div class="hero__body">
+          <div class="hero__foot">
+            <div class="site"><span class="a">a</span><span><b>123</b><span>Adirampattinam</span></span></div>
+            <div class="meta"><span class="who">Neeta Zoo With Approval</span><span class="dot"></span>8d ago</div>
+          </div>
+        </div>
+      </article>
+      <article class="hero hero--note">
+        <div class="hero__media">
+          <span class="bang">!</span>
+          <span class="chip chip--on-dark"><i>✎</i>Note</span>
+          <h2 class="hero__title" style="margin-top:8px">Carpentry</h2>
+          <div class="tags"><span>Nest Box</span><span>Enrichment</span><span>New Structure</span></div>
+        </div>
+        <div class="hero__body">
+          <div class="hero__foot">
+            <div class="site"><span class="a">a</span><span><b>Bhitarkanika</b><span>Adirampattinam</span></span></div>
+            <div class="meta"><span class="who">Sowmya 09</span><span class="dot"></span>10d ago</div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+
+  <!-- ═══ D ═══ -->
+  <section class="approach">
+    <div class="approach__head">
+      <span class="approach__letter">D</span>
+      <div>
+        <div class="approach__title">Keeping A, giving the height back</div>
+        <p class="approach__note">A was liked; the worry is the tab. <strong>The page already spends 204px on the Antz Command Centre hero,</strong> so a second banner is where the height really goes. Three ways to keep A's shape without pushing the module cards down. Each shows the first card row underneath, as it would land at 1024.</p>
+      </div>
+    </div>
+
+    <!-- D1 -->
+    <div class="tactic">
+      <div class="tactic__head">
+        <div class="tactic__title">D1 · Fold it into the hero the page already has <small>slide 1 stays the estate; announcements, insights and notes are slides 2–4</small></div>
+        <span class="tactic__cost zero">+0px</span>
+      </div>
+      <div class="stack stack--car">
+        <div class="car" id="car">
+          <div class="car__track">
+            <article class="hero hero--fold hero--estate">
+              <div class="hero__media">
+                <img src="../assets/img/hero-banner.jpg" alt="">
+                <span class="est-mark"><img src="../assets/icon/hero-logo.svg" alt=""></span>
+                <span class="est-title">Antz Command Centre</span>
+              </div>
+            </article>
+            <article class="hero hero--fold">
+              <div class="hero__media">
+                <img src="../assets/img/species.jpg" alt="">
+                <span class="badge">📎 1 image</span>
+              </div>
+              <div class="hero__body">
+                <span class="mark"><img src="../assets/icon/hero-logo.svg" alt=""></span>
+                <span class="chip chip--ann"><i>📣</i>Announcement</span>
+                <h2 class="hero__title">World African wild dog day</h2>
+                <div class="meta"><span class="avatar"></span><span class="who">Kunal Singh</span><span class="dot"></span>7d ago</div>
+                <div class="hero__foot">
+                  <span class="btn btn--primary">Read more</span>
+                  <div class="react"><span>👍 0</span><span>💬 1</span></div>
+                </div>
+              </div>
+            </article>
+            <article class="hero hero--fold hero--ins">
+              <div class="hero__media">
+                <div class="stat stat--nat"><b>0</b><span>Natality</span></div>
+                <div class="stat stat--mor"><b>0</b><span>Mortality</span></div>
+              </div>
+              <div class="hero__body">
+                <span class="mark"><img src="../assets/icon/hero-logo.svg" alt=""></span>
+                <span class="chip chip--ins"><i>📈</i>Key Insights · This month</span>
+                <h2 class="hero__title">01 Sep – 03 Sep 2026</h2>
+                <p class="hero__text">Births and deaths across the collection so far this month.</p>
+                <div class="hero__foot"><span class="btn btn--ghost">Key Insights ›</span></div>
+              </div>
+            </article>
+            <article class="hero hero--fold hero--note">
+              <div class="hero__media">
+                <span class="bang">!</span>
+                <div class="tags"><span>Nest Box</span><span>Enrichment</span><span>New Structure</span></div>
+                <div class="site"><span class="a">a</span><span><b>Bhitarkanika</b><span>Adirampattinam</span></span></div>
+              </div>
+              <div class="hero__body">
+                <span class="chip chip--on-dark"><i>✎</i>Note</span>
+                <h2 class="hero__title">Carpentry</h2>
+                <div class="meta"><span class="who">Sowmya 09</span><span class="dot"></span>10d ago</div>
+                <div class="hero__foot"><span class="btn btn--on-dark">Open note</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+      <div class="fold-dots" id="carDots"><i class="est"></i><i class="on"></i><i></i><i></i></div>
+      
+      <div class="grid">
+        <div class="m m--medical"><img src="../assets/icon/m-medical.svg" alt=""><b>Medical</b></div>
+        <div class="m m--species"><img src="../assets/icon/m-species.svg" alt=""><b>Species</b></div>
+        <div class="m m--hospital"><img src="../assets/icon/m-hospital.svg" alt=""><b>Hospital</b></div>
+        <div class="m m--pharmacy"><img src="../assets/icon/m-pharmacy.svg" alt=""><b>Pharmacy</b></div>
+        <div class="m m--lab"><img src="../assets/icon/m-lab.svg" alt=""><b>Lab</b></div>
+      </div>
+      <div class="grid-note">Swipe the banner or tap a dot. The grey first dot is the estate illustration the hero shows today; the slider advances on its own every six seconds and stops when touched. Nothing under it moves.</div>
+
+      <div class="slides">
+        <span class="slides__label">The four slides, flat, at the hero's 204px</span>
+        <article class="hero hero--fold hero--estate">
+          <div class="hero__media">
+            <img src="../assets/img/hero-banner.jpg" alt="">
+            <span class="est-mark"><img src="../assets/icon/hero-logo.svg" alt=""></span>
+            <span class="est-title">Antz Command Centre</span>
+          </div>
+        </article>
+        <article class="hero hero--fold">
+          <div class="hero__media"><img src="../assets/img/species.jpg" alt=""><span class="badge">📎 1 image</span></div>
+          <div class="hero__body">
+            <span class="chip chip--ann"><i>📣</i>Announcement</span>
+            <h2 class="hero__title">World African wild dog day</h2>
+            <div class="meta"><span class="avatar"></span><span class="who">Kunal Singh</span><span class="dot"></span>7d ago</div>
+            <div class="hero__foot"><span class="btn btn--primary">Read more</span></div>
+          </div>
+        </article>
+        <article class="hero hero--fold hero--ins">
+          <div class="hero__media">
+            <div class="stat stat--nat"><b>0</b><span>Natality</span></div>
+            <div class="stat stat--mor"><b>0</b><span>Mortality</span></div>
+          </div>
+          <div class="hero__body">
+            <span class="chip chip--ins"><i>📈</i>Key Insights</span>
+            <h2 class="hero__title">01 Sep – 03 Sep 2026</h2>
+            <div class="hero__foot"><span class="btn btn--ghost">Key Insights ›</span></div>
+          </div>
+        </article>
+        <article class="hero hero--fold hero--note">
+          <div class="hero__media">
+            <span class="bang">!</span>
+            <div class="tags"><span>Nest Box</span><span>Enrichment</span></div>
+            <div class="site"><span class="a">a</span><span><b>Bhitarkanika</b><span>Adirampattinam</span></span></div>
+          </div>
+          <div class="hero__body">
+            <span class="chip chip--on-dark"><i>✎</i>Note</span>
+            <h2 class="hero__title">Carpentry</h2>
+            <div class="meta"><span class="who">Sowmya 09</span><span class="dot"></span>10d ago</div>
+            <div class="hero__foot"><span class="btn btn--on-dark">Open note</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- D2 -->
+    <div class="tactic">
+      <div class="tactic__head">
+        <div class="tactic__title">D2 · A strip under the search <small>one line; the full A banner opens in a sheet on tap</small></div>
+        <span class="tactic__cost">+72px</span>
+      </div>
+      <div class="strip">
+        <span class="thumb"><img src="../assets/img/species.jpg" alt=""></span>
+        <span class="chip chip--ann"><i>📣</i>Announcement</span>
+        <span class="t">World African wild dog day <span>· Kunal Singh · 7d ago</span></span>
+        <span class="more"><i><b></b><b></b><b></b></i>2 more</span>
+        <span class="go">›</span>
+      </div>
+      
+      <div class="grid">
+        <div class="m m--medical"><img src="../assets/icon/m-medical.svg" alt=""><b>Medical</b></div>
+        <div class="m m--species"><img src="../assets/icon/m-species.svg" alt=""><b>Species</b></div>
+        <div class="m m--hospital"><img src="../assets/icon/m-hospital.svg" alt=""><b>Hospital</b></div>
+        <div class="m m--pharmacy"><img src="../assets/icon/m-pharmacy.svg" alt=""><b>Pharmacy</b></div>
+        <div class="m m--lab"><img src="../assets/icon/m-lab.svg" alt=""><b>Lab</b></div>
+      </div>
+      <div class="grid-note">56px plus the 16px gap. Reads as a notification, not a feature; Key Insights are never seen without a tap.</div>
+    </div>
+
+    <!-- D3 -->
+    <div class="tactic">
+      <div class="tactic__head">
+        <div class="tactic__title">D3 · Into the grid, as widgets <small>a 2×1 Announcement card, a 1×1 Key Insights card, a 1×1 Note card</small></div>
+        <span class="tactic__cost zero">+0px · one grid row</span>
+      </div>
+      <div class="grid">
+        <article class="w w--ann">
+          <div class="pic"><img src="../assets/img/species.jpg" alt=""></div>
+          <div class="copy">
+            <span class="chip chip--ann"><i>📣</i>Announcement</span>
+            <h4>World African wild dog day</h4>
+            <div class="meta"><span class="avatar"></span><span class="who">Kunal Singh</span><span class="dot"></span>7d ago</div>
+          </div>
+        </article>
+        <article class="w w--ins">
+          <div class="h">This Month <span>Insights ›</span></div>
+          <div class="stats">
+            <div class="stat stat--nat"><b>0</b><span>Natality</span></div>
+            <div class="stat stat--mor"><b>0</b><span>Mortality</span></div>
+          </div>
+        </article>
+        <article class="w w--note">
+          <span class="bang">!</span>
+          <h4>Hygiene</h4>
+          <p>Unclean Environment</p>
+          <small>Neeta Zoo With Approval · 8d ago</small>
+        </article>
+        <div class="m m--medical keep"><img src="../assets/icon/m-medical.svg" alt=""><b>Medical</b></div>
+        <div class="m m--species keep"><img src="../assets/icon/m-species.svg" alt=""><b>Species</b></div>
+        <div class="m m--hospital keep"><img src="../assets/icon/m-hospital.svg" alt=""><b>Hospital</b></div>
+        <div class="m m--pharmacy keep"><img src="../assets/icon/m-pharmacy.svg" alt=""><b>Pharmacy</b></div>
+        <div class="m m--lab"><img src="../assets/icon/m-lab.svg" alt=""><b>Lab</b></div>
+        <div class="m m--eggs"><img src="../assets/icon/m-eggs.svg" alt=""><b>Eggs</b></div>
+      </div>
+      <div class="grid-note">They are cards like any other: the curator drags, resizes or removes them from Edit Modules, and Add Module lists them under Communication. This is the only tactic that uses what the product already is.</div>
+    </div>
+  </section>
+
+  <div class="legend">
+    <h3>What to look at before deciding</h3>
+    <ul>
+      <li><strong>How much of the module grid it pushes down.</strong> A is 272px plus dots. B is 312px. C is 44px of control plus 256px. D1 and D3 add nothing; D2 adds 72px.</li>
+      <li><strong>Whether Key Insights should ever be hidden.</strong> In A they are one dot away; in C, one tap; in B, always visible.</li>
+      <li><strong>The Notes blue.</strong> It is the phone's gradient, kept on purpose so a Note is recognisable across devices. It is the loudest thing on this page.</li>
+      <li>The Pending Allocations carousel from the phone is not in any of these; it is a Site attention row and belongs with the Site widgets.</li>
+    </ul>
+  </div>
+
+</div>
+<script>
+(() => {
+  const car = document.getElementById('car'), track = car.querySelector('.car__track')
+  const dots = [...document.querySelectorAll('#carDots i')]
+  const n = dots.length
+  let i = 1, timer
+  const go = (k) => { i = (k + n) % n; track.style.transform = `translateX(${-i * 100}%)`; dots.forEach((d, j) => d.classList.toggle('on', j === i)) }
+  const arm = () => { clearInterval(timer); timer = setInterval(() => go(i + 1), 6000) }
+  dots.forEach((d, j) => d.addEventListener('click', () => { go(j); arm() }))
+  let x0 = null, dx = 0
+  car.addEventListener('pointerdown', (e) => { x0 = e.clientX; dx = 0; car.classList.add('is-dragging'); clearInterval(timer) })
+  car.addEventListener('pointermove', (e) => { if (x0 === null) return; dx = e.clientX - x0; track.style.transform = `translateX(calc(${-i * 100}% + ${dx}px))` })
+  const end = () => { if (x0 === null) return; car.classList.remove('is-dragging'); const w = car.clientWidth; go(Math.abs(dx) > w * .18 ? i - Math.sign(dx) : i); x0 = null; arm() }
+  car.addEventListener('pointerup', end); car.addEventListener('pointercancel', end); car.addEventListener('pointerleave', end)
+  go(1); arm()
+})()
+</script>
+</body>
+</html>
