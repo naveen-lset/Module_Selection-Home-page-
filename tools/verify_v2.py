@@ -268,14 +268,13 @@ PILL = """(()=>{
     centred:rr&&Math.abs((rr.left+rr.right)/2 - innerWidth/2)<2,
     fromFoot:rr&&Math.round(innerHeight-rr.bottom),
     label:t&&t.textContent, labelW:t&&Math.round(t.getBoundingClientRect().width),
-    /* THE TWO CENTRES, so the collapse can be checked for moving either
-       control. The pill was always still; the disc travelled 56px until the
-       reservation went in — see `.qa.is-scrolled .qa-pill`. */
+    /* THE TWO CENTRES AND THE GAP BETWEEN THEM. Which of the three is
+       allowed to move is the whole question this row keeps being re-ruled
+       on; see the checks. `--qa-pill-open-w` was read here while the
+       reservation existed and is gone with it. */
     pillCentre:r&&Math.round(r.left+r.width/2),
     discCentre:cr&&Math.round(cr.left+cr.width/2),
     gapToDisc:cr&&r&&Math.round(cr.left-r.right),
-    reservedW:getComputedStyle(document.querySelector('.qa'))
-                .getPropertyValue('--qa-pill-open-w').trim(),
     radius:cs&&cs.borderRadius, borderW:cs&&cs.borderTopWidth,
     bg:cs&&cs.backgroundImage, bgColor:cs&&cs.backgroundColor,
     /* THE MATERIAL, since node 295:5561 took the pair to glass. `ink` is read
@@ -1122,37 +1121,38 @@ def main():
         check("…while the chat disc holds its size",
               near(sc["chatW"], 56, 1) and near(sc["chatH"], 56, 1),
               f"{sc['chatW']}x{sc['chatH']}")
-        # ── AND NEITHER CONTROL MOVES · 10 Sep 2026 ─────────────────────────
-        # THIS IS THE CHECK THE OLD BEHAVIOUR WOULD HAVE FAILED. The row is
-        # centred and holds pill + 12 + disc, so a narrowing pill used to
-        # re-centre the row and hand the whole 56px to the disc: measured
-        # travelling from centre 472 to 416. The pill's own centre was always
-        # still, which is why watching only the pill hid it.
+        # ── THE PAIR STAYS A PAIR · ruled 10 Sep 2026 ──────────────────────
+        # THIS ROW HAS NOW BEEN RULED BOTH WAYS, and the second ruling is the
+        # one in force: "here this gab i dont want. make centre when i scroll
+        # it."
         #
-        # The reservation holds the row's total width constant instead, so
-        # both centres are fixed and the GAP is what gives — 12 open, ~69
-        # collapsed. 2px of tolerance is sub-pixel rounding, not drift.
-        check("…and neither control has moved: both centres are where they were",
-              abs(sc["pillCentre"] - r["pillCentre"]) <= 2
-              and abs(sc["discCentre"] - r["discCentre"]) <= 2,
-              f"pill {r['pillCentre']}→{sc['pillCentre']}, "
-              f"disc {r['discCentre']}→{sc['discCentre']}")
-        # …WHICH IS THE GAP OPENING, and it is asserted so the mechanism is
-        # visible rather than implied: if this came back 12 the pill would be
-        # tracking the disc again and the check above would be passing for the
-        # wrong reason.
-        check("…the gap opening instead, from the frame's 12",
-              sc["gapToDisc"] > 50, f"{r['gapToDisc']} → {sc['gapToDisc']}")
-        # THE RESERVATION IS MEASURED, NOT ASSUMED. `--qa-pill-open-w` is the
-        # pill's own open width, written by measurePill(). A read taken while
-        # the pill is mid-expansion returns something between 52 and 165, and
-        # storing that silently shrinks the reservation until the disc moves
-        # again — which is exactly what a re-measure on the way back to the
-        # top did before it was guarded. So the stored value has to be the
-        # OPEN width and nothing else.
-        check("…off a measured open width, not a mid-transition one",
-              sc["reservedW"] == f"{r['w']}px",
-              f"reserved {sc['reservedW']} vs open {r['w']}px")
+        # The geometry allows exactly one of these at a time. The row is
+        # centred and holds pill + 12 + disc, so when the pill narrows from
+        # 168 to 52 either the row re-centres — constant gap, disc travels —
+        # or the pill reserves its open width — both controls still, gap
+        # opens to ~69. The reservation was built first, to stop the disc
+        # moving under a finger mid-scroll; it was then rejected on the gap it
+        # produced, which is what the user actually saw.
+        #
+        # So what is asserted now is the CONSTANT GAP and a centred row, and
+        # the disc's travel is asserted as a consequence rather than left
+        # unstated — half the pill's collapse, (168-52)/2 = 58.
+        check("…the gap stays the frame's 12, open and collapsed alike",
+              r["gapToDisc"] == 12 and sc["gapToDisc"] == 12,
+              f"{r['gapToDisc']} → {sc['gapToDisc']}")
+        check("…the pill's own centre never moves",
+              abs(sc["pillCentre"] - r["pillCentre"]) <= 2,
+              f"{r['pillCentre']}→{sc['pillCentre']}")
+        # AND THE DISC TAKES THE WHOLE SHIFT, which is the accepted cost of
+        # the ruling and is pinned so it cannot quietly grow: it is exactly
+        # half the label's collapse, and anything else means the row stopped
+        # being centred.
+        check("…and the disc takes the shift, half the label's collapse",
+              abs(abs(sc["discCentre"] - r["discCentre"]) - (r["w"] - 52) / 2) <= 3,
+              f"disc {r['discCentre']}→{sc['discCentre']}, "
+              f"expected {round((r['w'] - 52) / 2)}")
+        check("…with the row still centred on the page while scrolled",
+              sc["centred"], f"centred={sc['centred']}")
 
         # the menu: nineteen modules on a white material, page softened
         c.eval("document.querySelector('.qa-pill').click(); 1")
