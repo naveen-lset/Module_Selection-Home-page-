@@ -423,19 +423,40 @@ TILES = """(()=>{
       return v<=0.04045? v/12.92 : Math.pow((v+0.055)/1.055,2.4)});
     return 0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2];
   };
-  /* white against the tile, which is the only ratio that applies now */
-  const ratio=(css)=>{const L=lum(css); return 1.05/(L+0.05)};
+  /* THE LABEL AGAINST ITS CARD · reworked 10 Sep 2026. This was white
+     against the TILE, when the tile carried the module's colour and the ink
+     was white on all nineteen. The card is white now and the ink is dark, so
+     the pair being measured is the real one either way: whatever the label
+     is, against whatever it sits on. */
+  const ratioOf=(fg,bg)=>{const a=lum(fg)+0.05, b2=lum(bg)+0.05;
+    return a>b2 ? a/b2 : b2/a};
+  const ratio=(x)=>{const cs=getComputedStyle(x);
+    return ratioOf(cs.color, cs.backgroundColor)};
   const nameOf=(x)=>x.querySelector('.qa-mod__t').textContent;
+  const chip=(x)=>x.querySelector('.qa-mod__g');
 
   return JSON.stringify({
     n:t.length,
     visible:t.filter(x=>{const r=b(x);return r.width>1&&r.height>1}).length,
-    /* FLAT, NOT A RAMP · "Modules Colours fixed Colours Only" */
-    withGradient:t.filter(x=>getComputedStyle(x).backgroundImage!=='none').length,
-    distinctColours:uniq(t.map(x=>getComputedStyle(x).backgroundColor)).length,
-    /* NO SHADOW ON THE MODULES · and no border either */
+    /* FLAT, NOT A RAMP · "Modules Colours fixed Colours Only". Read off the
+       CHIP now: the module's colour moved there when the card went white,
+       and a ramp reintroduced on --qa-mod-c would land here. */
+    withGradient:t.filter(x=>getComputedStyle(chip(x)).backgroundImage!=='none').length,
+    distinctColours:uniq(t.map(x=>getComputedStyle(chip(x)).backgroundColor)).length,
+    /* …AND THE CARD ITSELF IS WHITE, every one of them. This is the half a
+       colour count cannot see: nineteen distinct chips would still pass
+       above if the cards had gone coloured again underneath them. */
+    cardsNotWhite:t.filter(x=>{const b=getComputedStyle(x).backgroundColor;
+      return b!=='rgb(255, 255, 255)'}).map(nameOf),
+    /* THE CARDS DO CARRY A SHADOW NOW, which is the reverse of the 9 Sep
+       ruling and is what "Apple Cards Radius, Shadow" asked for. */
     withShadow:t.filter(x=>getComputedStyle(x).boxShadow!=='none').length,
     withBorder:t.filter(x=>parseFloat(getComputedStyle(x).borderTopWidth)>0).length,
+    /* the chip's own geometry — a square with a squircle's radius */
+    chipW:Math.round(b(chip(t[0])).width), chipH:Math.round(b(chip(t[0])).height),
+    chipR:Math.round(parseFloat(getComputedStyle(chip(t[0])).borderTopLeftRadius)),
+    /* and the label's weight, which the ruling named outright */
+    weights:uniq(t.map(x=>getComputedStyle(x.querySelector('.qa-mod__t')).fontWeight)),
     tileW:Math.round(b0.width), tileH:Math.round(b0.height),
     radius:Math.round(parseFloat(getComputedStyle(t[0]).borderTopLeftRadius)),
     gapX:Math.round(b1.left-b0.right), gapY:Math.round(bRow2.top-b0.bottom),
@@ -446,15 +467,15 @@ TILES = """(()=>{
     /* EVERY TILE'S RENDERED COLOUR, not the class that used to set it. The
        `--dark` class is gone; a stray one would show up as a non-white ink
        here rather than being counted. */
-    notWhite:t.filter(x=>getComputedStyle(x).color!=='rgb(255, 255, 255)').map(nameOf),
+    inks:uniq(t.map(x=>getComputedStyle(x).color)),
     darkClass:t.filter(x=>x.classList.contains('qa-mod--dark')).length,
     /* the cost, named tile by tile: white fails AA on most of these and the
        3:1 non-text floor on the palest few. Recorded, not passed off. */
-    worstRatio:Math.round(Math.min(...t.map(x=>ratio(getComputedStyle(x).backgroundColor)))*100)/100,
-    worstTile:nameOf(t.reduce((a,x)=>
-      ratio(getComputedStyle(x).backgroundColor)<ratio(getComputedStyle(a).backgroundColor)?x:a)),
-    underThree:t.filter(x=>ratio(getComputedStyle(x).backgroundColor)<3).map(nameOf),
-    /* which is why the shadow has to be there on every one of them */
+    worstRatio:Math.round(Math.min(...t.map(ratio))*100)/100,
+    worstTile:nameOf(t.reduce((a,x)=>ratio(x)<ratio(a)?x:a)),
+    underAA:t.filter(x=>ratio(x)<4.5).map(nameOf),
+    /* the text-shadow should be GONE — it existed to hold white ink off a
+       pale tile, and there is no pale tile under the label any more */
     withShadowInk:t.filter(x=>getComputedStyle(x).textShadow!=='none').length,
     /* the glyphs are the modules' own exported files, loaded */
     glyphsLoaded:t.filter(x=>{const i=x.querySelector('.qa-mod__g img');
@@ -1243,12 +1264,28 @@ def main():
         # direction — if it becomes nineteen someone has invented three hues.
         check("…sixteen distinct colours across the nineteen, as the app has it",
               g["distinctColours"] == 16, f"{g['distinctColours']} distinct")
-        # NO SHADOW ON THE MODULES · 9 Sep. They had a two-layer drop while the
-        # field ran the page width with nothing framing it; inside the panel it
-        # only laid grey into the gutters.
-        check("no tile carries a shadow or a border",
-              g["withShadow"] == 0 and g["withBorder"] == 0,
-              f"{g['withShadow']} shadowed, {g['withBorder']} bordered")
+        # …AND EVERY CARD IS WHITE · ruled 10 Sep 2026, "Intead of Colours u
+        # use white". Checked separately from the count above because a
+        # colour count cannot see it: nineteen distinct chips would still
+        # pass if the cards had gone coloured again underneath them.
+        check("…and every card underneath them is white",
+              not g["cardsNotWhite"],
+              "all white" if not g["cardsNotWhite"] else str(g["cardsNotWhite"]))
+        # THE SHADOW IS BACK, AND THIS REVERSES 9 SEP OUTRIGHT. That ruling
+        # took a two-layer drop off the tiles because the field then ran the
+        # page width with nothing framing it and the shadow only laid grey
+        # into the gutters. The tiles are white cards on a white frost now,
+        # so the shadow is the only thing separating card from panel —
+        # "Apple Cards Radius, Shadow" asked for it by name.
+        check("every card carries its elevation, and no border",
+              g["withShadow"] == 19 and g["withBorder"] == 0,
+              f"{g['withShadow']}/19 shadowed, {g['withBorder']} bordered")
+        # THE CHIP IS WHERE THE COLOUR WENT, and its geometry is asserted so
+        # a white card with a white chip — nineteen invisible glyphs — cannot
+        # ship. The glyphs are white ink exported for coloured ground.
+        check("…the colour living on a 32px chip at a squircle's radius",
+              g["chipW"] == 32 and g["chipH"] == 32 and g["chipR"] == 9,
+              f"{g['chipW']}x{g['chipH']} r{g['chipR']}")
         # ONE RHYTHM, every number a multiple of 4: 150x70 tiles, a 16px
         # gutter on both axes, 32px of panel padding, and the panel 24px clear
         # of the row rather than the verb panel's 8.
@@ -1265,34 +1302,38 @@ def main():
               f"{g['cols']} cols, {g['panelW']}px, pad {g['panelPad']}")
         check("…standing 24 clear of the pill row, not 8",
               near(g["clearOfRow"], 24, 1), f"{g['clearOfRow']}px")
-        # ONE INK ON ALL NINETEEN · ruled 10 Sep 2026, "text All has to be
-        # white". This is the check that would have failed before the ruling:
-        # the page used to set `.qa-mod--dark` on ten of them, and the value
-        # read here is the RENDERED colour, so a returning class shows up as a
-        # non-white ink rather than as a count that agrees with itself.
-        check("every one of the nineteen labels is white",
-              not g["notWhite"] and g["darkClass"] == 0,
-              "all white" if not g["notWhite"]
-              else f"not white: {g['notWhite']} (+{g['darkClass']} --dark)")
-        # AND THE COST, RECORDED RATHER THAN PASSED OFF — this is what the
-        # per-tile ink was buying. White fails AA (4.5) on fifteen of the
-        # nineteen and the 3:1 non-text floor on the palest few: administer
-        # #A9B7AD at 1.60:1 is the worst. The ruling is explicit and the
-        # instruction is the authority, so this does NOT assert a floor it
-        # cannot meet; it pins the worst case so a REGRESSION is still visible
-        # — if it drops below 1.5 something has changed a colour token too.
-        # The ways back to AA, if it is ever wanted: colour on an icon chip
-        # with labels on a neutral wash (measured 13.20:1), or darken the four
-        # palest tokens until white clears 4.5 on all nineteen.
-        check("…and the palest tiles are the known ones, no worse",
-              g["worstRatio"] >= 1.5,
-              f"worst {g['worstTile']} {g['worstRatio']}:1; "
-              f"under 3:1 → {g['underThree']}")
-        # WHICH IS WHY THE SHADOW IS LOAD-BEARING NOW. At .35 it is the only
-        # thing separating a white label from administer / lab / parivesh, so
-        # a tile losing it is a real regression rather than lost polish.
-        check("…each carrying the shadow that makes white legible on them",
-              g["withShadowInk"] == 19, f"{g['withShadowInk']}/19")
+        # ONE INK ON ALL NINETEEN, STILL — but it is dark now, not white.
+        # "text All has to be white" was ruled against COLOURED tiles on
+        # 10 Sep; the cards went white later the same day, which reverses the
+        # ink rather than the principle. What the principle actually says is
+        # that there is no per-tile ink decision, and that is what is checked:
+        # ONE value across all nineteen, whatever it is, and no returning
+        # `--dark` class.
+        check("one ink across all nineteen, and it is dark on white",
+              len(g["inks"]) == 1 and g["inks"][0] != "rgb(255, 255, 255)"
+              and g["darkClass"] == 0,
+              f"{g['inks']} (+{g['darkClass']} --dark)")
+        # AND THE WEIGHT THE RULING NAMED · "Module Name make it Bold".
+        check("…set bold, as the ruling asked",
+              g["weights"] == ["700"], str(g["weights"]))
+        # THE CONTRAST DEBT IS PAID, AND THIS IS NOW A REAL FLOOR. It could
+        # not be one before: white ink on the pale tiles failed AA on fifteen
+        # of the nineteen and the 3:1 non-text floor on the palest few —
+        # administer at 1.60:1 was the worst — so the old check pinned the
+        # worst case rather than asserting a limit it could not meet, and
+        # recorded the way out. That way out is what shipped: "colour on an
+        # icon chip with labels on a neutral wash (measured 13.20:1)". So the
+        # floor is asserted properly, at AA for body text.
+        check("…and every label clears AA against its card",
+              g["worstRatio"] >= 4.5 and not g["underAA"],
+              f"worst {g['worstTile']} {g['worstRatio']}:1"
+              + ("" if not g["underAA"] else f"; under AA → {g['underAA']}"))
+        # AND THE TEXT-SHADOW IS GONE WITH THE DEBT. It was load-bearing at
+        # .35 — the only thing separating white ink from administer, lab and
+        # parivesh. Dark ink on a white card does not need it, and leaving it
+        # would smear the label it used to rescue.
+        check("…with the text-shadow retired, not left smearing the ink",
+              g["withShadowInk"] == 0, f"{g['withShadowInk']}/19 still shadowed")
         check("every glyph is the module's own file, loaded",
               g["glyphsLoaded"] == 19, f"{g['glyphsLoaded']}/19")
         check("no label runs out of its tile", g["labelOverflow"] == 0,

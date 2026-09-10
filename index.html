@@ -9119,34 +9119,84 @@ body.is-editing .qa-chat { display: none; }
    becomes a menu); the avatar menu, which already claims to hold everything a
    person can do; or a second control. It decides whether a tile NAVIGATES or
    EXPANDS, so it wants settling before this is built on. */
+/* ══ A WHITE CARD, NOT A COLOURED SLAB · ruled 10 Sep 2026 ════════════
+   "Intead of Colours u use white And Apple Cards Radius, Shadow & Module
+   Name make it Bold, How Apple Design that Apprach i want there."
+
+   THE COLOUR MOVES, IT DOES NOT GO. `--qa-mod-c` now fills the icon chip
+   instead of the tile — the Settings / App Library pattern, where the card
+   is white and the identity lives in a rounded coloured square. That is not
+   a free choice about where to put a fill: the nineteen glyphs are WHITE
+   ink exported for coloured ground (see the note at the markup — five carry
+   accent colours of their own, so they are drawn as <img> and never
+   recoloured). Put a white glyph on a white card and nineteen tiles go
+   blank. The chip is what keeps them legible, and it keeps the rule this
+   grid has always run on: a module is recognised by its fill.
+
+   AND IT SETTLES THE CONTRAST DEBT. White ink on the pale tiles measured
+   1.6:1 on Parivesh and under 3:1 on nine of the nineteen, carried by a
+   text-shadow and a recorded exception. Bold near-black on white is about
+   13:1, so the text-shadow goes with the debt — it existed to separate ink
+   from a tile that is no longer there. */
 .qa-mod {
-  display: flex; align-items: center; gap: 11px;
+  display: flex; align-items: center; gap: 10px;
   height: var(--qa-mod-h);
-  padding: 0 14px;
+  padding: 0 12px;
   border: 0; border-radius: var(--qa-mod-r);
-  background: var(--qa-mod-c);
-  color: #FFFFFF;
-  /* .22 while the ink was per tile and this only softened an edge; the ink is
-     white on all nineteen now, so on administer / lab / parivesh this is the
-     only thing separating the label from its tile — see the note above. */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+  background: var(--c-white, #FFFFFF);
+  color: var(--ink);
+  /* TWO LAYERS, APPLE'S PROPORTION: a tight contact shadow that seats the
+     card and a wider soft one that lifts it. In the project's own shadow ink
+     rather than neutral black — the panel's own box-shadow is already
+     rgba(31, 65, 91, …), and a black drop over a teal frost reads grey. */
+  box-shadow: 0 1px 1.5px rgba(31, 65, 91, .06),
+              0 4px 10px -3px rgba(31, 65, 91, .13);
   font: inherit;
   text-align: left;
   overflow: hidden;
   cursor: pointer;
+  transition: box-shadow 160ms var(--ease), transform 120ms var(--ease-out);
 }
-.qa-mod__g { flex: none; width: 26px; height: 26px; }
-.qa-mod__g img { display: block; width: 100%; height: 100%; }
+@media (hover: hover) {
+  .qa-mod:hover {
+    box-shadow: 0 1px 2px rgba(31, 65, 91, .08),
+                0 8px 18px -4px rgba(31, 65, 91, .20);
+  }
+}
+.qa-mod:active { transform: scale(.97); }
+/* THE CHIP CARRIES THE MODULE'S COLOUR and the white glyph sits on it
+   unchanged — 32 square at a 9px radius, the squircle's proportion at this
+   size. The glyph is 20 inside it rather than filling the box: the chip
+   needs its own margin or the mark reads as a sticker rather than an icon. */
+.qa-mod__g {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: var(--qa-mod-c);
+}
+.qa-mod__g img { display: block; width: 20px; height: 20px; }
 .qa-mod__t {
-  font-size: 13.5px; font-weight: 600; line-height: 1.2;
+  /* 700, and the ruling asked for it in those words — "Module Name make it
+     Bold". It can carry the weight now that it is dark ink on white; at 600
+     in white on a pale tile it was already straining. */
+  font-size: 13.5px; font-weight: 700; line-height: 1.2;
+  letter-spacing: -0.1px;
   /* `communication` is spelt with a SOFT HYPHEN in MODULES precisely so it can
      break inside a narrow tile; `manual` is what honours it. */
   hyphens: manual;
 }
 .qa-mod:hover { filter: brightness(1.06); }
 .qa-mod:active { transform: scale(.97); }
+/* AN OUTLINE, NOT AN INSET SHADOW. The inset pair was drawn with
+   box-shadow, which is a single property: now that the card carries its own
+   elevation in that same property, a focused tile lost its shadow and
+   dropped flat into the panel. `outline` composes with it instead, and the
+   offset puts the ring outside the card where the radius reads. */
 .qa-mod:focus-visible {
-  box-shadow: inset 0 0 0 3px var(--ui-link), inset 0 0 0 5px rgba(255, 255, 255, .9);
+  outline: 3px solid var(--ui-link);
+  outline-offset: 2px;
 }
 
 /* ── the opening · ONE MOVEMENT, AND NO TILE MOVES ──────────────────────
@@ -29996,7 +30046,7 @@ function createQuickActions({ root, onAction, onChat } = {}) {
     }
   }
 
-  function show() {
+  function show({ viaKeyboard = false } = {}) {
     if (open) return
     open = true
     if (closing) { clearTimeout(closing); closing = 0 }
@@ -30074,8 +30124,25 @@ function createQuickActions({ root, onAction, onChat } = {}) {
 
     /* …and focus moves once the first row is actually on screen. Focusing into
        a panel that has not been revealed yet makes some screen readers announce
-       a cell while the surface is still a pill. */
-    setTimeout(() => { if (open) cells[0]?.focus() }, ms('--qa-open-base'))
+       a cell while the surface is still a pill.
+
+       ONLY WHEN THE PANEL WAS OPENED FROM THE KEYBOARD · ruled 10 Sep 2026,
+       from a screenshot of the launcher with a blue double ring sitting on
+       Medical. That ring is `.qa-mod:focus-visible`, and it was this line
+       that put it there: a script `focus()` inherits the browser's current
+       modality, and on a touch tap Safari resolves that as focus-visible —
+       so every open of the launcher marked its first tile as though someone
+       had tabbed to it, which reads as a selection nobody made.
+
+       `e.detail === 0` IS THE TEST, taken at the click. A pointer click
+       reports the click count; Enter or Space on a button synthesises a
+       click with a detail of 0. So a keyboard user still lands on the first
+       tile and can arrow from it, and a finger leaves focus on the pill —
+       which is inside the same widget, still carries `aria-expanded` and
+       `aria-controls`, and puts the panel next in tab order anyway. */
+    if (viaKeyboard) {
+      setTimeout(() => { if (open) cells[0]?.focus() }, ms('--qa-open-base'))
+    }
     document.addEventListener('keydown', onKeydown)
   }
 
@@ -30108,7 +30175,12 @@ function createQuickActions({ root, onAction, onChat } = {}) {
     if (e.key === 'Escape') { e.preventDefault(); hide() }
   }
 
-  pill.addEventListener('click', () => (open ? hide() : show()))
+  /* the modality is read HERE, at the event, because it is a property of
+     the interaction and not of the panel — see the note in show() */
+  pill.addEventListener('click', (e) => {
+    if (open) return hide()
+    show({ viaKeyboard: e.detail === 0 })
+  })
   veil.addEventListener('click', () => hide())
 
   /* THE DISC IS NOT A SECOND DOOR INTO THIS MENU. It is its own control with
