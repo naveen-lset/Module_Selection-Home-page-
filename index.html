@@ -9388,7 +9388,26 @@ body.is-editing .qa-chat { display: none; }
      182 and covers the join. */
   .foliage {
     height: 293px;
-    background: url('assets/img/foliage-artboard.png') no-repeat 0 -24.18vw / 100% auto;
+    /* ── `cover`, NOT A vw OFFSET · reworked 10 Sep 2026 ─────────────────
+       This was `0 -24.18vw / 100% auto`, which resolved the node's own
+       190.44% / -61.4% against the 744 box and was correct THERE and only
+       there: fitting the image to the viewport's WIDTH ties its height to
+       the width too, so at 390 the artwork is 292 tall, the -24.18vw
+       offset lifts it 94, and the bottom 95px of the box is empty page.
+       That is why the phone could not simply be given this line.
+
+       `cover` states the same crop as a proportion instead of a distance,
+       so it holds at any box. The Y position is the node's offset
+       converted to a CSS percentage, which is NOT the same number: a
+       background percentage aligns that point of the IMAGE with that point
+       of the BOX, so the offset is (boxH - imgH) x p, and -61.4% of the box
+       with an image 190.44% of it solves to p = 0.614 / 0.9044 = 67.89%.
+       At 744 x 293 that computes to -179.9px, which is the pixel the vw
+       form produced — identical where it used to work, and defined
+       everywhere it did not. Narrower boxes now crop the scene's sides
+       rather than running out of image, which is the trade a fixed
+       illustration has to make somewhere. */
+    background: url('assets/img/foliage-artboard.png') no-repeat 50% 67.89% / cover;
     /* ── AND IT FEATHERS DOWN · ruled 10 Sep, "the image has to feather
        down, so it has to match the background" ───────────────────────────
        The node's foliage is an opaque 293-tall box and ends in a straight
@@ -9431,6 +9450,82 @@ body.is-editing .qa-chat { display: none; }
       rgba(0, 0, 0, .05) 0, rgba(0, 0, 0, .05) 182px,
       rgba(0, 0, 0, .036) 214px,
       rgba(0, 0, 0, .017) 252px,
+      rgba(0, 0, 0, 0) 293px);
+  }
+}
+
+/* ══ AND THE PHONE PLANTS THE SAME ARTWORK · ruled 10 Sep 2026 ════════════
+   "See here in iphone background Image no Changes." It had not: the artboard
+   planting was scoped to the 744-899 band when it went in, so a phone was
+   still drawing `foliage.png` — the tiled, feathered sprigs the build
+   derived — while the tablet drew node 321:3570's illustration.
+
+   THE IMAGE AND THE CROP ARE THE BAND ABOVE'S, verbatim, which is the whole
+   point of having restated that crop as `cover`: one declaration is now
+   correct at every width, so this rule does not re-derive it and cannot
+   drift from it.
+
+   WHAT IS PHONE-SPECIFIC IS THE DEPTH, and it is not a style choice. A phone
+   header is TALLER than a tablet's, not shorter: the name wraps to a second
+   line, so the Main Frame starts at 227 on a 390 screen against 182 on a
+   744 one. The artwork therefore has to stay solid for longer, and the
+   existing stops already knew this — 225px of hold in a 410 box, measured
+   for the tiled planting and just as true for this one. They are kept.
+
+   THE CLEARING IS NOT. `--clearing` is a radial that lifts the top-left so
+   dark text reads over busy sprigs; this artwork carries the node's flat 5%
+   black instead, which is the treatment 321:3570 actually draws, and
+   compositing both would darken the corner twice.
+
+   AND THE BOX COMES DOWN TO 293, WHICH IS THE WHOLE FIX. Left at the tiled
+   planting's 410 this shipped once and was wrong: 390 x 410 is a PORTRAIT
+   box and the artwork is landscape, so `cover` had to scale it by height and
+   magnified the scene about three times — a giraffe's head and a wash of
+   pale sky, with nothing left to say it was a zoo. At 293 the box is
+   390 x 293, an aspect of 1.331 against the image's own 1.333, so cover
+   fits it almost exactly and the whole illustration shows. Either side of
+   390 it crops a little, which is what cover is for.
+
+   It also puts the phone on the tablet's own number, and that is not a
+   coincidence worth hiding: the artwork is 4:3, so the box that shows all of
+   it is the viewport's width over 1.333 — 293 at 390 and 293 at 744 is the
+   same rule arriving at the same place from two directions. */
+@media (max-width: 743px) {
+  .foliage {
+    height: 293px;
+    background: url('assets/img/foliage-artboard.png') no-repeat 50% 67.89% / cover;
+    /* THE HOLD IS 210, WHICH IS A COMPROMISE AND SAYS SO. On the tablet the
+       artwork stays solid to exactly the Main Frame's top edge, because that
+       edge is 182 at every width in the band. Here it is not: the name wraps
+       at 390 and does not at 430, so the frame starts at 227 and 191 in the
+       same band. 210 sits between them — a little of the fade runs behind
+       the frame on a narrow phone, a little of the hold does on a wide one,
+       and the frame's own wash covers the join either way. */
+    -webkit-mask-image: linear-gradient(to bottom,
+      #000 0, #000 210px,
+      rgba(0, 0, 0, .72) 238px,
+      rgba(0, 0, 0, .34) 268px,
+      transparent 293px);
+            mask-image: linear-gradient(to bottom,
+      #000 0, #000 210px,
+      rgba(0, 0, 0, .72) 238px,
+      rgba(0, 0, 0, .34) 268px,
+      transparent 293px);
+    /* one mask, so the intersect the @supports block sets is neutralised —
+       the same reason the 744 band does it */
+    -webkit-mask-composite: source-over;
+            mask-composite: add;
+  }
+  /* the node's 5% black, ramped to die with the artwork rather than outlive
+     it as a grey rectangle — the mistake the 744 band already made once */
+  .foliage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(0, 0, 0, .05) 0, rgba(0, 0, 0, .05) 210px,
+      rgba(0, 0, 0, .036) 238px,
+      rgba(0, 0, 0, .017) 268px,
       rgba(0, 0, 0, 0) 293px);
   }
 }
