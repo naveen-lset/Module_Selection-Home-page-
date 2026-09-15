@@ -8174,11 +8174,24 @@ body.is-site .card:active { transform: scale(.978); }
      in two days; that is not the moment to throw the previous one away. Where
      the verbs should actually live is still an open question — see the note
      under `.qa-mod`. */
-  --qa-mod-w:   150px;  /* the tile; the grid reflows below 4 columns          */
-  --qa-mod-h:   70px;
+  /* ── NODE 370:4029 · THE PANEL IS THE MEASURE NOW, NOT THE TILE ────────
+     Ruled 15 Sep 2026 from the artboard's own launcher (371:5157). Every
+     version until now stated a 150px tile and SIZED THE PANEL FROM IT; the
+     node states a 696 panel on its 744 artboard — the screen less 24 either
+     side — and gives each tile `flex: 1`. So the derivation is inverted: the
+     panel is the number, and three columns divide what is left of it.
+
+     THE BREAKPOINT SURVIVES THE INVERSION, which is worth saying because it
+     looks like luck. Three columns still want a 150 tile to hold a label, and
+     150 now costs 3x150 + 2x16 + 2x24 = 530 of panel plus 48 of screen margin
+     — 578, the same width the old 546-plus-32 arrived at. The phone band
+     below it needs no new number. */
+  --qa-mod-panel-w: 696px;  /* 744 artboard less 24 either side                */
+  --qa-mod-w:   150px;  /* no longer sets the panel; the 3-column floor        */
+  --qa-mod-h:   72px;
   --qa-mod-gap: 16px;
-  --qa-mod-pad: 32px;   /* the panel's own, on every side                      */
-  --qa-mod-r:   14px;
+  --qa-mod-pad: 24px;   /* the panel's own, on every side                      */
+  --qa-mod-r:   16px;
   --qa-mod-panel-r: 28px;
   /* THE LAUNCHER OPENS AS ONE SURFACE — 220ms of scale-and-fade out of the
      pill, and not a single tile animating. This replaces --qa-mod-fan 560ms
@@ -9078,24 +9091,26 @@ body.is-editing .qa-chat { display: none; }
    pill as ONE surface instead — see the note over `--qa-mod-open` for why the
    nineteen tiles no longer move independently. */
 .qa--modules .qa-menu {
-  /* THREE TILES WIDE AND TWO GUTTERS, which is the grid above stated as a
-     measure — 3x150 + 2x16 + 2x32 = 546, down from the four-column 712. The
-     two numbers are one decision: a panel sized for four with a grid set to
-     three would stretch the tiles past their own 150. */
-  width: min(calc(3 * var(--qa-mod-w) + 2 * var(--qa-mod-gap) + 2 * var(--qa-mod-pad)),
-             calc(100vw - 32px));
+  /* THE NODE'S OWN 696, CLAMPED TO THE SCREEN'S 24px MARGINS. 371:5157 is
+     `left: 24, width: 696` on a 744 artboard, which is one statement — the
+     panel is the screen less 24 either side — so that is how it is written.
+     It stops growing at 696 rather than tracking the viewport forever: the
+     node fixes the panel's measure, and a 976-wide launcher at 1024 would be
+     three 299px tiles holding a 14px label, which is not what it draws. */
+  width: min(var(--qa-mod-panel-w), calc(100vw - 48px));
   padding: var(--qa-mod-pad);
   border-radius: var(--qa-mod-panel-r);
   border: 0;
-  /* 4A'S OWN .62, AND IT WENT TO .92 AND BACK. Over an 82% black backdrop
-     62% white composited to a mid-grey slab, so the alpha was raised to keep
-     the panel reading as the white panel 4A rules. The backdrop is a LIGHT
-     30% tint now, so the compensation is unnecessary and the frost is real
-     again — a raised alpha is what you need when the layer behind is opaque,
-     which is a reason to check the backdrop rather than to change this. */
-  background: rgba(255, 255, 255, .62);
-  -webkit-backdrop-filter: blur(30px) saturate(1.8);
-          backdrop-filter: blur(30px) saturate(1.8);
+  /* WHITE AT 40% OVER A 15px BLUR · node 371:5157, and ruling five on this
+     surface in six days. It was .62 over blur(30) saturate(1.8) — a value
+     chosen when the backdrop was 82% black and kept when that went to a light
+     30% tint. The node states .4/15 with no saturation, and the saturation is
+     dropped rather than kept "because it looked richer": a lift that was
+     never in the file is the kind of thing that makes the next comparison
+     against the artboard fail for no reason anybody can name. */
+  background: rgba(255, 255, 255, .4);
+  -webkit-backdrop-filter: blur(15px);
+          backdrop-filter: blur(15px);
   box-shadow: 0 1px 2px rgba(31, 65, 91, .08), 0 24px 60px -24px rgba(31, 65, 91, .32);
   /* IT SITS 24px CLEAR OF THE ROW, not 8. The verb panel's own offset is
      `--qa-b + --qa-row-h + --s2`, which puts its bottom edge 8px above the
@@ -9178,12 +9193,45 @@ body.is-editing .qa-chat { display: none; }
   .qa--modules .qa-menu__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .qa--modules .qa-menu {
     width: min(calc(2 * var(--qa-mod-w) + var(--qa-mod-gap) + 2 * var(--qa-mod-pad)),
-               calc(100vw - 32px));
+               calc(100vw - 48px));
   }
+}
+/* ── AND ONE COLUMN UNDER 378, BECAUSE THE PAIR STOPS FITTING ────────────
+   THE MEASURE IS THE LONGEST UNBREAKABLE WORD, and the node's tile spends 70
+   of its width before the label starts — a 32px chip, a 6px gap and 32 of
+   padding. With `Management` hyphenated in MODULES the longest word left in
+   the nineteen is `Administer` at 73px in Inter Medium 14, so a tile has to
+   reach 133 at this band's 10px padding, two of them plus the gutter and the
+   panel's own padding need 330, and that is a 378 screen.
+
+   BELOW IT, `break-word` DOES ALL THE WORK AND IT LOOKS IT — at 360 twelve of
+   the nineteen broke mid-word: "Medica/l", "Hospit/al", "Specie/s Manag/
+   ement". Nothing was HIDDEN, which is why the clipping check passed it; it
+   was simply bad, and a check that only asks whether text is cut off cannot
+   tell the difference. One column gives the label the whole tile — 250px at
+   360 — and every name sits on one line.
+
+   THE COST IS THE SCROLL, and it is the right one to pay: nineteen rows do
+   not fit a phone at any tile height, the panel has been a scroll container
+   since it was built, and the suite asserts the last tile can be reached. */
+@media (max-width: 377px) {
+  .qa--modules .qa-menu__grid { grid-template-columns: minmax(0, 1fr); }
+  .qa--modules .qa-menu { width: calc(100vw - 48px); }
 }
 /* the head arrives with the panel rather than after the last row: there are
    no rows to count from any more */
-.qa--modules .qa-menu__head { --qa-delay: 0ms; padding-bottom: 20px; }
+.qa--modules .qa-menu__head { --qa-delay: 0ms; padding: 0 0 var(--qa-mod-gap); }
+/* ── "All Modules", AND IT IS A LABEL NOW, NOT AN EAVESDROPPED HEADING ────
+   The verb panel's head is a 650-weight petrol micro-cap with .05em of
+   tracking, which is the treatment this borrowed. 371:5158 states Inter
+   Medium 16 in plain sentence case, white — the same ink as the tiles under
+   it, because it is sitting on the same dark ground, not over the page. The
+   uppercase and the tracking go with the petrol: micro-caps are what you set
+   a 10px label in, and this is 16. */
+.qa--modules .qa-menu__head b {
+  font-size: 16px; font-weight: 500; letter-spacing: 0;
+  text-transform: none; color: var(--c-white, #FFFFFF);
+}
 
 /* ── one module tile ─────────────────────────────────────────────────────
    A FLAT COLOUR AND NO SHADOW. The tiles carried a two-layer drop while the
@@ -9239,54 +9287,112 @@ body.is-editing .qa-chat { display: none; }
    text-shadow and a recorded exception. Bold near-black on white is about
    13:1, so the text-shadow goes with the debt — it existed to separate ink
    from a tile that is no longer there. */
+/* ══ A PANE OF SMOKED GLASS, NOT A WHITE CARD · node 371:5441, 15 Sep ═════
+   This reverses the white Apple card of 10 Sep, five days old, and the note
+   above is left standing because it is the argument the reversal answers.
+
+   WHAT THE NODE DRAWS is black at 20% behind its own 8px blur, a hairline at
+   0.5px, radius 16, 72 tall, and the chip and label CENTRED as a pair rather
+   than run out from the left edge. Every tile is identical: there is no
+   per-module fill left anywhere on this surface.
+
+   SO THE COLOUR IS GONE FROM THE LAUNCHER, and that is the whole substance of
+   the change rather than a side effect. It moved from the tile to a chip on
+   10 Sep to settle a contrast debt; the node empties the chip too, so the
+   nineteen are now told apart by GLYPH AND NAME alone. The `--f-*` tokens are
+   untouched and the home grid still paints all nineteen from them — this is
+   the launcher's own decision, not the palette's.
+
+   AND IT TAKES THE DEBT BACK ON, MEASURED. White 14/500 on this tile is about
+   3:1 where the white card measured 10.68, because the tile is a 20% black
+   veil over a 40% white panel and composites to a mid grey. That is under AA
+   for body text and is a recorded exception, the same kind the fills carry —
+   the artboard's own surface wins, and the number is asserted as a FLOOR in
+   verify_v2.py so it can be seen if it ever drifts lower. What bought the
+   debt down last time was moving colour off the text; there is no colour left
+   to move, so the honest options if it is ever called are a darker tile or a
+   smaller panel alpha, both of which leave the node. */
 .qa-mod {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   height: var(--qa-mod-h);
-  padding: 0 12px;
-  border: 0; border-radius: var(--qa-mod-r);
-  background: var(--c-white, #FFFFFF);
-  color: var(--ink);
-  /* TWO LAYERS, APPLE'S PROPORTION: a tight contact shadow that seats the
-     card and a wider soft one that lifts it. In the project's own shadow ink
-     rather than neutral black — the panel's own box-shadow is already
-     rgba(31, 65, 91, …), and a black drop over a teal frost reads grey. */
-  box-shadow: 0 1px 1.5px rgba(31, 65, 91, .06),
-              0 4px 10px -3px rgba(31, 65, 91, .13);
+  padding: 16px;
+  border: .5px solid rgba(153, 153, 153, 0);
+  border-radius: var(--qa-mod-r);
+  background: rgba(0, 0, 0, .2);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+  color: var(--c-white, #FFFFFF);
+  box-shadow: none;
   font: inherit;
   text-align: left;
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 160ms var(--ease), transform 120ms var(--ease-out);
+  transition: background 160ms var(--ease), transform 120ms var(--ease-out);
 }
+/* HOVER LIFTS THE GLASS, IT DOES NOT CAST A SHADOW. A drop shadow under a
+   translucent pane reads as dirt on the panel behind it; deepening the tile's
+   own veil is the move the material allows. */
 @media (hover: hover) {
-  .qa-mod:hover {
-    box-shadow: 0 1px 2px rgba(31, 65, 91, .08),
-                0 8px 18px -4px rgba(31, 65, 91, .20);
-  }
+  .qa-mod:hover { background: rgba(0, 0, 0, .28); }
 }
 .qa-mod:active { transform: scale(.97); }
-/* THE CHIP CARRIES THE MODULE'S COLOUR and the white glyph sits on it
-   unchanged — 32 square at a 9px radius, the squircle's proportion at this
-   size. The glyph is 20 inside it rather than filling the box: the chip
-   needs its own margin or the mark reads as a sticker rather than an icon. */
+/* THE CHIP IS AN EMPTY BOX NOW — 32 square at a 9px radius, and no fill.
+   371:5442 keeps the container and drops the background, so the white glyph
+   sits straight on the glass. The box stays rather than being deleted for two
+   reasons: it is what holds the 20px glyph off the tile's 16px padding at a
+   fixed size whatever the label does, and the fill is one declaration away if
+   the colour is ever wanted back — which is the whole history of this
+   component. `--qa-mod-c` is no longer set on the tile; nothing read it once
+   this fill went, and a live custom property that nothing resolves is worse
+   than none. */
 .qa-mod__g {
   flex: none;
   display: grid;
   place-items: center;
   width: 32px; height: 32px;
   border-radius: 9px;
-  background: var(--qa-mod-c);
 }
 .qa-mod__g img { display: block; width: 20px; height: 20px; }
 .qa-mod__t {
-  /* 700, and the ruling asked for it in those words — "Module Name make it
-     Bold". It can carry the weight now that it is dark ink on white; at 600
-     in white on a pale tile it was already straining. */
-  font-size: 13.5px; font-weight: 700; line-height: 1.2;
-  letter-spacing: -0.1px;
-  /* `communication` is spelt with a SOFT HYPHEN in MODULES precisely so it can
-     break inside a narrow tile; `manual` is what honours it. */
+  /* 14/500 AT +0.1 TRACKING · 371:5444, which is the project's own
+     `Antz_Body_Medium`. "Module Name make it Bold" was ruled on 10 Sep for
+     near-black ink on a white card, where 700 was carrying the card's
+     hierarchy; on the glass the label is the only ink on the tile and the
+     node sets it back to Medium. Positive tracking, not the card's -0.1:
+     white on a mid ground thickens optically and wants the extra air.
+
+     THE NODE'S `min-width: 96px` IS DELIBERATELY NOT COPIED. It is the width
+     of the placeholder text box in the file, not a constraint — at the
+     artboard's 205px tile the label never comes near it, and at the 139px
+     tile a phone gets it would reinstate exactly the truncation fixed this
+     morning. The wrap below is load-bearing instead. */
+  font-size: 14px; font-weight: 500; line-height: 1.2;
+  letter-spacing: 0.1px;
+  /* ── `auto`, NOT `manual`, AND A BREAK OF LAST RESORT ─────────────────
+     `manual` honoured the SOFT HYPHEN `communication` is spelt with in
+     MODULES and nothing else, which was enough while the label had 84px at a
+     150 tile and one hyphenated name. The node's tile spends 32 of its width
+     on padding and another 38 on the chip and its gap, so on a phone's 124px
+     tile the label is left 52 — and `Administer`, `Management`, `Pharmacy`
+     and nine more are single words longer than that.
+
+     A WORD THAT CANNOT BREAK AND CANNOT FIT IS CLIPPED SILENTLY, because
+     `min-width: 0` lets the BOX shrink under its own text and `overflow:
+     hidden` on the tile cuts the rest. That is what "Species Managemen" was
+     at 390 — and the reason it survived this morning's fix is that the check
+     measured the box, which fits, rather than the text in it.
+
+     `auto` WAS TRIED HERE AND IS WRONG, for the reason the note beside
+     `Commu­nication` in MODULES already gives: it needs a hyphenation
+     dictionary the browser may not have shipped, and this Chrome has none. It
+     changed nothing at 360 and left `break-word` doing all the work —
+     "Medica/l", "Hospit/al", "Specie/s Manag/ement" on twelve of the
+     nineteen. So `manual` stays, `Management` gets the soft hyphen that
+     `Communication` has had all along, and `break-word` is demoted to what it
+     should always have been: a backstop that should never fire. */
   hyphens: manual;
+  -webkit-hyphens: manual;
+  overflow-wrap: break-word;
   /* AND IT HAS TO BE ALLOWED TO SHRINK BEFORE IT CAN WRAP. A flex item's
      `min-width` is `auto`, which is its MIN-CONTENT — so the label took its
      longest word's width whatever the tile measured, and `overflow: hidden`
@@ -9296,8 +9402,12 @@ body.is-editing .qa-chat { display: none; }
      "Hosp", "Spec Mana". Zero is what lets the wrap above actually happen. */
   min-width: 0;
 }
-.qa-mod:hover { filter: brightness(1.06); }
-.qa-mod:active { transform: scale(.97); }
+/* `filter: brightness(1.06)` AND A SECOND `:active` STOOD HERE. Both were
+   duplicates left from the coloured-tile era — the brightness lifted a
+   saturated fill, and on a 20% black veil it washed the glass out instead,
+   fighting the hover rule 40 lines above that deepens it. Deleted rather than
+   re-tuned: two hover declarations on one selector is the bug, whatever
+   either says. */
 /* AN OUTLINE, NOT AN INSET SHADOW. The inset pair was drawn with
    box-shadow, which is a single property: now that the card carries its own
    elevation in that same property, a focused tile lost its shadow and
@@ -9306,6 +9416,31 @@ body.is-editing .qa-chat { display: none; }
 .qa-mod:focus-visible {
   outline: 3px solid var(--ui-link);
   outline-offset: 2px;
+}
+
+/* ── THE TILE'S OWN PHONE BANDS · AFTER `.qa-mod`, AND THAT IS THE POINT ──
+   These two live down here rather than beside the grid's own media queries
+   240 lines above, because a media query carries NO extra specificity: both
+   selectors are `.qa-mod`, so the one that wins is the one written LAST.
+   Placed with the grid rules they lost to the base rule silently — the
+   padding measured 16 at every width while the stylesheet said 10, and the
+   only symptom was a label two pixels short of its box on a phone. The grid
+   and panel rules can sit up there because `.qa--modules .qa-menu` outranks
+   what it overrides; these cannot. */
+@media (max-width: 577px) {
+  /* THE TILE GIVES 12px BACK TO THE LABEL. 16 either side is the node's own
+     number against its 205px tile, where it is a fourteenth of the width;
+     against a phone's 139 it is a fifth, and the chip and gap take 38 more.
+     10 is this band's number, not a correction to the node's — the artboard
+     draws no phone — and it is what puts `Administer` inside its box with
+     room rather than exactly on the line. */
+  .qa-mod { padding: 16px 10px; }
+}
+@media (max-width: 377px) {
+  /* one column, so the node's own padding fits again — and the pair goes back
+     to the left edge, because centring one wide tile per row puts every glyph
+     in a different place down the list */
+  .qa-mod { padding: 16px; justify-content: flex-start; }
 }
 
 /* ── the opening · ONE MOVEMENT, AND NO TILE MOVES ──────────────────────
@@ -13527,7 +13662,16 @@ const MODULES = [
     icon: 'm-species.svg',
     iconSize: 28,
     gradient: '--g-species',
-    name: 'Species Management',
+    /* A SOFT HYPHEN, U+00AD, between "Manage" and "ment" — the same device
+       `Commu­nication` carries below and for the same reason. This name
+       has a space to break at, so it never needed one until the launcher's
+       tile went to the node's centred chip-and-label pair on 15 Sep: that
+       spends 70 of the tile's width before the label starts, and "Management"
+       alone is 89px in Inter Medium 14. Without the hyphen a phone's second
+       line read "Managemen" with the t cut off, and then — once `break-word`
+       was added under it — "Manag/ement". It is invisible wherever the name
+       has room, which is everywhere else in the product. */
+    name: 'Species Manage­ment',
     category: 'animal',
     /* ON THE MODULE, NOT ON ONE CARD. A module's destination is a property of
        the place, the same as its name and its fill — so every Species widget
@@ -30046,20 +30190,21 @@ function createQuickActions({ root, onAction, onChat } = {}) {
     '</button>' +
     '</div>' +
     '<div class="qa-menu" id="qaMenu" role="menu" aria-label="Quick actions" hidden>' +
-      `<div class="qa-menu__head"><b>${isModules ? 'All modules' : 'Quick Actions'}</b></div>` +
+      `<div class="qa-menu__head"><b>${isModules ? 'All Modules' : 'Quick Actions'}</b></div>` +
       '<div class="qa-menu__grid">' +
       (isModules
         /* ── the nineteen module tiles ──────────────────────────────────
-           `--qa-mod-c` is the module's own fixed colour, and it is the only
-           custom property a tile carries — the launch-order pair `--qa-i` /
-           `--qa-i-r` went with the per-tile flight on 10 Sep.
-           THE INK IS WHITE ON ALL NINETEEN — ruled 10 Sep, "text All has to
-           be white". There is no per-colour decision any more; the cost it
-           buys back is recorded at `.qa-mod`. */
+           A TILE CARRIES NO CUSTOM PROPERTY AT ALL NOW. It held
+           `--qa-mod-c`, the module's own fixed colour, which filled the tile
+           and then the icon chip; node 371:5441 of 15 Sep empties the chip
+           too, so nothing resolved it any more and setting it would have left
+           a live property that reads as intent. The launch-order pair
+           `--qa-i` / `--qa-i-r` went the same way with the per-tile flight on
+           10 Sep. The ink is white on all nineteen, as it has been since that
+           ruling; what the glass costs is recorded at `.qa-mod`. */
         ? QA_MODULES.map((m, i) => {
             return `<button type="button" class="qa-mod" role="menuitem"` +
-              ` data-module="${m.id}"` +
-              ` style="--qa-mod-c: var(--f-${m.id})">` +
+              ` data-module="${m.id}">` +
               /* the module's own exported glyph, as an <img> and never
                  recoloured: five of the nineteen carry accent colours of
                  their own and a mask would keep only their alpha */

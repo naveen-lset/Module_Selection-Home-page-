@@ -48,6 +48,65 @@ def near(a, b, tol=1.0):
     return a is not None and abs(a - b) <= tol
 
 
+def _sample_ink_contrast(chrome, boxes):
+    """White label against a TRANSLUCENT tile, measured off the render.
+
+    The launcher's tiles stopped being opaque on 15 Sep (node 371:5441), and a
+    translucent ground cannot be measured from `getComputedStyle`: the tile
+    reports `rgba(0, 0, 0, 0.2)` whatever it is actually sitting on. The only
+    honest read is the composited pixel, so this screenshots the page and
+    samples each tile's ground in the strip between the label's right edge and
+    the tile's own — clear of the chip, the ink and the rounded corners.
+
+    Returns (worst, best, under_aa, under_3, worst_name), or None if the
+    sample cannot be taken. None is reported as a FAILURE by the caller rather
+    than skipped: a contrast check that quietly does nothing is how the debt
+    got lost the first time.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    import tempfile, os as _os
+
+    fd, path = tempfile.mkstemp(suffix=".png", prefix="qa-ink-")
+    _os.close(fd)
+    try:
+        chrome.screenshot(path)
+        im = Image.open(path).convert("RGB")
+
+        def lin(v):
+            v /= 255.0
+            return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+
+        def lum(rgb):
+            r, g_, b_ = (lin(c) for c in rgb)
+            return 0.2126 * r + 0.7152 * g_ + 0.0722 * b_
+
+        out = []
+        for t in boxes:
+            xs = range(max(0, t["lr"] + 4), min(im.width, t["x"] + t["w"] - 6))
+            ys = range(max(0, t["y"] + 10), min(im.height, t["y"] + t["h"] - 10))
+            px = [im.getpixel((x, y)) for x in xs for y in ys]
+            if not px:
+                continue
+            avg = tuple(sum(p[i] for p in px) // len(px) for i in range(3))
+            lo, hi = sorted((lum(avg) + 0.05, lum((255, 255, 255)) + 0.05))
+            out.append((hi / lo, t["name"]))
+        if not out:
+            return None
+        out.sort()
+        return (out[0][0], out[-1][0],
+                sum(1 for r, _ in out if r < 4.5),
+                sum(1 for r, _ in out if r < 3.0),
+                out[0][1], len(out))
+    finally:
+        try:
+            _os.unlink(path)
+        except OSError:
+            pass
+
+
 PROBE = """(()=>{
   const q=(s)=>document.querySelector(s);
   const shown=(s)=>{const e=q(s); return e ? getComputedStyle(e).display!=='none' : null};
@@ -443,23 +502,38 @@ TILES = """(()=>{
   return JSON.stringify({
     n:t.length,
     visible:t.filter(x=>{const r=b(x);return r.width>1&&r.height>1}).length,
-    /* FLAT, NOT A RAMP · "Modules Colours fixed Colours Only". Read off the
-       CHIP now: the module's colour moved there when the card went white,
-       and a ramp reintroduced on --qa-mod-c would land here. */
-    withGradient:t.filter(x=>getComputedStyle(chip(x)).backgroundImage!=='none').length,
-    distinctColours:uniq(t.map(x=>getComputedStyle(chip(x)).backgroundColor)).length,
-    /* …AND THE CARD ITSELF IS WHITE, every one of them. This is the half a
-       colour count cannot see: nineteen distinct chips would still pass
-       above if the cards had gone coloured again underneath them. */
-    cardsNotWhite:t.filter(x=>{const b=getComputedStyle(x).backgroundColor;
-      return b!=='rgb(255, 255, 255)'}).map(nameOf),
-    /* THE CARDS DO CARRY A SHADOW NOW, which is the reverse of the 9 Sep
-       ruling and is what "Apple Cards Radius, Shadow" asked for. */
+    /* ── ONE MATERIAL ON ALL NINETEEN · node 371:5441, 15 Sep 2026 ───────
+       There is no per-module colour left on this surface at all. The fill
+       went tile → chip on 10 Sep to settle a contrast debt, and the node
+       empties the chip too, so what used to be a count of SIXTEEN distinct
+       colours is now a requirement that there be exactly ONE ground and one
+       unfilled chip. Asserted as a count rather than a value so that a stray
+       `--qa-mod-c` coming back on one tile fails here rather than being
+       absorbed. */
+    grounds:uniq(t.map(x=>getComputedStyle(x).backgroundColor)),
+    withGradient:t.filter(x=>getComputedStyle(x).backgroundImage!=='none').length,
+    chipsFilled:t.filter(x=>{const c=getComputedStyle(chip(x)).backgroundColor;
+      return c!=='rgba(0, 0, 0, 0)' && c!=='transparent'}).length,
+    /* AND IT IS GLASS, NOT A SLAB. The 20% veil only reads as the node's
+       material with the blur behind it; without it the tile is a flat grey
+       rectangle that measures the same and looks nothing like the file. */
+    tileBlur:uniq(t.map(x=>{const s=getComputedStyle(x);
+      return s.backdropFilter||s.webkitBackdropFilter||'none'})),
+    /* THE SHADOW IS GONE AND A HAIRLINE IS BACK, which is the exact reverse
+       of the 10 Sep white card. A drop shadow under a translucent pane reads
+       as dirt on the panel behind it. */
     withShadow:t.filter(x=>getComputedStyle(x).boxShadow!=='none').length,
     withBorder:t.filter(x=>parseFloat(getComputedStyle(x).borderTopWidth)>0).length,
-    /* the chip's own geometry — a square with a squircle's radius */
+    /* the chip's own geometry — a square with a squircle's radius, kept as a
+       box even though it no longer carries a fill */
     chipW:Math.round(b(chip(t[0])).width), chipH:Math.round(b(chip(t[0])).height),
     chipR:Math.round(parseFloat(getComputedStyle(chip(t[0])).borderTopLeftRadius)),
+    /* the tile's own layout — the node centres the chip and label as a pair
+       rather than running them out from the left edge */
+    justify:uniq(t.map(x=>getComputedStyle(x).justifyContent)),
+    tileGap:uniq(t.map(x=>getComputedStyle(x).gap)),
+    tilePad:uniq(t.map(x=>getComputedStyle(x).padding)),
+    sizes:uniq(t.map(x=>getComputedStyle(x.querySelector('.qa-mod__t')).fontSize)),
     /* and the label's weight, which the ruling named outright */
     weights:uniq(t.map(x=>getComputedStyle(x.querySelector('.qa-mod__t')).fontWeight)),
     tileW:Math.round(b0.width), tileH:Math.round(b0.height),
@@ -474,11 +548,29 @@ TILES = """(()=>{
        here rather than being counted. */
     inks:uniq(t.map(x=>getComputedStyle(x).color)),
     darkClass:t.filter(x=>x.classList.contains('qa-mod--dark')).length,
-    /* the cost, named tile by tile: white fails AA on most of these and the
-       3:1 non-text floor on the palest few. Recorded, not passed off. */
-    worstRatio:Math.round(Math.min(...t.map(ratio))*100)/100,
-    worstTile:nameOf(t.reduce((a,x)=>ratio(x)<ratio(a)?x:a)),
-    underAA:t.filter(x=>ratio(x)<4.5).map(nameOf),
+    /* THE CONTRAST IS NOT COMPUTABLE FROM STYLE ANY MORE, and pretending
+       otherwise is worse than not checking. `ratioOf(color, backgroundColor)`
+       used to be the real pair because the card was opaque white; the tile is
+       now 20% black over a 40% white panel over a 30% black veil over
+       whatever the page draws there, so `backgroundColor` returns
+       `rgba(0, 0, 0, 0.2)` and a luminance read of it — which ignores alpha —
+       reports 21:1 for a tile that actually measures 2.06. The measurement
+       moved to the SCREENSHOT, below; what is exported here is only the boxes
+       to sample and the ink that sits in them.
+
+       ONLY THE TILES ACTUALLY INSIDE THE PANEL, which one column made
+       necessary: nineteen rows overflow a phone, the panel scrolls, and a
+       tile below the fold still reports its laid-out box. Sampling there
+       reads the PAGE rather than the tile — it produced a 15.14:1 "best" off
+       a dark card and a 1.66:1 "worst" off a pale corner, neither of which
+       is a tile at all. */
+    inkBoxes:t.map(x=>{const r=b(x), l=b(x.querySelector('.qa-mod__t')), p=b(menu);
+      return {name:nameOf(x), x:Math.round(r.left), y:Math.round(r.top),
+        w:Math.round(r.width), h:Math.round(r.height),
+        lr:Math.round(l.right), lt:Math.round(l.top), lb:Math.round(l.bottom),
+        inPanel: r.top>=p.top-1 && r.bottom<=p.bottom+1
+                 && r.left>=p.left-1 && r.right<=p.right+1}})
+      .filter(r=>r.inPanel),
     /* the text-shadow should be GONE — it existed to hold white ink off a
        pale tile, and there is no pale tile under the label any more */
     withShadowInk:t.filter(x=>getComputedStyle(x).textShadow!=='none').length,
@@ -488,6 +580,42 @@ TILES = """(()=>{
     /* and no label runs out of its tile */
     labelOverflow:t.filter(x=>{const l=x.querySelector('.qa-mod__t');
       return b(l).right>b(x).right-2 || b(l).bottom>b(x).bottom-1}).length,
+    /* ── AND NO LABEL RUNS OUT OF ITS OWN BOX, which is a different question
+       and the one that was being missed. `min-width: 0` is what lets the
+       label wrap at all, and it also lets the BOX shrink under the text
+       inside it: the box then sits happily within the tile while `overflow:
+       hidden` cuts the word off. "Species Managemen" passed the check above
+       at 390 while reading exactly like that on screen. Twelve of the
+       nineteen were clipped this way at 360. `scrollWidth` against the
+       measured box is what sees it. */
+    labelClipped:t.map(x=>{const l=x.querySelector('.qa-mod__t');
+        return [l.textContent.replace(/\\u00ad/g,''),
+                l.scrollWidth-Math.round(b(l).width)]})
+      .filter(r=>r[1]>1),
+    /* ── AND NO WORD BREAKS IN THE MIDDLE OF ITSELF, which is the check that
+       actually holds. `overflow-wrap: break-word` was added as a backstop
+       against clipping and it has a sting: once it is on, `scrollWidth` never
+       exceeds the box, so the clipping test above can never fail again. It
+       went green at 360 while the panel read "Medica/l", "Hospit/al",
+       "Specie/s Manag/ement" — twelve of the nineteen split mid-word. Nothing
+       was hidden and everything was wrong.
+       So what is measured is the longest UNBREAKABLE run — each label split
+       on whitespace and on its own soft hyphens — against the box it has to
+       sit in. If the run is wider, the backstop is carrying the layout, and
+       the answer is a column fewer or a hyphen in MODULES, never the
+       backstop. */
+    wordBreaks:(()=>{const p=document.createElement('span');
+      const c0=getComputedStyle(t[0].querySelector('.qa-mod__t'));
+      p.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;'+
+        'font:'+c0.font+';letter-spacing:'+c0.letterSpacing;
+      document.body.append(p);
+      const runW=(s)=>Math.max(...s.split(/\\s+/).flatMap(w=>w.split('\\u00ad'))
+        .map(w=>{p.textContent=w; return p.getBoundingClientRect().width}));
+      const out=t.map(x=>{const l=x.querySelector('.qa-mod__t');
+        const need=Math.round(runW(l.textContent)), has=Math.round(b(l).width);
+        return [l.textContent.replace(/\\u00ad/g,''), need, has]})
+        .filter(r=>r[1]>r[2]+1);
+      p.remove(); return out})(),
     names:t.map(x=>x.querySelector('.qa-mod__t').textContent),
   })})()"""
 
@@ -1173,15 +1301,19 @@ def main():
         check("it opens all nineteen modules, and no verbs",
               m["open"] and m["isModules"] and m["tiles"] == 19 and m["cells"] == 0,
               f"tiles={m['tiles']} verbs={m['cells']} head={m['head']!r}")
-        # A WHITE APPLE MATERIAL, where this was rgba(255,255,255,.94) at
-        # radius 22 — and before that the profile menu's borrowed one. White at
-        # 62% over a 30px blur with saturation lifted — 4A's own value, which
-        # briefly went to 92% to stay white over an 82% black backdrop and
-        # came back when that backdrop went to a light 30% tint.
-        check("a white material of its own, and a real blur behind it",
-              m["material"] == "rgba(255, 255, 255, 0.62)" and m["radius"] == "28px"
-              and "blur(30px)" in (m["panelBlur"] or "")
-              and "saturate(1.8)" in (m["panelBlur"] or ""),
+        # WHITE AT 40% OVER A 15px BLUR · node 371:5157, and ruling five on
+        # this surface in six days: .94 at radius 22, then the profile menu's
+        # borrowed material, then 4A's .62/30/saturate(1.8), which went to .92
+        # to stay white over an 82% black backdrop and back when that became a
+        # light 30% tint. The node states .4 and 15 with NO saturation, and the
+        # saturate is asserted ABSENT rather than merely not required — it was
+        # never in the file, and a lift nobody can point at a source for is
+        # what makes the next comparison against the artboard fail for reasons
+        # nobody can name.
+        check("the node's white at 40% over a 15px blur, and no saturation",
+              m["material"] == "rgba(255, 255, 255, 0.4)" and m["radius"] == "28px"
+              and "blur(15px)" in (m["panelBlur"] or "")
+              and "saturate" not in (m["panelBlur"] or ""),
               f"{m['material']} r={m['radius']} {m['panelBlur']}")
         # AND NO CLIP WINDOW, in any state. The verb panel unfolded out of the
         # pill's measured box by transitioning `clip-path`; the launcher scales
@@ -1253,60 +1385,89 @@ def main():
         c.eval("document.querySelector('.qa-pill').click(); 1")
         time.sleep(0.9)
         g = json.loads(c.eval(TILES))
-        # WHAT THIS WIDTH IS OWED, derived the way the stylesheet derives it:
-        # 150-wide tiles on a 16px gutter inside 32px of padding, three of
-        # them while the 546 that needs fits in the screen's own margins, two
-        # below. The panel is clamped to `100vw - 32px` either way, so on a
-        # narrow phone it is the clamp that sets the measure and the tiles
-        # divide what is left — 150 at 430, 139 at 390, 124 at 360.
-        want_cols = 3 if WIDTH >= 578 else 2
-        want_panel = min(want_cols * 150 + (want_cols - 1) * 16 + 64, WIDTH - 32)
-        want_tile = (want_panel - 64 - (want_cols - 1) * 16) // want_cols
+        # WHAT THIS WIDTH IS OWED, derived the way the stylesheet derives it —
+        # AND THE DERIVATION INVERTED ON 15 SEP. Node 370:4029 states a 696
+        # panel on its 744 artboard (the screen less 24 either side) with
+        # `flex: 1` tiles, where every version before it stated a 150 tile and
+        # sized the panel from it. So above the breakpoint the panel is the
+        # number and three columns divide what is left of it: 205 at 744 and
+        # at every width above, because the panel stops growing at 696.
+        #
+        # BELOW IT THE OLD DERIVATION STILL HOLDS, because two columns have no
+        # stated measure in the file — 150 is still the floor a label needs,
+        # and the clamp takes over on a narrow phone: 150 at 430, 139 at 390,
+        # 124 at 360. The 577/578 boundary is unchanged by all of this, which
+        # looks like luck and is not: 3x150 + 2x16 + 2x24 = 530 plus 48 of
+        # screen margin is the same 578 the old 546-plus-32 arrived at.
+        #
+        # AND ONE COLUMN UNDER 378, added 15 Sep with the node's tile. That
+        # tile spends 70px before the label starts, so two of them stop
+        # holding the longest unbreakable word — `Administer`, 73px — below
+        # that width. The tile's own padding moves with the band and is
+        # asserted alongside, because it is what buys the word its room: 10
+        # either side where two columns are tight, the node's 16 where they
+        # are not.
+        want_cols = 3 if WIDTH >= 578 else (2 if WIDTH >= 378 else 1)
+        want_panel = min({3: 696, 2: 2 * 150 + 16 + 48}.get(want_cols, 10 ** 6),
+                         WIDTH - 48)
+        want_tile = (want_panel - 48 - (want_cols - 1) * 16) // want_cols
+        want_pad = "16px 10px" if want_cols == 2 else "16px"
+        want_justify = "flex-start" if want_cols == 1 else "center"
         check("all nineteen are there, and every one is drawn",
               g["n"] == 19 and g["visible"] == 19, f"{g['n']} tiles, {g['visible']} drawn")
         check("…carrying the modules' own names",
               g["names"][0] == "Medical" and "Commu\u00adnication" in g["names"],
               f"{g['names'][0]} … {g['names'][-1]!r}")
-        # FIXED COLOURS, NOT GRADIENTS · "Modules Colours fixed Colours Only".
-        # A ramp on any tile fails here, which is what would happen if someone
-        # pointed --qa-mod-c back at a --g-* token.
-        check("every tile is one flat colour, no ramp",
+        # ONE GROUND ON ALL NINETEEN · node 371:5441, ruled 15 Sep 2026. This
+        # replaces a count of SIXTEEN distinct colours, and the replacement is
+        # the substance of the change rather than a loosened check: the fill
+        # went tile → chip on 10 Sep to settle a contrast debt, and the node
+        # empties the chip as well. The nineteen are now told apart by glyph
+        # and name alone. Asserted as a count so that one tile getting its
+        # `--qa-mod-c` back fails here instead of being absorbed.
+        check("every tile wears one ground, the node's 20% black",
+              g["grounds"] == ["rgba(0, 0, 0, 0.2)"], str(g["grounds"]))
+        check("…flat, with no ramp on any of them",
               g["withGradient"] == 0, f"{g['withGradient']} with a gradient")
-        # AND SIXTEEN COLOURS FOR NINETEEN MODULES, which is the app's own
-        # duplication made visible by flattening: pharmacy and reports both
-        # resolve to #1ABEB6, and housing / followup / communication all to
-        # #5A8088. Asserted so the number cannot drift unnoticed in either
-        # direction — if it becomes nineteen someone has invented three hues.
-        check("…sixteen distinct colours across the nineteen, as the app has it",
-              g["distinctColours"] == 16, f"{g['distinctColours']} distinct")
-        # …AND EVERY CARD IS WHITE · ruled 10 Sep 2026, "Intead of Colours u
-        # use white". Checked separately from the count above because a
-        # colour count cannot see it: nineteen distinct chips would still
-        # pass if the cards had gone coloured again underneath them.
-        check("…and every card underneath them is white",
-              not g["cardsNotWhite"],
-              "all white" if not g["cardsNotWhite"] else str(g["cardsNotWhite"]))
-        # THE SHADOW IS BACK, AND THIS REVERSES 9 SEP OUTRIGHT. That ruling
-        # took a two-layer drop off the tiles because the field then ran the
-        # page width with nothing framing it and the shadow only laid grey
-        # into the gutters. The tiles are white cards on a white frost now,
-        # so the shadow is the only thing separating card from panel —
-        # "Apple Cards Radius, Shadow" asked for it by name.
-        check("every card carries its elevation, and no border",
-              g["withShadow"] == 19 and g["withBorder"] == 0,
-              f"{g['withShadow']}/19 shadowed, {g['withBorder']} bordered")
-        # THE CHIP IS WHERE THE COLOUR WENT, and its geometry is asserted so
-        # a white card with a white chip — nineteen invisible glyphs — cannot
-        # ship. The glyphs are white ink exported for coloured ground.
-        check("…the colour living on a 32px chip at a squircle's radius",
+        check("…and not one chip is filled any more",
+              g["chipsFilled"] == 0, f"{g['chipsFilled']} still filled")
+        # AND IT IS GLASS. The 20% veil is only the node's material with the
+        # blur behind it — without it the tile is a flat grey rectangle that
+        # measures identically and looks nothing like the file, which is the
+        # failure a colour check cannot see.
+        check("…over its own 8px blur, which is what makes it glass",
+              g["tileBlur"] == ["blur(8px)"], str(g["tileBlur"]))
+        # THE SHADOW GOES AND A HAIRLINE RETURNS, the exact reverse of 10 Sep
+        # ("Apple Cards Radius, Shadow"). A drop shadow under a translucent
+        # pane reads as dirt on the panel behind it; the node draws a 0.5px
+        # border instead, transparent at rest.
+        check("no tile casts a shadow, and every one carries the hairline",
+              g["withShadow"] == 0 and g["withBorder"] == 19,
+              f"{g['withShadow']}/19 shadowed, {g['withBorder']}/19 bordered")
+        # THE CHIP SURVIVES AS A BOX. 371:5442 keeps the 32/r9 container and
+        # drops only its fill, so the 20px glyph still sits at a fixed size
+        # whatever the label does. Asserted because deleting the empty box is
+        # the obvious tidy-up and it would let the glyph move.
+        check("…the chip still a 32px box at a squircle's radius, just unfilled",
               g["chipW"] == 32 and g["chipH"] == 32 and g["chipR"] == 9,
               f"{g['chipW']}x{g['chipH']} r{g['chipR']}")
+        # AND THE PAIR IS CENTRED, not run out from the left edge. This is the
+        # one layout property that changed with the material and the only one
+        # a screenshot diff would catch late.
+        check(f"…with the chip and label {want_justify}, 6 apart, on {want_pad} of pad",
+              g["justify"] == [want_justify] and g["tileGap"] == ["6px"]
+              and g["tilePad"] == [want_pad],
+              f"{g['justify']} gap {g['tileGap']} pad {g['tilePad']}"
+              f" (wanted {want_justify} on {want_pad} at {WIDTH})")
         # ONE RHYTHM, every number a multiple of 4: 150x70 tiles, a 16px
         # gutter on both axes, 32px of panel padding, and the panel 24px clear
         # of the row rather than the verb panel's 8.
-        check(f"{want_tile}x70 tiles at radius 14, on a 16px gutter both ways",
-              g["tileW"] == want_tile and g["tileH"] == 70 and g["radius"] == 14
-              and g["gapX"] == 16 and g["gapY"] == 16,
+        check(f"{want_tile}x72 tiles at radius 16, on a 16px gutter both ways",
+              # `gapX` is tile[1].left - tile[0].right, which is only a
+              # horizontal gutter when there IS a second column — at one it
+              # measures the wrap back to the next row and reads -264.
+              g["tileW"] == want_tile and g["tileH"] == 72 and g["radius"] == 16
+              and (want_cols == 1 or g["gapX"] == 16) and g["gapY"] == 16,
               f"{g['tileW']}x{g['tileH']} r{g['radius']} gap {g['gapX']}/{g['gapY']}"
               f" (wanted {want_tile} wide at {WIDTH})")
         # THREE, NOT FOUR · ruled 10 Sep 2026, "Quick access module has come
@@ -1326,9 +1487,9 @@ def main():
         # derivation rather than either constant — sized from the column
         # count in force, at whichever width is being run.
         check(f"…in {'three' if want_cols == 3 else 'two'} columns on a "
-              f"{want_panel}px panel with 32px padding",
+              f"{want_panel}px panel with 24px padding",
               g["cols"] == want_cols and g["panelW"] == want_panel
-              and g["panelPad"] == "32px",
+              and g["panelPad"] == "24px",
               f"{g['cols']} cols, {g['panelW']}px, pad {g['panelPad']}"
               f" (wanted {want_cols} at {want_panel} for {WIDTH})")
         check("…standing 24 clear of the pill row, not 8",
@@ -1359,35 +1520,88 @@ def main():
         # that there is no per-tile ink decision, and that is what is checked:
         # ONE value across all nineteen, whatever it is, and no returning
         # `--dark` class.
-        check("one ink across all nineteen, and it is dark on white",
-              len(g["inks"]) == 1 and g["inks"][0] != "rgb(255, 255, 255)"
+        check("one ink across all nineteen, and it is white on the glass",
+              len(g["inks"]) == 1 and g["inks"][0] == "rgb(255, 255, 255)"
               and g["darkClass"] == 0,
               f"{g['inks']} (+{g['darkClass']} --dark)")
-        # AND THE WEIGHT THE RULING NAMED · "Module Name make it Bold".
-        check("…set bold, as the ruling asked",
-              g["weights"] == ["700"], str(g["weights"]))
-        # THE CONTRAST DEBT IS PAID, AND THIS IS NOW A REAL FLOOR. It could
-        # not be one before: white ink on the pale tiles failed AA on fifteen
-        # of the nineteen and the 3:1 non-text floor on the palest few —
-        # administer at 1.60:1 was the worst — so the old check pinned the
-        # worst case rather than asserting a limit it could not meet, and
-        # recorded the way out. That way out is what shipped: "colour on an
-        # icon chip with labels on a neutral wash (measured 13.20:1)". So the
-        # floor is asserted properly, at AA for body text.
-        check("…and every label clears AA against its card",
-              g["worstRatio"] >= 4.5 and not g["underAA"],
-              f"worst {g['worstTile']} {g['worstRatio']}:1"
-              + ("" if not g["underAA"] else f"; under AA → {g['underAA']}"))
-        # AND THE TEXT-SHADOW IS GONE WITH THE DEBT. It was load-bearing at
-        # .35 — the only thing separating white ink from administer, lab and
-        # parivesh. Dark ink on a white card does not need it, and leaving it
-        # would smear the label it used to rescue.
+        # AND THE NODE'S OWN WEIGHT · 371:5444 is Inter Medium 14 at +0.1,
+        # the project's `Antz_Body_Medium`. "Module Name make it Bold" was
+        # ruled on 10 Sep for near-black ink carrying a white card's
+        # hierarchy; on the glass the label is the only ink on the tile.
+        check("…at the node's Medium 14, not the white card's bold 13.5",
+              g["weights"] == ["500"] and g["sizes"] == ["14px"],
+              f"{g['weights']} at {g['sizes']}")
+        # ── THE CONTRAST DEBT IS BACK, AND IT IS MEASURED OFF THE SCREEN ───
+        # This check was a real AA floor for five days and is a recorded
+        # exception again. It has to be said plainly: the 10 Sep white card
+        # measured 10.68:1 worst case, and node 371:5441 trades that away for
+        # its material. Every one of the nineteen is now under AA and ten are
+        # under the 3:1 non-text floor.
+        #
+        # AND IT CANNOT BE READ OFF STYLE ANY MORE. The tile is 20% black over
+        # a 40% white panel over a 30% black veil over whatever the page draws
+        # behind it, so `backgroundColor` returns `rgba(0, 0, 0, 0.2)` and a
+        # luminance read of it — which ignores alpha — reports 21:1 for a tile
+        # that actually measures 2.06. That is a check passing while the
+        # screen is wrong, so the measurement moved to the rendered pixels:
+        # sample the tile's ground between the label's right edge and the
+        # tile's, clear of the chip, the ink and the corners.
+        #
+        # ASSERTED AS A FLOOR, NOT A TARGET, so the exception is bounded. If a
+        # later change pushes any tile below what the node itself produces,
+        # this fails — and the way back is a darker tile or a lower panel
+        # alpha, both of which leave the file. The spread is the PAGE, not the
+        # tiles: they are one ground, and the light bottom-left corner of the
+        # page is why Communication reads worst.
+        ink = _sample_ink_contrast(c, g["inkBoxes"])
+        if ink is None:
+            check("…the label's measured contrast, sampled off the render",
+                  False, "could not sample — PIL missing or screenshot failed")
+        else:
+            worst, best, under_aa, under_3, worst_name, sampled = ink
+            # 1.9, AND THE HEADROOM IS DELIBERATE. The measure is
+            # deterministic — three runs at 744 give 2.05 to two decimals —
+            # but it lands differently at each width because the spread is the
+            # PAGE showing through: 2.05 at 744, 2.12 at 1024, 2.15 at 390. A
+            # floor pinned to the tightest of those would fail on an
+            # anti-aliasing change rather than on a real one, which is the
+            # failure mode that makes a suite get ignored.
+            check("…the label's contrast measured off the render, and bounded",
+                  worst >= 1.9,
+                  f"worst {worst_name} {worst:.2f}:1, best {best:.2f}:1 — "
+                  f"{under_aa}/{sampled} under AA, {under_3}/{sampled} under 3:1 "
+                  f"(of {sampled} tiles in the panel; recorded exception: "
+                  f"node 371:5441's material, 15 Sep)")
+        # AND THE TEXT-SHADOW STAYS RETIRED. It was load-bearing at .35 on the
+        # coloured tiles — the only thing separating white ink from
+        # administer, lab and parivesh. Putting it back is the obvious reflex
+        # now that the ink is white again on a mid ground, and it is the wrong
+        # one: the node draws no shadow, and a smear under 14px Medium is what
+        # made the old tiles look cheap. If the contrast is ever called, the
+        # answer is the material, not a shadow over it.
         check("…with the text-shadow retired, not left smearing the ink",
               g["withShadowInk"] == 0, f"{g['withShadowInk']}/19 still shadowed")
         check("every glyph is the module's own file, loaded",
               g["glyphsLoaded"] == 19, f"{g['glyphsLoaded']}/19")
         check("no label runs out of its tile", g["labelOverflow"] == 0,
               str(g["labelOverflow"]))
+        # AND NONE IS CLIPPED INSIDE ITS OWN BOX — the half the line above
+        # cannot see. Kept as a separate check rather than folded in, because
+        # the two fail for opposite reasons: the box overflows when the label
+        # CANNOT shrink, and the text overflows when it shrinks too far.
+        check("…and no word is cut off inside it",
+              not g["labelClipped"],
+              "none" if not g["labelClipped"] else
+              ", ".join(f"{n} by {px}px" for n, px in g["labelClipped"]))
+        # AND NO WORD IS SPLIT DOWN THE MIDDLE, which is the one that holds.
+        # The two above can both be green while the panel reads "Medica/l" —
+        # `break-word` guarantees it by making the text fit whatever the box.
+        # This asserts the box is wide enough that the backstop never fires.
+        check("…and no word has to break in the middle of itself",
+              not g["wordBreaks"],
+              "none" if not g["wordBreaks"] else
+              ", ".join(f"{n} needs {need} has {has}"
+                        for n, need, has in g["wordBreaks"]))
         errs = c.errors()
         check("no console errors", not errs, "; ".join(str(e)[:110] for e in errs[:3]))
 
