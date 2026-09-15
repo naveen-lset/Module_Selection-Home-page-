@@ -1507,6 +1507,68 @@ def main():
               f["panelOpacity"] == 0 and 0.95 <= f["panelScale"] <= 0.97,
               f"opacity {f['panelOpacity']}, scale {f['panelScale']}")
 
+    # ══ THE PLANTING IS THE ARTBOARD'S, AT EVERY WIDTH ════════════════════
+    # Three bands draw one image and the base rule's `foliage.png` is now
+    # reached by none of them, which is exactly the arrangement that decays
+    # quietly: widen a media query, or touch the base rule, and one band goes
+    # back to the tiled sprigs with nothing failing. Nothing asserted this at
+    # all until today — the phone's own ruling of 10 Sep shipped unchecked.
+    #
+    # WHAT IS ASSERTED IS THE DERIVATION, not three sets of constants. The
+    # crop is one proportion at every width because it is stated as `cover` at
+    # 67.89%, so it is checked as the same string everywhere. The hold is the
+    # one thing that legitimately differs: it ends where the Main Frame's top
+    # edge is, which is what "solid for as long as it is behind the greeting
+    # and the field" means — so the edge is MEASURED and the mask is required
+    # to hold to it, rather than both being written down twice and drifting.
+    print("\nthe planting, and where it stops being solid")
+    with Chrome(width=WIDTH, height=900) as c:
+        c.goto(BASE + "index.html?v=2", settle=2.0)
+        pl = json.loads(c.eval("""(()=>{const b=e=>e.getBoundingClientRect();
+          const f=document.querySelector('.foliage'), cs=getComputedStyle(f);
+          const m=(cs.webkitMaskImage||cs.maskImage||'');
+          const hold=/#000(?:000)?\\s+0(?:px)?\\s*,\\s*(?:rgb\\(0,\\s*0,\\s*0\\)|#000(?:000)?)\\s+(\\d+)px/.exec(m)
+                  || /,\\s*rgb\\(0,\\s*0,\\s*0\\)\\s+(\\d+)px/.exec(m);
+          return JSON.stringify({
+            img: /([^/"')]+\\.png)/.exec(cs.backgroundImage||'')?.[1] || null,
+            size: cs.backgroundSize, pos: cs.backgroundPosition,
+            boxH: Math.round(b(f).height),
+            hold: hold ? +hold[1] : null,
+            frameTop: Math.round(b(document.querySelector('.main-frame')).top),
+            masks: m.split(/\\)\\s*,\\s*(?=linear|radial)/).length,
+          })})()"""))
+        check("it is the artboard's illustration, not the tiled sprigs",
+              pl["img"] == "foliage-artboard.png", str(pl["img"]))
+        # ONE CROP, STATED AS A PROPORTION. `cover` at 67.89% is the node's
+        # 190.44% / -61.4% solved once; a vw offset was correct at 744 and
+        # only there, which is the bug this replaced.
+        check("…on the one crop that is correct in any box",
+              pl["size"] == "cover" and pl["pos"] == "50% 67.89%",
+              f"{pl['size']} at {pl['pos']}")
+        # AND THE FEATHER IS ONE MASK, not the base rule's feather-intersect-
+        # clearing pair: the clearing lifts the top-left for dark text over
+        # busy sprigs, and this artwork carries the node's own flat 5% black
+        # instead. Composited, the corner would be darkened twice.
+        check("…through one mask, the clearing left off it",
+              pl["masks"] == 1, f"{pl['masks']} mask layers")
+        # THE HOLD ENDS AT THE MAIN FRAME'S EDGE — 182 on the tablet, 204 at
+        # 900 and up, and on the phone it cannot: the name wraps at 390 and
+        # not at 430, so 210 is a declared compromise between 227 and 191 and
+        # is checked as that rather than against a moving edge.
+        if WIDTH < 744:
+            check("…holding solid to the phone's declared 210", pl["hold"] == 210,
+                  f"hold {pl['hold']}, frame at {pl['frameTop']}")
+        else:
+            check("…holding solid to exactly where the Main Frame begins",
+                  pl["hold"] is not None and abs(pl["hold"] - pl["frameTop"]) <= 1,
+                  f"hold {pl['hold']}, frame at {pl['frameTop']}")
+        # AND THE BOX IS THE HOLD PLUS THE FADE, which is the part that was
+        # got wrong first: taking the tablet's 293 to the desktop would have
+        # squeezed the 111px dissolve to 89 so that a constant could stay put.
+        want_box = 293 if WIDTH < 900 else 315
+        check(f"…in a {want_box}px box, the hold plus its 111 of fade",
+              pl["boxH"] == want_box, f"{pl['boxH']}px")
+
     # ══ THE NUMBERS, AND WHAT A FINGER CAN ACTUALLY HIT ═══════════════════
     print("\nthe figures and the touch targets")
     with Chrome(width=WIDTH, height=900) as c:

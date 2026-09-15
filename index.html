@@ -9689,6 +9689,69 @@ body.is-editing .qa-chat { display: none; }
   }
 }
 
+/* ══ AND SO DOES THE DESKTOP · ruled 15 Sep 2026 ══════════════════════════
+   The artboard planting went in at 744-899 and was widened to the phone the
+   same day, which left 900 and up as the one band still drawing the build's
+   own `foliage.png` — pale tiled sprigs over the cyan gradient, beside an
+   illustration on every other screen. It was left that way deliberately: the
+   ruling had named the phone, and the 1024 artboard states its own figures.
+   Ruled the other way today, so the planting is now the artboard's at every
+   width and `foliage.png` at the base rule is no longer reached by anything.
+   The asset and tools/foliage.py are kept — retiring them is its own call.
+
+   THE IMAGE AND THE CROP ARE THE OTHER TWO BANDS', verbatim. That is the
+   whole point of having restated the node's 190.44% / -61.4% as `cover` at
+   67.89%: it is a proportion, so it holds in any box, and this band does not
+   re-derive it and cannot drift from it.
+
+   WHAT IS DESKTOP-SPECIFIC IS THE HOLD, AND IT IS MEASURED, NOT COPIED. The
+   rule is that the artwork stays solid for exactly as long as it is behind
+   the greeting and the field, then dissolves across the 111px that overlap
+   the top of the module surface. On the tablet that edge is 182. Here it is
+   204 — measured at 1000, 1024, 1180, 1280, 1440 and 1728, all 204, and 203
+   at exactly 900, the same 1px slack the tablet band accepts across its own.
+   Taking the tablet's 182 unchanged was tried and is wrong in a way that
+   shows: the artwork begins fading 22px before the field it is meant to sit
+   solid behind, so the field's own bottom edge sits in the fade.
+
+   SO THE BOX IS 315, NOT 293. 204 + the same 111px of fade the tablet runs.
+   Holding the 293 instead would have compressed the dissolve to 89 to make a
+   number match — the box is the consequence of the hold here, not a constant
+   the hold has to fit inside. The stops keep the tablet's own shape: solid to
+   the frame's edge, .72 at +32, .34 at +70, gone at +111. */
+@media (min-width: 900px) {
+  .foliage {
+    height: 315px;
+    background: url('assets/img/foliage-artboard.png') no-repeat 50% 67.89% / cover;
+    -webkit-mask-image: linear-gradient(to bottom,
+      #000 0, #000 204px,
+      rgba(0, 0, 0, .72) 236px,
+      rgba(0, 0, 0, .34) 274px,
+      transparent 315px);
+            mask-image: linear-gradient(to bottom,
+      #000 0, #000 204px,
+      rgba(0, 0, 0, .72) 236px,
+      rgba(0, 0, 0, .34) 274px,
+      transparent 315px);
+    /* one mask, so the intersect the @supports block sets is neutralised —
+       the same reason the other two bands do it */
+    -webkit-mask-composite: source-over;
+            mask-composite: add;
+  }
+  /* the node's 5% black, ramped to die with the artwork rather than outlive
+     it as a grey rectangle — the mistake the 744 band made once */
+  .foliage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(0, 0, 0, .05) 0, rgba(0, 0, 0, .05) 204px,
+      rgba(0, 0, 0, .036) 236px,
+      rgba(0, 0, 0, .017) 274px,
+      rgba(0, 0, 0, 0) 315px);
+  }
+}
+
 /* ══ THE MODULE SURFACE REACHES THE FOOT OF THE PAGE ══════════════════════
    Ruled 10 Sep: "Down empty remove". The wash ended 24px below the grid and
    the page ran on for another 160 — `#panel-modules` reserves the pill's
