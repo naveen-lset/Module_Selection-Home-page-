@@ -9158,6 +9158,29 @@ body.is-editing .qa-chat { display: none; }
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--qa-mod-gap);
 }
+/* ── TWO ON A PHONE, BECAUSE THREE DOES NOT FIT AND DID NOT SAY SO ───────
+   The three-column ruling was made and measured at the app's own width, and
+   nothing carried it down. The panel is already clamped to `100vw - 32px`,
+   so on a 390 phone it became 358 — and three fixed fractions of 358 are
+   87px tiles. A tile spends 24 on padding, 32 on the chip and 10 on the gap,
+   which left the label 21px and truncated EIGHTEEN OF NINETEEN: "Medi",
+   "Hosp", "Phar", "Spec Mana". The panel measured correct the whole time;
+   the thing that was wrong was only ever visible on the rendered label.
+
+   577 IS THE MEASURE, NOT A DEVICE. Three columns need the 546 panel plus
+   its 16px screen margins either side — 578. Below that the panel is sized
+   from TWO the same way it is sized from three above, so the tiles hold
+   their own 150 wherever there is room for them and compress only on a
+   genuinely narrow phone: 150 at 430, 139 at 390, 124 at 360. Without the
+   cap the 2-column band would stretch them to 224 at 560, which is the
+   mistake the note over the panel's width warns about, made in reverse. */
+@media (max-width: 577px) {
+  .qa--modules .qa-menu__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qa--modules .qa-menu {
+    width: min(calc(2 * var(--qa-mod-w) + var(--qa-mod-gap) + 2 * var(--qa-mod-pad)),
+               calc(100vw - 32px));
+  }
+}
 /* the head arrives with the panel rather than after the last row: there are
    no rows to count from any more */
 .qa--modules .qa-menu__head { --qa-delay: 0ms; padding-bottom: 20px; }
@@ -9264,6 +9287,14 @@ body.is-editing .qa-chat { display: none; }
   /* `communication` is spelt with a SOFT HYPHEN in MODULES precisely so it can
      break inside a narrow tile; `manual` is what honours it. */
   hyphens: manual;
+  /* AND IT HAS TO BE ALLOWED TO SHRINK BEFORE IT CAN WRAP. A flex item's
+     `min-width` is `auto`, which is its MIN-CONTENT — so the label took its
+     longest word's width whatever the tile measured, and `overflow: hidden`
+     on the tile cut the rest off rather than letting it break. That was
+     invisible at 150 because one label exceeded its box by 2px; at the 87px
+     tiles a phone was drawing it truncated eighteen of the nineteen — "Medi",
+     "Hosp", "Spec Mana". Zero is what lets the wrap above actually happen. */
+  min-width: 0;
 }
 .qa-mod:hover { filter: brightness(1.06); }
 .qa-mod:active { transform: scale(.97); }

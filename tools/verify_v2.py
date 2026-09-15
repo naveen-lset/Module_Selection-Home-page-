@@ -408,7 +408,13 @@ TILES = """(()=>{
   const gcs=getComputedStyle(grid), mcs=getComputedStyle(menu);
   const uniq=(a)=>[...new Set(a)];
   const b=(e)=>e.getBoundingClientRect();
-  const b0=b(t[0]), b1=b(t[1]), bRow2=b(t[4]);
+  /* THE SECOND ROW IS FOUND, NOT COUNTED TO. This was `t[4]`, which is the
+     middle of row two at three columns and the middle of row THREE at two —
+     so on a phone the row gutter measured 102 and a correct 16px grid failed
+     its own check. The first tile that starts below row one is the second
+     row at any column count. */
+  const b0=b(t[0]), b1=b(t[1]);
+  const bRow2=b(t.find((x)=>b(x).top>b0.bottom-1)||t[t.length-1]);
 
   /* THE INK IS WHITE ON ALL NINETEEN · ruled 10 Sep. What is checked is no
      longer WHICH ink each colour favours but that every tile actually got
@@ -1247,6 +1253,15 @@ def main():
         c.eval("document.querySelector('.qa-pill').click(); 1")
         time.sleep(0.9)
         g = json.loads(c.eval(TILES))
+        # WHAT THIS WIDTH IS OWED, derived the way the stylesheet derives it:
+        # 150-wide tiles on a 16px gutter inside 32px of padding, three of
+        # them while the 546 that needs fits in the screen's own margins, two
+        # below. The panel is clamped to `100vw - 32px` either way, so on a
+        # narrow phone it is the clamp that sets the measure and the tiles
+        # divide what is left — 150 at 430, 139 at 390, 124 at 360.
+        want_cols = 3 if WIDTH >= 578 else 2
+        want_panel = min(want_cols * 150 + (want_cols - 1) * 16 + 64, WIDTH - 32)
+        want_tile = (want_panel - 64 - (want_cols - 1) * 16) // want_cols
         check("all nineteen are there, and every one is drawn",
               g["n"] == 19 and g["visible"] == 19, f"{g['n']} tiles, {g['visible']} drawn")
         check("…carrying the modules' own names",
@@ -1289,19 +1304,54 @@ def main():
         # ONE RHYTHM, every number a multiple of 4: 150x70 tiles, a 16px
         # gutter on both axes, 32px of panel padding, and the panel 24px clear
         # of the row rather than the verb panel's 8.
-        check("150x70 tiles at radius 14, on a 16px gutter both ways",
-              g["tileW"] == 150 and g["tileH"] == 70 and g["radius"] == 14
+        check(f"{want_tile}x70 tiles at radius 14, on a 16px gutter both ways",
+              g["tileW"] == want_tile and g["tileH"] == 70 and g["radius"] == 14
               and g["gapX"] == 16 and g["gapY"] == 16,
-              f"{g['tileW']}x{g['tileH']} r{g['radius']} gap {g['gapX']}/{g['gapY']}")
+              f"{g['tileW']}x{g['tileH']} r{g['radius']} gap {g['gapX']}/{g['gapY']}"
+              f" (wanted {want_tile} wide at {WIDTH})")
         # THREE, NOT FOUR · ruled 10 Sep 2026, "Quick access module has come
         # in 3 coloums". The panel is sized FROM the column count — 3x150 +
         # 2x16 + 2x32 = 546 — so this asserts the pair together: a panel that
         # kept its 712 while the grid went to three would stretch the tiles.
-        check("…in three columns on a 546px panel with 32px padding",
-              g["cols"] == 3 and g["panelW"] == 546 and g["panelPad"] == "32px",
-              f"{g['cols']} cols, {g['panelW']}px, pad {g['panelPad']}")
+        #
+        # AND TWO BELOW 578, which is that same 546 plus the 16px screen
+        # margins the panel is clamped to. This pair used to be asserted as
+        # the constants 3 and 546 at EVERY width, which read as a verifier
+        # that hardcoded the desktop — and the note it was carried under said
+        # so, that the panel "correctly reflows to one column on a phone".
+        # IT DID NOT REFLOW AT ALL: it held three columns and squeezed the
+        # tiles to 87, and eighteen of the nineteen labels were truncated
+        # behind `overflow: hidden`. The checks were right to fail and the
+        # diagnosis was what was wrong, so what they assert now is the
+        # derivation rather than either constant — sized from the column
+        # count in force, at whichever width is being run.
+        check(f"…in {'three' if want_cols == 3 else 'two'} columns on a "
+              f"{want_panel}px panel with 32px padding",
+              g["cols"] == want_cols and g["panelW"] == want_panel
+              and g["panelPad"] == "32px",
+              f"{g['cols']} cols, {g['panelW']}px, pad {g['panelPad']}"
+              f" (wanted {want_cols} at {want_panel} for {WIDTH})")
         check("…standing 24 clear of the pill row, not 8",
               near(g["clearOfRow"], 24, 1), f"{g['clearOfRow']}px")
+        # AND ALL NINETEEN ARE REACHABLE, which two columns made a question.
+        # At three the field is seven rows and fits a phone outright; at two it
+        # is ten and 944px of content sits in a 728px panel. That is fine —
+        # the panel has been a scroll container the whole time — but "fine"
+        # here means the LAST tile can actually be brought into it, and that
+        # the page behind does not take the scroll instead, which is the way
+        # this fails in practice. Checked as the rendered box of the last
+        # tile, not as `scrollTop` agreeing with itself.
+        reach = json.loads(c.eval("""(()=>{const b=e=>e.getBoundingClientRect();
+          const m=document.querySelector('.qa-menu');
+          const t=[...document.querySelectorAll('.qa-mod')], last=t[t.length-1];
+          const y0=scrollY; m.scrollTop=m.scrollHeight;
+          return JSON.stringify({inside: b(last).top>=b(m).top-1 && b(last).bottom<=b(m).bottom+1,
+            pageMoved: Math.round(scrollY-y0), room: m.scrollHeight-m.clientHeight})})()"""))
+        check("…and every one of the nineteen can be reached in the panel",
+              reach["inside"] and reach["pageMoved"] == 0,
+              f"last tile inside={reach['inside']}, page moved {reach['pageMoved']}px, "
+              f"{reach['room']}px of scroll")
+        c.eval("document.querySelector('.qa-menu').scrollTop = 0; 1")
         # ONE INK ON ALL NINETEEN, STILL — but it is dark now, not white.
         # "text All has to be white" was ruled against COLOURED tiles on
         # 10 Sep; the cards went white later the same day, which reverses the
