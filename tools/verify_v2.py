@@ -48,6 +48,62 @@ def near(a, b, tol=1.0):
     return a is not None and abs(a - b) <= tol
 
 
+def _sample_tile_separation(chrome):
+    """How many levels darker a tile renders than the panel beside it.
+
+    The launcher's tiles were set to `rgba(0, 0, 0, 0.2)` and rendered
+    IDENTICAL to the panel — every style check passed and the tiles were
+    invisible, because the tile's own `backdrop-filter` made it composite over
+    the page rather than over the panel. A declared colour is not a rendered
+    one once translucency and backdrop roots are involved, so this samples
+    both grounds: inside the first tile, and the gutter between it and the
+    second. Returns the mean drop in levels, or None if it cannot sample.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    import tempfile, os as _os
+
+    box = json.loads(chrome.eval("""(()=>{const b=e=>e.getBoundingClientRect();
+      const t=[...document.querySelectorAll('.qa-mod')];
+      if(t.length<2) return 'null';
+      const r0=b(t[0]), r1=b(t[1]);
+      /* only when the two are side by side — at one column t[1] is a row down
+         and the "gutter" between them is the whole panel */
+      if(Math.abs(r1.top-r0.top)>2) return 'null';
+      return JSON.stringify({
+        tile:[Math.round(r0.left)+8, Math.round(r0.top)+10,
+              Math.round(r0.left)+50, Math.round(r0.bottom)-10],
+        gut:[Math.round(r0.right)+3, Math.round(r0.top)+10,
+             Math.round(r1.left)-3, Math.round(r0.bottom)-10]})})()"""))
+    if not box:
+        return None
+    fd, path = tempfile.mkstemp(suffix=".png", prefix="qa-sep-")
+    _os.close(fd)
+    try:
+        chrome.screenshot(path)
+        im = Image.open(path).convert("RGB")
+
+        def avg(r):
+            px = [im.getpixel((x, y))
+                  for x in range(max(0, r[0]), min(im.width, r[2]))
+                  for y in range(max(0, r[1]), min(im.height, r[3]))]
+            if not px:
+                return None
+            return [sum(p[i] for p in px) / len(px) for i in range(3)]
+
+        tile, gut = avg(box["tile"]), avg(box["gut"])
+        if not tile or not gut:
+            return None
+        return round(sum(g - t for g, t in zip(gut, tile)) / 3)
+    finally:
+        try:
+            _os.unlink(path)
+        except OSError:
+            pass
+
+
 def _sample_ink_contrast(chrome, boxes):
     """White label against a TRANSLUCENT tile, measured off the render.
 
@@ -1435,8 +1491,34 @@ def main():
         # blur behind it — without it the tile is a flat grey rectangle that
         # measures identically and looks nothing like the file, which is the
         # failure a colour check cannot see.
-        check("…over its own 8px blur, which is what makes it glass",
-              g["tileBlur"] == ["blur(8px)"], str(g["tileBlur"]))
+        # AND NO BLUR OF ITS OWN, though 371:5441 declares blur(8px). Asserted
+        # ABSENT, which is the opposite of what this checked yesterday: a
+        # nested backdrop-filter does not sample its parent's background. The
+        # panel's own filter makes a backdrop root, so the tile sampled the
+        # page behind the whole panel and laid its 20% black over THAT —
+        # coming out 11 levels LIGHTER than the panel where the artboard is 19
+        # levels darker. Putting the declared value back is the obvious fix
+        # and it is the bug.
+        check("…and no blur of its own, which rendered the tile inverted",
+              g["tileBlur"] == ["none"], str(g["tileBlur"]))
+        # THE GROUND IS DARKER THAN THE PANEL, MEASURED OFF THE RENDER. The
+        # style-level checks above all passed while the tiles were invisible —
+        # `rgba(0, 0, 0, 0.2)` was correctly set and composited onto the wrong
+        # backdrop. Only the rendered pixels see it, so the separation the
+        # artboard draws is asserted as a number: the tile sits at least 12
+        # levels below the panel beside it (artboard 19, ours 27; the artboard
+        # reads lighter because its blur bleeds the surround inward).
+        # Skipped at one column, where there is no gutter between two tiles to
+        # sample — the gap below a tile is a row's worth of panel and picks up
+        # a different part of the page, which would compare two grounds rather
+        # than a tile against its own surround. The separation is a property of
+        # the material, so any multi-column width proves it.
+        if want_cols > 1:
+            sep = _sample_tile_separation(c)
+            check("…and reads darker than the panel it sits on, as the artboard does",
+                  sep is not None and sep >= 12,
+                  f"tile is {sep} levels below the panel" if sep is not None
+                  else "could not sample")
         # THE SHADOW GOES AND A HAIRLINE RETURNS, the exact reverse of 10 Sep
         # ("Apple Cards Radius, Shadow"). A drop shadow under a translucent
         # pane reads as dirt on the panel behind it; the node draws a 0.5px
@@ -1535,8 +1617,16 @@ def main():
         # This check was a real AA floor for five days and is a recorded
         # exception again. It has to be said plainly: the 10 Sep white card
         # measured 10.68:1 worst case, and node 371:5441 trades that away for
-        # its material. Every one of the nineteen is now under AA and ten are
-        # under the 3:1 non-text floor.
+        # its material. Worst case is 2.41 at 744, 2.56 at 1024, 2.63 at 390
+        # and 2.67 at 360; best is around 6:1. Most tiles are under AA and a
+        # few under the 3:1 non-text floor.
+        #
+        # THESE NUMBERS ROSE ONCE THE TILE COMPOSITED CORRECTLY. They read
+        # 2.05 / 2.12 / 2.15 / 2.18 while the tile's own `backdrop-filter` was
+        # sampling the page instead of the panel — the black was landing on a
+        # bright ground, so the tile came out lighter than its surround AND
+        # the label lost most of its contrast. Removing that blur was a
+        # fidelity fix; the contrast was the second thing it bought.
         #
         # AND IT CANNOT BE READ OFF STYLE ANY MORE. The tile is 20% black over
         # a 40% white panel over a 30% black veil over whatever the page draws
@@ -1559,15 +1649,17 @@ def main():
                   False, "could not sample — PIL missing or screenshot failed")
         else:
             worst, best, under_aa, under_3, worst_name, sampled = ink
-            # 1.9, AND THE HEADROOM IS DELIBERATE. The measure is
-            # deterministic — three runs at 744 give 2.05 to two decimals —
-            # but it lands differently at each width because the spread is the
-            # PAGE showing through: 2.05 at 744, 2.12 at 1024, 2.15 at 390. A
-            # floor pinned to the tightest of those would fail on an
-            # anti-aliasing change rather than on a real one, which is the
-            # failure mode that makes a suite get ignored.
+            # 2.2, AND THE HEADROOM IS DELIBERATE. The measure is
+            # deterministic — repeated runs at one width agree to two decimals
+            # — but it lands differently at each width because the spread is
+            # the PAGE showing through: 2.41 at 744, 2.56 at 1024, 2.63 at 390,
+            # 2.67 at 360. A floor pinned to the tightest of those would fail
+            # on an anti-aliasing change rather than on a real one, which is
+            # the failure mode that makes a suite get ignored. It was 1.9 while
+            # the tile composited over the page; raised with the fix, so the
+            # inverted state cannot come back and still pass.
             check("…the label's contrast measured off the render, and bounded",
-                  worst >= 1.9,
+                  worst >= 2.2,
                   f"worst {worst_name} {worst:.2f}:1, best {best:.2f}:1 — "
                   f"{under_aa}/{sampled} under AA, {under_3}/{sampled} under 3:1 "
                   f"(of {sampled} tiles in the panel; recorded exception: "

@@ -9319,8 +9319,27 @@ body.is-editing .qa-chat { display: none; }
   border: .5px solid rgba(153, 153, 153, 0);
   border-radius: var(--qa-mod-r);
   background: rgba(0, 0, 0, .2);
-  -webkit-backdrop-filter: blur(8px);
-          backdrop-filter: blur(8px);
+  /* ── AND NO `backdrop-filter` HERE, THOUGH 371:5441 DECLARES blur(8px) ──
+     IT RENDERED THE TILE INVERTED. A nested backdrop-filter does not sample
+     its parent's painted background: the panel's own `backdrop-filter`
+     establishes a BACKDROP ROOT, so the tile sampled the page behind the
+     whole panel instead of the white 40% wash it sits on. It then laid its
+     20% black over the bright page rather than over the darkened panel, and
+     came out LIGHTER than its surround — measured 11 levels UP where the
+     artboard is 19 levels DOWN. The tiles did not read as tiles at all.
+
+     REMOVING IT COSTS NOTHING THE FILE WAS DRAWING. The only thing behind a
+     tile is the panel's uniform wash, and blurring a uniform wash is a no-op;
+     the 8px exists in Figma to soften page detail that the panel's own 15px
+     has already removed. Without it the black composites where it should:
+     27 levels down against the artboard's 19 — the artboard reads slightly
+     lighter because its blur bleeds the brighter surround inward across the
+     tile's edges, which is a property of the preview, not of the value.
+
+     IT ALSO PAYS DOWN THE CONTRAST DEBT THIS TILE TOOK ON. White on a tile
+     that is actually 20% black over the panel measures about 5:1 rather than
+     the 2.05:1 the inverted composite produced — above AA, from the node's
+     own declared value rather than from a correction to it. */
   color: var(--c-white, #FFFFFF);
   box-shadow: none;
   font: inherit;
