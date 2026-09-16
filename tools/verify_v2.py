@@ -1091,14 +1091,21 @@ def main():
         c.eval(OPEN_MENU)
         time.sleep(0.35)
         g = c.eval(VER_GROUP)
-        check("the menu carries a Home page group of two radios",
-              g["open"] and len(g["ver"]) == 2
+        # THREE SINCE 16 SEP, not two — V3 is the black page, node 506:10213.
+        # The count is asserted rather than "at least two" because a row that
+        # fails to render is exactly the failure this group has had before.
+        check("the menu carries a Home page group of three radios",
+              g["open"] and len(g["ver"]) == 3
               and all(r["role"] == "menuitemradio" for r in g["ver"])
               and "HOME PAGE" in [h.upper() for h in g["heads"]],
               f"{g['heads']} {[r['label'] for r in g['ver']]}")
-        check("the tick is on the page you are actually on",
-              g["ver"][0]["checked"] == "true" and g["ver"][1]["checked"] == "false",
-              f"{g['ver'][0]['checked']} / {g['ver'][1]['checked']}")
+        # AND EXACTLY ONE TICK. Version 1's `checked` was `!isV2()`, which is
+        # true on V3 as well — the row would have ticked itself on a page it
+        # was not showing. It reads its own predicate now, and what is asserted
+        # is the invariant rather than three separate values.
+        check("the tick is on the page you are actually on, and only there",
+              [r["checked"] for r in g["ver"]] == ["true", "false", "false"],
+              str([r["checked"] for r in g["ver"]]))
         check("neither row clips its note",
               not any(r["clipped"] for r in g["ver"]),
               str([r["note"] for r in g["ver"]]))
@@ -1118,8 +1125,8 @@ def main():
         time.sleep(0.35)
         g = c.eval(VER_GROUP)
         check("the tick has moved with the page",
-              g["ver"][1]["checked"] == "true" and g["ver"][0]["checked"] == "false",
-              f"{g['ver'][0]['checked']} / {g['ver'][1]['checked']}")
+              [r["checked"] for r in g["ver"]] == ["false", "true", "false"],
+              str([r["checked"] for r in g["ver"]]))
         c.eval(PRESS_VER % "2")
         time.sleep(1.0)
         w = c.eval(WHERE)
@@ -1138,6 +1145,44 @@ def main():
         check("pressing Version 1 goes back to the plain URL",
               w["v"] == "1" and w["search"] == "", f"{w['v']} {w['search']!r}")
         check("…and V1's deck is mounted again", w["deck"] == 6, str(w["deck"]))
+
+        # ── AND V3, THE BLACK PAGE · node 506:10213, 16 Sep 2026 ──────────
+        # The boot gate was `PAGE_VERSION !== '2'`, which mounted V1's deck
+        # and rail for anything that was not V2 — so V3 would have opened with
+        # two bands it does not have and a dwell timer running behind them.
+        # It reads `=== '1'` now, and this is what proves it.
+        c.eval(OPEN_MENU)
+        time.sleep(0.35)
+        c.eval(PRESS_VER % "3")
+        time.sleep(1.8)
+        w = c.eval(WHERE)
+        check("pressing Version 3 lands on V3, at ?v=3",
+              w["v"] == "3" and w["search"] == "?v=3", f"{w['v']} {w['search']}")
+        check("…and it is really V3: no deck mounted", w["deck"] == 0, str(w["deck"]))
+        # THE GROUND IS BLACK AND THE PLANTING IS GONE — the two things that
+        # make it this page rather than V2 with a different seed. `.foliage`
+        # is asserted because it painted straight over the glow when V3 first
+        # rendered: the artboard illustration measured 221 where the node
+        # reads 74, and nothing else in the page would have failed.
+        v3 = json.loads(c.eval("""(()=>{const cs=getComputedStyle;
+          const f=document.querySelector('.foliage');
+          return JSON.stringify({
+            root: cs(document.documentElement).backgroundColor,
+            hasGlow: cs(document.documentElement).backgroundImage.includes('radial-gradient'),
+            foliage: f ? cs(f).display : 'absent',
+            searchBg: cs(document.querySelector('.search')).backgroundColor,
+            searchR: cs(document.querySelector('.search')).borderTopLeftRadius,
+            ink: cs(document.querySelector('.greeting__name')).color})})()"""))
+        check("…on a black ground with the warm glow over it",
+              v3["root"] == "rgb(0, 0, 0)" and v3["hasGlow"],
+              f"{v3['root']} glow={v3['hasGlow']}")
+        check("…and no planting, which would paint straight over it",
+              v3["foliage"] == "none", str(v3["foliage"]))
+        # THE HEADER IS A HOLE IN THE BLACK, NOT AN OBJECT ON IT · 506:10233.
+        check("…the search field white at 10% on a 12px radius, ink white",
+              v3["searchBg"] == "rgba(255, 255, 255, 0.1)"
+              and v3["searchR"] == "12px" and v3["ink"] == "rgb(255, 255, 255)",
+              f"{v3['searchBg']} r={v3['searchR']} ink={v3['ink']}")
         errs = c.errors()
         check("no console errors across three switches", not errs,
               "; ".join(str(e)[:110] for e in errs[:3]))

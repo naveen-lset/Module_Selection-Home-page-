@@ -2980,12 +2980,15 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    a phone is not the frame this ruling is about. One number here if that is
    wanted lower down. */
 @media (min-width: 700px) {
-  :root[data-page-version='2'] { --grid-cols: 4; --grid-gap: 16px; }
+  :root[data-page-version='2'],
+  :root[data-page-version='3'] { --grid-cols: 4; --grid-gap: 16px; }
 }
 @supports (container-type: inline-size) {
   @media (min-width: 700px) {
     :root[data-page-version='2'] #moduleGrid,
-    :root[data-page-version='2'] .hero--estate { --grid-row: calc((100cqw - 48px) / 4 / 1.125); }
+    :root[data-page-version='2'] .hero--estate,
+    :root[data-page-version='3'] #moduleGrid,
+    :root[data-page-version='3'] .hero--estate { --grid-row: calc((100cqw - 48px) / 4 / 1.125); }
   }
 }
 
@@ -3009,7 +3012,9 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    are still in the markup for V1 and nothing about them changes, so the
    version is the only thing that decides. */
 :root[data-page-version='2'] .hero-stage,
-:root[data-page-version='2'] .obs-band { display: none; }
+:root[data-page-version='2'] .obs-band,
+:root[data-page-version='3'] .hero-stage,
+:root[data-page-version='3'] .obs-band { display: none; }
 
 /* …and the band it loses moves onto the module grid's own box. The geometry is
    V1's, re-anchored: the negative gutters bleed it to the page edges, and the
@@ -3020,7 +3025,8 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    containing block this needs. Nothing here relies on that — the band would
    position against the nearest one either way — but it is why the element is
    safe to hang it on. */
-:root[data-page-version='2'] .modules-band { position: relative; }
+:root[data-page-version='2'] .modules-band,
+:root[data-page-version='3'] .modules-band { position: relative; }
 :root[data-page-version='2'] .modules-band::before {
   content: '';
   position: absolute;
@@ -3037,7 +3043,8 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 }
 /* the head needs the 24 the band is drawn to, or the grid starts under the
    greeting with nothing between them */
-:root[data-page-version='2'] .modules-band { margin-top: var(--s6); }
+:root[data-page-version='2'] .modules-band,
+:root[data-page-version='3'] .modules-band { margin-top: var(--s6); }
 
 /* ── V2 HAS NO SECTION HEAD AT REST ──────────────────────────────────────
    The user's ruling of 8 Sep 2026, given against this row on V2: remove it,
@@ -3062,7 +3069,8 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    Module and Done with it — and that Done is the only way out of edit mode on
    the page itself. Scoping the collapse to the resting state means edit mode's
    rule is untouched and the two cannot drift. */
-:root[data-page-version='2'] body:not(.is-editing) .section-head--home {
+:root[data-page-version='2'] body:not(.is-editing) .section-head--home,
+:root[data-page-version='3'] body:not(.is-editing) .section-head--home {
   height: 0;
   margin: 0;
   opacity: 0;
@@ -3083,6 +3091,107 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   transition: height var(--t-base) var(--ease), opacity var(--t-base) var(--ease),
               margin var(--t-base) var(--ease), visibility 0s linear var(--t-base);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   V3 · THE BLACK PAGE · node 506:10213, section "Final (16/9/2026)"
+   ══════════════════════════════════════════════════════════════════════════
+   A THIRD COMPOSITION, NOT A DARK THEME. It shares V2's geometry outright —
+   four 162px columns on a 16px gutter, 696 across, no announcement deck, no
+   observation rail, no section head at rest — and that is why the rules above
+   name it beside V2 rather than being copied. What is its own is the ground,
+   the header's material, and a card set of its own that is still being built.
+
+   THE GROUND IS #000000, MEASURED, NOT ASSUMED. Sampled down the render's own
+   left edge: (0,0,0) from y=400 to the foot of a 2300px page, with no tint
+   anywhere in it. The teal wash V2 draws under its grid is deliberately NOT
+   inherited — `.modules-band::before` is left scoped to V2 above, because a
+   10% teal over black is a grey haze the node does not draw. */
+:root[data-page-version='3'] {
+  color-scheme: dark;
+  --page-bg: #000000;
+}
+/* ── THE GROUND AND THE GLOW ARE ONE BACKGROUND, ON THE ROOT ─────────────
+   IT WAS A `body::before` AND IT DID NOT PAINT. A fixed pseudo-element at
+   `z-index: -1` sits behind its parent's own background, and `body` carried
+   the black — so the glow was drawn and then covered by it, measuring 0 where
+   the node reads 74. Raising it to `z-index: 0` would have put it over the
+   cards instead. Both layers belong on the same element.
+
+   `fixed`, BECAUSE THE SCROLLED ARTBOARD KEEPS IT. 506:10915 still shows the
+   glow at the top of the frame behind a collapsed header, so it belongs to
+   the viewport rather than to the document, and the root's background is
+   where that is one declaration rather than a layer to manage.
+
+   THE GLOW IS FITTED TO THE RENDER, because the node states no gradient for
+   it. Sampled across the artboard: a smooth bell centred at x≈360 of 744,
+   peaking at rgb(74, 59, 23) on the top edge, down to rgb(17, 14, 5) at both
+   side edges, still 58 at y=190 and gone by y≈400 — symmetric left to right,
+   so a radial and not a corner wash. Its ratio is R:G:B = 1 : 0.80 : 0.31, a
+   warm olive: the page's light source is the savanna photograph in the hero
+   below it.
+
+   THE ELLIPSE AND THE STOPS ARE FITTED, NOT CHOSEN. 54 combinations rendered
+   and scored against the artboard's own profile — the horizontal at y=2 and
+   the vertical down the left edge, which is the only column clear of cards.
+   125% x 360px with stops at 26/44 wins at a mean error of 4.2 levels across
+   and 0.9 down, on a range of 0-74. Narrower ellipses fit the middle and blew
+   out the edges; taller ones ran the glow past where the node has reached
+   black. This is the same method the header gradients were fitted with — see
+   the note at `.foliage` about percentages not being CSS percentages. */
+:root[data-page-version='3'] {
+  background:
+    radial-gradient(125% 100% at 50% 0%,
+      rgb(74, 59, 23) 0%,
+      rgba(60, 48, 19, .72) 26%,
+      rgba(38, 30, 12, .34) 44%,
+      rgba(0, 0, 0, 0) 100%) no-repeat left top / 100% 360px fixed,
+    var(--page-bg);
+}
+:root[data-page-version='3'] body {
+  background: transparent;
+  color: var(--c-white, #FFFFFF);
+}
+/* AND NO PLANTING. `.foliage` is the artboard illustration V1 and V2 both
+   draw behind their header — widened to every width on 15 Sep. This page's
+   header has no artwork at all: it is black with a warm glow, and the
+   illustration painted straight over it, measuring 221 where the node reads
+   74. Hidden rather than overridden, because there is nothing here for it to
+   degrade into. */
+:root[data-page-version='3'] .foliage { display: none; }
+
+
+/* ── THE HEADER'S CONTROLS ARE WHITE AT 10%, AT RADIUS 12 ────────────────
+   506:10225, 506:10233 and 506:10238 all carry `rgba(255,255,255,0.1)` at a
+   12px radius. That is three changes from V2 in one: the fill was solid white
+   with a shadow, the search field was a 100px pill rather than a 12px box, and
+   the ink was petrol. Here the field is the same rounded rectangle as the two
+   buttons beside it, and every one of them is a hole in the black rather than
+   an object on it — so the shadows go with the white. */
+:root[data-page-version='3'] .search,
+:root[data-page-version='3'] .search-btn,
+:root[data-page-version='3'] .icon-btn {
+  background: rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  box-shadow: none;
+  border: 0;
+  color: var(--c-white, #FFFFFF);
+}
+:root[data-page-version='3'] .search__input,
+:root[data-page-version='3'] .greeting__word,
+:root[data-page-version='3'] .greeting__name {
+  color: var(--c-white, #FFFFFF);
+}
+:root[data-page-version='3'] .search__input::placeholder {
+  color: rgba(255, 255, 255, .72);
+}
+/* THE GLYPHS ARE PETROL FILES, and on this ground they have to be the ink.
+   `brightness(0) invert(1)` is the one transform that whitens an arbitrary
+   coloured SVG loaded as an <img>, which cannot be recoloured by `fill`.
+   The AVATAR is excluded by name: it is a photograph, and the same filter
+   would turn a face into a white silhouette. */
+:root[data-page-version='3'] .search__icon,
+:root[data-page-version='3'] .search-btn img,
+:root[data-page-version='3'] .icon-btn img { filter: brightness(0) invert(1); }
 
 /* ── 8 · modules section head ────────────────────────────────────────────
    NOT IN THE ARTBOARD, AND THEREFORE NOT IN THE RESTING PAGE.
@@ -10060,7 +10169,11 @@ body.is-editing .qa-chat { display: none; }
   var v = '1';
   try {
     var q = new URLSearchParams(location.search).get('v');
-    if (q === '2') v = '2';
+    /* '2' and '3' are the two alternatives; anything else is V1, which is
+       what an unknown value or a stale link should answer with. Kept as an
+       explicit list rather than a range check so that adding a version is a
+       visible edit in both of the two places `?v=` is read. */
+    if (q === '2' || q === '3') v = q;
   } catch (e) { /* no URLSearchParams, no version: V1 is the default anyway */ }
   document.documentElement.dataset.pageVersion = v;
 })();
@@ -12977,11 +13090,18 @@ function createStore(initial) {
 
 __def('js/lib/pageVersion.js', function (__x, __req) {
 /**
- * WHICH HOME PAGE THE APPLICATION IS DRAWING — '1' or '2'.
+ * WHICH HOME PAGE THE APPLICATION IS DRAWING — '1', '2' or '3'.
  *
- * Read once, from `?v=`, and anything but `2` is V1: an unknown value is a
- * typo or a stale link, and the page it should answer with is the one that has
- * always been there rather than an error.
+ * Read once, from `?v=`, and anything unrecognised is V1: an unknown value is
+ * a typo or a stale link, and the page it should answer with is the one that
+ * has always been there rather than an error.
+ *
+ * V3 IS THE BLACK PAGE — node 506:10213, 16 Sep 2026. It is a third
+ * composition rather than a theme: a black ground under a warm top glow, the
+ * header's controls on white at 10%, and its own card set. `isV3()` is its own
+ * predicate and NOT `!isV2()`, which is the trap this file invites — every
+ * existing `isV2()` consumer read "V1" from a false, and would have taken V3
+ * down the V1 path silently.
  *
  * THIS IS THE SECOND PLACE `?v=` IS READ, and that is deliberate. The script
  * above <body> reads it too, because the stylesheet has to know before the
@@ -12990,13 +13110,15 @@ __def('js/lib/pageVersion.js', function (__x, __req) {
  */
 const PAGE_VERSION = (() => {
   try {
-    return new URLSearchParams(location.search).get('v') === '2' ? '2' : '1'
+    const q = new URLSearchParams(location.search).get('v')
+    return q === '2' || q === '3' ? q : '1'
   } catch {
     return '1'
   }
 })()
 
 const isV2 = () => PAGE_VERSION === '2'
+const isV3 = () => PAGE_VERSION === '3'
 
 /**
  * SWITCH THE PAGE — A NAVIGATION, AND IT CANNOT BE ANYTHING ELSE.
@@ -13026,7 +13148,8 @@ const isV2 = () => PAGE_VERSION === '2'
 function setPageVersion(v) {
   try {
     const url = new URL(location.href)
-    if (String(v) === '2') url.searchParams.set('v', '2')
+    const want = String(v)
+    if (want === '2' || want === '3') url.searchParams.set('v', want)
     else url.searchParams.delete('v')
     if (url.href === location.href) return false
     location.assign(url.href)
@@ -13039,6 +13162,7 @@ function setPageVersion(v) {
 
   __x.PAGE_VERSION = PAGE_VERSION;
   __x.isV2 = isV2;
+  __x.isV3 = isV3;
   __x.setPageVersion = setPageVersion;
 });
 
@@ -13063,7 +13187,7 @@ __def('js/state/layoutStore.js', function (__x, __req) {
 const { createStore } = __req('js/state/store.js');
 const { getVariant } = __req('js/data/cardVariants.js');
 const { normalise } = __req('js/lib/pack.js');
-const { isV2 } = __req('js/lib/pageVersion.js');
+const { isV2, isV3 } = __req('js/lib/pageVersion.js');
 
 /**
  * ONE KEY PER PAGE VERSION, and not one key with a version field in it.
@@ -13433,7 +13557,15 @@ function seed() {
      `newRow`, so the artboard's deliberate gap in the last two rows was packed
      away on a fresh install and only appeared after a save/reload — the flag
      survived repair() but never made it out of the default. */
-  return (isV2() ? V2_LAYOUT : DEFAULT_LAYOUT).map((d) => ({ ...d, uid: newUid() }))
+  /* V3 SEEDS FROM V2'S LAYOUT FOR NOW, and this line is the marker for the
+     rest of that work. Node 506:10213 states its own set — Key Insights and
+     Species Management, the Tags promo, Notes beside Pending Requests, the
+     four small tiles, Inventory & Stock, Help Desk, Eggs Collected, Medical,
+     Chat — and most of those compositions do not exist in the catalogue yet.
+     Until they do, V3 draws V2's cards on its own ground, which is honest
+     about what is built rather than half-drawing the node's. */
+  const layout = isV2() || isV3() ? V2_LAYOUT : DEFAULT_LAYOUT
+  return layout.map((d) => ({ ...d, uid: newUid() }))
 }
 
 function load() {
@@ -30616,8 +30748,12 @@ mountIconSprite()
    would mean two more `?v=` branches in the HTML for no gain: V1 needs them,
    V2's CSS drops them before they paint, and an empty `.hero-stage` in the DOM
    of a page that never displays it costs nothing. */
-const { PAGE_VERSION, isV2, setPageVersion } = __req('js/lib/pageVersion.js')
-if (PAGE_VERSION !== '2') {
+const { PAGE_VERSION, isV2, isV3, setPageVersion } = __req('js/lib/pageVersion.js')
+/* `=== '1'`, NOT `!== '2'`. The deck and the rail are V1's alone, and the
+   negative form meant "anything that is not V2" — which was the same thing
+   right up until V3 existed, and would then have mounted V1's two bands into
+   the black page and left a 6-second dwell timer running behind them. */
+if (PAGE_VERSION === '1') {
   const { createHeroBanners } = __req('js/components/HeroBanners.js')
   createHeroBanners({ root: document.getElementById('heroStage') })
 
@@ -30893,10 +31029,14 @@ const profileMenu = createProfileMenu({
            actual state. And no note on the heading — the rows say it. */
         null,
         { heading: 'Home page' },
-        { id: 'ver:1', label: 'Version 1', checked: !isV2(),
+        /* `checked` READS ITS OWN PREDICATE, not the absence of another's.
+           Version 1 was `!isV2()`, which ticked V1 while V3 was on screen. */
+        { id: 'ver:1', label: 'Version 1', checked: PAGE_VERSION === '1',
           note: 'Announcements, observations, then modules' },
         { id: 'ver:2', label: 'Version 2', checked: isV2(),
           note: 'Search, then straight into the modules' },
+        { id: 'ver:3', label: 'Version 3', checked: isV3(),
+          note: 'The black page — node 506:10213' },
 
         null,
         { id: 'reset', icon: 'refresh', label: 'Reset Home Page',
