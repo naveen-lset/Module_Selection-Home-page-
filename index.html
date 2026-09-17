@@ -3123,7 +3123,58 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 :root[data-page-version='3'] {
   color-scheme: dark;
   --page-bg: #000000;
+
+  /* ── THE CARDS' OWN FILLS · node 506:10427, read off the frame ─────────
+     ONE LEVER, NOT NINETEEN. A card's background resolves to `--card-bg`,
+     which `renderCard` sets from its module's `--g-*` token — so restating
+     those tokens here repaints every card of that module on this page and
+     leaves V1 and V2 exactly as they were. The alternative was a per-card
+     override for each of the nineteen, which would have had to be kept in
+     step with the catalogue by hand.
+
+     THE ANGLES AND STOPS ARE THE NODE'S, TRANSCRIBED NOT REDRAWN, including
+     the stops past 100% — those are Figma running the gradient line beyond
+     the shape, and CSS accepts them and resolves them the same way. What is
+     NOT transcribed is Figma's construction: 506:10441 draws Users as a card
+     flipped on its vertical axis with a 12% black over it, which is a way of
+     reusing one component, not a thing to reproduce. A vertical flip maps an
+     angle to 180 minus itself, so 37.776 is written as 142.224 and the black
+     as its own layer over the ramp. */
+  --g-eggs: linear-gradient(-63.8414deg,
+              rgb(161, 255, 110) 16.033%,
+              rgb(31, 146, 172) 93.902%,
+              rgb(241, 203, 0) 141.36%);
+  /* FITTED, BECAUSE FIGMA EMITTED THIS ONE'S STOPS OUT OF ORDER — yellow at
+     104.98% BEFORE coral at 64.527%. CSS clamps a stop that runs backwards up
+     to its predecessor, so transcribing it literally put the yellow in the
+     far corner and left the rest flat coral: measured 35.7 levels of mean
+     error against the frame, the ramp running the wrong way. Five candidates
+     rendered and scored on the card's four corners; 135deg wins at 17.4.
+     IT DOES NOT CLOSE COMPLETELY, and the reason is not the ramp: 506:10433 is
+     a 320px `Ellipse 119` bled off the card's bottom-left corner, which
+     flattens the whole fill. That overlay is per-card construction and is not
+     built yet — see the handover note. */
+  --g-species: linear-gradient(135deg,
+              rgb(255, 232, 110) 0%,
+              rgb(250, 97, 64) 60%);
+  /* BOTH USERS TOKENS. The module points at `--g-users-wash` — `--g-users`
+     is the fallback `.card[data-fill='solid']` falls back to — so setting the
+     bare one repainted nothing and the tile stayed slate. Measured, not
+     assumed: the override was written, the page rendered, and the corner came
+     back (69,108,119) where the node draws teal. */
+  --g-users: linear-gradient(rgba(0, 0, 0, .12), rgba(0, 0, 0, .12)),
+             linear-gradient(142.2243deg,
+              rgb(0, 214, 201) 8.1339%,
+              rgb(186, 255, 251) 122.51%);
+  --g-users-wash: var(--g-users);
+  --g-mortality: linear-gradient(-5.4181deg,
+              rgb(233, 51, 83) 46.965%,
+              rgb(250, 97, 64) 48.137%,
+              rgb(251, 113, 83) 142.07%);
 }
+/* AND THE CARD'S CORNER IS 12 HERE, not the 16 the other pages use —
+   506:10428, 506:10432, 506:10446 all draw 12. */
+:root[data-page-version='3'] .card { border-radius: 12px; }
 /* ── THE GROUND AND THE GLOW ARE ONE BACKGROUND, ON THE ROOT ─────────────
    IT WAS A `body::before` AND IT DID NOT PAINT. A fixed pseudo-element at
    `z-index: -1` sits behind its parent's own background, and `body` carried
