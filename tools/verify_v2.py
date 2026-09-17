@@ -1279,8 +1279,11 @@ def main():
         # once it closed `is-stuck` could never clear. Scrolled to 1200 and
         # back to 0, the header was still 0 tall and the greeting never came
         # back. Asserted as PRESENT so the collapse cannot be reintroduced.
+        # NOT COLLAPSED — asserted as "still has height", not as 112. The
+        # header is 112 at 744 and taller at 390, where the name wraps; what
+        # the latch did was take it to ZERO, and that is the thing to pin.
         check("…with the greeting scrolled off rather than collapsed",
-              stuck["hdrH"] == 112, f"{stuck['hdrH']}px")
+              stuck["hdrH"] > 0, f"{stuck['hdrH']}px")
 
         # ── AND IT ALL COMES BACK ON THE WAY UP ──────────────────────────
         # The round trip, not just the down leg. A state must not consume the
@@ -1297,7 +1300,7 @@ def main():
               veil: getComputedStyle(row,'::before').opacity}))}, 800))})()""",
           await_promise=True))
         check("scrolled back to the top, the bar un-sticks and the header returns",
-              not back["stuck"] and back["hdrH"] == 112 and back["rowTop"] > 0,
+              not back["stuck"] and back["hdrH"] > 0 and back["rowTop"] > 0,
               f"stuck={back['stuck']} header={back['hdrH']}px rowTop={back['rowTop']}")
         check("…and the dark glass fades back out with it",
               back["veil"] == "0", f"opacity {back['veil']}")
@@ -1320,8 +1323,11 @@ def main():
             ("insights.key", "340x144"), ("species.stats", "340x144"),
             ("notes.recent", "340x464"), ("pharmacy.requests", "340x304"),
             ("approvals.pending", "340x144"),
-            ("eggs.default", "162x144"), ("species.figure", "162x144"),
-            ("users.default", "162x144"), ("mortality.split", "162x144"),
+            # V3's own one-cell tiles, not the doors — 506:10428 stacks the
+            # glyph and name together where `door` pushes them apart, and two
+            # of these four cells carry a figure rather than a name at all.
+            ("eggs.v3", "162x144"), ("species.v3new", "162x144"),
+            ("users.v3", "162x144"), ("mortality.v3", "162x144"),
             ("pharmacy.stock", "340x304"), ("pharmacy.default", "162x144"),
             ("lab.default", "162x144"), ("approvals.week", "340x144"),
             ("species.recent", "340x304"), ("approvals.breakdown", "340x144"),

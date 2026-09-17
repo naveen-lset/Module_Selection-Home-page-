@@ -3172,6 +3172,101 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
               rgb(250, 97, 64) 48.137%,
               rgb(251, 113, 83) 142.07%);
 }
+/* ══ V3'S ONE-CELL TILES · node 506:10427, every number the frame's ══════
+   THE TILE · 506:10428 and 506:10441. Glyph and name together at the foot on
+   a 12px gap inside 16 of padding, the name Inter Semi Bold 14 on a 20px line.
+   Not the door's "pushed to opposite ends": these two belong to each other. */
+/* THE CARD'S OWN PADDING COMES OFF FOR THESE THREE. `.card` already pads, so
+   a layout that pads too spends it twice: the Animals caption measured a
+   106px box where the frame gives it 138 — 162 less the card's 16 either side
+   AND the layout's 12 — and ellipsed "Newly Added An…" on a card that has
+   room for the whole line. The node states ONE padding per tile, so the
+   layout owns it and the card gives it the full box. */
+.card:has(> .l-v3tile),
+.card:has(> .l-v3count),
+.card:has(> .l-v3split) { padding: 0; }
+
+.l-v3tile {
+  display: flex; flex-direction: column; justify-content: flex-end;
+  gap: 12px; height: 100%; padding: 16px; min-width: 0;
+}
+.l-v3tile__icon { display: block; width: 40px; height: 40px; }
+.l-v3tile__icon img { display: block; width: 100%; height: 100%; }
+.l-v3tile__name {
+  font-size: 14px; font-weight: 600; line-height: 20px;
+  color: var(--on-dark); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* THE COUNT · 506:10432. A label and the module's glyph across the top, the
+   figure pushed to the foot. 44px of DM Sans Bold in the notes yellow, which
+   is `--c-notes` / #FCF4AE — the frame's own token, not a near-white. */
+.l-v3count, .l-v3split {
+  display: flex; flex-direction: column; justify-content: space-between;
+  gap: 8px; height: 100%; padding: 12px; min-width: 0;
+}
+.l-v3count__head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.l-v3count__label {
+  flex: 1 1 auto; min-width: 0;
+  font-size: 14px; font-weight: 500; letter-spacing: .1px;
+  color: var(--on-dark);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* AND THE FISH GLYPH IS 20 HERE, NOT 44. `glyph()` adds `card__icon--fish`
+   for the modules whose mark is drawn long — mortality is one — and that rule
+   sizes it 44. Same specificity as a bare class and written later in the
+   sheet, so it won it: the tile rendered a 44px fish that pushed "Mortality"
+   into an ellipsis and squashed both panes. Named explicitly rather than
+   raised with `!important`. */
+.l-v3count__icon, .l-v3count__icon.card__icon--fish {
+  flex: none; display: block; width: 20px; height: 20px;
+}
+.l-v3tile__icon.card__icon--fish { width: 40px; height: 40px; }
+.l-v3count__icon img { display: block; width: 100%; height: 100%; }
+.l-v3count__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.l-v3count__value {
+  font-family: var(--font-num); font-weight: 700; font-size: 44px;
+  line-height: 1; font-variant-numeric: tabular-nums;
+  color: var(--c-notes, #FCF4AE);
+}
+.l-v3count__cap {
+  font-size: 12px; color: var(--on-dark);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* THE SPLIT · 506:10446. The same head over two panes, and the FIRST one sits
+   on a blurred white-10% plate at radius 8 while the second is bare. That is
+   the card's hierarchy in one difference: one figure is the headline and the
+   other is context, so they are not two equal boxes. */
+.l-v3split__panes { display: flex; flex: 1 1 auto; gap: 8px; min-height: 0; }
+.l-v3split__pane {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; gap: 4px; padding-bottom: 8px; text-align: center;
+}
+.l-v3split__pane--plate {
+  justify-content: center; padding: 8px; border-radius: 8px;
+  background: rgba(255, 255, 255, .1);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+}
+.l-v3split__pane b {
+  font-family: var(--font-num); font-weight: 700; font-size: 44px;
+  line-height: 1; font-variant-numeric: tabular-nums;
+  color: var(--c-displaybg-2, #DDEBE9);
+}
+.l-v3split__pane:not(.l-v3split__pane--plate) b { font-size: 28px; }
+.l-v3split__pane i {
+  /* NOWRAP, AS THE NODE SETS IT. Both panes are half of 138 less the gutter,
+     and "This Week" at 12px is 58 against 49 of plate content — so it wraps
+     unless told not to. 506:10453 carries `whitespace-nowrap` and the card
+     clips: the frame would rather the line run to the edge than break in two,
+     because the pair either side of it is one row of figures. */
+  font-style: normal; font-size: 12px; color: var(--on-dark);
+  white-space: nowrap;
+}
+.l-v3split__pane:not(.l-v3split__pane--plate) i { font-size: 10px; font-weight: 500; }
+
 /* AND THE CARD'S CORNER IS 12 HERE, not the 16 the other pages use —
    506:10428, 506:10432, 506:10446 all draw 12. */
 :root[data-page-version='3'] .card { border-radius: 12px; }
@@ -11849,6 +11944,44 @@ const VARIANTS = [
 
   /* ══ SPECIES MANAGEMENT ════════════════════════════════════════════════ */
   {
+    /* ── V3's FOUR ONE-CELL TILES · node 506:10427, 17 Sep 2026 ────────
+       The black page's row of four: two tiles and two counts. They are their
+       own variants rather than sizes of the doors because the node draws
+       different CONTENT, not a different box — `eggs.default` at `small` is a
+       glyph pushed away from its name, and 506:10428 stacks them together at
+       the foot. Every figure and caption below is the frame's own text.
+
+       `secondary`, NOT `primary`, AND THE SUITE INSISTED. `checkDefaults()`
+       holds that a primary variant must appear on the DEFAULT home page —
+       these are V3's alone, so calling them primary broke an invariant that
+       has nothing to do with V3 and everything to do with the picker's
+       ordering. The rule was right; the priority was wrong. */
+    id: 'eggs.v3', moduleId: 'eggs', name: 'Eggs',
+    layout: 'v3-tile', purpose: 'NAVIGATE',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: {},
+  },
+  {
+    id: 'users.v3', moduleId: 'users', name: 'Users',
+    layout: 'v3-tile', purpose: 'NAVIGATE',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: {},
+  },
+  {
+    id: 'species.v3new', moduleId: 'species', name: 'New Animals',
+    layout: 'v3-count', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { label: 'Animals', value: '24', caption: 'Newly Added Animals' },
+  },
+  {
+    id: 'mortality.v3', moduleId: 'mortality', name: 'Mortality',
+    layout: 'v3-split', purpose: 'UNDERSTAND',
+    supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary',
+    data: { label: 'Mortality',
+            a: { value: '12', label: 'This Week' },
+            b: { value: '03', label: 'Species' } },
+  },
+  {
     id: 'species.stats', moduleId: 'species', name: 'Collection',
     layout: 'photo', purpose: 'UNDERSTAND',
     /* ONE LANDSCAPE PHOTOGRAPH, CROPPED NEAR ITS TOP.
@@ -13747,10 +13880,10 @@ const V3_LAYOUT = [
   { variantId: 'pharmacy.requests',  size: 'tall'   },
   { variantId: 'approvals.pending',  size: 'medium' },
   /* row 5 · four one-cell tiles: two doors and two counts */
-  { variantId: 'eggs.default',       size: 'small',  newRow: true },
-  { variantId: 'species.figure',     size: 'small'  },
-  { variantId: 'users.default',      size: 'small'  },
-  { variantId: 'mortality.split',    size: 'small'  },
+  { variantId: 'eggs.v3',            size: 'small',  newRow: true },
+  { variantId: 'species.v3new',      size: 'small'  },
+  { variantId: 'users.v3',           size: 'small'  },
+  { variantId: 'mortality.v3',       size: 'small'  },
   /* rows 6-7 · Inventory & Stock two rows on the left; Pharmacy and Lab share
      the first row beside it and Approvals takes the second */
   { variantId: 'pharmacy.stock',     size: 'tall',   newRow: true },
@@ -23276,6 +23409,54 @@ const LAYOUTS = {
   door: (mod, variant, data) =>
     `<span class="l-door">${glyph(mod, variant)}` +
     `<span class="l-door__name">${esc(data.label || mod?.name || '')}</span></span>`,
+
+  /* ── V3's THREE TILE COMPOSITIONS · node 506:10427 ────────────────────
+     THE BLACK PAGE'S ONE-CELL TILES ARE NOT THE DOOR. `door` pushes a glyph
+     and a name to opposite ends of the card, which is what V1 and V2's
+     artboards draw. 506:10428 and 506:10441 stack them TOGETHER at the foot on
+     a 12px gap, and the other two cells in that row are not doors at all —
+     they carry a figure. Three layouts rather than one with flags: the
+     difference between them is what is IN the card, which is the thing a
+     layout is.
+
+     THEY ARE V3-ONLY BY DATA, NOT BY VERSION. Nothing here reads the page
+     version; these render wherever a variant asks for them, which keeps the
+     rule this file runs on — a layout is a shape, and the catalogue decides
+     who wears it. */
+  'v3-tile': (mod, variant, data) =>
+    `<span class="l-v3tile">${glyph(mod, variant, 'l-v3tile__icon')}` +
+    `<span class="l-v3tile__name">${esc(data.label || mod?.name || '')}</span></span>`,
+
+  /* A label and its module glyph across the top, one big figure at the foot —
+     506:10432, "24 / Newly Added Animals". */
+  'v3-count': (mod, variant, data) =>
+    `<span class="l-v3count">` +
+      `<span class="l-v3count__head">` +
+        `<span class="l-v3count__label">${esc(data.label || mod?.name || '')}</span>` +
+        glyph(mod, variant, 'l-v3count__icon') +
+      `</span>` +
+      `<span class="l-v3count__body">` +
+        `<span class="l-v3count__value">${esc(data.value || '')}</span>` +
+        `<span class="l-v3count__cap">${esc(data.caption || '')}</span>` +
+      `</span>` +
+    `</span>`,
+
+  /* The same head over TWO panes — 506:10446 draws the first on a blurred
+     white-10% plate and the second bare, which is the card's whole hierarchy:
+     one figure is the headline and the other is context. */
+  'v3-split': (mod, variant, data) =>
+    `<span class="l-v3split">` +
+      `<span class="l-v3count__head">` +
+        glyph(mod, variant, 'l-v3count__icon') +
+        `<span class="l-v3count__label">${esc(data.label || mod?.name || '')}</span>` +
+      `</span>` +
+      `<span class="l-v3split__panes">` +
+        `<span class="l-v3split__pane l-v3split__pane--plate">` +
+          `<b>${esc(data.a?.value || '')}</b><i>${esc(data.a?.label || '')}</i></span>` +
+        `<span class="l-v3split__pane">` +
+          `<b>${esc(data.b?.value || '')}</b><i>${esc(data.b?.label || '')}</i></span>` +
+      `</span>` +
+    `</span>`,
 
   /* The same entry point on its side, one row high, for a page that wants many
      modules visible at once. */
