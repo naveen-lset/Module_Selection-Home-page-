@@ -1183,6 +1183,98 @@ def main():
               v3["searchBg"] == "rgba(255, 255, 255, 0.1)"
               and v3["searchR"] == "12px" and v3["ink"] == "rgb(255, 255, 255)",
               f"{v3['searchBg']} r={v3['searchR']} ink={v3['ink']}")
+
+        # ── THE VERTICAL RHYTHM · 506:10213 states it to the pixel ────────
+        # The Greeting block runs 0-200 with 16 of padding either end, the
+        # Home Header 16-128 on its own 24, the Search Row 128-184, and the
+        # Main Frame's Modules begin at 208 — so the hero top IS 208 and the
+        # gap from the field to the banner is 24.
+        #
+        # ASSERTED BECAUSE IT WAS WRONG IN THREE PLACES AT ONCE, and each was
+        # inherited rather than written: the header began at 0, the row ran 52
+        # in flow where the node draws 56, and the gap measured 46 against 24
+        # — that last one `.modules-band`'s `margin-top`, which V3 picked up
+        # when it was named beside V2 on the structural rules and which exists
+        # to make room for a teal wash this page does not draw.
+        rhythm = json.loads(c.eval("""(()=>{const b=e=>e.getBoundingClientRect();
+          const R=e=>[Math.round(b(e).top),Math.round(b(e).bottom)];
+          return JSON.stringify({
+            hdr:R(document.querySelector('.home-header')),
+            field:R(document.querySelector('.search')),
+            hero:R(document.querySelector('.hero')),
+            heroX:[Math.round(b(document.querySelector('.hero')).left),
+                   Math.round(b(document.querySelector('.hero')).right)],
+            card1:R(document.querySelector('#moduleGrid .card')),
+            gap:Math.round(parseFloat(getComputedStyle(
+              document.querySelector('#moduleGrid')).rowGap))})})()"""))
+        # ONLY AT 744, WHICH IS THE ARTBOARD'S OWN WIDTH — and on this project
+        # that is not a caveat but the rule: the frame is 744 and its numbers
+        # ARE the app's, which is why the phone/tablet boundary was moved to
+        # 743/744. Above it the page padding grows and below it the greeting's
+        # name wraps, so the ladder is a different ladder and asserting these
+        # y-values there would be asserting a coincidence. What survives every
+        # width is the GAP and the hero's own box, checked underneath.
+        if WIDTH == 744:
+            check("the header is the node's 16 to 128",
+                  rhythm["hdr"] == [16, 128], str(rhythm["hdr"]))
+            check("…the field 130 to 182", rhythm["field"] == [130, 182],
+                  str(rhythm["field"]))
+            check("…the hero 208 to 352, on the page's own 24 either side",
+                  rhythm["hero"] == [208, 352] and rhythm["heroX"] == [24, 720],
+                  f"{rhythm['hero']} x{rhythm['heroX']}")
+        # AT EVERY WIDTH: the field-to-hero gap is 26 (the node's 24 of frame
+        # padding plus the 2 its search row carries under the field), and the
+        # grid follows the hero by one gutter. These are the two relationships
+        # the ladder exists to produce; the y-values above are where they land
+        # at 744.
+        check("the hero follows the field by the node's gap",
+              rhythm["hero"][0] - rhythm["field"][1] == 26,
+              f"{rhythm['hero'][0] - rhythm['field'][1]}px (node 26)")
+        # AGAINST `--grid-gap`, NOT A LITERAL 16. On the artboard the space
+        # between the banner and the cards IS the space between two card rows
+        # — which is why the hero's own margin is written as that token — and
+        # the token steps 16 → 14 → 12 with the breakpoints. Asserting 16 here
+        # passed at 744 and failed at 390 on a page that was correct.
+        check("…and the first card row one gutter under it",
+              rhythm["card1"][0] - rhythm["hero"][1] == rhythm["gap"],
+              f"{rhythm['card1'][0] - rhythm['hero'][1]}px on a {rhythm['gap']}px gutter")
+
+        # ── AND THE BAR TURNS TO DARK GLASS WHEN IT STICKS · 506:10916 ────
+        # THE SECOND ARTBOARD EXISTS FOR THIS. The bar is rgba(30,30,30,.4)
+        # behind a 20px blur with its bottom corners at 28, 88 tall, on 16 of
+        # side padding where the resting row has 24 — and the greeting is gone.
+        # What shipped first was the pale mint wash V1 and V2 use, which on a
+        # black page reads as a light slab dropped on top of it.
+        stuck = json.loads(c.eval("""(()=>{
+          scrollTo(0, 900);
+          return new Promise(r=>setTimeout(()=>{
+            const b=e=>e.getBoundingClientRect();
+            const row=document.querySelector('.search-row');
+            const pre=getComputedStyle(row,'::before');
+            r(JSON.stringify({
+              stuck: row.classList.contains('is-stuck'),
+              top: Math.round(b(row).top), h: Math.round(b(row).height),
+              hdrH: Math.round(b(document.querySelector('.home-header')).height),
+              bg: pre.backgroundColor,
+              blur: pre.backdropFilter||pre.webkitBackdropFilter,
+              radius: pre.borderBottomLeftRadius, opacity: pre.opacity,
+              pad: getComputedStyle(row).paddingLeft}))}, 700))})()""",
+          await_promise=True))
+        check("scrolled, the bar sticks at the top",
+              stuck["stuck"] and stuck["top"] == 0,
+              f"stuck={stuck['stuck']} top={stuck['top']}")
+        if WIDTH == 744:
+            check("…in the node's own 88", stuck["h"] == 88, f"{stuck['h']}px")
+        check("…as dark glass, not the pale wash V1 and V2 use",
+              stuck["bg"] == "rgba(30, 30, 30, 0.4)"
+              and "blur(20px)" in stuck["blur"] and stuck["opacity"] == "1",
+              f"{stuck['bg']} {stuck['blur']} opacity {stuck['opacity']}")
+        check("…with its bottom corners at 28 and 16 of side padding",
+              stuck["radius"] == "28px" and stuck["pad"] == "16px",
+              f"r={stuck['radius']} pad={stuck['pad']}")
+        check("…and the greeting collapsed away, which is what that frame is",
+              stuck["hdrH"] == 0, f"{stuck['hdrH']}px")
+        c.eval("scrollTo(0, 0); 1")
         errs = c.errors()
         check("no console errors across three switches", not errs,
               "; ".join(str(e)[:110] for e in errs[:3]))

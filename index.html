@@ -2261,6 +2261,20 @@ body.is-searching { overflow: hidden; }
   line-height: normal;
   color: var(--on-dark);
 }
+/* THE TITLE IS A COLUMN NOW, because V3 puts a line under it. The wrapper
+   takes the `flex: 1 0 0` the title used to carry — it is the row's flexible
+   child, and leaving that on the title inside a COLUMN container would have
+   made it grow down the axis instead of across it. */
+.hero__titles {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hero__titles .hero__title { flex: none; }
+/* hidden wherever the artboard draws the name alone — V1 and V2 */
+.hero__sub { display: none; }
 
 @media (max-width: 743px) {
   /* 44px of side padding is a quarter of a phone. The mark comes down with it
@@ -3192,6 +3206,162 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 :root[data-page-version='3'] .search__icon,
 :root[data-page-version='3'] .search-btn img,
 :root[data-page-version='3'] .icon-btn img { filter: brightness(0) invert(1); }
+
+/* ── THE HERO · node 506:10261 ───────────────────────────────────────────
+   A DIFFERENT PHOTOGRAPH, AND IT IS THE PAGE'S LIGHT SOURCE. V1 and V2 draw
+   the illustrated estate; this is a savanna at sunset, and the warm glow
+   fitted at the head of the page is that photograph's own colour bleeding up
+   behind the header. Shipped as a 1400px JPEG at 70KB — the source asset is a
+   1.6MB PNG of 2132x738, which is four times the page's widest render and
+   twenty times the weight of the banner it sits beside.
+
+   ONE SCRIM, NOT TWO. V1 carries a flat 40% black plus a second bottom wash,
+   tuned for an illustration with a pale sky over dark foliage. 506:10261
+   states a single gradient — rgba(102,102,102,.08) to rgba(0,0,0,.32) at 53%
+   — so the flat scrim is emptied rather than layered under it, or the picture
+   goes to mud.
+
+   RADIUS 12 AND A 44px MARK. The banner is 16 elsewhere and the mark 60; the
+   node draws 12 and 44. */
+:root[data-page-version='3'] .hero__media {
+  background-image: url('assets/img/v3-hero.jpg');
+  background-position: 50% 50%;
+}
+:root[data-page-version='3'] .hero,
+:root[data-page-version='3'] .hero__media,
+:root[data-page-version='3'] .hero__scrim,
+:root[data-page-version='3'] .hero__veil { border-radius: 12px; }
+:root[data-page-version='3'] .hero__scrim { background: none; }
+:root[data-page-version='3'] .hero__veil {
+  background: linear-gradient(180deg,
+    rgba(102, 102, 102, .08) 0%,
+    rgba(0, 0, 0, .32) 53.027%);
+}
+:root[data-page-version='3'] .hero__mark,
+:root[data-page-version='3'] .hero__mark img { width: 44px; height: 44px; }
+/* THE WORDMARK GOES BACK TO INTER. Host Grotesk is loaded for this one line
+   on V1 and V2 because their artboards set it; 506:10267 sets Inter Semi Bold
+   at a flat 32 with no tracking, so V3 asks for neither the face nor the
+   clamp. The text-shadow is the node's own. */
+:root[data-page-version='3'] .hero__title {
+  font-family: var(--font);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, .1);
+}
+:root[data-page-version='3'] .hero__sub {
+  display: block;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--on-dark);
+  text-shadow: 0 4px 4px rgba(0, 0, 0, .1);
+  /* 412 is the node's own text box; past it the line would run under the mark */
+  max-width: 412px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* THE BANNER'S OWN PADDING IS 24 ACROSS AND 2 DOWN · 506:10261, where V1
+   spends 24 on both axes. The column is 4 apart, the two lines 2. */
+:root[data-page-version='3'] .hero { padding: 2px 24px; }
+:root[data-page-version='3'] .hero__row--foot { padding-right: 0; }
+
+/* ── THE VERTICAL RHYTHM · measured against 506:10213, not carried over ──
+   THE ARTBOARD'S OWN LADDER, in frame coordinates: the Greeting block runs
+   0-200 with 16 of padding top and bottom; the Home Header is 16-128 on its
+   own 24 of padding; the Search Row is 128-184; the Main Frame starts at 200
+   and its Modules at 208, so the HERO TOP IS 208 and the gap from the field
+   to the banner is 24 — 16 of the greeting's bottom padding plus 8 of the
+   frame's top.
+
+   MEASURED HERE FIRST, AND THREE THINGS WERE WRONG. The header began at 0
+   where the node has 16; the field's row ran 52 tall where the node draws 56;
+   and the gap to the hero measured 46 against the node's 24. That last one is
+   `.modules-band`'s own `margin-top: var(--s6)` — 24px this page inherited
+   when V3 was named beside V2 on the structural rules. V2 needs it because
+   the band's teal wash is drawn to it. V3 has no wash: that rule is scoped to
+   V2 and the margin was paying for a layer this page does not draw. */
+:root[data-page-version='3'] .home-header { padding: 24px; margin-top: 16px; }
+/* AND THE GREETING'S TWO LINES ARE 26 AND 34, WHICH IS WHERE THE LAST 2px
+   WENT. 506:10217 is a 26-tall box and 506:10218 a 34-tall one, 4 apart — 64
+   of content inside 24 of padding either side, which is the header's 112.
+   Ours measured 110, so every y below it sat 2px high all the way to the
+   hero: the line boxes were whatever the face's default leading produced
+   rather than the numbers the frame states. */
+:root[data-page-version='3'] .greeting { gap: 4px; }
+:root[data-page-version='3'] .greeting__word { font-size: 20px; line-height: 26px; }
+:root[data-page-version='3'] .greeting__name { font-size: 28px; line-height: 34px; }
+:root[data-page-version='3'] .modules-band { margin-top: 0; }
+/* the 24 is the whole gap now, in one place instead of 32 here and 24 there */
+:root[data-page-version='3'] .main-frame { padding-top: 24px; }
+/* THE ROW IS 56 IN FLOW AND 88 WHEN IT STICKS · 506:10232 is 56 tall (a 52px
+   field inside 2 of padding) and 506:10934 sits in an 88-tall bar (16 + 56 +
+   16). The existing trick is padding for the stuck state cancelled by a
+   negative margin so the flow is unchanged — see the note over `.search-row`.
+   Here the two differ by 4 on purpose: 18 of padding against 16 of margin
+   leaves the node's extra 4 in the flow and gives the glass its 88. */
+:root[data-page-version='3'] .search-row {
+  padding-block: 18px;
+  margin-block: -16px;
+}
+
+/* ── SCROLLED · node 506:10915, the artboard's SECOND frame ──────────────
+   THE SECOND FRAME EXISTS BECAUSE THE BAR CHANGES MATERIAL, and that is the
+   whole reason it was drawn. 506:10916 is `rgba(30,30,30,0.4)` behind a 20px
+   backdrop blur with its two bottom corners at 28 — a pane of dark glass the
+   page runs under. What shipped here instead was the pale mint wash V1 and V2
+   use, which on a black page reads as a light slab dropped on top of it.
+
+   IT IS THE SAME LAYER, NOT A NEW ONE. `.search-row::before` already exists
+   precisely so the transition is one composited property — see the note over
+   it — so V3 restates that layer's paint and inherits the cross-fade, rather
+   than adding a second backdrop that would blur what the first one blurred.
+
+   THE GREETING GOES WITH THE SCROLL. The scrolled frame is 88 tall against
+   the resting 200 and holds the search row alone: "Good Morning," and the
+   name are gone. That is the collapse the second artboard is for. */
+:root[data-page-version='3'] .search-row::before {
+  background: rgba(30, 30, 30, .4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0;
+  border-radius: 0 0 28px 28px;
+  box-shadow: none;
+}
+@supports not (backdrop-filter: blur(2px)) {
+  /* no blur, no glass — so the fallback has to carry the separation itself,
+     and an opaque near-black is the honest version of this material */
+  :root[data-page-version='3'] .search-row::before { background: rgb(24, 24, 24); }
+}
+/* THE ROW'S OWN PADDING NARROWS TO 16 WHEN IT STICKS · 506:10934 draws the
+   scrolled search row on 16 either side where the resting one has 24. It is
+   `padding-inline` on the row and not on the glass, so the pane still runs
+   the full width and only the field inside it moves. */
+:root[data-page-version='3'] .search-row.is-stuck { padding-inline: 16px; }
+/* AND THE GREETING COLLAPSES. The scrolled frame is 88 tall against the
+   resting 200, holding the search row alone.
+
+   DRIVEN OFF `.is-stuck` WITH `:has()`, NOT A NEW SIGNAL. The observer at the
+   foot of app.js already toggles that one class and two consumers already
+   read it; adding a `body.is-scrolled` beside it would be a second source of
+   truth for one fact. The header sits BEFORE the row in the DOM, so no
+   sibling combinator reaches it — `:has()` does, and this file already uses
+   it for the search field's focus ring.
+
+   HEIGHT, NOT `display: none`, so the collapse can be watched rather than
+   cutting, and `overflow: hidden` so the two lines clip instead of spilling
+   while it closes. */
+:root[data-page-version='3'] .home-header {
+  overflow: hidden;
+  transition: height 220ms var(--ease), opacity 180ms var(--ease),
+              padding-block 220ms var(--ease);
+}
+:root[data-page-version='3'] body:has(.search-row.is-stuck) .home-header {
+  height: 0;
+  padding-block: 0;
+  opacity: 0;
+}
 
 /* ── 8 · modules section head ────────────────────────────────────────────
    NOT IN THE ARTBOARD, AND THEREFORE NOT IN THE RESTING PAGE.
@@ -10384,7 +10554,16 @@ body.is-editing .qa-chat { display: none; }
         <span class="hero__mark" aria-hidden="true"><img src="assets/icon/hero-logo.svg" alt=""></span>
       </span>
       <span class="hero__row hero__row--foot">
-        <span class="hero__title">Antz Command Centre</span>
+        <!-- THE SUBTITLE IS V3's AND IT IS IN THE MARKUP FOR EVERY VERSION.
+             506:10268 draws "A clear view of what's happening across the zoo."
+             under the wordmark; V1 and V2's artboards draw the name alone. It
+             is written once and hidden by CSS rather than injected by the
+             version, because a line of prose that only exists on one page is
+             a line nobody finds when they search the file for it. -->
+        <span class="hero__titles">
+          <span class="hero__title">Antz Command Centre</span>
+          <span class="hero__sub">A clear view of what’s happening across the zoo.</span>
+        </span>
         <span class="sr-only"> (opens in a new tab)</span>
       </span>
     </a>
