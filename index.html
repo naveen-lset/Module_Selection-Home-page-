@@ -3176,6 +3176,64 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    THE TILE · 506:10428 and 506:10441. Glyph and name together at the foot on
    a 12px gap inside 16 of padding, the name Inter Semi Bold 14 on a 20px line.
    Not the door's "pushed to opposite ends": these two belong to each other. */
+/* ══ THE TAGS PROMO · node 506:12894 ═══════════════════════════════════
+   A PHOTOGRAPH UNDER A BLURRED WASH, not a flat gradient. The frame lays an
+   8px backdrop blur over a bottom-to-top ramp of black 10% to grey 10% — so
+   the picture reads as a texture rather than a subject, which is what lets
+   20px of white title sit on it without a scrim.
+
+   44 ACROSS AND 24 DOWN, which is the frame's own padding and is nothing like
+   the 16 the module cards use — this is a banner, and the ribbon in the
+   corner needs the room. The body column is capped at 519 so the two lines
+   break where the frame breaks them rather than running under the tags. */
+.card:has(> .l-v3promo) { padding: 0; overflow: hidden; }
+.l-v3promo {
+  position: relative;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 4px; height: 100%; padding: 24px 44px; min-width: 0;
+  background-image: linear-gradient(to top, rgba(0, 0, 0, .1), rgba(102, 102, 102, .1)),
+                    url('assets/img/v3-tags.jpg');
+  background-size: cover, cover;
+  background-position: 50% 10.17%, 50% 10.17%;
+  border-radius: 12px;
+}
+/* THE RIBBON SITS ON THE CORNER, half off the card — `left/top: -1` in the
+   frame, rotated a quarter turn. It is the one thing here that is allowed
+   outside the padding. */
+.l-v3promo__ribbon {
+  position: absolute; left: -1px; top: -1.5px;
+  width: 52px; height: 52px; display: block; pointer-events: none;
+  /* THE QUARTER TURN IS THE FRAME'S · 506:12906 wraps the mark in a
+     `-rotate-90`. Without it the ribbon reads the same way up but occupies a
+     wider slice of the corner, and its pink ran under the title's first
+     letter — "ntroducing Tags". */
+  transform: rotate(-90deg);
+}
+.l-v3promo__title {
+  font-size: 20px; font-weight: 600; color: var(--on-dark);
+  white-space: nowrap;
+}
+.l-v3promo__body {
+  display: flex; flex-direction: column; gap: 0;
+  max-width: 519px; padding-right: 32px;
+  font-size: 14px; line-height: 20px; color: var(--on-dark);
+}
+/* THE CTA IS A GLASS PILL, and its ink is the notes yellow rather than white
+   — 506:12900 is #FCF4AE, the same token the figures use. */
+.l-v3promo__cta {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 4px; padding: 8px 16px; border-radius: 100px;
+  border: .3px solid rgba(255, 255, 255, .2);
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, .2) 33.871%, rgba(232, 244, 242, .2) 100%);
+  -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+  font-size: 12px; font-weight: 600; color: var(--c-notes, #FCF4AE);
+  white-space: nowrap;
+}
+.l-v3promo__cta img { display: block; width: 8px; height: 8px; }
+
 /* THE CARD'S OWN PADDING COMES OFF FOR THESE THREE. `.card` already pads, so
    a layout that pads too spends it twice: the Animals caption measured a
    106px box where the frame gives it 138 — 162 less the card's 16 either side
@@ -11214,6 +11272,12 @@ const SPAN_TABLE = {
      every card already using that size on four other pages. Only variants
      that name it in `supportedSizes` can be set to it. */
   xtall:  { 2: [1, 3], 4: [2, 3], 5: [2, 3], 8: [2, 3], 12: [3, 3] },
+  /* THE FULL WIDTH AT ONE ROW · added 17 Sep for node 506:12894. `full` is
+     four columns and TWO rows; the promo banner is four and ONE — 696x144,
+     the hero's own footprint. Nothing before it needed a band that wide and
+     that short, and widening `full` would have halved the height of every
+     card using it on four other pages. */
+  band:   { 2: [2, 1], 4: [4, 1], 5: [5, 1], 8: [8, 1], 12: [12, 1] },
   full:   { 2: [2, 2], 4: [4, 2], 5: [5, 2], 8: [8, 2], 12: [12, 2] },
 }
 
@@ -11943,6 +12007,19 @@ const VARIANTS = [
   },
 
   /* ══ SPECIES MANAGEMENT ════════════════════════════════════════════════ */
+  {
+    /* THE TAGS PROMO · 506:12894. `moduleId: null` — it belongs to no
+       module, which the catalogue already allows and nothing else uses. */
+    id: 'promo.tags', moduleId: null, name: 'Introducing Tags',
+    layout: 'v3-promo', purpose: 'UNDERSTAND',
+    supportedSizes: ['band'], defaultSize: 'band', priority: 'secondary',
+    data: {
+      title: 'Introducing Tags',
+      lines: ['Organise, track, and find important information with tags.',
+              'Make your workflows more structured and efficient'],
+      cta: 'See How it Works',
+    },
+  },
   {
     /* ── V3's FOUR ONE-CELL TILES · node 506:10427, 17 Sep 2026 ────────
        The black page's row of four: two tiles and two counts. They are their
@@ -13873,6 +13950,8 @@ const V3_LAYOUT = [
   /* row 1 · Key Insights beside Species Management, two wide each */
   { variantId: 'insights.key',       size: 'medium' },
   { variantId: 'species.stats',      size: 'medium' },
+  /* row 2 · the promo, four columns wide (506:12894) */
+  { variantId: 'promo.tags',         size: 'band',   newRow: true },
   /* rows 2-4 · Notes is three rows tall on the left (506:10322, 340x464);
      beside it Pharmacy's requests take two rows and Approvals one, which is
      304 + 16 + 144 = 464 and squares the block */
@@ -23409,6 +23488,29 @@ const LAYOUTS = {
   door: (mod, variant, data) =>
     `<span class="l-door">${glyph(mod, variant)}` +
     `<span class="l-door__name">${esc(data.label || mod?.name || '')}</span></span>`,
+
+  /* ── THE PROMO BANNER · node 506:12894 ────────────────────────────────
+     NOT A MODULE CARD, AND THAT IS WHY IT WAS MISSING. It is four columns
+     wide and one row tall between rows one and two, it announces a feature
+     rather than opening a module, and it has no glyph and no figures. Its
+     absence is why every row below it sat 160px above the frame — 144 of
+     banner plus a 16 gutter.
+
+     IT IS STILL A CARD, THOUGH, and that is the point of putting it here
+     rather than in the page's markup: it takes a grid cell, it moves when the
+     grid reflows, and it can be removed in edit mode like anything else. What
+     it does not take is a module — `moduleId` is null and every string is its
+     own. */
+  'v3-promo': (mod, variant, data) =>
+    `<span class="l-v3promo">` +
+      `<img class="l-v3promo__ribbon" src="${ASSET_ICON}v3-new-ribbon.svg" alt="" aria-hidden="true">` +
+      `<span class="l-v3promo__title">${esc(data.title || '')}</span>` +
+      `<span class="l-v3promo__body">` +
+        data.lines.map((l) => `<span>${esc(l)}</span>`).join('') +
+      `</span>` +
+      `<span class="l-v3promo__cta">${esc(data.cta || '')}` +
+        `<img src="${ASSET_ICON}v3-arrow-ne.svg" alt="" aria-hidden="true"></span>` +
+    `</span>`,
 
   /* ── V3's THREE TILE COMPOSITIONS · node 506:10427 ────────────────────
      THE BLACK PAGE'S ONE-CELL TILES ARE NOT THE DOOR. `door` pushes a glyph

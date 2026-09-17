@@ -1321,6 +1321,9 @@ def main():
                      Math.round(b(x).width)+'x'+Math.round(b(x).height)]))})()"""))
         want = [
             ("insights.key", "340x144"), ("species.stats", "340x144"),
+            # the promo banner, four columns and ONE row (506:12894) — its
+            # absence is why every row below it sat 160px above the frame
+            ("promo.tags", "696x144"),
             ("notes.recent", "340x464"), ("pharmacy.requests", "340x304"),
             ("approvals.pending", "340x144"),
             # V3's own one-cell tiles, not the doors — 506:10428 stacks the
@@ -1336,7 +1339,7 @@ def main():
         ]
         got = [tuple(r) for r in cards]
         if WIDTH == 744:
-            check("V3 seeds its own nineteen, in the frame's order",
+            check("V3 seeds its own twenty, in the frame's order",
                   got == want,
                   "as drawn" if got == want else
                   f"{len(got)} cards; first difference "
@@ -1344,7 +1347,7 @@ def main():
         else:
             # away from 744 the columns change, so the footprints do; what
             # still has to hold is WHICH cards and in what order
-            check("V3 seeds its own nineteen, in the frame's order",
+            check("V3 seeds its own twenty, in the frame's order",
                   [g[0] for g in got] == [w[0] for w in want],
                   f"{len(got)} cards")
         # AND NOTES IS THREE ROWS, which is the one span this grid did not
