@@ -1275,6 +1275,54 @@ def main():
         check("…and the greeting collapsed away, which is what that frame is",
               stuck["hdrH"] == 0, f"{stuck['hdrH']}px")
         c.eval("scrollTo(0, 0); 1")
+
+        # ── V3'S OWN CARD SET · 506:10213, read off the frame's geometry ──
+        # Every card in that artboard is a whole number of grid cells — 162
+        # wide and 144 tall on a 16 gutter, the same grid V2 uses — so 340 is
+        # two columns, 304 two rows and 464 three. That is what makes V3 a
+        # LAYOUT rather than twenty new components, and it is what this
+        # asserts: the footprints, in the frame's own order.
+        #
+        # IT SEEDED V2'S SET FOR TWO DAYS, which looked like the black page
+        # with the wrong cards on it. The seed reads `isV3()` now.
+        cards = json.loads(c.eval("""(()=>{const b=e=>e.getBoundingClientRect();
+          try{localStorage.clear()}catch(e){}
+          return JSON.stringify([...document.querySelectorAll('#moduleGrid .card')]
+            .map(x=>[x.dataset.variant,
+                     Math.round(b(x).width)+'x'+Math.round(b(x).height)]))})()"""))
+        want = [
+            ("insights.key", "340x144"), ("species.stats", "340x144"),
+            ("notes.recent", "340x464"), ("pharmacy.requests", "340x304"),
+            ("approvals.pending", "340x144"),
+            ("eggs.default", "162x144"), ("species.figure", "162x144"),
+            ("users.default", "162x144"), ("mortality.split", "162x144"),
+            ("pharmacy.stock", "340x304"), ("pharmacy.default", "162x144"),
+            ("lab.default", "162x144"), ("approvals.week", "340x144"),
+            ("species.recent", "340x304"), ("approvals.breakdown", "340x144"),
+            ("mortality.trend", "340x144"), ("eggs.collection", "340x304"),
+            ("medical.actions", "340x144"), ("communication.unread", "340x144"),
+        ]
+        got = [tuple(r) for r in cards]
+        if WIDTH == 744:
+            check("V3 seeds its own nineteen, in the frame's order",
+                  got == want,
+                  "as drawn" if got == want else
+                  f"{len(got)} cards; first difference "
+                  f"{next((f'{g} want {w}' for g, w in zip(got, want) if g != w), 'length only')}")
+        else:
+            # away from 744 the columns change, so the footprints do; what
+            # still has to hold is WHICH cards and in what order
+            check("V3 seeds its own nineteen, in the frame's order",
+                  [g[0] for g in got] == [w[0] for w in want],
+                  f"{len(got)} cards")
+        # AND NOTES IS THREE ROWS, which is the one span this grid did not
+        # have. 464 is 144 x 3 + 16 x 2, and no existing size is 3 tall — a
+        # stretched `tall` would have changed every card using that size on
+        # four other pages, so `xtall` is its own step.
+        if WIDTH == 744:
+            check("…with Notes on the new three-row step, not a stretched tall",
+                  dict(got).get("notes.recent") == "340x464",
+                  str(dict(got).get("notes.recent")))
         errs = c.errors()
         check("no console errors across three switches", not errs,
               "; ".join(str(e)[:110] for e in errs[:3]))

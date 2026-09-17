@@ -11065,6 +11065,14 @@ const SPAN_TABLE = {
   medium: { 2: [2, 1], 4: [2, 1], 5: [2, 1], 8: [2, 1], 12: [3, 1] },
   large:  { 2: [2, 2], 4: [3, 2], 5: [2, 2], 8: [4, 2], 12: [4, 2] },
   tall:   { 2: [1, 2], 4: [2, 2], 5: [2, 2], 8: [2, 2], 12: [2, 2] },
+  /* THREE ROWS, TWO COLUMNS · added 17 Sep 2026 for node 506:10322. V3 draws
+     Notes 340x464 against the 340x304 every other page gives it, and 464 is
+     144 x 3 + 16 x 2 — three grid rows exactly. No existing step is 3 tall,
+     so this is a new one rather than a stretched `tall`: the difference
+     between them is a ROW, and inventing it inside `tall` would have changed
+     every card already using that size on four other pages. Only variants
+     that name it in `supportedSizes` can be set to it. */
+  xtall:  { 2: [1, 3], 4: [2, 3], 5: [2, 3], 8: [2, 3], 12: [3, 3] },
   full:   { 2: [2, 2], 4: [4, 2], 5: [5, 2], 8: [8, 2], 12: [12, 2] },
 }
 
@@ -11923,7 +11931,7 @@ const VARIANTS = [
   {
     id: 'pharmacy.stock', moduleId: 'pharmacy', name: 'Stock Status',
     layout: 'ring', purpose: 'UNDERSTAND',
-    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    supportedSizes: ['medium', 'tall', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: {
       title: 'Stock Status', total: '1,248', unit: 'Items',
       segments: [
@@ -12289,7 +12297,7 @@ const VARIANTS = [
   {
     id: 'eggs.collection', moduleId: 'eggs', name: 'Collection',
     layout: 'stat', purpose: 'UNDERSTAND',
-    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    supportedSizes: ['medium', 'tall', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: { title: 'Egg Collection', value: '1,248', label: 'Eggs Collected',
             sub: '842 under incubation' },
   },
@@ -13108,7 +13116,7 @@ const VARIANTS = [
     id: 'notes.recent', moduleId: 'notes', name: 'Notes',
     layout: 'note', purpose: 'MONITOR',
     passive: true,
-    supportedSizes: ['tall', 'large'], defaultSize: 'tall', priority: 'secondary',
+    supportedSizes: ['tall', 'xtall', 'large'], defaultSize: 'tall', priority: 'secondary',
     data: { title: 'Notes', items: NOTES },
   },
 
@@ -13662,6 +13670,58 @@ const V2_LAYOUT = [
 ]
 
 /**
+ * V3 · NODE 506:10213's OWN ORDER, ROW BY ROW.
+ * ───────────────────────────────────────────────────────────────────────────
+ * READ OFF THE FRAME'S GEOMETRY, NOT ITS PICTURE. Every card in that artboard
+ * is a whole number of grid cells — 162 wide and 144 tall with 16 between, the
+ * same grid V2 uses — so 340 is two columns, 696 is four, 304 is two rows and
+ * 464 is three. That is what makes this a LAYOUT and not twenty new
+ * components: the node draws cards this catalogue mostly already has, in an
+ * order it has not been asked for before.
+ *
+ * WHAT IS GENUINELY NEW IS THE PROMO BANNER — "Introducing Tags", 696x144
+ * between rows one and two (506:12894). It is not a module card and has no
+ * variant, so it is not in this list; it wants its own component and is the
+ * one thing here still outstanding.
+ *
+ * WHERE THE NODE SHOWS FIGURES, THIS SEEDS THE FIGURE CARD. Two of the four
+ * small cells in row three are not doors: 506:10432 reads "24 / Newly Added
+ * Animals" and 506:10446 "12 This Week / 03 Species". Seeding `species.default`
+ * and `mortality.default` there would have been four identical tiles where the
+ * frame draws two doors and two counts.
+ */
+const V3_LAYOUT = [
+  /* row 1 · Key Insights beside Species Management, two wide each */
+  { variantId: 'insights.key',       size: 'medium' },
+  { variantId: 'species.stats',      size: 'medium' },
+  /* rows 2-4 · Notes is three rows tall on the left (506:10322, 340x464);
+     beside it Pharmacy's requests take two rows and Approvals one, which is
+     304 + 16 + 144 = 464 and squares the block */
+  { variantId: 'notes.recent',       size: 'xtall',  newRow: true },
+  { variantId: 'pharmacy.requests',  size: 'tall'   },
+  { variantId: 'approvals.pending',  size: 'medium' },
+  /* row 5 · four one-cell tiles: two doors and two counts */
+  { variantId: 'eggs.default',       size: 'small',  newRow: true },
+  { variantId: 'species.figure',     size: 'small'  },
+  { variantId: 'users.default',      size: 'small'  },
+  { variantId: 'mortality.split',    size: 'small'  },
+  /* rows 6-7 · Inventory & Stock two rows on the left; Pharmacy and Lab share
+     the first row beside it and Approvals takes the second */
+  { variantId: 'pharmacy.stock',     size: 'tall',   newRow: true },
+  { variantId: 'pharmacy.default',   size: 'small'  },
+  { variantId: 'lab.default',        size: 'small'  },
+  { variantId: 'approvals.week',     size: 'medium' },
+  /* rows 8-9 · the new-animals list, with Help Desk and Mortality beside it */
+  { variantId: 'species.recent',     size: 'tall',   newRow: true },
+  { variantId: 'approvals.breakdown', size: 'medium' },
+  { variantId: 'mortality.trend',    size: 'medium' },
+  /* rows 10-11 · eggs collected, with the actions tile and chat beside it */
+  { variantId: 'eggs.collection',    size: 'tall',   newRow: true },
+  { variantId: 'medical.actions',    size: 'medium' },
+  { variantId: 'communication.unread', size: 'medium' },
+]
+
+/**
  * Cards the user is not allowed to remove.
  *
  * Two, and only two. A command centre without the living collection or without
@@ -13736,14 +13796,9 @@ function seed() {
      `newRow`, so the artboard's deliberate gap in the last two rows was packed
      away on a fresh install and only appeared after a save/reload — the flag
      survived repair() but never made it out of the default. */
-  /* V3 SEEDS FROM V2'S LAYOUT FOR NOW, and this line is the marker for the
-     rest of that work. Node 506:10213 states its own set — Key Insights and
-     Species Management, the Tags promo, Notes beside Pending Requests, the
-     four small tiles, Inventory & Stock, Help Desk, Eggs Collected, Medical,
-     Chat — and most of those compositions do not exist in the catalogue yet.
-     Until they do, V3 draws V2's cards on its own ground, which is honest
-     about what is built rather than half-drawing the node's. */
-  const layout = isV2() || isV3() ? V2_LAYOUT : DEFAULT_LAYOUT
+  /* EACH PAGE SEEDS ITS OWN SET. V3's is node 506:10213's, row by row — see
+     V3_LAYOUT above for how the frame's geometry was read into grid cells. */
+  const layout = isV3() ? V3_LAYOUT : isV2() ? V2_LAYOUT : DEFAULT_LAYOUT
   return layout.map((d) => ({ ...d, uid: newUid() }))
 }
 
