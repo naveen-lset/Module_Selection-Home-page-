@@ -3390,29 +3390,24 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    `padding-inline` on the row and not on the glass, so the pane still runs
    the full width and only the field inside it moves. */
 :root[data-page-version='3'] .search-row.is-stuck { padding-inline: 16px; }
-/* AND THE GREETING COLLAPSES. The scrolled frame is 88 tall against the
-   resting 200, holding the search row alone.
+/* ── THE GREETING SCROLLS AWAY, IT DOES NOT COLLAPSE ────────────────────
+   IT WAS COLLAPSED AND THAT LATCHED THE PAGE. `body:has(.search-row.is-stuck)`
+   took the header to `height: 0`, which removes the 112px the observer uses to
+   decide the row is stuck in the first place — so once it closed, the row's top
+   stayed at 0 and `is-stuck` could never clear. Measured: scrolled to 1200 and
+   back to 0, the header was still 0 tall and still stuck. The greeting never
+   came back.
 
-   DRIVEN OFF `.is-stuck` WITH `:has()`, NOT A NEW SIGNAL. The observer at the
-   foot of app.js already toggles that one class and two consumers already
-   read it; adding a `body.is-scrolled` beside it would be a second source of
-   truth for one fact. The header sits BEFORE the row in the DOM, so no
-   sibling combinator reaches it — `:has()` does, and this file already uses
-   it for the search field's focus ring.
+   THE SECOND ARTBOARD IS A SCROLL POSITION, NOT A SECOND LAYOUT. 506:10915 is
+   88 tall and holds the search row alone because the greeting has scrolled off
+   under a sticky bar — which is what the header already does on its own, in
+   every version, for free. The row's own padding gives that bar its 88. So the
+   collapse is deleted rather than repaired: there was nothing for it to do
+   except break the thing it depended on.
 
-   HEIGHT, NOT `display: none`, so the collapse can be watched rather than
-   cutting, and `overflow: hidden` so the two lines clip instead of spilling
-   while it closes. */
-:root[data-page-version='3'] .home-header {
-  overflow: hidden;
-  transition: height 220ms var(--ease), opacity 180ms var(--ease),
-              padding-block 220ms var(--ease);
-}
-:root[data-page-version='3'] body:has(.search-row.is-stuck) .home-header {
-  height: 0;
-  padding-block: 0;
-  opacity: 0;
-}
+   A STATE MUST NOT CONSUME THE SIGNAL THAT ENDS IT. That is the whole lesson
+   here, and it is why no height, margin or display on the header may be driven
+   from `.is-stuck`. */
 
 /* ── 8 · modules section head ────────────────────────────────────────────
    NOT IN THE ARTBOARD, AND THEREFORE NOT IN THE RESTING PAGE.

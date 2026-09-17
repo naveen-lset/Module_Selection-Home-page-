@@ -1272,9 +1272,35 @@ def main():
         check("…with its bottom corners at 28 and 16 of side padding",
               stuck["radius"] == "28px" and stuck["pad"] == "16px",
               f"r={stuck['radius']} pad={stuck['pad']}")
-        check("…and the greeting collapsed away, which is what that frame is",
-              stuck["hdrH"] == 0, f"{stuck['hdrH']}px")
-        c.eval("scrollTo(0, 0); 1")
+        # AND THE GREETING IS STILL THERE, SCROLLED OFF — not collapsed. It
+        # WAS collapsed, with `body:has(.search-row.is-stuck)` taking the
+        # header to `height: 0`, and that latched the page: the collapse
+        # removes the 112px the observer uses to decide the row is stuck, so
+        # once it closed `is-stuck` could never clear. Scrolled to 1200 and
+        # back to 0, the header was still 0 tall and the greeting never came
+        # back. Asserted as PRESENT so the collapse cannot be reintroduced.
+        check("…with the greeting scrolled off rather than collapsed",
+              stuck["hdrH"] == 112, f"{stuck['hdrH']}px")
+
+        # ── AND IT ALL COMES BACK ON THE WAY UP ──────────────────────────
+        # The round trip, not just the down leg. A state must not consume the
+        # signal that ends it, and the only way to see that is to go back.
+        back = json.loads(c.eval("""(()=>{
+          scrollTo(0, 0);
+          return new Promise(r=>setTimeout(()=>{
+            const b=e=>e.getBoundingClientRect();
+            const row=document.querySelector('.search-row');
+            r(JSON.stringify({
+              stuck: row.classList.contains('is-stuck'),
+              rowTop: Math.round(b(row).top),
+              hdrH: Math.round(b(document.querySelector('.home-header')).height),
+              veil: getComputedStyle(row,'::before').opacity}))}, 800))})()""",
+          await_promise=True))
+        check("scrolled back to the top, the bar un-sticks and the header returns",
+              not back["stuck"] and back["hdrH"] == 112 and back["rowTop"] > 0,
+              f"stuck={back['stuck']} header={back['hdrH']}px rowTop={back['rowTop']}")
+        check("…and the dark glass fades back out with it",
+              back["veil"] == "0", f"opacity {back['veil']}")
 
         # ── V3'S OWN CARD SET · 506:10213, read off the frame's geometry ──
         # Every card in that artboard is a whole number of grid cells — 162
