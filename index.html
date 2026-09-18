@@ -53,6 +53,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- ADDED TO THE HOME SCREEN, THE PAGE IS THE APP. The owner reviews this on
+     an iPad and asked for the address bar and tab strip to go: Safari only
+     drops them for a page saved to the home screen that declares itself
+     standalone, so these three say so. In a tab they change nothing. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ANTZ">
 <meta name="theme-color" content="#DFF5F3">
 <title>ANTZ Command Centre · Home</title>
 <link rel="icon" href="assets/icon/hero-logo.svg">
@@ -3000,8 +3008,17 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 
 /* the chips: a filled pill for the pressed one, a quiet grey pill otherwise,
    both carrying their count; a class with nothing in it is greyed and inert */
-.life-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.life-chips {
+  display: flex; flex-wrap: nowrap; gap: 6px; margin-bottom: 14px;
+  /* ONE LINE, as the workbook draws them: the row scrolls sideways when it
+     must and never wraps, and shows no scrollbar — the cut-off chip at the
+     edge is the affordance, as it is for the observations rail */
+  overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.life-chips::-webkit-scrollbar { display: none; }
 .life-chip {
+  flex: none;
   display: inline-flex; align-items: center; gap: 6px;
   height: 28px; padding: 0 10px; border: 0; border-radius: var(--r-pill);
   background: #F0F3F1; color: var(--ink-head);
@@ -3024,7 +3041,11 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   list-style: none; margin: 0; padding: 0;
   /* six rows show; the rest scroll inside the panel, as the dashboard's do */
   max-height: 372px; overflow-y: auto; overscroll-behavior: contain;
+  /* no scrollbar: the owner did not want the bar drawn beside the list, and
+     the sixth row cut at the bottom edge says there is more */
+  scrollbar-width: none;
 }
+.life-list::-webkit-scrollbar { display: none; }
 .life-row {
   display: flex; align-items: center; gap: 12px;
   min-height: 62px; padding: 8px 0;
@@ -3059,14 +3080,73 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-table td { font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink); }
 .life-table td.is-zero { color: var(--ink-mute); }
 .life-table tfoot tr { border-top: 1px solid rgba(31, 65, 91, .12); }
+/* the share sits under its figure in the micro size, muted, so the count
+   stays the thing read first and the rate is there for the one comparing */
+.life-table--share { font-size: var(--fs-label); }
+.life-table--share td { padding-left: 8px; }
+.life-table--share td small, .life-table--share th small { display: block; font-family: var(--font); font-size: 11px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; color: var(--ink-mute); margin-top: 3px; }
+.life-table--share tbody th, .life-table--share tbody td { padding-top: 10px; padding-bottom: 10px; vertical-align: top; }
+.life-table--share tfoot td { font-size: var(--fs-label); }
 .life-table tfoot th, .life-table tfoot td { font-weight: 700; color: var(--ink); }
+
+/* ANIMAL CARE: the four count tiles are a row of their own above the grid;
+   the trend panel shares the grid's third column with the two lists */
+.care-band { margin-top: 0; }
+.care-counts {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px;
+  padding-top: 8px; margin-bottom: 20px;
+}
+.care-count {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 18px 22px 16px; border-radius: 20px;
+  background: var(--c-white); box-shadow: var(--shadow-card);
+}
+.care-count__label { font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute); }
+.care-count__n { font-family: var(--font-num); font-size: var(--fs-stat-sm); font-weight: 700; line-height: 1.05; color: var(--ink); }
+/* the serious count is coral so it is found first; the label still says
+   what it is, so the colour is never the only thing that does */
+.care-count--serious .care-count__n { color: var(--c-tertiary); }
+.care-count__note { font-size: var(--fs-label); color: var(--ink-mute); }
+
+.life-cols--flush { padding-left: 0; }
+/* a due item carries a coral figure AND the words "needs action" under it */
+.life-row--due .life-row__val b { color: var(--c-tertiary); }
+/* the rate cell: a quiet bar under the percentage, its length the rate, so
+   the class that lags is seen at a glance */
+.life-table--wide { table-layout: fixed; }
+.life-table--wide th:first-child, .life-table--wide td:first-child { width: 26%; }
+.life-table td.is-rate { padding-left: 12px; }
+.life-pct { position: relative; display: inline-block; min-width: 56px; padding-bottom: 6px; }
+.life-pct::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; border-radius: 2px; background: rgba(31, 65, 91, .10); }
+.life-pct i { position: absolute; left: 0; bottom: 0; height: 4px; border-radius: 2px; background: var(--c-action-ink); opacity: .55; }
+.life-pct b { font-weight: 600; }
+.life-table tfoot .life-pct b { font-weight: 700; }
+
+.care-trend__head { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.care-trend__n { font-size: var(--fs-body); color: var(--ink-mute); }
+.care-trend__n b { font-family: var(--font-num); font-size: var(--fs-stat-sm); font-weight: 700; color: var(--ink); margin-right: 4px; }
+.care-trend__delta { font-size: var(--fs-label); color: var(--ink-mute); }
+.care-trend__delta.is-up   { color: var(--c-tertiary); }
+.care-trend__delta.is-down { color: var(--c-action-ink); }
+.care-trend__plot { display: flex; align-items: flex-end; gap: 5px; height: 150px; flex: 1 1 auto; }
+.care-trend__col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
+.care-trend__n2 { font-family: var(--font-num); font-size: var(--fs-micro); font-weight: 600; line-height: 1; color: var(--ink-mute); min-height: 1em; }
+.care-trend__bar { width: 100%; max-width: 22px; min-height: 2px; border-radius: 4px 4px 2px 2px; background: rgba(0, 109, 53, .22); }
+.care-trend__col.is-this .care-trend__bar { background: rgba(0, 109, 53, .55); }
+.care-trend__col.is-today .care-trend__bar { background: var(--c-action-ink); }
+.care-trend__col.is-this .care-trend__n2 { color: var(--ink); }
+.care-trend__day { font-size: var(--fs-micro); line-height: 1; color: var(--ink-mute); }
+.care-trend__col.is-today .care-trend__day { color: var(--ink); font-weight: 700; }
 
 @media (max-width: 1023px) {
   .life-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .life-card--table { grid-column: 1 / -1; }
+  .life-card--table, .life-card--trend { grid-column: 1 / -1; }
+  .care-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 743px) {
   .life-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .care-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .care-count { padding: 14px 16px 12px; border-radius: 16px; }
   .life-band { margin-bottom: 36px; }
   .life-card { padding: 18px 18px 14px; }
 }
@@ -5637,18 +5717,6 @@ body.is-editing .pager-dwell { animation-play-state: paused; }
 .l-week__day { font-size: var(--fs-micro); line-height: 1; opacity: .6; margin-top: 2px; }
 .l-week__col[data-last] .l-week__bar { background: #fff; }
 .l-week__col[data-last] .l-week__n, .l-week__col[data-last] .l-week__day { opacity: 1; font-weight: 700; }
-/* the line — the SVG stretches to the card, so the marks are told not to:
-   `vector-effect` keeps the stroke and the points round under `none` */
-.l-week__plot--line { flex-direction: column; align-items: stretch; gap: 0; }
-.l-week__plot--line svg { display: block; flex: 1 1 auto; width: 100%; min-height: 0; overflow: visible; }
-.l-week__base { stroke: rgba(255, 255, 255, .3); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.l-week__line { fill: none; stroke: rgba(255, 255, 255, .85); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.l-week__pt { fill: var(--card-bg-solid, #3CC6BE); stroke: #fff; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
-.l-week__pt[data-last] { fill: #fff; }
-.l-week__pt-n { fill: #fff; font-family: var(--font-num); font-weight: 600; font-size: 6.5px; opacity: .9; }
-.l-week__days { display: flex; margin-top: 2px; font-size: var(--fs-micro); line-height: 1; opacity: .6; text-align: center; }
-.l-week__days span { flex: 1 1 0; }
-.l-week__days span[data-last] { opacity: 1; font-weight: 700; }
 
 .l-spark__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 .l-spark__plot { flex: none; display: flex; align-items: flex-end; gap: 2px; height: 42px; }
@@ -10939,6 +11007,36 @@ body.is-editing .qa-chat { display: none; }
       <div class="life-grid"></div>
     </section>
 
+    <!-- ══ animal care (V4) ═════════════════════════════════════════════
+         The medical side of the same morning: four counts across the top
+         (in hospital, under medication, in maternity care, serious), then
+         the care overdue by species, the medicines the central pharmacy
+         still owes, and the enrichment tickets trend. Rendered by
+         js/components/AnimalCare.js from js/data/care.js; the panels share
+         the Circle of Life's styles so the two bands read as one report.
+         Empty and hidden on every version but 4. -->
+    <section class="life-band care-band" id="animalCare" aria-labelledby="careTitle" hidden>
+      <div class="obs-head">
+        <h2 class="obs-head__title" id="careTitle">Animal Care</h2>
+      </div>
+      <div class="care-counts"></div>
+      <div class="life-grid"></div>
+    </section>
+
+    <!-- ══ collection (V4) ══════════════════════════════════════════════
+         What the site holds and how well it is known: species and animals
+         by class with the microchipping rate, the rescue and rehabilitation
+         pipeline, and the compliance watch list a director asks about
+         first. Rendered by js/components/Collection.js from
+         js/data/collection.js. Empty and hidden on every version but 4. -->
+    <section class="life-band care-band" id="collection" aria-labelledby="collectionTitle" hidden>
+      <div class="obs-head">
+        <h2 class="obs-head__title" id="collectionTitle">Collection</h2>
+      </div>
+      <div class="care-counts"></div>
+      <div class="life-grid"></div>
+    </section>
+
     <!-- ══ modules ═════════════════════════════════════════════════════
          The section head was zero-height at rest so the grid sat where the
          artboard puts it. Since 3 Sep 2026 it is a visible row under the
@@ -13635,10 +13733,7 @@ const VARIANTS = [
     id: 'natality.week', moduleId: 'natality', name: 'This Week',
     layout: 'week', purpose: 'UNDERSTAND', passive: true,
     supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
-    /* `line`, where Mortality keeps the bars: births are the trend to watch
-       rise and a line reads as movement, deaths are a tally and bars read
-       as one. Same layout, same figures, one drawing each. */
-    data: { title: 'Natality', series: 'natality', unit: 'births', line: true },
+    data: { title: 'Natality', series: 'natality', unit: 'births' },
   },
   {
     id: 'mortality.week', moduleId: 'mortality', name: 'This Week',
@@ -23613,36 +23708,6 @@ const BEHAVIOUR = {
 
 /* What a screen reader reads: the module, the card, then its actual content,
    so nobody has to open Pharmacy to learn that 42 requests are waiting. */
-/* THE LINE · one SVG, the days spaced evenly, every day a point — a line
-   cannot skip a day the way the bars skip one, so an empty day sits on the
-   baseline rather than leaving a gap the eye would read as missing data.
-   The count sits above each point that has one; today's point is filled and
-   the rest are hollow, which is the line's version of the bars' full-strength
-   last column. The letters are HTML below the drawing, not text in the SVG,
-   so they set in the page's own face at the page's own size. */
-function weekLine(days, max, fmt) {
-  const W = 140, H = 44, PAD = 6, TOP = 8
-  const n = days.length
-  const x = (i) => (PAD + (i * (W - PAD * 2)) / (n - 1))
-  const y = (c) => (H - PAD - (c / max) * (H - PAD - TOP))
-  const pts = days.map((d, i) => [x(i), y(d.count), d.count])
-  const path = pts.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(1)} ${py.toFixed(1)}`).join(' ')
-  const marks = pts.map(([px, py, c], i) => {
-    const last = i === n - 1
-    return (c ? `<text class="l-week__pt-n" x="${px.toFixed(1)}" y="${(py - 4.5).toFixed(1)}" text-anchor="middle">${c}</text>` : '') +
-      `<circle class="l-week__pt"${last ? ' data-last' : ''} cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${last ? 2.6 : 2}"/>`
-  }).join('')
-  const letters = days.map((d, i) =>
-    `<span${i === n - 1 ? ' data-last' : ''}>${esc(fmt.format(new Date(Date.now() - d.ago * 86400000)))}</span>`).join('')
-  return `<span class="l-week__plot l-week__plot--line">` +
-    `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" focusable="false">` +
-      `<line class="l-week__base" x1="${PAD}" y1="${H - PAD}" x2="${W - PAD}" y2="${H - PAD}"/>` +
-      `<path class="l-week__line" d="${path}"/>${marks}` +
-    `</svg>` +
-    `<span class="l-week__days">${letters}</span>` +
-  `</span>`
-}
-
 /* What a week card says aloud — today's figure and the week's, since the
    bars are hidden from assistive technology and the title alone is a riddle. */
 function weekSpoken(data) {
@@ -24186,7 +24251,7 @@ const LAYOUTS = {
     const today = days[days.length - 1].count
     return `<span class="l-week">${head(mod, variant, data)}` +
       `<span class="l-week__today"><b>${today}</b> ${esc(data.unit)} today</span>` +
-      (data.line ? weekLine(days, max, fmt) : `<span class="l-week__plot">${cols}</span>`) +
+      `<span class="l-week__plot">${cols}</span>` +
     `</span>`
   },
 
@@ -30849,15 +30914,18 @@ __def('js/components/CircleOfLife.js', function (__x, __req) {
  * so before it is tapped, and a tapped chip is `aria-pressed`, so the state
  * is spoken and not only coloured.
  *
- * The table's rows are the two kinds and its foot is the NET — births less
- * deaths — because that is the one figure a total of births and deaths could
- * never be. The compliance table foots a sum; this one does not, and says so.
+ * The table's rows are the two kinds, each figure with its share of the
+ * class's animals under it, and its foot is the animals held per class —
+ * the owner's ask (18 Sep 2026), in place of a net row: a birth or death
+ * count means little until it is read against how many animals there are,
+ * and a mortality rate is what a director compares between classes.
  *
  * Nothing here is a link: there is no natality or mortality page in this
  * build, so the panels are regions and not anchors to nowhere.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES, summarise, byClass } = __req('js/data/lifecycle.js')
+const { BY_CLASS } = __req('js/data/collection.js')
 
 const DAYS = 10
 const KINDS = [
@@ -30921,22 +30989,24 @@ function listCard(spec) {
 
 function tableCard() {
   const rows = KINDS.map((k) => ({ ...k, n: byClass(k.kind, DAYS) }))
-  const net = { all: rows[0].n.all - rows[1].n.all }
-  for (const c of CLASSES) net[c.key] = rows[0].n[c.key] - rows[1].n[c.key]
-  const cell = (v, cls = '') => `<td class="${cls}${v === 0 ? ' is-zero' : ''}">${v > 0 && cls === 'is-net' ? '+' : ''}${fmt(v)}</td>`
+  const held = { all: 0 }
+  for (const c of CLASSES) { const r = BY_CLASS.find((x) => x.key === c.key); held[c.key] = r ? r.animals : 0; held.all += held[c.key] }
+  /* the share, to one place; nothing is written under a zero */
+  const share = (v, of) => (v && of ? `<small>${(v / of * 100).toFixed(1)}%</small>` : '')
+  const cell = (v, of) => `<td class="${v === 0 ? 'is-zero' : ''}">${fmt(v)}${share(v, of)}</td>`
 
   const el = document.createElement('section')
   el.className = 'life-card life-card--table'
-  el.setAttribute('aria-label', `By class, last ${DAYS} days`)
+  el.setAttribute('aria-label', `By class, last ${DAYS} days, against animals held`)
   el.innerHTML =
     `<h3 class="life-card__title">By class <span class="life-card__span">· last ${DAYS} days</span></h3>` +
-    `<table class="life-table"><thead><tr><th scope="col">Kind</th>` +
+    `<table class="life-table life-table--share"><thead><tr><th scope="col">Kind</th>` +
       CLASSES.map((c) => `<th scope="col" class="is-${c.key}"><abbr title="${c.label}">${c.short}</abbr></th>`).join('') +
       `<th scope="col">All</th></tr></thead><tbody>` +
-      rows.map((r) => `<tr><th scope="row">${r.head}</th>` +
-        CLASSES.map((c) => cell(r.n[c.key])).join('') + cell(r.n.all) + `</tr>`).join('') +
-    `</tbody><tfoot><tr><th scope="row">Net</th>` +
-      CLASSES.map((c) => cell(net[c.key], 'is-net')).join('') + cell(net.all, 'is-net') +
+      rows.map((r) => `<tr><th scope="row">${r.head}<small>share</small></th>` +
+        CLASSES.map((c) => cell(r.n[c.key], held[c.key])).join('') + cell(r.n.all, held.all) + `</tr>`).join('') +
+    `</tbody><tfoot><tr><th scope="row">Animals</th>` +
+      CLASSES.map((c) => `<td>${fmt(held[c.key])}</td>`).join('') + `<td>${fmt(held.all)}</td>` +
     `</tr></tfoot></table>`
   return el
 }
@@ -30946,6 +31016,266 @@ function mount({ root } = {}) {
   const grid = root.querySelector('.life-grid')
   for (const k of KINDS) grid.appendChild(listCard(k))
   grid.appendChild(tableCard())
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+});
+
+__def('js/components/AnimalCare.js', function (__x, __req) {
+/**
+ * ANIMAL CARE — the medical side of the morning, on V4
+ * ───────────────────────────────────────────────────────────────────────────
+ * Under Circle of Life, in the same white panels. The owner listed seven
+ * things (18 Sep 2026) and left the shape to me; they fall into three:
+ *
+ *   COUNTS — how many animals are in hospital, under medication, in
+ *   maternity care, and flagged serious. Four tiles across the top, each
+ *   a figure with today's change under it, because a count with no
+ *   direction is a number nobody acts on.
+ *
+ *   LISTS — the care that is overdue (vaccination, deworming, supplement)
+ *   and the medicines the central pharmacy has not sent. Both are the
+ *   Circle of Life list: chips over rows, the figure on the right. The
+ *   pharmacy's chips are the three ages the owner asked for; the oldest
+ *   bin opens by default, since an indent three weeks old is the one to
+ *   chase and a two-day-old one is just the post.
+ *
+ *   A TREND — enrichment tickets raised per day for two weeks, with this
+ *   week against last, drawn as bars because the week tiles are bars.
+ *
+ * Every figure is counted from js/data/care.js at render, so the tiles,
+ * the chip counts and the rows always agree. No links: none of these
+ * pages exist in this build.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { OVERDUE, CARE_KINDS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts } = __req('js/data/care.js')
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+const fmt = (n) => n.toLocaleString('en-IN')
+const days = (n) => `${n} day${n === 1 ? '' : 's'}`
+
+/* the four tiles: figure, what it counts, and what moved today */
+function countTiles() {
+  const c = counts()
+  const tiles = [
+    { key: 'hospital',   label: 'In hospital',       n: c.hospital.n,   note: c.hospital.today   ? `${c.hospital.today} admitted today`  : 'No admissions today' },
+    { key: 'medication', label: 'Under medication',  n: c.medication.n, note: c.medication.today ? `${c.medication.today} started today`  : 'No new courses today' },
+    { key: 'maternity',  label: 'In maternity care', n: c.maternity.n,  note: c.maternity.today  ? `${c.maternity.today} moved in today`  : 'No new mothers today' },
+    { key: 'serious',    label: 'Serious condition', n: c.serious.n,    note: c.serious.today    ? `${c.serious.today} flagged today`     : 'None flagged today' },
+  ]
+  return tiles.map((t) =>
+    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
+      `<span class="care-count__label">${t.label}</span>` +
+      `<span class="care-count__n">${fmt(t.n)}</span>` +
+      `<span class="care-count__note">${esc(t.note)}</span>` +
+    `</section>`).join('')
+}
+
+/* one chip-filtered list, the Circle of Life's shape: `chips` carry a key,
+   a label and a test; `row` draws one item; `open` is the chip that starts
+   pressed */
+function listCard({ title, span, aria, colHead, rows, chips, row, open, empty }) {
+  const el = document.createElement('section')
+  el.className = 'life-card'
+  el.setAttribute('aria-label', aria)
+  const count = (c) => rows.filter(c.test).length
+  el.innerHTML =
+    `<h3 class="life-card__title">${title} <span class="life-card__span">· ${span}</span></h3>` +
+    `<div class="life-chips" role="group" aria-label="Filter">` +
+      chips.map((c) => `<button type="button" class="life-chip" data-key="${c.key}" aria-pressed="${c.key === open}"` +
+        `${count(c) ? '' : ' disabled'}>${c.label} <b>${fmt(count(c))}</b></button>`).join('') +
+    `</div>` +
+    `<div class="life-cols" aria-hidden="true"><span>${colHead[0]}</span><span>${colHead[1]}</span></div>` +
+    `<ol class="life-list"></ol>`
+  const list = el.querySelector('.life-list')
+  const draw = (key) => {
+    const c = chips.find((x) => x.key === key)
+    const shown = rows.filter(c.test)
+    list.innerHTML = shown.length ? shown.map((r, i) => `<li class="life-row">${row(r, i)}</li>`).join('')
+      : `<li class="life-row life-row--none">${empty}</li>`
+  }
+  draw(open)
+  el.querySelector('.life-chips').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.life-chip')
+    if (!btn || btn.disabled) return
+    for (const b of el.querySelectorAll('.life-chip')) b.setAttribute('aria-pressed', String(b === btn))
+    draw(btn.dataset.key)
+  })
+  return el
+}
+
+function overdueCard() {
+  const rows = [...OVERDUE].sort((a, b) => b.overdue - a.overdue)
+  return listCard({
+    title: 'Care overdue', span: 'by animal', aria: 'Care overdue, by animal',
+    colHead: ['Animal', 'Overdue'], rows, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true },
+      ...CARE_KINDS.map((k) => ({ key: k.key, label: k.label, test: (r) => r.kind === k.key }))],
+    row: (r, i) =>
+      `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span>` +
+        `<span class="life-row__sub">${esc(CARE_KINDS.find((k) => k.key === r.kind).label)} · ${esc(r.enclosure)} · ${esc(r.code)}</span></span>` +
+      `<span class="life-row__val"><b>${r.overdue}</b><span class="life-row__note">${r.overdue === 1 ? 'day' : 'days'} late</span></span>`,
+    empty: 'Nothing overdue',
+  })
+}
+
+function pharmacyCard() {
+  const rows = [...PHARMACY].sort((a, b) => b.ago - a.ago)
+  return listCard({
+    title: 'Pharmacy', span: 'indents pending', aria: 'Central pharmacy, indents pending',
+    colHead: ['Medicine', 'Waiting'], rows, open: 'old',
+    chips: PHARMACY_BINS.map((b) => ({ key: b.key, label: b.label, test: b.test })),
+    row: (r, i) =>
+      `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.medicine)}</span>` +
+        `<span class="life-row__sub">${esc(r.qty)} · for ${esc(r.forSpecies)} · ${esc(r.by)}</span></span>` +
+      `<span class="life-row__val"><b>${r.ago}</b><span class="life-row__note">${r.ago === 1 ? 'day' : 'days'}</span></span>`,
+    empty: 'Nothing pending in this window',
+  })
+}
+
+/* the trend: fourteen bars, this week's seven full-strength, with the
+   week's total against the week before */
+function enrichmentCard() {
+  const d = ENRICHMENT
+  const thisWeek = d.slice(-7).reduce((n, x) => n + x, 0)
+  const lastWeek = d.slice(0, 7).reduce((n, x) => n + x, 0)
+  const delta = thisWeek - lastWeek
+  const max = Math.max(1, ...d)
+  const fmtDay = new Intl.DateTimeFormat('en', { weekday: 'narrow' })
+  const el = document.createElement('section')
+  el.className = 'life-card life-card--trend'
+  el.setAttribute('aria-label', `Enrichment tickets: ${thisWeek} this week, ${lastWeek} last week`)
+  el.innerHTML =
+    `<h3 class="life-card__title">Enrichment <span class="life-card__span">· tickets, 14 days</span></h3>` +
+    `<div class="care-trend__head">` +
+      `<span class="care-trend__n"><b>${fmt(thisWeek)}</b> this week</span>` +
+      `<span class="care-trend__delta${delta > 0 ? ' is-up' : delta < 0 ? ' is-down' : ''}">` +
+        `${delta > 0 ? '+' : ''}${fmt(delta)} vs last week (${fmt(lastWeek)})</span>` +
+    `</div>` +
+    `<div class="care-trend__plot" aria-hidden="true">` +
+      d.map((n, i) => {
+        const ago = d.length - 1 - i
+        return `<span class="care-trend__col${ago < 7 ? ' is-this' : ''}${ago === 0 ? ' is-today' : ''}">` +
+          `<span class="care-trend__n2">${n || ''}</span>` +
+          `<span class="care-trend__bar" style="height:${Math.round((n / max) * 100)}%"></span>` +
+          `<span class="care-trend__day">${esc(fmtDay.format(new Date(Date.now() - ago * 86400000)))}</span>` +
+        `</span>`
+      }).join('') +
+    `</div>`
+  return el
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = countTiles()
+  const grid = root.querySelector('.life-grid')
+  grid.appendChild(overdueCard())
+  grid.appendChild(pharmacyCard())
+  grid.appendChild(enrichmentCard())
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+});
+
+__def('js/components/Collection.js', function (__x, __req) {
+/**
+ * COLLECTION — the site's holdings and the director's watch list, on V4
+ * ───────────────────────────────────────────────────────────────────────────
+ * The owner asked for species by class, the number microchipped and the
+ * rate by class, and then for the rest of what a director of a rescue and
+ * rehabilitation site would want in view (18 Sep 2026). Three panels in
+ * the Circle of Life's shape, under four counts:
+ *
+ *   BY CLASS — one table: species, animals, chipped, and the rate drawn as
+ *   a bar inside the cell so a low class is seen before it is read.
+ *   RESCUE & REHAB — the pipeline as a list: received, quarantine, in
+ *   rehabilitation, fit for release, released, died; the flows carry last
+ *   month beside them.
+ *   WATCH LIST — the compliance figures, the ones with a clock on them first.
+ *
+ * Every figure is summed from js/data/collection.js at render.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { BY_CLASS, REHAB, WATCH } = __req('js/data/collection.js')
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+const fmt = (n) => n.toLocaleString('en-IN')
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
+
+function countTiles() {
+  const species = BY_CLASS.reduce((n, r) => n + r.species, 0)
+  const animals = BY_CLASS.reduce((n, r) => n + r.animals, 0)
+  const chipped = BY_CLASS.reduce((n, r) => n + r.chipped, 0)
+  const stage = (k) => REHAB.find((r) => r.key === k).n
+  const tiles = [
+    { key: 'species',  label: 'Species on site',   n: fmt(species),                 note: `${fmt(animals)} animals` },
+    { key: 'chipped',  label: 'Microchipped',      n: `${pct(chipped, animals)}%`,  note: `${fmt(chipped)} of ${fmt(animals)} animals` },
+    { key: 'rehab',    label: 'In rehabilitation', n: fmt(stage('rehab')),          note: `${stage('quarantine')} more in quarantine` },
+    { key: 'released', label: 'Released',          n: fmt(stage('released')),       note: 'this month' },
+  ]
+  return tiles.map((t) =>
+    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
+      `<span class="care-count__label">${t.label}</span>` +
+      `<span class="care-count__n">${t.n}</span>` +
+      `<span class="care-count__note">${esc(t.note)}</span>` +
+    `</section>`).join('')
+}
+
+function classCard() {
+  const tot = BY_CLASS.reduce((a, r) => ({ species: a.species + r.species, animals: a.animals + r.animals, chipped: a.chipped + r.chipped }), { species: 0, animals: 0, chipped: 0 })
+  const rate = (r) => `<td class="is-rate"><span class="life-pct"><i style="width:${pct(r.chipped, r.animals)}%"></i><b>${pct(r.chipped, r.animals)}%</b></span></td>`
+  const row = (r) => `<tr><th scope="row">${r.label}</th>` +
+    `<td>${fmt(r.species)}</td><td>${fmt(r.animals)}</td><td>${fmt(r.chipped)}</td>${rate(r)}</tr>`
+  const el = document.createElement('section')
+  el.className = 'life-card life-card--table'
+  el.setAttribute('aria-label', 'Collection by class: species, animals and microchipped')
+  el.innerHTML =
+    `<h3 class="life-card__title">By class <span class="life-card__span">· species, animals, chipped</span></h3>` +
+    `<table class="life-table life-table--wide"><thead><tr><th scope="col">Class</th><th scope="col">Species</th>` +
+      `<th scope="col">Animals</th><th scope="col">Chipped</th><th scope="col">Rate</th></tr></thead>` +
+    `<tbody>${BY_CLASS.map(row).join('')}</tbody>` +
+    `<tfoot>${row({ label: 'Total', ...tot })}</tfoot></table>`
+  return el
+}
+
+/* a list with no chips — label, note, figure; the pipeline and the watch
+   list are both this shape */
+function figureList({ title, span, aria, colHead, rows }) {
+  const el = document.createElement('section')
+  el.className = 'life-card'
+  el.setAttribute('aria-label', aria)
+  el.innerHTML =
+    `<h3 class="life-card__title">${title} <span class="life-card__span">· ${span}</span></h3>` +
+    `<div class="life-cols life-cols--flush" aria-hidden="true"><span>${colHead[0]}</span><span>${colHead[1]}</span></div>` +
+    `<ol class="life-list">${rows.map((r) =>
+      `<li class="life-row${r.due ? ' life-row--due' : ''}">` +
+        `<span class="life-row__who"><span class="life-row__name">${esc(r.label)}</span>` +
+          `<span class="life-row__sub">${esc(r.note)}</span></span>` +
+        `<span class="life-row__val"><b>${fmt(r.n)}</b>` +
+          (r.prev != null ? `<span class="life-row__note">${fmt(r.prev)} last month</span>` : r.due ? `<span class="life-row__note">needs action</span>` : '') +
+        `</span>` +
+      `</li>`).join('')}</ol>`
+  return el
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = countTiles()
+  const grid = root.querySelector('.life-grid')
+  grid.appendChild(classCard())
+  grid.appendChild(figureList({ title: 'Rescue & rehab', span: 'the pipeline', aria: 'Rescue and rehabilitation pipeline', colHead: ['Stage', 'Animals'], rows: REHAB }))
+  grid.appendChild(figureList({ title: 'Watch list', span: 'compliance', aria: 'Compliance watch list', colHead: ['Item', 'Count'],
+    rows: [...WATCH].sort((a, b) => (b.due ? 1 : 0) - (a.due ? 1 : 0)) }))
   root.hidden = false
   return root
 }
@@ -31798,6 +32128,8 @@ if (PAGE_VERSION === '1' || isV4()) {
 
   /* V4's births-and-deaths band under the rail; mounts to nothing on V1 */
   __req('js/components/CircleOfLife.js').mount({ root: document.getElementById('circleOfLife') })
+  __req('js/components/AnimalCare.js').mount({ root: document.getElementById('animalCare') })
+  __req('js/components/Collection.js').mount({ root: document.getElementById('collection') })
 }
 
 /* ── quick actions ──────────────────────────────────────────────────────
@@ -33768,6 +34100,154 @@ Object.assign(window, {
 })
 
 
+});
+
+__def('js/data/care.js', function (__x, __req) {
+/**
+ * ANIMAL CARE — the seed behind the Animal Care band
+ * ───────────────────────────────────────────────────────────────────────────
+ * No hospital, pharmacy or ticketing service exists in this prototype, so
+ * this is the seed those panels read until one does. Like lifecycle.js it
+ * is written as ROWS rather than totals: every figure on the band is
+ * counted from these, so the count tiles, the lists and the chip counts
+ * can never disagree with one another. `ago` is whole days back from
+ * today, resolved against the clock when read, so nothing here goes stale.
+ *
+ * Species names are common names only — the owner ruled the scientific
+ * name and the photograph out of the lists (17 Sep 2026).
+ */
+
+/* WHO IS WHERE. One row per animal in care; the four counts on the band are
+   these rows counted by state, and one animal can be in several — a lioness
+   in the hospital under medication counts on both tiles, which is what a
+   keeper would expect. `serious` is the vet's flag, not derived. */
+const IN_CARE = [
+  { species: 'Asiatic lion',        code: 'AAID 87546/24', hospital: true,  medication: true,  maternity: false, serious: true,  since: 3 },
+  { species: 'Blackbuck',           code: 'AAID 10221/23', hospital: true,  medication: true,  maternity: false, serious: false, since: 1 },
+  { species: 'Cinereous vulture',   code: 'AAID 30871/22', hospital: true,  medication: true,  maternity: false, serious: true,  since: 6 },
+  { species: 'Chital',              code: 'AAID 55102/25', hospital: true,  medication: false, maternity: false, serious: false, since: 0 },
+  { species: 'Indian rock python',  code: 'AAID 40019/21', hospital: true,  medication: true,  maternity: false, serious: false, since: 2 },
+  { species: 'Barasingha',          code: 'AAID 20933/24', hospital: false, medication: true,  maternity: false, serious: false, since: 9 },
+  { species: 'Bonnet macaque',      code: 'AAID 61207/25', hospital: false, medication: true,  maternity: false, serious: false, since: 4 },
+  { species: 'Sambar',              code: 'AAID 18540/23', hospital: false, medication: true,  maternity: false, serious: false, since: 12 },
+  { species: 'Nilgai',              code: 'AAID 22318/24', hospital: false, medication: false, maternity: true,  serious: false, since: 5 },
+  { species: 'Blackbuck',           code: 'AAID 10388/24', hospital: false, medication: false, maternity: true,  serious: false, since: 2 },
+  { species: 'Indian star tortoise',code: 'AAID 70045/20', hospital: false, medication: false, maternity: true,  serious: false, since: 14 },
+  { species: 'Indian peafowl',      code: 'AAID 33910/25', hospital: false, medication: true,  maternity: false, serious: true,  since: 1 },
+];
+
+/* CARE OVERDUE. One row per animal per kind of care, `overdue` in whole days
+   past the due date. Sorted by the reader: the most overdue first. */
+const OVERDUE = [
+  { kind: 'vaccination', species: 'Asiatic lion',        code: 'AAID 87561/24', enclosure: 'Lion House 2',    overdue: 21 },
+  { kind: 'vaccination', species: 'Blackbuck',           code: 'AAID 10240/23', enclosure: 'Hoofstock Barn',  overdue: 9  },
+  { kind: 'vaccination', species: 'Chital',              code: 'AAID 55118/25', enclosure: 'Hoofstock Barn',  overdue: 4  },
+  { kind: 'vaccination', species: 'Bonnet macaque',      code: 'AAID 61230/25', enclosure: 'Primate Island',  overdue: 2  },
+  { kind: 'deworming',   species: 'Sambar',              code: 'AAID 18560/23', enclosure: 'Deer Paddock',    overdue: 15 },
+  { kind: 'deworming',   species: 'Nilgai',              code: 'AAID 22330/24', enclosure: 'Deer Paddock',    overdue: 11 },
+  { kind: 'deworming',   species: 'Barasingha',          code: 'AAID 20950/24', enclosure: 'Wetland Paddock', overdue: 6  },
+  { kind: 'deworming',   species: 'Indian peafowl',      code: 'AAID 33925/25', enclosure: 'Aviary 3',        overdue: 3  },
+  { kind: 'deworming',   species: 'Bonnet macaque',      code: 'AAID 61244/25', enclosure: 'Primate Island',  overdue: 1  },
+  { kind: 'supplement',  species: 'Indian star tortoise',code: 'AAID 70061/20', enclosure: 'Reptile House',   overdue: 8  },
+  { kind: 'supplement',  species: 'Cinereous vulture',   code: 'AAID 30890/22', enclosure: 'Aviary 1',        overdue: 5  },
+  { kind: 'supplement',  species: 'Indian rock python',  code: 'AAID 40027/21', enclosure: 'Reptile House',   overdue: 2  },
+];
+const CARE_KINDS = [
+  { key: 'vaccination', label: 'Vaccination' },
+  { key: 'deworming',   label: 'Deworming'   },
+  { key: 'supplement',  label: 'Supplement'  },
+];
+
+/* THE PHARMACY'S DEBT. One row per indent the central pharmacy has not yet
+   filled, `ago` days since it was raised. The band bins these into the
+   owner's three ages — up to 3 days, 4 to 15, and older than 15 — and the
+   oldest bin is the one that wants attention. */
+const PHARMACY = [
+  { medicine: 'Ivermectin 1% inj.',       qty: '6 vials',   forSpecies: 'Sambar',             by: 'Dr. Meera Nair',  ago: 1  },
+  { medicine: 'Meloxicam 5 mg/ml',        qty: '4 bottles', forSpecies: 'Asiatic lion',       by: 'Dr. Meera Nair',  ago: 2  },
+  { medicine: 'Enrofloxacin 10% inj.',    qty: '10 vials',  forSpecies: 'Blackbuck',          by: 'Dr. Arjun Rao',   ago: 3  },
+  { medicine: 'Calcium gluconate 10%',    qty: '12 amp.',   forSpecies: 'Indian star tortoise',by: 'Dr. Arjun Rao',  ago: 5  },
+  { medicine: 'Vitamin B-complex inj.',   qty: '20 vials',  forSpecies: 'Cinereous vulture',  by: 'Dr. Meera Nair',  ago: 7  },
+  { medicine: 'Ketamine 50 mg/ml',        qty: '2 vials',   forSpecies: 'Bonnet macaque',     by: 'Dr. Arjun Rao',   ago: 11 },
+  { medicine: 'Povidone-iodine 5%',       qty: '5 L',       forSpecies: 'Hoofstock Barn',     by: 'Ramesh Patil',    ago: 14 },
+  { medicine: 'Oxytetracycline LA',       qty: '8 vials',   forSpecies: 'Nilgai',             by: 'Dr. Arjun Rao',   ago: 17 },
+  { medicine: 'Fenbendazole 22% granules',qty: '3 kg',      forSpecies: 'Deer Paddock',       by: 'Dr. Meera Nair',  ago: 22 },
+  { medicine: 'Amoxicillin-clavulanate',  qty: '30 tabs',   forSpecies: 'Indian peafowl',     by: 'Dr. Meera Nair',  ago: 31 },
+];
+const PHARMACY_BINS = [
+  { key: 'recent', label: '0–3 days',  test: (r) => r.ago <= 3 },
+  { key: 'mid',    label: '4–15 days', test: (r) => r.ago > 3 && r.ago <= 15 },
+  { key: 'old',    label: '15+ days',      test: (r) => r.ago > 15 },
+];
+
+/* ENRICHMENT TICKETS. Raised per day, oldest first, for the last 14 days;
+   the trend compares this week with the one before it. */
+const ENRICHMENT = [2, 1, 3, 0, 2, 1, 1,   3, 4, 2, 5, 3, 4, 6];
+
+function counts() {
+  const n = (k) => IN_CARE.filter((r) => r[k]).length;
+  const today = (k) => IN_CARE.filter((r) => r[k] && r.since === 0).length;
+  return {
+    hospital:   { n: n('hospital'),   today: today('hospital') },
+    medication: { n: n('medication'), today: today('medication') },
+    maternity:  { n: n('maternity'),  today: today('maternity') },
+    serious:    { n: n('serious'),    today: today('serious') },
+  };
+}
+
+__x.IN_CARE = IN_CARE;
+__x.OVERDUE = OVERDUE;
+__x.CARE_KINDS = CARE_KINDS;
+__x.PHARMACY = PHARMACY;
+__x.PHARMACY_BINS = PHARMACY_BINS;
+__x.ENRICHMENT = ENRICHMENT;
+__x.counts = counts;
+});
+
+__def('js/data/collection.js', function (__x, __req) {
+/**
+ * THE COLLECTION — what this site holds, and the eyes a director keeps on it
+ * ───────────────────────────────────────────────────────────────────────────
+ * Seed for the Collection band, until the species registry serves it. The
+ * figures are THIS SITE's, not the estate's: the Species Management tile
+ * carries the artboard's estate-wide numbers and the two are not meant to
+ * agree. `BY_CLASS` is species and animals held, and how many animals carry
+ * a microchip — birds and reptiles are chipped less because many are ringed
+ * or too small, which is why the rate is shown per class and not as one
+ * number. `REHAB` is the rescue pipeline as stages, `WATCH` the compliance
+ * and record-keeping figures that make a site look bad in an inspection.
+ */
+const BY_CLASS = [
+  { key: 'aves',    label: 'Aves',     species: 48, animals: 1497, chipped: 812  },
+  { key: 'mammal',  label: 'Mammals',  species: 31, animals: 2138, chipped: 1843 },
+  { key: 'reptile', label: 'Reptiles', species: 22, animals: 201,  chipped: 156  },
+  { key: 'other',   label: 'Others',   species: 6,  animals: 61,   chipped: 4    },
+];
+
+/* the rescue and rehabilitation pipeline, this month; `prev` is last month
+   for the flows that have a rate */
+const REHAB = [
+  { key: 'received',   label: 'Rescues received',   note: 'this month',                       n: 14, prev: 12 },
+  { key: 'quarantine', label: 'In quarantine',      note: 'awaiting clearance',               n: 9 },
+  { key: 'rehab',      label: 'In rehabilitation',  note: 'under treatment or conditioning',  n: 23 },
+  { key: 'fit',        label: 'Fit for release',    note: 'awaiting release order',           n: 4 },
+  { key: 'released',   label: 'Released',           note: 'this month',                       n: 6,  prev: 9 },
+  { key: 'died',       label: 'Died in care',       note: 'this month',                       n: 2,  prev: 3 },
+];
+
+/* what an inspector asks for; `due` marks the ones with a clock on them */
+const WATCH = [
+  { key: 'sched1',   label: 'Schedule I animals',          note: 'Wild Life (Protection) Act', n: 312 },
+  { key: 'cites1',   label: 'CITES Appendix I species',    note: 'held on site',               n: 41 },
+  { key: 'noid',     label: 'Animals without an ID',       note: 'no chip, ring or tag',       n: 37, due: true },
+  { key: 'pm',       label: 'Post-mortems pending',        note: 'deaths without a report',    n: 2,  due: true },
+  { key: 'permits',  label: 'Permits expiring',            note: 'within 30 days',             n: 3,  due: true },
+  { key: 'transfer', label: 'Transfers awaiting approval', note: 'CZA / CWLW',                 n: 2 },
+];
+
+__x.BY_CLASS = BY_CLASS;
+__x.REHAB = REHAB;
+__x.WATCH = WATCH;
 });
 
 __def('js/data/lifecycle.js', function (__x, __req) {
