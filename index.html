@@ -1817,6 +1817,8 @@ button { font: inherit; color: inherit; }
 .gsx-row__thumb[data-tint='4'] { background: var(--thumb-tint-4); }
 
 .gsx-row__body { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; flex: 1 0 0; }
+/* the matched letters: bold and nothing else, no highlighter yellow */
+.gsx-mark { background: transparent; color: inherit; font-weight: 700; }
 .gsx-row__title {
   font-size: var(--fs-body); font-weight: 600; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -19789,6 +19791,82 @@ function matches(rec, terms) {
   return true
 }
 
+/* ── RANKED MATCHING, V4 ─────────────────────────────────────────────────
+   Carried over from the compliance web's global search (src/lib/
+   global-search.ts), where it was worked out against a real species book.
+   The substring-AND above is kept for V1–V3, which return rows in fixture
+   order; `search()` ranks only when asked (`opts.rank`), so nothing about
+   the older versions' results moves.
+
+   WHAT A SCORE MEANS. 100 the whole label, 90 its start, 80 the start of a
+   word in it, 60 somewhere inside it, 55 every word of the query somewhere
+   in it in any order ("python rock"), 40 one slip forgiven on a word of four
+   letters or more ("pyhton"), 30 the old substring match across the other
+   fields. The title counts in full, the second line at nine tenths and the
+   metadata at seven, so "Lion" the animal outranks "Lion House" the
+   enclosure's metadata. Accents are folded so "Panthera" finds "Panthéra"
+   either way. */
+const normalise = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
+
+/* Damerau–Levenshtein, capped: enough to forgive one slip and stop counting */
+function distance(a, b, cap) {
+  if (Math.abs(a.length - b.length) > cap) return cap + 1
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j)
+  let cur = new Array(b.length + 1)
+  for (let i = 1; i <= a.length; i++) {
+    cur[0] = i
+    let rowMin = i
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost)
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) cur[j] = Math.min(cur[j], prev[j - 1])
+      rowMin = Math.min(rowMin, cur[j])
+    }
+    if (rowMin > cap) return cap + 1
+    ;[prev, cur] = [cur, prev]
+  }
+  return prev[b.length]
+}
+
+/* how well `text` answers `query`, and where in it — `range` is the matched
+   letters for highlighting, null when the match was fuzzy or spread out */
+function scoreText(text, query) {
+  const t = normalise(text)
+  const q = normalise(query)
+  if (!t || !q) return { score: 0, range: null }
+  if (t === q) return { score: 100, range: [0, text.length] }
+  const at = t.indexOf(q)
+  if (at === 0) return { score: 90, range: [0, q.length] }
+  if (at > 0 && t[at - 1] === ' ') return { score: 80, range: [at, at + q.length] }
+  if (at > 0) return { score: 60, range: [at, at + q.length] }
+  const words = q.split(' ')
+  if (words.length > 1 && words.every((w) => t.includes(w))) return { score: 55, range: null }
+  if (q.length >= 4 && words.length === 1) {
+    for (const w of t.split(' ')) {
+      if (distance(w, q, 1) <= 1) return { score: 40, range: null }
+      if (w.length > q.length && distance(w.slice(0, q.length), q, 1) <= 1) return { score: 35, range: null }
+    }
+  }
+  return { score: 0, range: null }
+}
+
+/* the record's best answer across its fields; the title's range is the only
+   one worth highlighting, since only the title is drawn in full */
+function rank(rec, query, terms) {
+  const parts = [
+    { ...scoreText(rec.title, query), weight: 1, own: true },
+    { ...scoreText(rec.sub, query), weight: .9 },
+    ...(rec.meta || []).map((m) => ({ ...scoreText(m, query), weight: .7 })),
+  ]
+  let top = { score: 0, range: null }
+  for (const p of parts) {
+    const score = p.score * p.weight
+    if (score > top.score) top = { score, range: p.own ? p.range : null }
+  }
+  if (!top.score && matches(rec, terms)) top = { score: 30, range: null }
+  return top
+}
+
 /* A row is in scope if it belongs to the Site being looked at. Rows with no
    Site - species aggregates, modules - are always in scope; they are not
    anywhere in particular. */
@@ -19803,6 +19881,7 @@ function inScope(rec, scope) {
  * @param opts   type   one of TYPES.key, or null for everything
  *               scope  { siteId } or null for all Sites
  *               cap    rows per group before "See all"
+ *               rank   score and order the rows (V4); rows then carry `range`
  * @returns [{ key, label, total, rows }] in GROUP_ORDER, empty groups dropped
  */
 function search(query, opts) {
@@ -19826,11 +19905,18 @@ function search(query, opts) {
        Quarantine means the animals that are both, which is the only reading
        that makes adding a second tag narrow the list rather than widen it. */
     if (tags && !(rec.tags && tags.every((t) => rec.tags.includes(t)))) continue
-    if (terms.length && !matches(rec, terms)) continue
+    let hit = rec
+    if (o.rank && terms.length) {
+      const r = rank(rec, query, terms)
+      if (!r.score) continue
+      /* a copy, so the shared index never carries one query's score */
+      hit = Object.assign(Object.create(rec), { score: r.score, range: r.range })
+    } else if (terms.length && !matches(rec, terms)) continue
     let b = buckets.get(rec.type)
     if (!b) { b = []; buckets.set(rec.type, b) }
-    b.push(rec)
+    b.push(hit)
   }
+  if (o.rank) for (const b of buckets.values()) b.sort((a, c) => c.score - a.score || String(a.title).localeCompare(String(c.title)))
 
   const out = []
   for (const key of GROUP_ORDER) {
@@ -19843,6 +19929,21 @@ function search(query, opts) {
       total: rows.length,
       rows: cap ? rows.slice(0, cap) : rows,
     })
+  }
+  return out
+}
+
+/* Names to suggest in the search hint: animals and species, spaced through
+   the index rather than taken off its top, since the top is all one Site. Short
+   ones only — the hint has a field's width, not a line's — and names, not
+   codes: "Saanvi" tells a reader what the box finds where "CAR-01" does not. */
+function examples(count) {
+  const named = index().filter((r) => (r.type === 'animal' || r.type === 'species') && /^[A-Za-z][A-Za-z -]{1,17}$/.test(String(r.title)))
+  if (!named.length) return []
+  const step = Math.max(1, Math.floor(named.length / count))
+  const out = []
+  for (let i = 0; i < named.length && out.length < count; i += step) {
+    if (!out.includes(named[i].title)) out.push(named[i].title)
   }
   return out
 }
@@ -19930,6 +20031,7 @@ function tagsFor(id) {
   __x.tagsFor = tagsFor;
   __x.search = search;
   __x.index = index;
+  __x.examples = examples;
 });
 
 __def('js/data/domainDetail.js', function (__x, __req) {
@@ -29762,6 +29864,7 @@ __def('js/components/GlobalSearch.js', function (__x, __req) {
 const { icon } = __req('js/icons.js');
 const { TYPES, TAGS, search } = __req('js/data/searchIndex.js');
 const { prefersReducedMotion } = __req('js/lib/motion.js');
+const { isV4 } = __req('js/lib/pageVersion.js');
 
 const RECENT_KEY = 'antz.search.recent'
 const RECENT_MAX = 8
@@ -29771,6 +29874,15 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ))
+}
+
+/* the matched letters in bold, as the compliance search draws them — V4's
+   ranked rows carry `range`; the older versions' rows never do, so their
+   titles come out exactly as before */
+function highlight(text, range) {
+  const t = String(text == null ? '' : text)
+  if (!range || range[1] <= range[0]) return esc(t)
+  return esc(t.slice(0, range[0])) + '<mark class="gsx-mark">' + esc(t.slice(range[0], range[1])) + '</mark>' + esc(t.slice(range[1]))
 }
 
 function readRecent() {
@@ -30166,7 +30278,7 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
     return '<button type="button" class="gsx-row" role="option" aria-selected="false" data-i="' + i + '">' +
       thumb(rec) +
       '<span class="gsx-row__body">' +
-        '<span class="gsx-row__title">' + esc(rec.title) + '</span>' +
+        '<span class="gsx-row__title">' + highlight(rec.title, rec.range) + '</span>' +
         sub + meta + pills(rec.pills) + tags +
       '</span>' + right +
     '</button>'
@@ -30215,7 +30327,7 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
       return
     }
 
-    const groups = search(q, { type: token ? token.key : null, scope, tags: picked, cap: CAP })
+    const groups = search(q, { type: token ? token.key : null, scope, tags: picked, cap: CAP, rank: isV4() })
     flat = []
     for (const g of groups) for (const r of g.rows) flat.push(r)
     cursor = flat.length ? 0 : -1
@@ -30405,6 +30517,16 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
    */
   input.readOnly = true
   trigger.addEventListener('click', (e) => { e.preventDefault(); show() })
+  /* ⌘K / Ctrl+K opens the search from anywhere on V4, as it does on every
+     page of the compliance web; pressed again while it is open, it closes.
+     Not bound on the older versions, whose keyboard is the artboard's. */
+  if (isV4()) {
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() !== 'k' || !(e.metaKey || e.ctrlKey) || e.altKey) return
+      e.preventDefault()
+      if (open) hide(); else show()
+    })
+  }
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return
     e.preventDefault()
@@ -33451,7 +33573,14 @@ const searchHint = createSearchHint({
   prefix: 'Search',
   words() {
     const st = viewStore.get()
-    return st.view === 'site' ? SEARCH_WORDS[st.level] || SEARCH_WORDS.site : SEARCH_WORDS.modules
+    const cats = st.view === 'site' ? SEARCH_WORDS[st.level] || SEARCH_WORDS.site : SEARCH_WORDS.modules
+    /* V4 cycles real names through the hint between the categories —
+       "Blackbuck", "Lion House 2" — so the field says what it can find and
+       what to type, which a category alone does not (the compliance web's
+       search-hints.ts, whose examples are lifted from its own sheet) */
+    if (!isV4()) return cats
+    const ex = __req('js/data/searchIndex.js').examples(6)
+    return cats.flatMap((c, i) => (ex[i] ? [c, ex[i]] : [c]))
   },
 })
 
