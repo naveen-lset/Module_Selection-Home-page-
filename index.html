@@ -3177,6 +3177,11 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-table tbody th { color: var(--ink-head); }
 .life-table td { font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink); }
 .life-table td.is-zero { color: var(--ink-mute); }
+/* a flagged figure — a late count, a reading out of range — is coral, and
+   the row's own words say why */
+.life-table td.is-flag { color: var(--c-tertiary); font-weight: 600; }
+.life-row__val.is-late b { color: var(--c-tertiary); }
+.life-table tbody th small { display: block; font-size: var(--fs-micro); font-weight: 400; color: var(--ink-mute); }
 .life-table tfoot tr { border-top: 1px solid rgba(31, 65, 91, .12); }
 /* the share sits under its figure in the micro size, muted, so the count
    stays the thing read first and the rate is there for the one comparing */
@@ -11156,6 +11161,19 @@ body.is-editing .qa-chat { display: none; }
     <section class="life-band care-band" id="husbandry" aria-labelledby="husbandryTitle" hidden>
       <div class="obs-head">
         <h2 class="obs-head__title" id="husbandryTitle">Husbandry</h2>
+      </div>
+      <div class="care-counts"></div>
+      <div class="life-grid life-grid--2"></div>
+    </section>
+
+    <!-- ══ operations (V4) ══════════════════════════════════════════════
+         Transfers within and between sites, the lab's open requests and
+         turnaround, and the enclosure climate. Rendered by
+         js/components/Operations.js from js/data/operations.js. Empty and
+         hidden on every version but 4. -->
+    <section class="life-band care-band" id="operations" aria-labelledby="operationsTitle" hidden>
+      <div class="obs-head">
+        <h2 class="obs-head__title" id="operationsTitle">Operations</h2>
       </div>
       <div class="care-counts"></div>
       <div class="life-grid life-grid--2"></div>
@@ -31499,24 +31517,36 @@ function figureList({ title, span, aria, colHead, rows }) {
   return el
 }
 
-/* kinds down the side, classes across, All at the end; `rows` carry a `head`
-   and an `n` keyed by class plus `all`; `foot` is an optional last row */
-function classTable({ title, span, aria, corner = 'Kind', rows, foot }) {
-  const cell = (v, cls = '') => `<td class="${cls}${v === 0 ? ' is-zero' : ''}">${fmt(v)}</td>`
-  const line = (r, cls = '') => `<tr><th scope="row">${esc(r.head)}</th>` +
-    CLASSES.map((c) => cell(r.n[c.key], cls)).join('') + cell(r.n.all, cls) + `</tr>`
+/* headings down the side, `cols` across; `rows` carry a `head` and an `n`
+   keyed by column; `foot` is an optional last row. A column may carry a
+   `cls` for its head (the class colours) and a `fmt` for its cells (a
+   percentage, a day count) — a number is written plain otherwise. */
+function matrixTable({ title, span, aria, corner, cols, rows, foot, wide = false }) {
+  const cell = (c, v) => {
+    if (v == null) return `<td class="is-zero">–</td>`
+    const text = c.fmt ? c.fmt(v) : fmt(v)
+    return `<td class="${v === 0 ? 'is-zero' : ''}${c.flag && c.flag(v) ? ' is-flag' : ''}">${text}</td>`
+  }
+  const line = (r) => `<tr><th scope="row">${esc(r.head)}${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</th>` +
+    cols.map((c) => cell(c, r.n[c.key])).join('') + `</tr>`
   const el = document.createElement('section')
   el.className = 'life-card life-card--table'
   el.setAttribute('aria-label', aria)
   el.innerHTML =
     `<h3 class="life-card__title">${title} <span class="life-card__span">· ${span}</span></h3>` +
-    `<table class="life-table"><thead><tr><th scope="col">${esc(corner)}</th>` +
-      CLASSES.map((c) => `<th scope="col" class="is-${c.key}"><abbr title="${c.label}">${c.short}</abbr></th>`).join('') +
-      `<th scope="col">All</th></tr></thead>` +
-    `<tbody>${rows.map((r) => line(r)).join('')}</tbody>` +
+    `<table class="life-table${wide ? ' life-table--wide' : ''}"><thead><tr><th scope="col">${esc(corner)}</th>` +
+      cols.map((c) => `<th scope="col"${c.cls ? ` class="${c.cls}"` : ''}>${c.short ? `<abbr title="${esc(c.label)}">${esc(c.short)}</abbr>` : esc(c.label)}</th>`).join('') +
+      `</tr></thead>` +
+    `<tbody>${rows.map(line).join('')}</tbody>` +
     (foot ? `<tfoot>${line(foot)}</tfoot>` : '') +
     `</table>`
   return el
+}
+
+/* kinds down the side, the four classes and All across */
+function classTable({ title, span, aria, corner = 'Kind', rows, foot }) {
+  const cols = [...CLASSES.map((c) => ({ key: c.key, label: c.label, short: c.short, cls: `is-${c.key}` })), { key: 'all', label: 'All' }]
+  return matrixTable({ title, span, aria, corner, cols, rows, foot })
 }
 
 __x.esc = esc
@@ -31524,6 +31554,7 @@ __x.fmt = fmt
 __x.listCard = listCard
 __x.figureList = figureList
 __x.classTable = classTable
+__x.matrixTable = matrixTable
 });
 
 __def('js/components/AnimalCare.js', function (__x, __req) {
@@ -31863,6 +31894,187 @@ function mount({ root } = {}) {
   const grid = root.querySelector('.life-grid')
   grid.appendChild(dietCard())
   grid.appendChild(eggsCard())
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+});
+
+__def('js/components/Operations.js', function (__x, __req) {
+/**
+ * OPERATIONS — transfers, the lab, and the enclosure climate, on V4
+ * ───────────────────────────────────────────────────────────────────────────
+ * Three asks in one band (owner, 18 Sep 2026), each a list and a table:
+ *
+ *   TRANSFERS   every movement in the last 30 days, the chips splitting
+ *               within-site from between-sites, and beside it the split by
+ *               the specialist who signed — which is how the owner asked
+ *               for it ("intra-site and inter-site breakup with specialist").
+ *   LAB         the open requests by discipline, each saying which day of
+ *               its target turnaround it is on and coral once past it, and
+ *               beside it the turnaround table: open, late, done in 30 days,
+ *               average days against target.
+ *   CLIMATE     every monitored enclosure's temperature and humidity now
+ *               against its range, the out-of-range ones first and coral,
+ *               and beside it the last 24 hours' extremes.
+ *
+ * Four counts over the lot. Everything is counted from js/data/operations.js.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
+const { esc, fmt, listCard, matrixTable } = __req('js/components/LifePanel.js')
+
+const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
+const disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k)
+const outOfRange = (c) => c.temp < c.tempRange[0] || c.temp > c.tempRange[1] || c.rh < c.rhRange[0] || c.rh > c.rhRange[1]
+
+function countTiles() {
+  const moved = TRANSFERS.reduce((n, t) => n + t.animals, 0)
+  const open = LAB.filter((r) => r.done == null)
+  const late = open.filter((r) => r.ago > disc(r.discipline).target)
+  const out = CLIMATE.filter(outOfRange)
+  const tiles = [
+    { key: 'transfers', label: 'Transfers',           n: TRANSFERS.length, note: `${fmt(moved)} animals moved, last 30 days` },
+    { key: 'lab',       label: 'Lab requests open',   n: open.length,      note: `${late.length} past turnaround` },
+    { key: 'late',      label: 'Lab reports late',    n: late.length,      note: late.length ? 'oldest ' + agoWord(Math.max(...late.map((r) => r.ago))) : 'all within target' },
+    { key: 'climate',   label: 'Enclosures out of range', n: out.length,   note: out.length ? out.map((c) => c.enclosure).slice(0, 2).join(', ') + (out.length > 2 ? '…' : '') : 'all within range' },
+  ]
+  return tiles.map((t) =>
+    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
+      `<span class="care-count__label">${t.label}</span>` +
+      `<span class="care-count__n">${fmt(t.n)}</span>` +
+      `<span class="care-count__note">${esc(t.note)}</span>` +
+    `</section>`).join('')
+}
+
+function transfersCard() {
+  const rows = [...TRANSFERS].sort((a, b) => a.ago - b.ago)
+  return listCard({
+    title: 'Transfers', span: 'last 30 days', aria: 'Transfers, last 30 days',
+    colHead: ['Movement', 'Animals'], rows, open: 'all',
+    chips: [
+      { key: 'all',   label: 'All',           test: () => true },
+      { key: 'intra', label: 'Within site',   test: (t) => t.within },
+      { key: 'inter', label: 'Between sites', test: (t) => !t.within },
+    ],
+    row: (t, i) =>
+      `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(t.species)}</span>` +
+        `<span class="life-row__sub">${esc(t.from)} → ${esc(t.to)} · ${esc(t.specialist)} · ${agoWord(t.ago)}</span></span>` +
+      `<span class="life-row__val"><b>${fmt(t.animals)}</b><span class="life-row__note">${t.within ? 'within site' : 'between sites'}</span></span>`,
+    empty: 'No transfers',
+  })
+}
+
+function transfersBySpecialist() {
+  const names = [...new Set(TRANSFERS.map((t) => t.specialist))]
+  const tally = (test) => {
+    const n = { intra: 0, inter: 0, all: 0, animals: 0 }
+    for (const t of TRANSFERS) if (test(t)) { n[t.within ? 'intra' : 'inter'] += 1; n.all += 1; n.animals += t.animals }
+    return n
+  }
+  const rows = names.map((name) => ({ head: name, n: tally((t) => t.specialist === name) })).sort((a, b) => b.n.all - a.n.all)
+  return matrixTable({
+    title: 'By specialist', span: 'transfers signed', aria: 'Transfers by specialist',
+    corner: 'Specialist',
+    cols: [{ key: 'intra', label: 'Within' }, { key: 'inter', label: 'Between' }, { key: 'all', label: 'All' }, { key: 'animals', label: 'Animals' }],
+    rows, foot: { head: 'Total', n: tally(() => true) },
+  })
+}
+
+function labCard() {
+  const rows = LAB.filter((r) => r.done == null).sort((a, b) => (b.ago - disc(b.discipline).target) - (a.ago - disc(a.discipline).target))
+  return listCard({
+    title: 'Lab requests', span: 'open', aria: 'Lab requests open',
+    colHead: ['Request', 'Day'], rows, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true },
+      ...LAB_DISCIPLINES.map((d) => ({ key: d.key, label: d.label, test: (r) => r.discipline === d.key }))],
+    row: (r, i) => {
+      const d = disc(r.discipline)
+      const late = r.ago > d.target
+      return `<span class="life-row__rank">${i + 1}</span>` +
+        `<span class="life-row__who"><span class="life-row__name">${esc(r.test)}</span>` +
+          `<span class="life-row__sub">${esc(d.label)} · ${esc(r.species)} · ${esc(r.by)}</span></span>` +
+        `<span class="life-row__val${late ? ' is-late' : ''}"><b>${r.ago} of ${d.target}</b>` +
+          `<span class="life-row__note">${late ? `${r.ago - d.target} day${r.ago - d.target === 1 ? '' : 's'} late` : 'within target'}</span></span>`
+    },
+    empty: 'Nothing open',
+  })
+}
+
+function labTurnaround() {
+  const rows = LAB_DISCIPLINES.map((d) => {
+    const mine = LAB.filter((r) => r.discipline === d.key)
+    const open = mine.filter((r) => r.done == null)
+    const done = mine.filter((r) => r.done != null)
+    const avg = done.length ? done.reduce((n, r) => n + r.done, 0) / done.length : null
+    return { head: d.label, n: { open: open.length, late: open.filter((r) => r.ago > d.target).length, done: done.length, avg, target: d.target } }
+  })
+  const days = (v) => `${Number.isInteger(v) ? v : v.toFixed(1)} d`
+  return matrixTable({
+    title: 'Turnaround', span: 'by discipline', aria: 'Lab turnaround by discipline',
+    corner: 'Discipline',
+    cols: [
+      { key: 'open',   label: 'Open' },
+      { key: 'late',   label: 'Late', flag: (v) => v > 0 },
+      { key: 'done',   label: 'Done', short: 'Done' },
+      { key: 'avg',    label: 'Average days', short: 'Avg', fmt: days },
+      { key: 'target', label: 'Target days',  short: 'Target', fmt: days },
+    ],
+    rows,
+  })
+}
+
+function climateCard() {
+  const rows = [...CLIMATE].sort((a, b) => outOfRange(b) - outOfRange(a) || a.enclosure.localeCompare(b.enclosure))
+  const range = (r) => `${r[0]}–${r[1]}`
+  return listCard({
+    title: 'Climate', span: 'now', aria: 'Enclosure climate now',
+    colHead: ['Enclosure', 'Now'], rows, open: 'all',
+    chips: [
+      { key: 'all', label: 'All',          test: () => true },
+      { key: 'out', label: 'Out of range', test: outOfRange },
+      { key: 'in',  label: 'In range',     test: (c) => !outOfRange(c) },
+    ],
+    row: (c, i) => {
+      const out = outOfRange(c)
+      return `<span class="life-row__rank">${i + 1}</span>` +
+        `<span class="life-row__who"><span class="life-row__name">${esc(c.enclosure)}</span>` +
+          `<span class="life-row__sub">${esc(c.species)} · target ${range(c.tempRange)}°C · ${range(c.rhRange)}% RH</span></span>` +
+        `<span class="life-row__val${out ? ' is-late' : ''}"><b>${c.temp.toFixed(1)}°C</b>` +
+          `<span class="life-row__note">${c.rh}% RH${out ? ' · out of range' : ''}</span></span>`
+    },
+    empty: 'No sensors reporting',
+  })
+}
+
+function climateExtremes() {
+  const rows = CLIMATE.map((c) => ({ head: c.enclosure, n: { tmin: c.min[0], tmax: c.min[1], hmin: c.rhMin[0], hmax: c.rhMin[1] },
+    _out: c.min[0] < c.tempRange[0] || c.min[1] > c.tempRange[1] || c.rhMin[0] < c.rhRange[0] || c.rhMin[1] > c.rhRange[1] }))
+  return matrixTable({
+    title: 'Climate', span: 'last 24 hours', aria: 'Enclosure climate extremes, last 24 hours',
+    corner: 'Enclosure',
+    cols: [
+      { key: 'tmin', label: 'Minimum °C', short: 'Min °C', fmt: (v) => v.toFixed(1) },
+      { key: 'tmax', label: 'Maximum °C', short: 'Max °C', fmt: (v) => v.toFixed(1) },
+      { key: 'hmin', label: 'Minimum humidity', short: 'Min %', fmt: (v) => String(v) },
+      { key: 'hmax', label: 'Maximum humidity', short: 'Max %', fmt: (v) => String(v) },
+    ],
+    rows,
+  })
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = countTiles()
+  const grid = root.querySelector('.life-grid')
+  grid.appendChild(transfersCard())
+  grid.appendChild(transfersBySpecialist())
+  grid.appendChild(labCard())
+  grid.appendChild(labTurnaround())
+  grid.appendChild(climateCard())
+  grid.appendChild(climateExtremes())
   root.hidden = false
   return root
 }
@@ -32719,6 +32931,7 @@ if (PAGE_VERSION === '1' || isV4()) {
   __req('js/components/CircleOfLife.js').mount({ root: document.getElementById('circleOfLife') })
   __req('js/components/AnimalCare.js').mount({ root: document.getElementById('animalCare') })
   __req('js/components/Husbandry.js').mount({ root: document.getElementById('husbandry') })
+  __req('js/components/Operations.js').mount({ root: document.getElementById('operations') })
   __req('js/components/Collection.js').mount({ root: document.getElementById('collection') })
 }
 
@@ -34971,6 +35184,87 @@ const CLUTCHES = [
 __x.DIET_CHANGES = DIET_CHANGES;
 __x.DIET_REASONS = DIET_REASONS;
 __x.CLUTCHES = CLUTCHES;
+});
+
+__def('js/data/operations.js', function (__x, __req) {
+/**
+ * OPERATIONS — transfers, the lab, and the enclosure climate
+ * ───────────────────────────────────────────────────────────────────────────
+ * The seed behind the Operations band (owner, 18 Sep 2026). Rows, as with
+ * every seed on V4, `ago` in days:
+ *
+ *   TRANSFERS   one row per movement of animals, `within` true when both
+ *               enclosures are on this site (intra-site) and false when the
+ *               animals came from or went to another site (inter-site); the
+ *               `specialist` is the vet or curator who signed the movement.
+ *   LAB         one row per request to the lab, by discipline, with the
+ *               days it has been open or took, and the discipline's target
+ *               turnaround; a row with `done` set is finished.
+ *   CLIMATE     one row per monitored enclosure: the reading now, the
+ *               species' range, and the last 24 hours' extremes.
+ */
+const TRANSFERS = [
+  { species: 'Blackbuck',          animals: 6, from: 'Hoofstock Barn',   to: 'Deer Paddock',        within: true,  specialist: 'Dr. Meera Nair', ago: 0  },
+  { species: 'Asiatic lion',       animals: 1, from: 'Lion House 2',     to: 'Hospital',            within: true,  specialist: 'Dr. Meera Nair', ago: 1  },
+  { species: 'Sarus crane',        animals: 2, from: 'Wetland Aviary',   to: 'KWT · Wetland 1',    within: false, specialist: 'Dr. Arjun Rao',  ago: 2  },
+  { species: 'Bonnet macaque',     animals: 4, from: 'Quarantine',       to: 'Primate Island',      within: true,  specialist: 'Dr. Arjun Rao',  ago: 3  },
+  { species: 'Indian rock python', animals: 1, from: 'RKT · Reptile 2',  to: 'Reptile House',       within: false, specialist: 'S. Menon (curator)', ago: 5 },
+  { species: 'Chital',             animals: 12,from: 'Deer Paddock',     to: 'Wetland Paddock',     within: true,  specialist: 'S. Menon (curator)', ago: 6 },
+  { species: 'Cinereous vulture',  animals: 1, from: 'Hospital',         to: 'Aviary 1',            within: true,  specialist: 'Dr. Meera Nair', ago: 8  },
+  { species: 'Gaur',               animals: 2, from: 'GZRRC · Bovid 3',  to: 'Hoofstock Barn',      within: false, specialist: 'Dr. Meera Nair', ago: 11 },
+  { species: 'Indian peafowl',     animals: 8, from: 'Aviary 3',         to: 'Aviary 2',            within: true,  specialist: 'S. Menon (curator)', ago: 14 },
+  { species: 'Sloth bear',         animals: 1, from: 'Bear Dell',        to: 'KWT · Bear 1',       within: false, specialist: 'Dr. Arjun Rao',  ago: 19 },
+  { species: 'Hill myna',          animals: 3, from: 'Quarantine',       to: 'Aviary 3',            within: true,  specialist: 'Dr. Arjun Rao',  ago: 24 },
+  { species: 'Barasingha',         animals: 3, from: 'GZRRC · Deer 1',   to: 'Wetland Paddock',     within: false, specialist: 'S. Menon (curator)', ago: 27 },
+];
+
+const LAB_DISCIPLINES = [
+  { key: 'pathology',    label: 'Pathology',    target: 3 },
+  { key: 'biochemistry', label: 'Biochemistry', target: 2 },
+  { key: 'toxicology',   label: 'Toxicology',   target: 7 },
+  { key: 'microbiology', label: 'Microbiology', target: 5 },
+];
+const LAB = [
+  { discipline: 'pathology',    test: 'Histopathology, liver',     species: 'Asiatic lion',        by: 'Dr. Meera Nair', ago: 5 },
+  { discipline: 'pathology',    test: 'Post-mortem, full',         species: 'Chital',              by: 'Dr. Arjun Rao',  ago: 2 },
+  { discipline: 'pathology',    test: 'Cytology, mass',            species: 'Sloth bear',          by: 'Dr. Meera Nair', ago: 1 },
+  { discipline: 'biochemistry', test: 'Serum panel',               species: 'Cinereous vulture',   by: 'Dr. Meera Nair', ago: 3 },
+  { discipline: 'biochemistry', test: 'Renal panel',               species: 'Barasingha',          by: 'Dr. Arjun Rao',  ago: 0 },
+  { discipline: 'biochemistry', test: 'Liver enzymes',             species: 'Indian peafowl',      by: 'Dr. Arjun Rao',  ago: 1 },
+  { discipline: 'toxicology',   test: 'Heavy metals screen',       species: 'Indian star tortoise',by: 'Dr. Arjun Rao',  ago: 9 },
+  { discipline: 'toxicology',   test: 'Pesticide residue',         species: 'Black kite',          by: 'Dr. Meera Nair', ago: 4 },
+  { discipline: 'microbiology', test: 'Culture and sensitivity',   species: 'Blackbuck',           by: 'Dr. Meera Nair', ago: 6 },
+  { discipline: 'microbiology', test: 'Faecal culture',            species: 'Bonnet macaque',      by: 'Dr. Arjun Rao',  ago: 2 },
+  /* finished, for the turnaround figures: `done` is the days it took */
+  { discipline: 'pathology',    test: 'Histopathology, skin',      species: 'Indian leopard',      by: 'Dr. Meera Nair', ago: 12, done: 4 },
+  { discipline: 'pathology',    test: 'Post-mortem, full',         species: 'Nilgai',              by: 'Dr. Arjun Rao',  ago: 15, done: 2 },
+  { discipline: 'pathology',    test: 'Cytology, fluid',           species: 'Gaur',                by: 'Dr. Arjun Rao',  ago: 20, done: 3 },
+  { discipline: 'biochemistry', test: 'Serum panel',               species: 'Sambar',              by: 'Dr. Meera Nair', ago: 8,  done: 1 },
+  { discipline: 'biochemistry', test: 'Serum panel',               species: 'Chital',              by: 'Dr. Arjun Rao',  ago: 10, done: 2 },
+  { discipline: 'biochemistry', test: 'Glucose curve',             species: 'Bonnet macaque',      by: 'Dr. Arjun Rao',  ago: 17, done: 3 },
+  { discipline: 'toxicology',   test: 'Rodenticide screen',        species: 'Barn owl',            by: 'Dr. Meera Nair', ago: 22, done: 9 },
+  { discipline: 'toxicology',   test: 'Heavy metals screen',       species: 'Mallard',             by: 'Dr. Arjun Rao',  ago: 28, done: 6 },
+  { discipline: 'microbiology', test: 'Culture and sensitivity',   species: 'Asiatic lion',        by: 'Dr. Meera Nair', ago: 9,  done: 4 },
+  { discipline: 'microbiology', test: 'Faecal culture',            species: 'Sarus crane',         by: 'Dr. Arjun Rao',  ago: 25, done: 7 },
+];
+
+const CLIMATE = [
+  { enclosure: 'Reptile House',   species: 'Indian star tortoise', temp: 29.4, rh: 61, tempRange: [26, 32], rhRange: [50, 70], min: [24.8, 31.2], rhMin: [48, 74] },
+  { enclosure: 'Python Room',     species: 'Indian rock python',   temp: 33.1, rh: 58, tempRange: [27, 32], rhRange: [55, 75], min: [27.9, 33.6], rhMin: [52, 66] },
+  { enclosure: 'Incubator 1',     species: 'Eggs · aves',         temp: 37.4, rh: 55, tempRange: [37.2, 37.8], rhRange: [50, 60], min: [37.1, 37.6], rhMin: [53, 58] },
+  { enclosure: 'Incubator 2',     species: 'Eggs · reptile',      temp: 30.2, rh: 88, tempRange: [29, 31], rhRange: [80, 90], min: [29.6, 30.4], rhMin: [84, 91] },
+  { enclosure: 'Night Aviary',    species: 'Barn owl',             temp: 24.1, rh: 66, tempRange: [18, 28], rhRange: [40, 70], min: [21.0, 27.3], rhMin: [58, 72] },
+  { enclosure: 'Lion House 2',    species: 'Asiatic lion',         temp: 27.8, rh: 47, tempRange: [18, 32], rhRange: [30, 70], min: [23.4, 31.9], rhMin: [41, 63] },
+  { enclosure: 'Primate Island',  species: 'Bonnet macaque',       temp: 30.6, rh: 72, tempRange: [18, 34], rhRange: [40, 80], min: [25.1, 33.2], rhMin: [55, 81] },
+  { enclosure: 'Hospital, ICU',   species: 'In-patients',          temp: 24.9, rh: 52, tempRange: [22, 26], rhRange: [45, 60], min: [24.2, 25.6], rhMin: [50, 56] },
+  { enclosure: 'Quarantine',      species: 'New arrivals',         temp: 26.3, rh: 63, tempRange: [22, 30], rhRange: [40, 70], min: [24.0, 29.1], rhMin: [55, 69] },
+  { enclosure: 'Bear Dell',       species: 'Sloth bear',           temp: 31.7, rh: 44, tempRange: [15, 30], rhRange: [30, 70], min: [24.6, 32.8], rhMin: [38, 60] },
+];
+
+__x.TRANSFERS = TRANSFERS;
+__x.LAB_DISCIPLINES = LAB_DISCIPLINES;
+__x.LAB = LAB;
+__x.CLIMATE = CLIMATE;
 });
 
 __def('js/data/lifecycle.js', function (__x, __req) {
