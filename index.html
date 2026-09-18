@@ -3192,6 +3192,85 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-table--share tfoot td { font-size: var(--fs-label); }
 .life-table tfoot th, .life-table tfoot td { font-weight: 700; color: var(--ink); }
 
+/* ── THE REPORT PAGE ── V4, a report's detail over the home
+   The search page's surface — fixed, full, its own bar with the back arrow
+   — on the home's wash rather than white, since what it holds is panels on
+   a wash, as the home is. */
+.rpage {
+  position: fixed; inset: 0;
+  z-index: calc(var(--z-sheet) - 2);
+  display: flex; flex-direction: column;
+  background: var(--page-bg, #DFF5F3);
+  opacity: 0; transform: translateY(8px);
+  transition: opacity var(--t-menu) var(--ease-out), transform var(--t-menu) var(--ease-out);
+}
+.rpage.is-open { opacity: 1; transform: none; }
+.rpage[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .rpage { transition: none; opacity: 1; transform: none; } }
+body.is-report { overflow: hidden; }
+.rpage__bar {
+  flex: none; display: flex; align-items: center; gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) var(--pad-page) 12px;
+  background: rgba(223, 245, 243, .92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(31, 65, 91, .08);
+}
+.rpage__back {
+  display: grid; place-items: center; width: 44px; height: 44px; flex: none;
+  border: 0; padding: 0; border-radius: var(--r-pill); background: var(--c-white); box-shadow: var(--shadow-card);
+  color: var(--ink); cursor: pointer;
+}
+.rpage__back .icon { width: 22px; height: 22px; }
+.rpage__title { flex: 1 1 auto; margin: 0; font-size: 24px; font-weight: 500; line-height: 29px; color: var(--c-on-surface-var); outline: none; }
+.rpage__scope { flex: none; font-size: var(--fs-label); font-weight: 600; color: var(--c-action-ink); }
+.rpage__body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--pad-page) 48px; }
+.rpage__report { max-width: 1280px; margin: 0 auto; }
+
+/* ── THE REPORTS BAND ── V4, Today and the cards on the home */
+.scope-wrap { flex: none; }
+.scope {
+  height: 36px; padding: 0 36px 0 14px; border: 0; border-radius: var(--r-pill);
+  background: var(--c-white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231F415B' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  box-shadow: var(--shadow-card); appearance: none; -webkit-appearance: none;
+  font: inherit; font-size: var(--fs-label); font-weight: 600; color: var(--ink); cursor: pointer;
+}
+.today { margin: 8px 0 20px; padding: 18px 22px 8px; border-radius: 20px; background: var(--c-white); box-shadow: var(--shadow-card); }
+.today__head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+.today__title { margin: 0; font-size: 20px; font-weight: 600; color: var(--ink); }
+.today__head .life-chips { margin: 0; flex: 1 1 auto; min-width: 0; }
+.today__list { list-style: none; margin: 0; padding: 0; }
+.today__row {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 52px; padding: 8px 4px;
+  border: 0; border-top: 1px solid rgba(31, 65, 91, .08); background: none; text-align: left;
+  font: inherit; color: var(--ink); cursor: pointer;
+}
+.today__row:hover { background: rgba(0, 109, 53, .04); }
+.today__n { flex: none; min-width: 40px; font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; color: var(--ink); text-align: center; }
+.today__row.is-due .today__n { color: var(--c-tertiary); }
+.today__text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-body); font-weight: 500; }
+.today__text small { font-size: var(--fs-micro); font-weight: 400; color: var(--ink-mute); }
+.today__go { flex: none; color: var(--ink-mute); }
+.today__go .icon { width: 18px; height: 18px; }
+.today__none { margin: 8px 0 12px; color: var(--ink-mute); font-size: var(--fs-label); }
+.report-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.report-card {
+  display: flex; flex-direction: column; gap: 14px; min-height: 180px; padding: 18px 20px 14px;
+  border: 0; border-radius: 20px; background: var(--c-white); box-shadow: var(--shadow-card);
+  text-align: left; font: inherit; color: var(--ink); cursor: pointer;
+  transition: box-shadow var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+}
+@media (hover: hover) { .report-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); } }
+.report-card:focus-visible { outline: 2px solid var(--c-action-ink); outline-offset: 2px; }
+.report-card__head { display: flex; align-items: center; gap: 10px; }
+.report-card__head .icon { width: 22px; height: 22px; color: var(--c-secondary-dark); }
+.report-card__title { font-size: 18px; font-weight: 600; }
+.report-card__figs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.report-card__fig { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.report-card__fig b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1; }
+.report-card__fig small { font-size: var(--fs-micro); color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.report-card__foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--fs-micro); color: var(--ink-mute); }
+.report-card__go { color: var(--c-action-ink); display: inline-flex; }
+.report-card__go .icon { width: 18px; height: 18px; }
+
 /* ── MY SPECIES ── V4, the favourites rail under the search
    A title, a row of chips that scrolls sideways with no scrollbar, and Edit
    on the right. A chip is a white pill with the species' initial on a disc
@@ -11187,74 +11266,21 @@ body.is-editing .qa-chat { display: none; }
       <div class="obs-rail" id="obsRail" role="list"></div>
     </section>
 
-    <!-- ══ circle of life (V4) ═══════════════════════════════════════════
-         Births and deaths over the last ten days, in three white panels
-         drawn after the compliance dashboard's cards: two ranked species
-         lists with class chips, and a class-by-kind table. Rendered by
-         js/components/CircleOfLife.js from js/data/lifecycle.js — the same
-         events the week tiles in All Modules read, so the two never
-         disagree. Empty and hidden on every version but 4. -->
-    <section class="life-band" id="circleOfLife" aria-labelledby="lifeTitle" hidden>
-      <div class="obs-head">
-        <h2 class="obs-head__title" id="lifeTitle">Circle of Life</h2>
-      </div>
-      <div class="life-grid"></div>
-    </section>
-
-    <!-- ══ animal care (V4) ═════════════════════════════════════════════
-         The medical side of the same morning: four counts across the top
-         (in hospital, under medication, in maternity care, serious), then
-         the care overdue by species, the medicines the central pharmacy
-         still owes, and the enrichment tickets trend. Rendered by
-         js/components/AnimalCare.js from js/data/care.js; the panels share
-         the Circle of Life's styles so the two bands read as one report.
-         Empty and hidden on every version but 4. -->
-    <section class="life-band care-band" id="animalCare" aria-labelledby="careTitle" hidden>
-      <div class="obs-head">
-        <h2 class="obs-head__title" id="careTitle">Animal Care</h2>
-      </div>
-      <div class="care-counts"></div>
-      <div class="life-grid life-grid--2"></div>
-    </section>
-
-    <!-- ══ collection (V4) ══════════════════════════════════════════════
-         What the site holds and how well it is known: species and animals
-         by class with the microchipping rate, the rescue and rehabilitation
-         pipeline, and the compliance watch list a director asks about
-         first. Rendered by js/components/Collection.js from
-         js/data/collection.js. Empty and hidden on every version but 4. -->
-    <!-- ══ husbandry (V4) ═══════════════════════════════════════════════
-         The kitchen and the egg room: diet changes by species, and the
-         clutches laid, incubating and hatched. Rendered by
-         js/components/Husbandry.js from js/data/husbandry.js. Empty and
+    <!-- ══ reports (V4) ═════════════════════════════════════════════════
+         What needs doing today, and one card per report — Circle of Life,
+         Animal Care, Necropsy, Assessment, Husbandry, Operations, People,
+         Tasks, Collection. A card shows four figures and opens the report
+         as a page over the home (js/components/ReportPage.js), rendered
+         only then. The scope control in the head chooses which site the
+         figures speak for. Rendered by js/components/Reports.js. Empty and
          hidden on every version but 4. -->
-    <section class="life-band care-band" id="husbandry" aria-labelledby="husbandryTitle" hidden>
+    <section class="life-band" id="reports" aria-labelledby="reportsTitle" hidden>
       <div class="obs-head">
-        <h2 class="obs-head__title" id="husbandryTitle">Husbandry</h2>
+        <h2 class="obs-head__title" id="reportsTitle">Site reports</h2>
+        <label class="scope-wrap"><span class="sr-only">Site</span><select class="scope" aria-label="Site the reports speak for"></select></label>
       </div>
-      <div class="care-counts"></div>
-      <div class="life-grid life-grid--2"></div>
-    </section>
-
-    <!-- ══ operations (V4) ══════════════════════════════════════════════
-         Transfers within and between sites, the lab's open requests and
-         turnaround, and the enclosure climate. Rendered by
-         js/components/Operations.js from js/data/operations.js. Empty and
-         hidden on every version but 4. -->
-    <section class="life-band care-band" id="operations" aria-labelledby="operationsTitle" hidden>
-      <div class="obs-head">
-        <h2 class="obs-head__title" id="operationsTitle">Operations</h2>
-      </div>
-      <div class="care-counts"></div>
-      <div class="life-grid life-grid--2"></div>
-    </section>
-
-    <section class="life-band care-band" id="collection" aria-labelledby="collectionTitle" hidden>
-      <div class="obs-head">
-        <h2 class="obs-head__title" id="collectionTitle">Collection</h2>
-      </div>
-      <div class="care-counts"></div>
-      <div class="life-grid life-grid--2"></div>
+      <div class="today"></div>
+      <div class="report-cards"></div>
     </section>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
@@ -31382,6 +31408,7 @@ __def('js/components/CircleOfLife.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES, summarise, byClass, incidents } = __req('js/data/lifecycle.js')
 const { BY_CLASS } = __req('js/data/collection.js')
+const { esc, fmt, renderCounts } = __req('js/components/LifePanel.js')
 const { getVariant } = __req('js/data/cardVariants.js')
 const { renderCard } = __req('js/components/ModuleCard.js')
 
@@ -31391,10 +31418,6 @@ const KINDS = [
   { kind: 'mortality', title: 'Mortality', unit: 'deaths', head: 'Deaths' },
 ]
 
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
-}
-const fmt = (n) => n.toLocaleString('en-IN')
 
 /* "Schedule I" for a scheduled species, "Not scheduled" otherwise — the flag
    asked for in place of a scientific name */
@@ -31489,7 +31512,7 @@ function weekTiles() {
 /* the four counts under the tiles: the other things counted beside births
    and deaths, over 30 days, and the enclosures the site is made of — the
    latter read off the search index, which already lists every one */
-function countTiles() {
+function tiles() {
   const enclosures = __req('js/data/searchIndex.js').index().filter((r) => r.type === 'enclosure').length
   const tiles = [
     { key: 'neonatal',   label: 'Neonatal deaths', n: incidents('neonatal', 30), note: 'under 30 days old, last 30 days' },
@@ -31497,21 +31520,14 @@ function countTiles() {
     { key: 'escape',     label: 'Escapes',         n: incidents('escape', 30),   note: 'last 30 days, all recovered' },
     { key: 'enclosures', label: 'Enclosures',      n: enclosures,                note: 'across the site' },
   ]
-  const wrap = document.createElement('div')
-  wrap.className = 'care-counts'
-  wrap.innerHTML = tiles.map((t) =>
-    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
-      `<span class="care-count__label">${t.label}</span>` +
-      `<span class="care-count__n">${fmt(t.n)}</span>` +
-      `<span class="care-count__note">${esc(t.note)}</span>` +
-    `</section>`).join('')
-  return wrap
+  return tiles
 }
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   const grid = root.querySelector('.life-grid')
-  grid.before(weekTiles(), countTiles())
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
+  grid.before(weekTiles())
   for (const k of KINDS) grid.appendChild(listCard(k))
   grid.appendChild(tableCard())
   root.hidden = false
@@ -31519,6 +31535,11 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
+   card shows, the kind of thing one aggregate query serves — and `render()`
+   is the expensive one, run only when the report page is opened. */
+__x.report = { id: 'circleOfLife', title: 'Circle of Life', icon: 'd-animal', sub: 'births, deaths and what is counted beside them',
+  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
 });
 
 __def('js/components/LifePanel.js', function (__x, __req) {
@@ -31628,8 +31649,19 @@ function classTable({ title, span, aria, corner = 'Kind', rows, foot }) {
   return matrixTable({ title, span, aria, corner, cols, rows, foot })
 }
 
+/* the row of count tiles at the head of a report, from `tiles()` data */
+function renderCounts(tiles) {
+  return tiles.map((t) =>
+    `<section class="care-count care-count--${t.key}" aria-label="${esc(t.label)}: ${esc(String(t.n))}">` +
+      `<span class="care-count__label">${esc(t.label)}</span>` +
+      `<span class="care-count__n">${typeof t.n === 'number' ? fmt(t.n) : esc(String(t.n))}</span>` +
+      `<span class="care-count__note">${esc(t.note)}</span>` +
+    `</section>`).join('')
+}
+
 __x.esc = esc
 __x.fmt = fmt
+__x.renderCounts = renderCounts
 __x.listCard = listCard
 __x.figureList = figureList
 __x.classTable = classTable
@@ -31665,10 +31697,10 @@ __def('js/components/AnimalCare.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { OVERDUE, CARE_KINDS, DUE_AHEAD, AHEAD_WINDOWS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts, casesByClass } = __req('js/data/care.js')
-const { esc, fmt, listCard, classTable } = __req('js/components/LifePanel.js')
+const { esc, fmt, listCard, classTable , renderCounts } = __req('js/components/LifePanel.js')
 
 /* the four tiles: figure, what it counts, and what moved today */
-function countTiles() {
+function tiles() {
   const c = counts()
   const tiles = [
     { key: 'hospital',   label: 'In hospital',       n: c.hospital.n,   note: c.hospital.today   ? `${c.hospital.today} admitted today`  : 'No admissions today' },
@@ -31676,12 +31708,7 @@ function countTiles() {
     { key: 'maternity',  label: 'In maternity care', n: c.maternity.n,  note: c.maternity.today  ? `${c.maternity.today} moved in today`  : 'No new mothers today' },
     { key: 'serious',    label: 'Serious condition', n: c.serious.n,    note: c.serious.today    ? `${c.serious.today} flagged today`     : 'None flagged today' },
   ]
-  return tiles.map((t) =>
-    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
-      `<span class="care-count__label">${t.label}</span>` +
-      `<span class="care-count__n">${fmt(t.n)}</span>` +
-      `<span class="care-count__note">${esc(t.note)}</span>` +
-    `</section>`).join('')
+  return tiles
 }
 
 function overdueCard() {
@@ -31767,7 +31794,7 @@ function enrichmentCard() {
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
-  root.querySelector('.care-counts').innerHTML = countTiles()
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
   const grid = root.querySelector('.life-grid')
   const cases = casesByClass()
   grid.appendChild(classTable({ title: 'Medical cases', span: 'by class', aria: 'Medical cases by class', corner: 'State', rows: cases.rows, foot: cases.foot }))
@@ -31780,6 +31807,11 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
+   card shows, the kind of thing one aggregate query serves — and `render()`
+   is the expensive one, run only when the report page is opened. */
+__x.report = { id: 'animalCare', title: 'Animal Care', icon: 'd-veterinary', sub: 'in care, overdue, pharmacy, enrichment',
+  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
 });
 
 __def('js/components/Collection.js', function (__x, __req) {
@@ -31803,10 +31835,10 @@ __def('js/components/Collection.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { BY_CLASS, REHAB, WATCH, PROTECTED } = __req('js/data/collection.js')
-const { esc, fmt, listCard, figureList } = __req('js/components/LifePanel.js')
+const { esc, fmt, listCard, figureList , renderCounts } = __req('js/components/LifePanel.js')
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
 
-function countTiles() {
+function tiles() {
   const species = BY_CLASS.reduce((n, r) => n + r.species, 0)
   const animals = BY_CLASS.reduce((n, r) => n + r.animals, 0)
   const chipped = BY_CLASS.reduce((n, r) => n + r.chipped, 0)
@@ -31817,12 +31849,7 @@ function countTiles() {
     { key: 'rehab',    label: 'In rehabilitation', n: fmt(stage('rehab')),          note: `${stage('quarantine')} more in quarantine` },
     { key: 'released', label: 'Released',          n: fmt(stage('released')),       note: 'this month' },
   ]
-  return tiles.map((t) =>
-    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
-      `<span class="care-count__label">${t.label}</span>` +
-      `<span class="care-count__n">${t.n}</span>` +
-      `<span class="care-count__note">${esc(t.note)}</span>` +
-    `</section>`).join('')
+  return tiles
 }
 
 /* BY CLASS AS COLUMNS, not a table (owner, 18 Sep 2026: "it looks very
@@ -31888,7 +31915,7 @@ function protectedCard() {
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
-  root.querySelector('.care-counts').innerHTML = countTiles()
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
   const grid = root.querySelector('.life-grid')
   grid.appendChild(classCard())
   grid.appendChild(protectedCard())
@@ -31900,6 +31927,11 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
+   card shows, the kind of thing one aggregate query serves — and `render()`
+   is the expensive one, run only when the report page is opened. */
+__x.report = { id: 'collection', title: 'Collection', icon: 'd-overview', sub: 'the holdings, rehabilitation, compliance',
+  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
 });
 
 __def('js/components/Husbandry.js', function (__x, __req) {
@@ -31915,14 +31947,14 @@ __def('js/components/Husbandry.js', function (__x, __req) {
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { DIET_CHANGES, DIET_REASONS, CLUTCHES } = __req('js/data/husbandry.js')
-const { esc, fmt, listCard } = __req('js/components/LifePanel.js')
+const { esc, fmt, listCard , renderCounts } = __req('js/components/LifePanel.js')
 
 const DAY = 86400000
 const dueDate = (c) => new Date(Date.now() + (c.period - c.laid) * DAY)
 const fmtDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' })
 const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
 
-function countTiles() {
+function tiles() {
   const open = CLUTCHES.filter((c) => c.hatched == null)
   const laidWeek = CLUTCHES.filter((c) => c.laid < 7).reduce((n, c) => n + c.eggs, 0)
   const incubator = open.filter((c) => c.mode === 'artificial').reduce((n, c) => n + c.eggs, 0)
@@ -31934,12 +31966,7 @@ function countTiles() {
     { key: 'due',       label: 'Due to hatch',            n: fmt(dueWeek.reduce((n, c) => n + c.eggs, 0)), note: dueWeek.length ? `${dueWeek.length} clutch${dueWeek.length === 1 ? '' : 'es'} within 7 days` : 'nothing within 7 days' },
     { key: 'hatched',   label: 'Hatched',                 n: fmt(hatched.reduce((n, c) => n + c.hatched, 0)), note: `of ${fmt(hatched.reduce((n, c) => n + c.eggs, 0))} eggs, last 30 days` },
   ]
-  return tiles.map((t) =>
-    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
-      `<span class="care-count__label">${t.label}</span>` +
-      `<span class="care-count__n">${t.n}</span>` +
-      `<span class="care-count__note">${esc(t.note)}</span>` +
-    `</section>`).join('')
+  return tiles
 }
 
 function dietCard() {
@@ -31988,7 +32015,7 @@ function eggsCard() {
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
-  root.querySelector('.care-counts').innerHTML = countTiles()
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
   const grid = root.querySelector('.life-grid')
   grid.appendChild(dietCard())
   grid.appendChild(eggsCard())
@@ -31997,6 +32024,11 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
+   card shows, the kind of thing one aggregate query serves — and `render()`
+   is the expensive one, run only when the report page is opened. */
+__x.report = { id: 'husbandry', title: 'Husbandry', icon: 'd-husbandry', sub: 'diets and the egg room',
+  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
 });
 
 __def('js/components/Operations.js', function (__x, __req) {
@@ -32021,13 +32053,13 @@ __def('js/components/Operations.js', function (__x, __req) {
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
-const { esc, fmt, listCard, matrixTable } = __req('js/components/LifePanel.js')
+const { esc, fmt, listCard, matrixTable , renderCounts } = __req('js/components/LifePanel.js')
 
 const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
 const disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k)
 const outOfRange = (c) => c.temp < c.tempRange[0] || c.temp > c.tempRange[1] || c.rh < c.rhRange[0] || c.rh > c.rhRange[1]
 
-function countTiles() {
+function tiles() {
   const moved = TRANSFERS.reduce((n, t) => n + t.animals, 0)
   const open = LAB.filter((r) => r.done == null)
   const late = open.filter((r) => r.ago > disc(r.discipline).target)
@@ -32038,12 +32070,7 @@ function countTiles() {
     { key: 'late',      label: 'Lab reports late',    n: late.length,      note: late.length ? 'oldest ' + agoWord(Math.max(...late.map((r) => r.ago))) : 'all within target' },
     { key: 'climate',   label: 'Enclosures out of range', n: out.length,   note: out.length ? out.map((c) => c.enclosure).slice(0, 2).join(', ') + (out.length > 2 ? '…' : '') : 'all within range' },
   ]
-  return tiles.map((t) =>
-    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
-      `<span class="care-count__label">${t.label}</span>` +
-      `<span class="care-count__n">${fmt(t.n)}</span>` +
-      `<span class="care-count__note">${esc(t.note)}</span>` +
-    `</section>`).join('')
+  return tiles
 }
 
 function transfersCard() {
@@ -32165,7 +32192,7 @@ function climateExtremes() {
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
-  root.querySelector('.care-counts').innerHTML = countTiles()
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
   const grid = root.querySelector('.life-grid')
   grid.appendChild(transfersCard())
   grid.appendChild(transfersBySpecialist())
@@ -32178,6 +32205,11 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
+   card shows, the kind of thing one aggregate query serves — and `render()`
+   is the expensive one, run only when the report page is opened. */
+__x.report = { id: 'operations', title: 'Operations', icon: 'd-work', sub: 'transfers, the lab, the climate',
+  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
 });
 
 __def('js/components/Favourites.js', function (__x, __req) {
@@ -32264,6 +32296,178 @@ function mount({ root, onOpen } = {}) {
 }
 
 __x.mount = mount
+});
+
+__def('js/components/ReportPage.js', function (__x, __req) {
+/**
+ * THE REPORT PAGE — where a report's detail lives, one tap from the home
+ * ───────────────────────────────────────────────────────────────────────────
+ * The home shows a card per report with four figures; this is what opens
+ * when the card is tapped: a page surface over the home, like the search
+ * page, with a back arrow, the report's name, and the scope it speaks for.
+ * The report's `render()` runs the FIRST time it is opened and the result
+ * is kept, so nothing is computed for a report nobody looks at — which is
+ * the owner's point (18 Sep 2026): "showing so much data from so many
+ * tables might put a lot of load on the system". A change of scope throws
+ * the kept pages away, since every figure on them has changed.
+ *
+ * Escape and the arrow close it; focus goes to the title on open and back
+ * to the card on close; the home does not scroll underneath it.
+ */
+const { icon } = __req('js/icons.js')
+const { prefersReducedMotion } = __req('js/lib/motion.js')
+const scope = __req('js/state/reportScope.js')
+
+function createReportPage() {
+  const page = document.createElement('div')
+  page.className = 'rpage'
+  page.hidden = true
+  page.innerHTML =
+    `<div class="rpage__bar">` +
+      `<button type="button" class="rpage__back" aria-label="Back to home">${icon('chev-left')}</button>` +
+      `<h2 class="rpage__title" tabindex="-1"></h2>` +
+      `<span class="rpage__scope"></span>` +
+    `</div>` +
+    `<div class="rpage__body"></div>`
+  document.body.appendChild(page)
+  const title = page.querySelector('.rpage__title')
+  const scopeEl = page.querySelector('.rpage__scope')
+  const body = page.querySelector('.rpage__body')
+  const kept = new Map()
+  let open = false, current = null, restoreFocus = null
+
+  function build(report) {
+    const root = document.createElement('section')
+    root.className = 'rpage__report'
+    root.innerHTML = `<div class="care-counts"></div><div class="life-grid life-grid--2"></div>`
+    report.render(root)
+    return root
+  }
+  function show(report, from) {
+    restoreFocus = from || document.activeElement
+    current = report
+    title.textContent = report.title
+    scopeEl.textContent = scope.label()
+    if (!kept.has(report.id)) kept.set(report.id, build(report))
+    body.replaceChildren(kept.get(report.id))
+    body.scrollTop = 0
+    open = true
+    page.hidden = false
+    document.body.classList.add('is-report')
+    const go = () => page.classList.add('is-open')
+    if (prefersReducedMotion()) go(); else requestAnimationFrame(go)
+    title.focus()
+    document.addEventListener('keydown', onKey, true)
+  }
+  function hide() {
+    if (!open) return
+    open = false
+    page.classList.remove('is-open')
+    document.body.classList.remove('is-report')
+    const done = () => { if (!open) page.hidden = true }
+    page.addEventListener('transitionend', done, { once: true })
+    setTimeout(done, 420)
+    document.removeEventListener('keydown', onKey, true)
+    if (restoreFocus && restoreFocus.focus) restoreFocus.focus()
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); hide() } }
+  page.querySelector('.rpage__back').addEventListener('click', hide)
+  scope.subscribe(() => {
+    kept.clear()
+    if (open && current) { kept.set(current.id, build(current)); body.replaceChildren(kept.get(current.id)); scopeEl.textContent = scope.label() }
+  })
+  return { open: show, close: hide, get isOpen() { return open } }
+}
+
+__x.createReportPage = createReportPage
+});
+
+__def('js/components/Reports.js', function (__x, __req) {
+/**
+ * THE HOME'S REPORTS — what needs doing today, and a card per report
+ * ───────────────────────────────────────────────────────────────────────────
+ * Two things, both cheap. TODAY is the actionables every report contributes
+ * — a late lab report, an animal overdue for a vaccine, an enclosure out of
+ * range — as one short list, the ones with a clock on them first, with role
+ * chips (owner, 18 Sep 2026: "a list of things for a curator, a vet, a
+ * para-vet, for a horticulture team, for an admin team") so a keeper sees a
+ * keeper's list. Each row opens the report it came from. THE CARDS are one
+ * per report: its name, four figures from `summary()`, and nothing else —
+ * the detail is on the page the card opens.
+ *
+ * The scope control sits in the band's head and re-scopes both, and every
+ * open report page with them.
+ */
+const { icon } = __req('js/icons.js')
+const { esc, fmt } = __req('js/components/LifePanel.js')
+const scope = __req('js/state/reportScope.js')
+
+const ROLES = [
+  { key: 'all',      label: 'Everyone' },
+  { key: 'curator',  label: 'Curator' },
+  { key: 'vet',      label: 'Vet' },
+  { key: 'paravet',  label: 'Para-vet' },
+  { key: 'keeper',   label: 'Keeper' },
+  { key: 'biologist',label: 'Biologist' },
+  { key: 'horti',    label: 'Horticulture' },
+  { key: 'admin',    label: 'Admin' },
+]
+
+function mount({ root, reports, page } = {}) {
+  if (!root) return null
+  const today = root.querySelector('.today')
+  const cards = root.querySelector('.report-cards')
+  const picker = root.querySelector('.scope')
+  let role = 'all'
+
+  picker.innerHTML = scope.options().map((o) => `<option value="${o.id}"${o.id === scope.get() ? ' selected' : ''}>${esc(o.label)}</option>`).join('')
+  picker.addEventListener('change', () => scope.set(picker.value))
+
+  function drawToday() {
+    const items = reports.flatMap((r) => (r.actionables ? r.actionables() : []).map((a) => ({ ...a, report: r })))
+      .filter((a) => a.n > 0 && (role === 'all' || (a.roles || []).includes(role)))
+      .sort((a, b) => (b.due ? 1 : 0) - (a.due ? 1 : 0) || b.n - a.n)
+    today.innerHTML =
+      `<div class="today__head"><h3 class="today__title">Today</h3>` +
+        `<div class="life-chips" role="group" aria-label="Show actions for">` +
+          ROLES.map((r) => `<button type="button" class="life-chip" data-role="${r.key}" aria-pressed="${r.key === role}">${r.label}</button>`).join('') +
+        `</div></div>` +
+      (items.length
+        ? `<ol class="today__list">` + items.map((a) =>
+            `<li><button type="button" class="today__row${a.due ? ' is-due' : ''}" data-report="${a.report.id}">` +
+              `<b class="today__n">${fmt(a.n)}</b>` +
+              `<span class="today__text">${esc(a.text)}<small>${esc(a.report.title)}${a.note ? ' · ' + esc(a.note) : ''}</small></span>` +
+              `<span class="today__go" aria-hidden="true">${icon('chev-right')}</span>` +
+            `</button></li>`).join('') + `</ol>`
+        : `<p class="today__none">Nothing needs ${role === 'all' ? 'anyone' : 'this role'} today.</p>`)
+  }
+  function drawCards() {
+    cards.innerHTML = reports.map((r) =>
+      `<button type="button" class="report-card" data-report="${r.id}" aria-label="Open ${esc(r.title)} report">` +
+        `<span class="report-card__head">${icon(r.icon)}<span class="report-card__title">${esc(r.title)}</span></span>` +
+        `<span class="report-card__figs">` + r.summary().map((t) =>
+          `<span class="report-card__fig"><b>${typeof t.n === 'number' ? fmt(t.n) : esc(String(t.n))}</b><small>${esc(t.label)}</small></span>`).join('') +
+        `</span>` +
+        `<span class="report-card__foot">${esc(r.sub)}<span class="report-card__go">${icon('chev-right')}</span></span>` +
+      `</button>`).join('')
+  }
+  const draw = () => { drawToday(); drawCards() }
+  root.addEventListener('click', (e) => {
+    const chip = e.target.closest('.life-chip[data-role]')
+    if (chip) { role = chip.dataset.role; drawToday(); return }
+    const btn = e.target.closest('[data-report]')
+    if (!btn) return
+    const report = reports.find((r) => r.id === btn.dataset.report)
+    if (report && page) page.open(report, btn)
+  })
+  scope.subscribe(draw)
+  draw()
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+__x.ROLES = ROLES
 });
 
 __def('js/components/RecentObservations.js', function (__x, __req) {
@@ -33117,12 +33321,14 @@ if (PAGE_VERSION === '1' || isV4()) {
     onOpen: (name) => globalSearch.openWith(name, 'animal'),
   })
 
-  /* V4's births-and-deaths band under the rail; mounts to nothing on V1 */
-  __req('js/components/CircleOfLife.js').mount({ root: document.getElementById('circleOfLife') })
-  __req('js/components/AnimalCare.js').mount({ root: document.getElementById('animalCare') })
-  __req('js/components/Husbandry.js').mount({ root: document.getElementById('husbandry') })
-  __req('js/components/Operations.js').mount({ root: document.getElementById('operations') })
-  __req('js/components/Collection.js').mount({ root: document.getElementById('collection') })
+  /* V4's reports: the cards and Today on the home, the pages on demand */
+  if (isV4()) {
+    const reports = [
+      'CircleOfLife', 'AnimalCare', 'Husbandry', 'Operations', 'Collection',
+    ].map((m) => __req(`js/components/${m}.js`).report)
+    const page = __req('js/components/ReportPage.js').createReportPage()
+    __req('js/components/Reports.js').mount({ root: document.getElementById('reports'), reports, page })
+  }
 }
 
 /* ── quick actions ──────────────────────────────────────────────────────
@@ -35455,6 +35661,88 @@ __x.TRANSFERS = TRANSFERS;
 __x.LAB_DISCIPLINES = LAB_DISCIPLINES;
 __x.LAB = LAB;
 __x.CLIMATE = CLIMATE;
+});
+
+__def('js/state/reportScope.js', function (__x, __req) {
+/**
+ * WHICH SITE THE REPORTS SPEAK FOR
+ * ───────────────────────────────────────────────────────────────────────────
+ * A reader may have one site or several (owner, 18 Sep 2026). The reports
+ * open on all of them consolidated and narrow to one when asked, and every
+ * figure on every report re-scopes — which only works if every seed row
+ * knows its site. Most rows name an enclosure, and an enclosure belongs to
+ * one site; the rest name a species, and a species is housed on one site
+ * in this seed. `siteOf()` resolves that, once, from the maps below, and
+ * anything unmapped is dealt to a site by a stable hash so it never moves
+ * between reloads. The aggregate seeds that are not rows (the class totals,
+ * the manpower) scale by `share()` instead, which is a mock and says so.
+ *
+ * NOT the workspace's own site (viewStore): that one drives the Site
+ * Command Centre's hierarchy. This is a reading scope for the home reports
+ * and lives under its own key.
+ */
+const { SITES, getSite } = __req('js/data/sites.js')
+
+const KEY = 'antz.home.reportScope'
+const listeners = new Set()
+let current = (() => { try { const v = localStorage.getItem(KEY); return v && (v === 'all' || getSite(v)) ? v : 'all' } catch (_) { return 'all' } })()
+
+function get() { return current }
+function set(id) {
+  const next = id === 'all' || getSite(id) ? id : 'all'
+  if (next === current) return
+  current = next
+  try { localStorage.setItem(KEY, current) } catch (_) {}
+  for (const fn of listeners) fn(current)
+}
+function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn) }
+function label() { return current === 'all' ? 'All sites' : getSite(current).short }
+function options() { return [{ id: 'all', label: 'All sites' }, ...SITES.map((s) => ({ id: s.id, label: s.short }))] }
+
+const ENCLOSURE_SITE = {
+  'Lion House 2': 'bg-safari', 'Bear Dell': 'bg-safari', 'Hoofstock Barn': 'bg-safari', 'Deer Paddock': 'bg-safari',
+  'Wetland Paddock': 'bg-safari', 'Wetland Aviary': 'bg-safari', 'Duck Pond': 'bg-safari', 'Hospital': 'bg-safari', 'Hospital, ICU': 'bg-safari',
+  'Primate Island': 'bg-zoo', 'Reptile House': 'bg-zoo', 'Python Room': 'bg-zoo', 'Aviary 1': 'bg-zoo', 'Aviary 2': 'bg-zoo', 'Aviary 3': 'bg-zoo',
+  'Night Aviary': 'bg-zoo', 'Incubator 1': 'bg-zoo', 'Incubator 2': 'bg-zoo', 'Quarantine': 'bg-zoo',
+}
+const SPECIES_SITE = {
+  'Asiatic lion': 'bg-safari', lion: 'bg-safari', 'Bengal tiger': 'bg-safari', 'Indian leopard': 'bg-safari', 'Sloth bear': 'bg-safari',
+  Blackbuck: 'bg-safari', blackbuck: 'bg-safari', Chital: 'bg-safari', chital: 'bg-safari', Nilgai: 'bg-safari', nilgai: 'bg-safari',
+  Sambar: 'bg-safari', sambar: 'bg-safari', Barasingha: 'bg-safari', barasingha: 'bg-safari', Gaur: 'bg-safari',
+  'Indian peafowl': 'bg-safari', peafowl: 'bg-safari', 'Sarus crane': 'bg-safari', 'Painted stork': 'bg-safari', Mallard: 'bg-safari',
+  'Bonnet macaque': 'bg-zoo', macaque: 'bg-zoo', 'Rhesus macaque': 'bg-zoo', 'Indian star tortoise': 'bg-zoo', tortoise: 'bg-zoo',
+  'Indian rock python': 'bg-zoo', python: 'bg-zoo', 'Cinereous vulture': 'bg-zoo', vulture: 'bg-zoo', 'Rose-ringed parakeet': 'bg-zoo',
+  parakeet: 'bg-zoo', 'Giant forest scorpion': 'bg-zoo', scorpion: 'bg-zoo', 'Hill myna': 'bg-zoo', 'Black kite': 'bg-zoo',
+  'Barn owl': 'bg-zoo', 'Sumatran orangutan': 'bg-zoo',
+}
+/* the mock split of the aggregate seeds between the two sites */
+const SITE_SHARE = { 'bg-safari': .62, 'bg-zoo': .38 }
+
+function hash(str) { let h = 0; for (const ch of String(str)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h }
+function siteOf(row) {
+  if (row.site) return row.site
+  if (row.enclosure && ENCLOSURE_SITE[row.enclosure]) return ENCLOSURE_SITE[row.enclosure]
+  const sp = row.species || row.forSpecies
+  if (sp && SPECIES_SITE[sp]) return SPECIES_SITE[sp]
+  return SITES[hash(JSON.stringify(row)) % SITES.length].id
+}
+function inScope(row) { return current === 'all' || siteOf(row) === current }
+function scoped(rows) { return rows.filter(inScope) }
+function share() { return current === 'all' ? 1 : SITE_SHARE[current] || .5 }
+/* an aggregate figure scaled to the scope — a mock, since the seed has no
+   per-site totals; rounded so it reads as a count */
+function scale(n) { return Math.round(n * share()) }
+
+__x.get = get
+__x.set = set
+__x.subscribe = subscribe
+__x.label = label
+__x.options = options
+__x.siteOf = siteOf
+__x.inScope = inScope
+__x.scoped = scoped
+__x.share = share
+__x.scale = scale
 });
 
 __def('js/data/lifecycle.js', function (__x, __req) {
