@@ -3192,6 +3192,254 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-table--share tfoot td { font-size: var(--fs-label); }
 .life-table tfoot th, .life-table tfoot td { font-weight: 700; color: var(--ink); }
 
+/* ── THE DRAWING KIT'S PALETTE ── one hue, five tints
+   The brand teal (--c-secondary-dark) at five strengths is every series on
+   every report; coral (--c-tertiary) means "needs action" and nothing else.
+   NOT FROM FIGMA — the tints are steps of the one hue. */
+:root {
+  --viz-900: #0B5F63; --viz-700: #00ABAB; --viz-500: #3CC6BE; --viz-300: #9EDFDA; --viz-100: #DDF3F1;
+}
+.viz-900 { background: var(--viz-900); fill: var(--viz-900); }
+.viz-700 { background: var(--viz-700); fill: var(--viz-700); }
+.viz-500 { background: var(--viz-500); fill: var(--viz-500); }
+.viz-300 { background: var(--viz-300); fill: var(--viz-300); }
+.life-legend i.viz-900, .life-legend i.viz-700, .life-legend i.viz-500, .life-legend i.viz-300 { opacity: 1; }
+.life-mini { list-style: none; margin: 14px 0 0; padding: 0; }
+.life-mini li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid rgba(31, 65, 91, .08); font-size: var(--fs-label); }
+.life-mini li span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.life-mini small { font-size: var(--fs-micro); color: var(--ink-mute); }
+.life-mini b { font-family: var(--font-num); font-weight: 700; }
+.is-late { color: var(--c-tertiary); }
+
+/* diverging */
+.dv { display: flex; flex-direction: column; gap: 6px; }
+.dv__head { display: flex; justify-content: space-between; padding: 0 0 6px 110px; font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute); }
+.dv__row { display: grid; grid-template-columns: 110px 1fr 1fr; align-items: center; gap: 0 2px; min-height: 44px; }
+.dv__label { font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.dv__side { position: relative; display: flex; align-items: center; gap: 8px; height: 100%; min-height: 40px; }
+.dv__side--l { justify-content: flex-end; border-right: 1px solid rgba(31, 65, 91, .18); padding-right: 8px; }
+.dv__side--r { padding-left: 8px; }
+.dv__side i { display: block; height: 22px; border-radius: 4px; }
+.dv__side--l i { background: var(--viz-300); order: 3; }
+.dv__side--r i { background: var(--viz-700); }
+.dv__side b { font-family: var(--font-num); font-weight: 700; }
+.dv__side--l b { order: 2; }
+.dv__side small { font-size: 10.5px; color: var(--ink-mute); white-space: nowrap; }
+.dv__side--l small { order: 1; }
+
+/* stacked */
+.sb { display: flex; flex-direction: column; gap: 12px; }
+.sb__row { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 12px; }
+.sb__label { display: flex; justify-content: space-between; gap: 8px; font-size: var(--fs-label); color: var(--ink); }
+.sb__label b { font-family: var(--font-num); }
+.sb__track { display: flex; height: 26px; border-radius: 6px; overflow: hidden; min-width: 24px; }
+.sb__track i { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.sb__track b, .sh__track b, .ag__bar b { font-family: var(--font-num); font-size: var(--fs-micro); font-weight: 700; color: #fff; }
+.sb__track i.viz-300 b, .sh__track i.viz-300 b, .ag__bar i.viz-300 b { color: var(--ink); }
+.sb .life-legend { margin: 6px 0 0; }
+
+/* runway */
+.rw { display: flex; flex-direction: column; gap: 4px; }
+.rw__axis, .rw__lane { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 12px; }
+.rw__axis { height: 22px; }
+.rw__lanehead { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.rw__lanehead small { font-family: var(--font-num); color: var(--ink-mute); }
+.rw__axis .rw__lanehead { font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-mute); }
+.rw__ticks, .rw__track { position: relative; height: 100%; }
+.rw__ticks i { position: absolute; top: 0; transform: translateX(-50%); font-style: normal; font-size: var(--fs-micro); color: var(--ink-mute); white-space: nowrap; }
+.rw__ticks i:last-child { transform: translateX(-100%); }
+.rw__track { height: 40px; background: linear-gradient(90deg, var(--viz-100), transparent); border-radius: 6px; }
+.rw__track u { position: absolute; top: 0; bottom: 0; border-left: 1px dashed rgba(31, 65, 91, .25); }
+.rw__dot { position: absolute; top: 50%; transform: translate(-50%, -50%); max-width: 22%; display: grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 13px; background: var(--viz-500); color: #fff; font-style: normal; }
+.rw__dot.is-soon { background: var(--viz-900); }
+.rw__dot b { font-size: 10.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.rw__key { list-style: none; margin: 12px 0 0; padding: 0; columns: 2; column-gap: 24px; }
+.rw__key li { display: flex; align-items: center; gap: 10px; padding: 6px 0; break-inside: avoid; font-size: var(--fs-label); border-top: 1px solid rgba(31, 65, 91, .08); }
+.rw__key li > b { flex: none; min-width: 26px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--viz-100); color: var(--viz-900); font-size: 10.5px; font-weight: 700; display: grid; place-items: center; }
+.rw__key li span { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.rw__key li small { font-size: var(--fs-micro); color: var(--ink-mute); }
+.rw__key li em { font-style: normal; font-family: var(--font-num); color: var(--ink-mute); white-space: nowrap; }
+
+/* ageing */
+.ag__bar { display: flex; height: 30px; border-radius: 8px; overflow: hidden; }
+.ag__bar i { display: grid; place-items: center; }
+.ag__bar i.is-old { background: var(--c-tertiary); }
+.ag__bins { display: flex; justify-content: space-between; gap: 12px; margin: 10px 0 12px; }
+.ag__bins span { display: flex; flex-direction: column; font-size: var(--fs-micro); color: var(--ink-mute); }
+.ag__bins b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; color: var(--ink); }
+.ag__oldest { list-style: none; margin: 0; padding: 0; }
+.ag__oldest li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid rgba(31, 65, 91, .08); font-size: var(--fs-label); }
+.ag__oldest span { display: flex; flex-direction: column; min-width: 0; }
+.ag__oldest small { font-size: var(--fs-micro); color: var(--ink-mute); }
+.ag__oldest b { font-family: var(--font-num); font-weight: 700; white-space: nowrap; }
+
+/* rings */
+.rgs { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.rgs__row { display: flex; flex-wrap: wrap; gap: 10px; flex: 1 1 auto; justify-content: space-around; }
+.rg { position: relative; display: inline-flex; flex-direction: column; align-items: center; width: var(--size); }
+.rg svg { width: var(--size); height: var(--size); transform: rotate(-90deg); }
+.rg__track { fill: none; stroke: var(--viz-100); stroke-width: 9; }
+.rg__arc { fill: none; stroke: var(--viz-700); stroke-width: 9; stroke-linecap: round; }
+.rg > b { position: absolute; top: calc(var(--size) / 2); left: 0; right: 0; transform: translateY(-50%); text-align: center; font-family: var(--font-num); font-weight: 700; font-size: calc(var(--size) * .2); color: var(--ink); }
+.rg__label { margin-top: 6px; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.rg small { font-size: var(--fs-micro); color: var(--ink-mute); }
+
+/* pie */
+.pie { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 18px; position: relative; }
+.pie svg { width: 150px; height: 150px; }
+.pie path { stroke: #fff; stroke-width: 1.5; }
+.pie__centre { position: absolute; left: 0; width: 150px; top: 50%; transform: translateY(-50%); text-align: center; display: flex; flex-direction: column; pointer-events: none; }
+.pie__centre b { font-family: var(--font-num); font-size: var(--fs-metric); font-weight: 700; color: var(--ink); }
+.pie__centre small { font-size: var(--fs-micro); color: var(--ink-mute); }
+.pie__legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pie__legend li { display: grid; grid-template-columns: 12px 1fr auto; gap: 4px 10px; align-items: center; font-size: var(--fs-label); }
+.pie__legend i { width: 12px; height: 12px; border-radius: 3px; }
+.pie__legend b { font-family: var(--font-num); font-weight: 700; }
+.pie__legend small { grid-column: 2 / -1; font-size: var(--fs-micro); color: var(--ink-mute); }
+
+/* funnel */
+.fn { display: flex; flex-direction: column; gap: 6px; }
+.fn__step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.fn__bar { display: grid; place-items: center; height: 34px; border-radius: 6px; color: #fff; font-family: var(--font-num); font-weight: 700; }
+.fn__bar.viz-300 { color: var(--ink); }
+.fn__label { display: flex; gap: 6px; align-items: baseline; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.fn__label small { font-weight: 400; font-size: var(--fs-micro); color: var(--ink-mute); }
+.fn__aside { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding-top: 10px; border-top: 1px solid rgba(31, 65, 91, .10); font-size: var(--fs-label); }
+.fn__aside b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; color: var(--c-tertiary); }
+.fn__aside span { display: flex; flex-direction: column; }
+.fn__aside small { font-size: var(--fs-micro); color: var(--ink-mute); }
+
+/* range strips */
+.rs { display: flex; flex-direction: column; gap: 4px; }
+.rs__row { display: grid; grid-template-columns: 130px 1fr 74px; align-items: center; gap: 12px; min-height: 40px; }
+.rs__label { display: flex; flex-direction: column; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.rs__label small, .rs__val small { font-size: var(--fs-micro); font-weight: 400; color: var(--ink-mute); }
+.rs__track { position: relative; height: 18px; border-radius: 9px; background: rgba(31, 65, 91, .06); }
+.rs__band { position: absolute; top: 0; bottom: 0; background: var(--viz-300); border-radius: 9px; }
+.rs__whisker { position: absolute; top: 8px; height: 2px; background: var(--viz-900); }
+.rs__now { position: absolute; top: 3px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--viz-900); box-shadow: 0 0 0 2px #fff; }
+.rs__row.is-out .rs__now { background: var(--c-tertiary); }
+.rs__row.is-out .rs__val b { color: var(--c-tertiary); }
+.rs__val { display: flex; flex-direction: column; text-align: right; font-family: var(--font-num); font-weight: 700; }
+.rs .life-legend { margin-top: 10px; }
+.rs__k-band { background: var(--viz-300) !important; opacity: 1 !important; }
+.rs__k-whisker { background: var(--viz-900) !important; height: 2px !important; width: 14px !important; border-radius: 0 !important; opacity: 1 !important; }
+.rs__k-now { background: var(--viz-900) !important; border-radius: 50% !important; opacity: 1 !important; }
+
+/* bullets */
+.bl { display: flex; flex-direction: column; gap: 4px; }
+.bl__row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 82px; align-items: center; gap: 12px; min-height: 44px; }
+.bl__label { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.bl__label small, .bl__val small { font-size: var(--fs-micro); font-weight: 400; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bl__track { position: relative; height: 12px; border-radius: 6px; background: rgba(31, 65, 91, .06); }
+.bl__bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--viz-700); }
+.bl__row.is-late .bl__bar { background: var(--c-tertiary); }
+.bl__target { position: absolute; top: -4px; bottom: -4px; border-left: 2px solid var(--ink); }
+.bl__val { display: flex; flex-direction: column; text-align: right; font-family: var(--font-num); font-weight: 700; }
+.bl__row.is-late .bl__val b { color: var(--c-tertiary); }
+
+/* dots */
+.dp { display: flex; flex-direction: column; gap: 4px; }
+.dp__axis, .dp__row { display: grid; grid-template-columns: 130px 1fr 74px; align-items: center; gap: 12px; }
+.dp__axis { height: 18px; }
+.dp__ticks { position: relative; height: 100%; }
+.dp__ticks i { position: absolute; top: 0; transform: translateX(-50%); font-style: normal; font-size: var(--fs-micro); color: var(--ink-mute); white-space: nowrap; }
+.dp__ticks i:first-child { transform: none; }
+.dp__ticks i:last-child { transform: translateX(-100%); }
+.dp__row { min-height: 52px; }
+.dp__label { display: flex; flex-direction: column; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.dp__label small, .dp__val small { font-size: var(--fs-micro); font-weight: 400; color: var(--ink-mute); }
+.dp__track { position: relative; height: 36px; border-radius: 6px; background: rgba(31, 65, 91, .04); }
+.dp__target { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--ink); }
+.dp__mean { position: absolute; left: 0; bottom: 4px; height: 4px; border-radius: 2px; background: var(--viz-300); }
+.dp__dot { position: absolute; top: 8px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--viz-700); box-shadow: 0 0 0 2px #fff; }
+.dp__dot.is-open { background: #fff; box-shadow: inset 0 0 0 3px var(--viz-700); }
+.dp__dot.is-late { background: var(--c-tertiary); }
+.dp__dot.is-open.is-late { background: #fff; box-shadow: inset 0 0 0 3px var(--c-tertiary); }
+.dp__val { display: flex; flex-direction: column; text-align: right; font-family: var(--font-num); font-weight: 700; }
+.dp .life-legend { margin-top: 10px; }
+.dp__k-dot { background: var(--viz-700) !important; border-radius: 50% !important; opacity: 1 !important; }
+.dp__k-open { background: #fff !important; box-shadow: inset 0 0 0 2px var(--viz-700); border-radius: 50% !important; opacity: 1 !important; }
+.dp__k-target { background: var(--ink) !important; width: 2px !important; border-radius: 0 !important; opacity: 1 !important; }
+.dp__k-mean { background: var(--viz-300) !important; height: 4px !important; width: 14px !important; border-radius: 2px !important; opacity: 1 !important; }
+.life-card__sub { margin: 16px 0 8px; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+@media (max-width: 743px) { .dp__axis, .dp__row { grid-template-columns: 90px 1fr 64px; } }
+
+/* timeline */
+.tl { display: flex; flex-direction: column; gap: 8px; }
+.tl__when { display: block; font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--viz-900); margin: 6px 0 2px; }
+.tl__items { list-style: none; margin: 0; padding: 0 0 0 6px; border-left: 2px solid var(--viz-100); }
+.tl__items li { position: relative; display: flex; gap: 12px; padding: 6px 0 8px 14px; }
+.tl__dot { position: absolute; left: -7px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--viz-700); box-shadow: 0 0 0 2px #fff; }
+.tl__body { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-label); }
+.tl__body b { color: var(--ink); }
+.tl__body span { color: var(--ink); }
+.tl__body small { font-size: var(--fs-micro); color: var(--ink-mute); }
+
+/* progress */
+.pg { display: flex; flex-direction: column; gap: 4px; }
+.pg__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) 128px; align-items: center; gap: 12px; min-height: 44px; }
+.pg__label { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.pg__label small, .pg__val small { font-size: var(--fs-micro); font-weight: 400; color: var(--ink-mute); }
+.pg__label small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pg__track { height: 10px; border-radius: 5px; background: rgba(31, 65, 91, .06); overflow: hidden; }
+.pg__track i { display: block; height: 100%; border-radius: 5px; background: var(--viz-700); }
+.pg__row.is-done .pg__track i { background: var(--viz-300); }
+.pg__row.is-late .pg__track i { background: var(--c-tertiary); }
+.pg__val { display: flex; flex-direction: column; text-align: right; font-family: var(--font-num); font-weight: 700; }
+
+/* flow */
+.fl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.fl__row { display: grid; grid-template-columns: 1fr; gap: 4px; padding: 8px 0; border-top: 1px solid rgba(31, 65, 91, .08); }
+.fl__row:first-child { border-top: 0; }
+.fl__ends { display: flex; align-items: center; gap: 8px; font-size: var(--fs-label); color: var(--ink); min-width: 0; }
+.fl__ends b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fl__arrow { flex: none; width: 22px; height: 2px; background: var(--viz-700); position: relative; }
+.fl__arrow::after { content: ''; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-left: 6px solid var(--viz-700); border-right: 0; }
+.fl__arrow.is-across { background: repeating-linear-gradient(90deg, var(--viz-900) 0 4px, transparent 4px 7px); }
+.fl__arrow.is-across::after { border-left-color: var(--viz-900); }
+.fl__bar { display: flex; align-items: center; gap: 8px; }
+.fl__bar i { display: block; height: 10px; border-radius: 5px; background: var(--viz-500); min-width: 6px; }
+.fl__bar b { font-family: var(--font-num); font-weight: 700; }
+.fl__row small { font-size: var(--fs-micro); color: var(--ink-mute); }
+
+/* 100% stacked shares */
+.sh { display: flex; flex-direction: column; gap: 12px; }
+.sh__row { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 12px; }
+.sh__label { display: flex; justify-content: space-between; font-size: var(--fs-label); color: var(--ink); }
+.sh__label b { font-family: var(--font-num); }
+.sh__track { display: flex; height: 26px; border-radius: 6px; overflow: hidden; }
+.sh__track i { display: grid; place-items: center; }
+
+/* tiles */
+.tg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tg__tile { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: 12px; background: var(--viz-100); }
+.tg__tile b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; color: var(--ink); }
+.tg__tile span { font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.tg__tile small { font-size: var(--fs-micro); color: var(--ink-mute); }
+.tg__tile.is-due { background: rgba(250, 97, 64, .10); }
+.tg__tile.is-due b { color: var(--c-tertiary); }
+
+/* chip cloud */
+.cc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
+.cc__group { display: flex; flex-direction: column; gap: 8px; }
+.cc__head { display: flex; justify-content: space-between; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.cc__head b { font-family: var(--font-num); color: var(--ink-mute); }
+.cc__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cc__chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 4px 0 10px; border-radius: 14px; background: var(--viz-100); font-size: var(--fs-micro); color: var(--ink); }
+.cc__chip b { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--viz-700); color: #fff; font-family: var(--font-num); font-weight: 700; display: grid; place-items: center; }
+
+@media (max-width: 743px) {
+  .dv__row { grid-template-columns: 80px 1fr 1fr; }
+  .sb__row, .sh__row, .rw__axis, .rw__lane { grid-template-columns: 100px 1fr; }
+  .rs__row { grid-template-columns: 100px 1fr 64px; }
+  .pie { grid-template-columns: 120px 1fr; }
+  .pie svg, .pie__centre { width: 120px; }
+  .pie svg { height: 120px; }
+  .rw__key { columns: 1; }
+  .cc, .tg { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ── THE REPORT PAGE ── V4, a report's detail over the home
    The search page's surface — fixed, full, its own bar with the back arrow
    — on the home's wash rather than white, since what it holds is panels on
@@ -3251,6 +3499,9 @@ body.is-report { overflow: hidden; }
 .today__go { flex: none; color: var(--ink-mute); }
 .today__go .icon { width: 18px; height: 18px; }
 .today__none { margin: 8px 0 12px; color: var(--ink-mute); font-size: var(--fs-label); }
+.today__list.is-cut > li:nth-child(n + 9) { display: none; }
+.today__more { display: block; margin: 8px 0 4px; padding: 6px 0; border: 0; background: none; color: var(--c-action-ink); font: inherit; font-size: var(--fs-label); font-weight: 600; cursor: pointer; }
+.today__more:hover { text-decoration: underline; }
 .report-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .report-card {
   display: flex; flex-direction: column; gap: 14px; min-height: 180px; padding: 18px 20px 14px;
@@ -3321,6 +3572,13 @@ body.is-report { overflow: hidden; }
    row of three and one alone */
 .life-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .life-card--wide { grid-column: 1 / -1; }
+/* on a report page the two-column grid is a flow of columns: a card is as
+   tall as its content, the columns balance, a wide card spans both — no
+   card is stretched to its neighbour and left half empty */
+.rpage .life-grid--2 { display: block; columns: 2; column-gap: 16px; }
+.rpage .life-grid--2 > .life-card { display: flow-root; break-inside: avoid; margin: 0 0 16px; }
+.rpage .life-grid--2 > .life-card--wide { column-span: all; }
+@media (max-width: 743px) { .rpage .life-grid--2 { columns: 1; } }
 .life-card--wide .care-trend__plot { height: 120px; }
 /* ANIMAL CARE: the four count tiles are a row of their own above the grid;
    the trend panel shares the grid's third column with the two lists */
@@ -3382,14 +3640,13 @@ body.is-report { overflow: hidden; }
 .care-trend__n { font-size: var(--fs-body); color: var(--ink-mute); }
 .care-trend__n b { font-family: var(--font-num); font-size: var(--fs-stat-sm); font-weight: 700; color: var(--ink); margin-right: 4px; }
 .care-trend__delta { font-size: var(--fs-label); color: var(--ink-mute); }
-.care-trend__delta.is-up   { color: var(--c-tertiary); }
-.care-trend__delta.is-down { color: var(--c-action-ink); }
+.care-trend__delta.is-up, .care-trend__delta.is-down { color: var(--ink); }
 .care-trend__plot { display: flex; align-items: flex-end; gap: 5px; height: 150px; flex: 1 1 auto; }
 .care-trend__col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
 .care-trend__n2 { font-family: var(--font-num); font-size: var(--fs-micro); font-weight: 600; line-height: 1; color: var(--ink-mute); min-height: 1em; }
-.care-trend__bar { width: 100%; max-width: 22px; min-height: 2px; border-radius: 4px 4px 2px 2px; background: rgba(0, 109, 53, .22); }
-.care-trend__col.is-this .care-trend__bar { background: rgba(0, 109, 53, .55); }
-.care-trend__col.is-today .care-trend__bar { background: var(--c-action-ink); }
+.care-trend__bar { width: 100%; max-width: 22px; min-height: 2px; border-radius: 4px 4px 2px 2px; background: var(--viz-300); }
+.care-trend__col.is-this .care-trend__bar { background: var(--viz-700); }
+.care-trend__col.is-today .care-trend__bar { background: var(--viz-900); }
 .care-trend__col.is-this .care-trend__n2 { color: var(--ink); }
 .care-trend__day { font-size: var(--fs-micro); line-height: 1; color: var(--ink-mute); }
 .care-trend__col.is-today .care-trend__day { color: var(--ink); font-weight: 700; }
@@ -31380,123 +31637,46 @@ const OBSERVATIONS = [
 
 __def('js/components/CircleOfLife.js', function (__x, __req) {
 /**
- * CIRCLE OF LIFE — births and deaths, the last ten days, by species and class
+ * CIRCLE OF LIFE — births and deaths, and what is counted beside them
  * ───────────────────────────────────────────────────────────────────────────
- * Three white panels under the Recent Observations rail, on V4 only. The
- * shapes are the compliance dashboard's (WorkbookDashboard.tsx): its
- * "Top 10 scheduled species" card gives the two lists — class chips over a
- * ranked list, the figure bold on the right with a note under it — and its
- * "Appendix, by class" card gives the table. They were asked for by their
- * names, so they are drawn to match rather than reinvented.
- *
- * The lists are LAST 10 DAYS, the figure is the ten-day count and the note
- * is today's share of it, so the person reading sees both the trend and the
- * morning. A chip narrows a list to one class and the "All" chip widens it
- * back; the chips carry their own counts so a class with nothing in it says
- * so before it is tapped, and a tapped chip is `aria-pressed`, so the state
- * is spoken and not only coloured.
- *
- * The table's rows are the two kinds, each figure with its share of the
- * class's animals under it, and its foot is the animals held per class —
- * the owner's ask (18 Sep 2026), in place of a net row: a birth or death
- * count means little until it is read against how many animals there are,
- * and a mortality rate is what a director compares between classes.
- *
- * Nothing here is a link: there is no natality or mortality page in this
- * build, so the panels are regions and not anchors to nowhere.
+ * Four counts, the two week tiles, then three drawings, each its own kind:
+ * natality as a ranked list with class chips (who was born), mortality as
+ * a donut by class with the animals named beneath (where the deaths fell),
+ * and the two against each other as diverging bars by class, each figure
+ * with its share of the animals held. Everything reads the one event seed
+ * (js/data/lifecycle.js), which answers only for the scope.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES, summarise, byClass, incidents } = __req('js/data/lifecycle.js')
 const { BY_CLASS } = __req('js/data/collection.js')
-const { esc, fmt, renderCounts } = __req('js/components/LifePanel.js')
+const scope = __req('js/state/reportScope.js')
 const { getVariant } = __req('js/data/cardVariants.js')
 const { renderCard } = __req('js/components/ModuleCard.js')
+const { esc, fmt, renderCounts, panel, listCard, pie, diverging } = __req('js/components/LifePanel.js')
 
 const DAYS = 10
-const KINDS = [
-  { kind: 'natality',  title: 'Natality',  unit: 'births', head: 'Births' },
-  { kind: 'mortality', title: 'Mortality', unit: 'deaths', head: 'Deaths' },
-]
+const one = (klass) => (CLASSES.find((c) => c.key === klass) || { one: 'Other' }).one
+const standing = (r) => `${one(r.klass)} · ${r.schedule ? `Schedule ${r.schedule}` : 'Not scheduled'}`
 
-
-/* "Schedule I" for a scheduled species, "Not scheduled" otherwise — the flag
-   asked for in place of a scientific name */
-function standing(row) {
-  const klass = CLASSES.find((c) => c.key === row.klass)
-  const cls = klass ? klass.one : 'Other'
-  return `${cls} · ${row.schedule ? `Schedule ${row.schedule}` : 'Not scheduled'}`
+function tiles() {
+  const b = summarise('natality', 0).total, d = summarise('mortality', 0).total
+  return [
+    { key: 'births',   label: 'Births today',    n: b, note: `${fmt(summarise('natality', 7).total)} this week` },
+    { key: 'deaths',   label: 'Deaths today',    n: d, note: `${fmt(summarise('mortality', 7).total)} this week` },
+    { key: 'neonatal', label: 'Neonatal deaths', n: incidents('neonatal', 30), note: 'under 30 days old, last 30 days' },
+    { key: 'escape',   label: 'Escapes',         n: incidents('escape', 30),   note: 'last 30 days, all recovered' },
+    { key: 'fetal',    label: 'Fetal deaths',    n: incidents('fetal', 30),    note: 'stillbirths and abortions, 30 days' },
+  ]
 }
 
-function listCard(spec) {
-  const { rows, total } = summarise(spec.kind, DAYS)
-  const counts = { all: total }
-  for (const c of CLASSES) counts[c.key] = rows.filter((r) => r.klass === c.key).reduce((n, r) => n + r.count, 0)
-
-  const el = document.createElement('section')
-  el.className = 'life-card'
-  el.setAttribute('aria-label', `${spec.title}, last ${DAYS} days`)
-  el.innerHTML =
-    `<h3 class="life-card__title">${spec.title} <span class="life-card__span">· last ${DAYS} days</span></h3>` +
-    `<div class="life-chips" role="group" aria-label="Filter by class">` +
-      [{ key: 'all', label: 'All' }, ...CLASSES].map((c) =>
-        `<button type="button" class="life-chip" data-key="${c.key}" aria-pressed="${c.key === 'all'}"` +
-        `${counts[c.key] ? '' : ' disabled'}>${c.label} <b>${fmt(counts[c.key])}</b></button>`).join('') +
-    `</div>` +
-    `<div class="life-cols" aria-hidden="true"><span>Species</span><span>${spec.head}</span></div>` +
-    `<ol class="life-list"></ol>`
-
-  const list = el.querySelector('.life-list')
-  const draw = (key) => {
-    const shown = key === 'all' ? rows : rows.filter((r) => r.klass === key)
-    list.innerHTML = shown.length ? shown.map((r, i) =>
-      `<li class="life-row">` +
-        `<span class="life-row__rank">${i + 1}</span>` +
-        `<span class="life-row__who"><span class="life-row__name">${esc(r.common)}</span>` +
-          `<span class="life-row__sub">${esc(standing(r))}</span></span>` +
-        `<span class="life-row__val"><b>${fmt(r.count)}</b>` +
-          `<span class="life-row__note">${r.today ? `${fmt(r.today)} today` : '– today'}</span></span>` +
-      `</li>`).join('')
-      : `<li class="life-row life-row--none">No ${spec.unit} in the last ${DAYS} days</li>`
-  }
-  draw('all')
-  el.querySelector('.life-chips').addEventListener('click', (ev) => {
-    const btn = ev.target.closest('.life-chip')
-    if (!btn || btn.disabled) return
-    for (const b of el.querySelectorAll('.life-chip')) b.setAttribute('aria-pressed', String(b === btn))
-    draw(btn.dataset.key)
-  })
-  return el
+function actionables() {
+  return [
+    { text: 'Deaths today to record and review', n: summarise('mortality', 0).total, due: true, roles: ['vet', 'curator', 'admin'] },
+    { text: 'Neonatal deaths this month, cause to confirm', n: incidents('neonatal', 30), due: false, roles: ['vet', 'biologist'] },
+    { text: 'Escapes this month, enclosure checks to close', n: incidents('escape', 30), due: false, roles: ['curator', 'keeper', 'horti'] },
+  ]
 }
 
-function tableCard() {
-  const rows = KINDS.map((k) => ({ ...k, n: byClass(k.kind, DAYS) }))
-  const held = { all: 0 }
-  for (const c of CLASSES) { const r = BY_CLASS.find((x) => x.key === c.key); held[c.key] = r ? r.animals : 0; held.all += held[c.key] }
-  /* the share, to one place; nothing is written under a zero */
-  const share = (v, of) => (v && of ? `<small>${(v / of * 100).toFixed(1)}%</small>` : '')
-  const cell = (v, of) => `<td class="${v === 0 ? 'is-zero' : ''}">${fmt(v)}${share(v, of)}</td>`
-
-  const el = document.createElement('section')
-  el.className = 'life-card life-card--table'
-  el.setAttribute('aria-label', `By class, last ${DAYS} days, against animals held`)
-  el.innerHTML =
-    `<h3 class="life-card__title">By class <span class="life-card__span">· last ${DAYS} days</span></h3>` +
-    `<table class="life-table life-table--share"><thead><tr><th scope="col">Kind</th>` +
-      CLASSES.map((c) => `<th scope="col" class="is-${c.key}"><abbr title="${c.label}">${c.short}</abbr></th>`).join('') +
-      `<th scope="col">All</th></tr></thead><tbody>` +
-      rows.map((r) => `<tr><th scope="row">${r.head}<small>share</small></th>` +
-        CLASSES.map((c) => cell(r.n[c.key], held[c.key])).join('') + cell(r.n.all, held.all) + `</tr>`).join('') +
-    `</tbody><tfoot><tr><th scope="row">Animals</th>` +
-      CLASSES.map((c) => `<td>${fmt(held[c.key])}</td>`).join('') + `<td>${fmt(held.all)}</td>` +
-    `</tr></tfoot></table>`
-  return el
-}
-
-/* THE TWO WEEK TILES, drawn by the module card renderer exactly as they were
-   drawn in All Modules — same variant, same size — and placed here at the
-   head of the band (owner, 18 Sep 2026: "natality and mortality cards to be
-   above the list"). They are the same 2×1 cell the grid gave them, so the
-   band's tile row borrows the grid's row height. */
 function weekTiles() {
   const row = document.createElement('div')
   row.className = 'life-tiles'
@@ -31509,37 +31689,55 @@ function weekTiles() {
   return row
 }
 
-/* the four counts under the tiles: the other things counted beside births
-   and deaths, over 30 days, and the enclosures the site is made of — the
-   latter read off the search index, which already lists every one */
-function tiles() {
-  const enclosures = __req('js/data/searchIndex.js').index().filter((r) => r.type === 'enclosure').length
-  const tiles = [
-    { key: 'neonatal',   label: 'Neonatal deaths', n: incidents('neonatal', 30), note: 'under 30 days old, last 30 days' },
-    { key: 'fetal',      label: 'Fetal deaths',    n: incidents('fetal', 30),    note: 'stillbirths and abortions, last 30 days' },
-    { key: 'escape',     label: 'Escapes',         n: incidents('escape', 30),   note: 'last 30 days, all recovered' },
-    { key: 'enclosures', label: 'Enclosures',      n: enclosures,                note: 'across the site' },
-  ]
-  return tiles
+function natalityList() {
+  const { rows, total } = summarise('natality', DAYS)
+  return listCard({
+    title: 'Natality', span: `last ${DAYS} days`, aria: `Natality, last ${DAYS} days: ${fmt(total)} births`,
+    colHead: ['Species', 'Births'], rows, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true }, ...CLASSES.map((c) => ({ key: c.key, label: c.label, test: (r) => r.klass === c.key }))],
+    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.common)}</span><span class="life-row__sub">${esc(standing(r))}</span></span>` +
+      `<span class="life-row__val"><b>${fmt(r.count)}</b><span class="life-row__note">${r.today ? `${fmt(r.today)} today` : '– today'}</span></span>`,
+    empty: `No births in the last ${DAYS} days`,
+  })
+}
+
+function mortalityDonut() {
+  const { rows, total } = summarise('mortality', DAYS)
+  const n = byClass('mortality', DAYS)
+  const slices = CLASSES.map((c) => ({ label: c.label, n: n[c.key] })).filter((sl) => sl.n)
+  return panel({
+    title: 'Mortality', span: `last ${DAYS} days`, aria: `Mortality, last ${DAYS} days: ${fmt(total)} deaths, ` + slices.map((sl) => `${sl.n} ${sl.label}`).join(', '),
+    body: pie({ slices, hole: 44, centre: fmt(total), centreNote: 'deaths' }) +
+      `<ol class="life-mini">` + rows.map((r) => `<li><span>${esc(r.common)}<small>${esc(standing(r))}</small></span><b>${fmt(r.count)}</b></li>`).join('') + `</ol>`,
+  })
+}
+
+function byClassDiverging() {
+  const b = byClass('natality', DAYS), d = byClass('mortality', DAYS)
+  const held = (k) => scope.scale((BY_CLASS.find((x) => x.key === k) || { animals: 0 }).animals)
+  const share = (v, of) => (v && of ? `${(v / of * 100).toFixed(1)}% of ${fmt(of)}` : '')
+  return panel({
+    title: 'Births against deaths', span: 'by class, against animals held', cls: 'life-card--wide',
+    aria: `Births against deaths by class, last ${DAYS} days: ${fmt(b.all)} births, ${fmt(d.all)} deaths`,
+    body: diverging({ leftLabel: 'Deaths', rightLabel: 'Births',
+      rows: CLASSES.map((c) => ({ label: c.label, left: d[c.key], right: b[c.key], leftNote: share(d[c.key], held(c.key)), rightNote: share(b[c.key], held(c.key)) })) }),
+  })
 }
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles().slice(0, 4))
   const grid = root.querySelector('.life-grid')
-  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
   grid.before(weekTiles())
-  for (const k of KINDS) grid.appendChild(listCard(k))
-  grid.appendChild(tableCard())
+  grid.append(natalityList(), mortalityDonut(), byClassDiverging())
   root.hidden = false
   return root
 }
 
 __x.mount = mount
-/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
-   card shows, the kind of thing one aggregate query serves — and `render()`
-   is the expensive one, run only when the report page is opened. */
 __x.report = { id: 'circleOfLife', title: 'Circle of Life', icon: 'd-animal', sub: 'births, deaths and what is counted beside them',
-  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
+  summary: () => tiles().slice(0, 4), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/LifePanel.js', function (__x, __req) {
@@ -31659,6 +31857,240 @@ function renderCounts(tiles) {
     `</section>`).join('')
 }
 
+
+/* ═══ THE DRAWING KIT ═══════════════════════════════════════════════════
+   One presentation per kind of data (owner, 18 Sep 2026: "each data has to
+   be presented in a different format"), all in ONE palette — the brand teal
+   in five tints, the ink for text, coral for the one meaning it has on
+   every report: needs action. No class colours. Every drawing carries its
+   figures as text beside or inside it, so nothing is read from colour or
+   length alone, and every panel has an aria-label that says the same in a
+   sentence. */
+const RAMP = ['viz-900', 'viz-700', 'viz-500', 'viz-300']
+
+/* a white panel with a title and a body */
+function panel({ title, span, aria, cls = '', body }) {
+  const el = document.createElement('section')
+  el.className = `life-card ${cls}`.trim()
+  el.setAttribute('aria-label', aria || title)
+  el.innerHTML = `<h3 class="life-card__title">${esc(title)}${span ? ` <span class="life-card__span">· ${esc(span)}</span>` : ''}</h3>` + body
+  return el
+}
+const pctOf = (a, b) => (b ? Math.round((a / b) * 100) : 0)
+
+/* DIVERGING BARS — two quantities per row pulling opposite ways from a
+   centre line; the left is the pale tint so the eye lands on the right */
+function diverging({ rows, leftLabel, rightLabel }) {
+  const max = Math.max(1, ...rows.flatMap((r) => [r.left, r.right]))
+  return `<div class="dv"><div class="dv__head"><span>${esc(leftLabel)}</span><span>${esc(rightLabel)}</span></div>` +
+    rows.map((r) =>
+      `<div class="dv__row"><span class="dv__label">${esc(r.label)}</span>` +
+        `<span class="dv__side dv__side--l"><i style="width:${(r.left / max) * 100}%"></i><b>${fmt(r.left)}</b>${r.leftNote ? `<small>${esc(r.leftNote)}</small>` : ''}</span>` +
+        `<span class="dv__side dv__side--r"><i style="width:${(r.right / max) * 100}%"></i><b>${fmt(r.right)}</b>${r.rightNote ? `<small>${esc(r.rightNote)}</small>` : ''}</span>` +
+      `</div>`).join('') + `</div>`
+}
+
+/* STACKED BARS — one bar per row, split into segments of the ramp; the
+   segment's figure is written inside it when it has room */
+function stacked({ rows, segs }) {
+  const max = Math.max(1, ...rows.map((r) => r.total))
+  return `<div class="sb">` + rows.map((r) =>
+    `<div class="sb__row"><span class="sb__label">${esc(r.label)}<b>${fmt(r.total)}</b></span>` +
+      `<span class="sb__track" style="width:${(r.total / max) * 100}%">` +
+        segs.map((sg, i) => r.n[sg.key] ? `<i class="${RAMP[i % RAMP.length]}" style="flex:${r.n[sg.key]}" title="${esc(sg.label)}: ${fmt(r.n[sg.key])}"><b>${r.n[sg.key] / r.total > .12 ? fmt(r.n[sg.key]) : ''}</b></i>` : '').join('') +
+      `</span></div>`).join('') +
+    `<div class="life-legend">${segs.map((sg, i) => `<span><i class="${RAMP[i % RAMP.length]}"></i>${esc(sg.label)}</span>`).join('')}</div></div>`
+}
+
+/* RUNWAY — items placed along a span of days, one lane per kind, the
+   windows marked as ticks; each item is a dot with its figure, its name in
+   the key beneath so the runway stays readable when dots crowd */
+function runway({ lanes, span, ticks }) {
+  return `<div class="rw"><div class="rw__axis"><span class="rw__lanehead">Today</span><span class="rw__ticks">` +
+      ticks.map((t) => `<i style="left:${(t / span) * 100}%">${t} d</i>`).join('') + `</span></div>` +
+    lanes.map((l) =>
+      `<div class="rw__lane"><span class="rw__lanehead">${esc(l.label)}<small>${fmt(l.items.length)}</small></span><span class="rw__track">` +
+        ticks.map((t) => `<u style="left:${(t / span) * 100}%"></u>`).join('') +
+        l.items.map((it) => `<i class="rw__dot${it.soon ? ' is-soon' : ''}" style="left:${Math.min(100, (it.at / span) * 100)}%" title="${esc(it.label)} · ${esc(it.note)}"><b>${esc(it.tag)}</b></i>`).join('') +
+      `</span></div>`).join('') +
+    `<ol class="rw__key">` + lanes.flatMap((l) => l.items.map((it) => ({ ...it, lane: l.label }))).sort((a, b) => a.at - b.at)
+      .map((it) => `<li><b>${esc(it.tag)}</b><span>${esc(it.label)}<small>${esc(it.lane)} · ${esc(it.note)}</small></span><em>day ${it.at}</em></li>`).join('') + `</ol></div>`
+}
+
+/* AGEING BAR — one bar split by age bins, then the oldest few named */
+function ageing({ bins, oldest }) {
+  const total = bins.reduce((n, b) => n + b.n, 0) || 1
+  return `<div class="ag"><span class="ag__bar">` + bins.map((b, i) =>
+      b.n ? `<i class="${RAMP[Math.min(i + 1, 3) - (i === bins.length - 1 ? 1 : 0)]}${i === bins.length - 1 ? ' is-old' : ''}" style="flex:${b.n}"><b>${fmt(b.n)}</b></i>` : '').join('') + `</span>` +
+    `<div class="ag__bins">` + bins.map((b) => `<span><b>${fmt(b.n)}</b>${esc(b.label)}<small>${pctOf(b.n, total)}%</small></span>`).join('') + `</div>` +
+    `<ol class="ag__oldest">` + oldest.map((o) => `<li><span>${esc(o.label)}<small>${esc(o.note)}</small></span><b class="${o.late ? 'is-late' : ''}">${esc(o.value)}</b></li>`).join('') + `</ol></div>`
+}
+
+/* COLUMNS — one column per day, this week full strength, the count on top */
+function columns({ days, labels, recent }) {
+  const max = Math.max(1, ...days)
+  return `<div class="care-trend__plot" aria-hidden="true">` + days.map((n, i) => {
+    const fromEnd = days.length - 1 - i
+    return `<span class="care-trend__col${fromEnd < recent ? ' is-this' : ''}${fromEnd === 0 ? ' is-today' : ''}">` +
+      `<span class="care-trend__n2">${n || ''}</span><span class="care-trend__bar" style="height:${Math.round((n / max) * 100)}%"></span>` +
+      `<span class="care-trend__day">${esc(labels[i])}</span></span>`
+  }).join('') + `</div>`
+}
+
+/* RINGS — a share as an arc; one big, or a row of small */
+function ring(value, size, text, label, note) {
+  const r = size / 2 - 5, c = 2 * Math.PI * r
+  return `<span class="rg" style="--size:${size}px"><svg viewBox="0 0 ${size} ${size}" aria-hidden="true">` +
+      `<circle class="rg__track" cx="${size / 2}" cy="${size / 2}" r="${r}"/>` +
+      `<circle class="rg__arc" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-dasharray="${(c * value).toFixed(1)} ${c.toFixed(1)}"/>` +
+    `</svg><b>${esc(text)}</b>${label ? `<span class="rg__label">${esc(label)}</span>` : ''}${note ? `<small>${esc(note)}</small>` : ''}</span>`
+}
+function rings({ big, items }) {
+  return `<div class="rgs">${big ? ring(big.value, 132, big.text, big.label, big.note) : ''}<div class="rgs__row">` +
+    items.map((it) => ring(it.value, 84, it.text, it.label, it.note)).join('') + `</div></div>`
+}
+
+/* PIE / DONUT — slices of one whole in the ramp, the legend carrying the
+   figures; `hole` makes it a donut with the total in the middle */
+function arc(cx, cy, r, a0, a1, hole) {
+  const P = (a, rr) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)]
+  const large = a1 - a0 > Math.PI ? 1 : 0
+  const [x0, y0] = P(a0, r), [x1, y1] = P(a1, r)
+  if (!hole) return `M${cx} ${cy} L${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`
+  const [x2, y2] = P(a1, hole), [x3, y3] = P(a0, hole)
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} L${x2.toFixed(2)} ${y2.toFixed(2)} A${hole} ${hole} 0 ${large} 0 ${x3.toFixed(2)} ${y3.toFixed(2)} Z`
+}
+function pie({ slices, hole = 0, centre = '', centreNote = '' }) {
+  const total = slices.reduce((n, sl) => n + sl.n, 0) || 1
+  let a = -Math.PI / 2
+  const paths = slices.map((sl, i) => {
+    const a1 = a + (sl.n / total) * Math.PI * 2 - .0001
+    const d = arc(70, 70, 66, a, sl.n === total ? a + Math.PI * 2 - .0001 : a1, hole)
+    a = a1 + .0001
+    return `<path class="${RAMP[i % RAMP.length]}" d="${d}"><title>${esc(sl.label)}: ${fmt(sl.n)}</title></path>`
+  }).join('')
+  return `<div class="pie"><svg viewBox="0 0 140 140" aria-hidden="true">${paths}</svg>` +
+    (hole ? `<span class="pie__centre"><b>${esc(centre)}</b><small>${esc(centreNote)}</small></span>` : '') +
+    `<ul class="pie__legend">` + slices.map((sl, i) => `<li><i class="${RAMP[i % RAMP.length]}"></i><span>${esc(sl.label)}</span><b>${fmt(sl.n)}</b><small>${pctOf(sl.n, total)}%${sl.note ? ' · ' + esc(sl.note) : ''}</small></li>`).join('') + `</ul></div>`
+}
+
+/* FUNNEL — steps narrowing down the page, centred, so the drop between
+   steps is the thing seen; a side step (died) sits apart */
+function funnel({ steps, aside }) {
+  const max = Math.max(1, ...steps.map((st) => st.n))
+  return `<div class="fn">` + steps.map((st, i) =>
+      `<div class="fn__step"><span class="fn__bar ${RAMP[Math.min(i, 3)]}" style="width:${Math.max(18, (st.n / max) * 100)}%"><b>${fmt(st.n)}</b></span>` +
+      `<span class="fn__label">${esc(st.label)}<small>${esc(st.note)}</small></span></div>`).join('') +
+    (aside ? `<div class="fn__aside"><b>${fmt(aside.n)}</b><span>${esc(aside.label)}<small>${esc(aside.note)}</small></span></div>` : '') + `</div>`
+}
+
+/* RANGE STRIPS — a reading on a track: the target band, the last day's
+   reach as a whisker, the reading now as the dot; coral when it is out */
+function strips({ rows, unit }) {
+  return `<div class="rs">` + rows.map((r) => {
+    const lo = Math.min(r.lo, r.min, r.now), hi = Math.max(r.hi, r.max, r.now), w = hi - lo || 1
+    const X = (v) => (((v - lo) / w) * 100).toFixed(1)
+    return `<div class="rs__row${r.out ? ' is-out' : ''}"><span class="rs__label">${esc(r.label)}<small>${esc(r.sub)}</small></span>` +
+      `<span class="rs__track"><i class="rs__band" style="left:${X(r.lo)}%;width:${(((r.hi - r.lo) / w) * 100).toFixed(1)}%"></i>` +
+        `<i class="rs__whisker" style="left:${X(r.min)}%;width:${(((r.max - r.min) / w) * 100).toFixed(1)}%"></i>` +
+        `<i class="rs__now" style="left:${X(r.now)}%"></i></span>` +
+      `<span class="rs__val"><b>${esc(r.text)}</b><small>${r.lo}–${r.hi}${esc(unit)}</small></span></div>`
+  }).join('') + `<div class="life-legend"><span><i class="rs__k-band"></i>Target</span><span><i class="rs__k-whisker"></i>Last 24 h</span><span><i class="rs__k-now"></i>Now</span></div></div>`
+}
+
+/* BULLETS — a value against its target on one bar: the bar is the value,
+   the tick is the target, past the tick is coral */
+function bullets({ rows }) {
+  return `<div class="bl">` + rows.map((r) => {
+    const max = Math.max(r.value, r.target) * 1.25 || 1
+    return `<div class="bl__row${r.late ? ' is-late' : ''}"><span class="bl__label">${esc(r.label)}<small>${esc(r.sub)}</small></span>` +
+      `<span class="bl__track"><i class="bl__bar" style="width:${((r.value / max) * 100).toFixed(1)}%"></i><u class="bl__target" style="left:${((r.target / max) * 100).toFixed(1)}%"></u></span>` +
+      `<span class="bl__val"><b>${esc(r.text)}</b><small>${esc(r.note)}</small></span></div>`
+  }).join('') + `</div>`
+}
+
+/* DOTS — a strip plot: every item a dot on one axis, one row per group, the
+   target a line and the mean a bar beneath the dots; open items hollow */
+function dots({ rows, max, unit }) {
+  const X = (v) => ((v / max) * 100).toFixed(1)
+  const ticks = [0, Math.round(max / 3), Math.round((2 * max) / 3), Math.floor(max)]
+  return `<div class="dp"><div class="dp__axis"><span></span><span class="dp__ticks">${ticks.map((t) => `<i style="left:${X(t)}%">${t} ${esc(unit)}</i>`).join('')}</span><span></span></div>` +
+    rows.map((r) =>
+      `<div class="dp__row"><span class="dp__label">${esc(r.label)}<small>${esc(r.sub)}</small></span>` +
+        `<span class="dp__track"><u class="dp__target" style="left:${X(r.target)}%"></u>` +
+          (r.mean ? `<i class="dp__mean" style="width:${X(r.mean)}%"></i>` : '') +
+          r.points.map((pt) => `<i class="dp__dot${pt.open ? ' is-open' : ''}${pt.late ? ' is-late' : ''}" style="left:${X(pt.at)}%" title="${esc(pt.label)}"></i>`).join('') +
+        `</span><span class="dp__val"><b class="${r.mean > r.target ? 'is-late' : ''}">${esc(r.text)}</b><small>${esc(r.note)}</small></span></div>`).join('') +
+    `<div class="life-legend"><span><i class="dp__k-dot"></i>Reported</span><span><i class="dp__k-open"></i>Still open</span><span><i class="dp__k-target"></i>Target</span><span><i class="dp__k-mean"></i>Average</span></div></div>`
+}
+
+/* TIMELINE — items down the page, grouped under the day they happened */
+function timeline({ groups }) {
+  return `<div class="tl">` + groups.map((g) =>
+    `<div class="tl__day"><span class="tl__when">${esc(g.when)}</span><ol class="tl__items">` +
+      g.items.map((it) => `<li><span class="tl__dot"></span><span class="tl__body"><b>${esc(it.title)}</b><span>${esc(it.text)}</span><small>${esc(it.sub)}</small></span></li>`).join('') +
+    `</ol></div>`).join('') + `</div>`
+}
+
+/* PROGRESS — each row a bar filling toward its end, with where it stands */
+function progress({ rows }) {
+  return `<div class="pg">` + rows.map((r) =>
+    `<div class="pg__row${r.complete ? ' is-done' : ''}${r.late ? ' is-late' : ''}"><span class="pg__label">${esc(r.label)}<small>${esc(r.sub)}</small></span>` +
+      `<span class="pg__track"><i style="width:${Math.min(100, Math.round((r.done / (r.total || 1)) * 100))}%"></i></span>` +
+      `<span class="pg__val"><b>${esc(r.text)}</b><small>${esc(r.note)}</small></span></div>`).join('') + `</div>`
+}
+
+/* FLOW — a movement from one place to another, the animals as a bar */
+function flow({ rows }) {
+  const max = Math.max(1, ...rows.map((r) => r.n))
+  return `<ol class="fl">` + rows.map((r) =>
+    `<li class="fl__row"><span class="fl__ends"><b>${esc(r.from)}</b><i class="fl__arrow${r.across ? ' is-across' : ''}"></i><b>${esc(r.to)}</b></span>` +
+      `<span class="fl__bar"><i style="width:${(r.n / max) * 100}%"></i><b>${fmt(r.n)}</b></span>` +
+      `<small>${esc(r.note)}</small></li>`).join('') + `</ol>`
+}
+
+/* 100% STACKED — every row the same width, split by share */
+function shares({ rows, segs }) {
+  return `<div class="sh">` + rows.map((r) => {
+    const total = segs.reduce((n, sg) => n + (r.n[sg.key] || 0), 0) || 1
+    return `<div class="sh__row"><span class="sh__label">${esc(r.label)}<b>${fmt(total)}</b></span><span class="sh__track">` +
+      segs.map((sg, i) => r.n[sg.key] ? `<i class="${RAMP[i * 2 % 4]}" style="flex:${r.n[sg.key]}"><b>${fmt(r.n[sg.key])}</b></i>` : '').join('') + `</span></div>`
+  }).join('') + `<div class="life-legend">${segs.map((sg, i) => `<span><i class="${RAMP[i * 2 % 4]}"></i>${esc(sg.label)}</span>`).join('')}</div></div>`
+}
+
+/* TILES — small figures in a grid; a due one is coral and says so */
+function tiles({ items }) {
+  return `<div class="tg">` + items.map((it) =>
+    `<span class="tg__tile${it.due ? ' is-due' : ''}"><b>${fmt(it.n)}</b><span>${esc(it.label)}</span><small>${esc(it.note)}</small></span>`).join('') + `</div>`
+}
+
+/* CHIP CLOUD — names in groups, each with its figure */
+function cloud({ groups }) {
+  return `<div class="cc">` + groups.map((g) =>
+    `<div class="cc__group"><span class="cc__head">${esc(g.label)}<b>${fmt(g.items.length)}</b></span><span class="cc__chips">` +
+      g.items.map((it) => `<span class="cc__chip">${esc(it.name)}<b>${fmt(it.n)}</b></span>`).join('') + `</span></div>`).join('') + `</div>`
+}
+
+__x.panel = panel
+__x.RAMP = RAMP
+__x.diverging = diverging
+__x.stacked = stacked
+__x.runway = runway
+__x.ageing = ageing
+__x.columns = columns
+__x.rings = rings
+__x.pie = pie
+__x.funnel = funnel
+__x.strips = strips
+__x.bullets = bullets
+__x.timeline = timeline
+__x.dots = dots
+__x.progress = progress
+__x.flow = flow
+__x.shares = shares
+__x.tiles = tiles
+__x.cloud = cloud
+
 __x.esc = esc
 __x.fmt = fmt
 __x.renderCounts = renderCounts
@@ -31670,546 +32102,405 @@ __x.matrixTable = matrixTable
 
 __def('js/components/AnimalCare.js', function (__x, __req) {
 /**
- * ANIMAL CARE — the medical side of the morning, on V4
+ * ANIMAL CARE — the medical side of the morning
  * ───────────────────────────────────────────────────────────────────────────
- * Under Circle of Life, in the same white panels. The owner listed seven
- * things (18 Sep 2026) and left the shape to me; they fall into three:
- *
- *   COUNTS — how many animals are in hospital, under medication, in
- *   maternity care, and flagged serious. Four tiles across the top, each
- *   a figure with today's change under it, because a count with no
- *   direction is a number nobody acts on.
- *
- *   LISTS — the care that is overdue (vaccination, deworming, supplement)
- *   and the medicines the central pharmacy has not sent. Both are the
- *   Circle of Life list: chips over rows, the figure on the right. The
- *   pharmacy's chips are the three ages the owner asked for; the oldest
- *   bin opens by default, since an indent three weeks old is the one to
- *   chase and a two-day-old one is just the post.
- *
- *   A TREND — enrichment tickets raised per day for two weeks, with this
- *   week against last, drawn as bars because the week tiles are bars.
- *
- * Every figure is counted from js/data/care.js at render, so the tiles,
- * the chip counts and the rows always agree. No links: none of these
- * pages exist in this build.
+ * Four counts, then five drawings, each its own kind: the cases as stacked
+ * bars (state by class), the care overdue as a ranked list (it is the
+ * work list), the care due ahead as a runway of the next 45 days by
+ * medicine, the pharmacy's debt as an ageing bar with the oldest indents
+ * named, and enrichment tickets as columns, this week against last.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { OVERDUE, CARE_KINDS, DUE_AHEAD, AHEAD_WINDOWS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts, casesByClass } = __req('js/data/care.js')
-const { esc, fmt, listCard, classTable , renderCounts } = __req('js/components/LifePanel.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, listCard, stacked, runway, ageing, columns } = __req('js/components/LifePanel.js')
 
-/* the four tiles: figure, what it counts, and what moved today */
+const kindLabel = (k) => CARE_KINDS.find((x) => x.key === k).label
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
+const overdue = () => scope.scoped(OVERDUE)
+const pharmacy = () => scope.scoped(PHARMACY)
+const ahead = () => scope.scoped(DUE_AHEAD)
+
 function tiles() {
   const c = counts()
-  const tiles = [
-    { key: 'hospital',   label: 'In hospital',       n: c.hospital.n,   note: c.hospital.today   ? `${c.hospital.today} admitted today`  : 'No admissions today' },
-    { key: 'medication', label: 'Under medication',  n: c.medication.n, note: c.medication.today ? `${c.medication.today} started today`  : 'No new courses today' },
-    { key: 'maternity',  label: 'In maternity care', n: c.maternity.n,  note: c.maternity.today  ? `${c.maternity.today} moved in today`  : 'No new mothers today' },
-    { key: 'serious',    label: 'Serious condition', n: c.serious.n,    note: c.serious.today    ? `${c.serious.today} flagged today`     : 'None flagged today' },
+  return [
+    { key: 'hospital',   label: 'In hospital',       n: c.hospital.n,   note: c.hospital.today   ? `${c.hospital.today} admitted today` : 'no admissions today' },
+    { key: 'medication', label: 'Under medication',  n: c.medication.n, note: c.medication.today ? `${c.medication.today} started today` : 'no new courses today' },
+    { key: 'maternity',  label: 'In maternity care', n: c.maternity.n,  note: c.maternity.today  ? `${c.maternity.today} moved in today` : 'no new mothers today' },
+    { key: 'serious',    label: 'Serious condition', n: c.serious.n,    note: c.serious.today    ? `${c.serious.today} flagged today` : 'none flagged today' },
   ]
-  return tiles
+}
+
+function actionables() {
+  const od = overdue()
+  const old = pharmacy().filter((r) => r.ago > 15)
+  const soon = ahead().filter((r) => r.due <= 15)
+  return [
+    { text: 'Animals overdue for care', n: od.length, due: true, roles: ['vet', 'paravet', 'keeper'], note: od.length ? `worst ${Math.max(...od.map((r) => r.overdue))} days late` : '' },
+    { text: 'Serious cases to review', n: counts().serious.n, due: true, roles: ['vet', 'curator'] },
+    { text: 'Pharmacy indents older than 15 days to chase', n: old.length, due: true, roles: ['vet', 'admin'] },
+    { text: 'Medicines to indent for the next 15 days', n: soon.length, due: false, roles: ['vet', 'paravet', 'admin'] },
+  ]
+}
+
+function casesCard() {
+  const { rows, foot } = casesByClass()
+  return panel({
+    title: 'Medical cases', span: 'by state and class', aria: `Medical cases: ${fmt(foot.n.all)} animals in care`,
+    body: stacked({ rows: rows.map((r) => ({ label: r.head, total: r.n.all, n: r.n })), segs: CLASSES }) +
+      `<div class="ag__bins" style="margin-top:16px"><span><b>${fmt(foot.n.all)}</b>Animals in care<small>each counted once</small></span>` +
+        CLASSES.map((c) => `<span><b>${fmt(foot.n[c.key])}</b>${esc(c.label)}<small>${pct(foot.n[c.key], foot.n.all)}% of cases</small></span>`).join('') + `</div>`,
+  })
 }
 
 function overdueCard() {
-  const rows = [...OVERDUE].sort((a, b) => b.overdue - a.overdue)
+  const rows = [...overdue()].sort((a, b) => b.overdue - a.overdue)
   return listCard({
-    title: 'Care overdue', span: 'by animal', aria: 'Care overdue, by animal',
+    title: 'Care overdue', span: 'by animal', aria: `Care overdue: ${fmt(rows.length)} animals`,
     colHead: ['Animal', 'Overdue'], rows, open: 'all',
-    chips: [{ key: 'all', label: 'All', test: () => true },
-      ...CARE_KINDS.map((k) => ({ key: k.key, label: k.label, test: (r) => r.kind === k.key }))],
-    row: (r, i) =>
-      `<span class="life-row__rank">${i + 1}</span>` +
-      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span>` +
-        `<span class="life-row__sub">${esc(CARE_KINDS.find((k) => k.key === r.kind).label)} · ${esc(r.enclosure)} · ${esc(r.code)}</span></span>` +
-      `<span class="life-row__val"><b>${r.overdue}</b><span class="life-row__note">${r.overdue === 1 ? 'day' : 'days'} late</span></span>`,
+    chips: [{ key: 'all', label: 'All', test: () => true }, ...CARE_KINDS.map((k) => ({ key: k.key, label: k.label, test: (r) => r.kind === k.key }))],
+    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span><span class="life-row__sub">${esc(kindLabel(r.kind))} · ${esc(r.enclosure)} · ${esc(r.code)}</span></span>` +
+      `<span class="life-row__val is-late"><b>${r.overdue}</b><span class="life-row__note">${r.overdue === 1 ? 'day' : 'days'} late</span></span>`,
     empty: 'Nothing overdue',
   })
 }
 
-/* what the next 15, 30 and 45 days will need, by medicine — a window is a
-   chip, and a wider window includes the narrower one; soonest first */
-function dueAheadCard() {
-  const rows = [...DUE_AHEAD].sort((a, b) => a.due - b.due)
-  const kind = (k) => CARE_KINDS.find((x) => x.key === k).label
-  return listCard({
-    title: 'Care due ahead', span: 'medicine required', aria: 'Care due ahead, medicine required',
-    colHead: ['Medicine', 'Required'], rows, open: 'd15',
-    chips: AHEAD_WINDOWS.map((w) => ({ key: w.key, label: w.label, test: (r) => r.due <= w.days })),
-    row: (r, i) =>
-      `<span class="life-row__rank">${i + 1}</span>` +
-      `<span class="life-row__who"><span class="life-row__name">${esc(r.medicine)}</span>` +
-        `<span class="life-row__sub">${esc(kind(r.kind))} · ${fmt(r.animals)} animals · first due in ${r.due} day${r.due === 1 ? '' : 's'}</span></span>` +
-      `<span class="life-row__val"><b>${esc(r.qty)}</b><span class="life-row__note">to indent</span></span>`,
-    empty: 'Nothing due in this window',
+function aheadCard() {
+  const rows = ahead()
+  const short = (m) => { const w = m.replace(/\s*\(.*\)/, '').split(' '); return w[0] === 'Vitamin' ? w.slice(0, 2).join(' ') : w[0] }
+  const lanes = CARE_KINDS.map((k) => ({ label: k.label, items: rows.filter((r) => r.kind === k.key).map((r) => ({ at: r.due, tag: short(r.medicine), label: r.medicine, note: `${fmt(r.animals)} animals · ${r.qty}`, soon: r.due <= 15 })) }))
+  return panel({
+    title: 'Care due ahead', span: 'medicine required, next 45 days', cls: 'life-card--wide',
+    aria: 'Care due ahead: ' + AHEAD_WINDOWS.map((w) => `${rows.filter((r) => r.due <= w.days).length} medicines within ${w.days} days`).join(', '),
+    body: runway({ lanes, span: 45, ticks: AHEAD_WINDOWS.map((w) => w.days) }),
   })
 }
 
 function pharmacyCard() {
-  const rows = [...PHARMACY].sort((a, b) => b.ago - a.ago)
-  return listCard({
-    title: 'Pharmacy', span: 'indents pending', aria: 'Central pharmacy, indents pending',
-    colHead: ['Medicine', 'Waiting'], rows, open: 'old',
-    chips: PHARMACY_BINS.map((b) => ({ key: b.key, label: b.label, test: b.test })),
-    row: (r, i) =>
-      `<span class="life-row__rank">${i + 1}</span>` +
-      `<span class="life-row__who"><span class="life-row__name">${esc(r.medicine)}</span>` +
-        `<span class="life-row__sub">${esc(r.qty)} · for ${esc(r.forSpecies)} · ${esc(r.by)}</span></span>` +
-      `<span class="life-row__val"><b>${r.ago}</b><span class="life-row__note">${r.ago === 1 ? 'day' : 'days'}</span></span>`,
-    empty: 'Nothing pending in this window',
+  const rows = pharmacy()
+  const bins = PHARMACY_BINS.map((b) => ({ label: b.label, n: rows.filter(b.test).length }))
+  const oldest = [...rows].sort((a, b) => b.ago - a.ago).slice(0, 4).map((r) => ({ label: r.medicine, note: `${r.qty} · for ${r.forSpecies} · ${r.by}`, value: `${r.ago} d`, late: r.ago > 15 }))
+  return panel({
+    title: 'Pharmacy', span: 'indents pending, by age', aria: `Pharmacy: ${fmt(rows.length)} indents pending, ${bins[2].n} older than 15 days`,
+    body: ageing({ bins, oldest }),
   })
 }
 
-/* the trend: fourteen bars, this week's seven full-strength, with the
-   week's total against the week before */
 function enrichmentCard() {
-  const d = ENRICHMENT
-  const thisWeek = d.slice(-7).reduce((n, x) => n + x, 0)
-  const lastWeek = d.slice(0, 7).reduce((n, x) => n + x, 0)
-  const delta = thisWeek - lastWeek
-  const max = Math.max(1, ...d)
+  const d = ENRICHMENT.map((n) => scope.scale(n))
+  const thisWeek = d.slice(-7).reduce((n, x) => n + x, 0), lastWeek = d.slice(0, 7).reduce((n, x) => n + x, 0), delta = thisWeek - lastWeek
   const fmtDay = new Intl.DateTimeFormat('en', { weekday: 'narrow' })
-  const el = document.createElement('section')
-  el.className = 'life-card life-card--trend life-card--wide'
-  el.setAttribute('aria-label', `Enrichment tickets: ${thisWeek} this week, ${lastWeek} last week`)
-  el.innerHTML =
-    `<h3 class="life-card__title">Enrichment <span class="life-card__span">· tickets, 14 days</span></h3>` +
-    `<div class="care-trend__head">` +
-      `<span class="care-trend__n"><b>${fmt(thisWeek)}</b> this week</span>` +
-      `<span class="care-trend__delta${delta > 0 ? ' is-up' : delta < 0 ? ' is-down' : ''}">` +
-        `${delta > 0 ? '+' : ''}${fmt(delta)} vs last week (${fmt(lastWeek)})</span>` +
-    `</div>` +
-    `<div class="care-trend__plot" aria-hidden="true">` +
-      d.map((n, i) => {
-        const ago = d.length - 1 - i
-        return `<span class="care-trend__col${ago < 7 ? ' is-this' : ''}${ago === 0 ? ' is-today' : ''}">` +
-          `<span class="care-trend__n2">${n || ''}</span>` +
-          `<span class="care-trend__bar" style="height:${Math.round((n / max) * 100)}%"></span>` +
-          `<span class="care-trend__day">${esc(fmtDay.format(new Date(Date.now() - ago * 86400000)))}</span>` +
-        `</span>`
-      }).join('') +
-    `</div>`
-  return el
+  const labels = d.map((_, i) => fmtDay.format(new Date(Date.now() - (d.length - 1 - i) * 86400000)))
+  const week = d.slice(-7), busiest = week.indexOf(Math.max(...week))
+  const fmtLong = new Intl.DateTimeFormat('en', { weekday: 'long' })
+  return panel({
+    title: 'Enrichment', span: 'tickets raised, 14 days', cls: 'life-card--trend',
+    aria: `Enrichment tickets: ${thisWeek} this week, ${lastWeek} last week`,
+    body: `<div class="care-trend__head"><span class="care-trend__n"><b>${fmt(thisWeek)}</b> this week</span>` +
+      `<span class="care-trend__delta${delta > 0 ? ' is-up' : delta < 0 ? ' is-down' : ''}">${delta > 0 ? '+' : ''}${fmt(delta)} vs last week (${fmt(lastWeek)})</span></div>` +
+      columns({ days: d, labels, recent: 7 }) +
+      `<div class="ag__bins" style="margin-top:14px"><span><b>${(thisWeek / 7).toFixed(1)}</b>a day<small>this week's average</small></span>` +
+        `<span><b>${fmt(week[busiest])}</b>${esc(fmtLong.format(new Date(Date.now() - (6 - busiest) * 86400000)))}<small>the busiest day</small></span>` +
+        `<span><b>${fmt(d.reduce((n, x) => n + x, 0))}</b>in 14 days<small>${fmt(lastWeek)} the week before</small></span></div>`,
+  })
 }
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
-  const grid = root.querySelector('.life-grid')
-  const cases = casesByClass()
-  grid.appendChild(classTable({ title: 'Medical cases', span: 'by class', aria: 'Medical cases by class', corner: 'State', rows: cases.rows, foot: cases.foot }))
-  grid.appendChild(overdueCard())
-  grid.appendChild(dueAheadCard())
-  grid.appendChild(pharmacyCard())
-  grid.appendChild(enrichmentCard())
+  root.querySelector('.life-grid').append(casesCard(), overdueCard(), aheadCard(), pharmacyCard(), enrichmentCard())
   root.hidden = false
   return root
 }
 
 __x.mount = mount
-/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
-   card shows, the kind of thing one aggregate query serves — and `render()`
-   is the expensive one, run only when the report page is opened. */
 __x.report = { id: 'animalCare', title: 'Animal Care', icon: 'd-veterinary', sub: 'in care, overdue, pharmacy, enrichment',
-  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Collection.js', function (__x, __req) {
 /**
- * COLLECTION — the site's holdings and the director's watch list, on V4
+ * COLLECTION — the site's holdings and the director's watch list
  * ───────────────────────────────────────────────────────────────────────────
- * The owner asked for species by class, the number microchipped and the
- * rate by class, and then for the rest of what a director of a rescue and
- * rehabilitation site would want in view (18 Sep 2026). Three panels in
- * the Circle of Life's shape, under four counts:
- *
- *   BY CLASS — one table: species, animals, chipped, and the rate drawn as
- *   a bar inside the cell so a low class is seen before it is read.
- *   RESCUE & REHAB — the pipeline as a list: received, quarantine, in
- *   rehabilitation, fit for release, released, died; the flows carry last
- *   month beside them.
- *   WATCH LIST — the compliance figures, the ones with a clock on them first.
- *
- * Every figure is summed from js/data/collection.js at render.
+ * Four counts, then: the animals by class as a pie with the species count
+ * in its legend; microchipping as rings, the whole site large and each
+ * class small; the rescue pipeline as a funnel; the compliance watch list
+ * as tiles, the ones with a clock on them coral; the protected species as
+ * a cloud of names grouped by register, each with its animals.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { BY_CLASS, REHAB, WATCH, PROTECTED } = __req('js/data/collection.js')
-const { esc, fmt, listCard, figureList , renderCounts } = __req('js/components/LifePanel.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, pie, rings, funnel, tiles: tileGrid, cloud } = __req('js/components/LifePanel.js')
+
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
+/* the aggregate seeds scaled to the scope; a mock, see reportScope.js */
+const byClass = () => BY_CLASS.map((r) => ({ ...r, species: scope.scale(r.species), animals: scope.scale(r.animals), chipped: scope.scale(r.chipped) }))
+const rehab = () => REHAB.map((r) => ({ ...r, n: scope.scale(r.n), prev: r.prev == null ? null : scope.scale(r.prev) }))
+const watch = () => WATCH.map((r) => ({ ...r, n: scope.scale(r.n) }))
+const protectedRows = () => scope.scoped(PROTECTED)
 
 function tiles() {
-  const species = BY_CLASS.reduce((n, r) => n + r.species, 0)
-  const animals = BY_CLASS.reduce((n, r) => n + r.animals, 0)
-  const chipped = BY_CLASS.reduce((n, r) => n + r.chipped, 0)
-  const stage = (k) => REHAB.find((r) => r.key === k).n
-  const tiles = [
-    { key: 'species',  label: 'Species on site',   n: fmt(species),                 note: `${fmt(animals)} animals` },
-    { key: 'chipped',  label: 'Microchipped',      n: `${pct(chipped, animals)}%`,  note: `${fmt(chipped)} of ${fmt(animals)} animals` },
-    { key: 'rehab',    label: 'In rehabilitation', n: fmt(stage('rehab')),          note: `${stage('quarantine')} more in quarantine` },
-    { key: 'released', label: 'Released',          n: fmt(stage('released')),       note: 'this month' },
+  const bc = byClass(), species = bc.reduce((n, r) => n + r.species, 0), animals = bc.reduce((n, r) => n + r.animals, 0), chipped = bc.reduce((n, r) => n + r.chipped, 0)
+  const stage = (k) => rehab().find((r) => r.key === k).n
+  return [
+    { key: 'species',  label: 'Species on site',   n: species, note: `${fmt(animals)} animals` },
+    { key: 'chipped',  label: 'Microchipped',      n: `${pct(chipped, animals)}%`, note: `${fmt(chipped)} of ${fmt(animals)} animals` },
+    { key: 'rehab',    label: 'In rehabilitation', n: stage('rehab'), note: `${stage('quarantine')} more in quarantine` },
+    { key: 'released', label: 'Released',          n: stage('released'), note: 'this month' },
   ]
-  return tiles
 }
 
-/* BY CLASS AS COLUMNS, not a table (owner, 18 Sep 2026: "it looks very
-   boring"). One column per class, its height the animals held, split into
-   the chipped (the class's colour, solid) and the unchipped (the same colour,
-   pale); the total on top, the species count and the chipping rate beneath.
-   The shape is the compliance dashboard's "Appendix I, by class" card. The
-   colour carries the class and the label repeats it, so nothing is colour
-   alone; the split is also written as the rate. */
-function classCard() {
-  const max = Math.max(...BY_CLASS.map((r) => r.animals))
-  const tot = BY_CLASS.reduce((a, r) => ({ species: a.species + r.species, animals: a.animals + r.animals, chipped: a.chipped + r.chipped }), { species: 0, animals: 0, chipped: 0 })
-  const el = document.createElement('section')
-  el.className = 'life-card life-card--columns'
-  el.setAttribute('aria-label', `Collection by class: ${fmt(tot.species)} species, ${fmt(tot.animals)} animals, ${pct(tot.chipped, tot.animals)}% microchipped`)
-  el.innerHTML =
-    `<h3 class="life-card__title">By class <span class="life-card__span">· animals, microchipped</span></h3>` +
-    `<div class="life-legend" aria-hidden="true"><span><i class="is-solid"></i>Microchipped</span><span><i class="is-pale"></i>Not chipped</span></div>` +
-    `<div class="life-columns" role="list">` +
-      BY_CLASS.map((r) => {
-        const rate = pct(r.chipped, r.animals)
-        const h = Math.round((r.animals / max) * 100)
-        return `<div class="life-col is-${r.key}" role="listitem" aria-label="${r.label}: ${fmt(r.species)} species, ${fmt(r.animals)} animals, ${rate}% microchipped">` +
-          `<span class="life-col__total">${fmt(r.animals)}</span>` +
-          `<span class="life-col__stack" style="height:${h}%">` +
-            `<i class="life-col__pale" style="flex:${r.animals - r.chipped}"><b>${r.animals - r.chipped > max * .08 ? fmt(r.animals - r.chipped) : ''}</b></i>` +
-            `<i class="life-col__solid" style="flex:${r.chipped}"><b>${r.chipped > max * .08 ? fmt(r.chipped) : ''}</b></i>` +
-          `</span>` +
-          `<span class="life-col__name">${r.label}</span>` +
-          `<span class="life-col__sub">${fmt(r.species)} species</span>` +
-          `<span class="life-col__rate">${rate}% chipped</span>` +
-        `</div>`
-      }).join('') +
-    `</div>` +
-    `<div class="life-columns__foot">${fmt(tot.species)} species · ${fmt(tot.animals)} animals · ${pct(tot.chipped, tot.animals)}% microchipped</div>`
-  return el
+function actionables() {
+  const w = (k) => watch().find((r) => r.key === k).n
+  return [
+    { text: 'Post-mortems pending a report', n: w('pm'), due: true, roles: ['vet', 'admin'] },
+    { text: 'Permits expiring within 30 days', n: w('permits'), due: true, roles: ['admin', 'curator'] },
+    { text: 'Animals without an ID to chip, ring or tag', n: w('noid'), due: false, roles: ['paravet', 'keeper', 'biologist'] },
+    { text: 'Animals fit for release awaiting an order', n: rehab().find((r) => r.key === 'fit').n, due: false, roles: ['curator', 'admin'] },
+  ]
 }
 
-/* the protected species: one list, the chips choosing the register — the
-   Act's Schedule I and II, and CITES Appendix I and II — heaviest holding
-   first, because the list is read for "how many of these do we have" */
-function protectedCard() {
-  const rows = [...PROTECTED].sort((a, b) => b.animals - a.animals || a.species.localeCompare(b.species))
-  const cls = (r) => { const c = CLASSES.find((x) => x.key === r.klass); return c ? c.one : 'Other' }
-  const standing = (r) => [r.schedule ? `Schedule ${r.schedule}` : null, r.cites ? `CITES ${r.cites}` : null].filter(Boolean).join(' · ')
-  return listCard({
-    title: 'Protected species', span: 'on site', aria: 'Protected species on site',
-    colHead: ['Species', 'Animals'], rows, open: 'sched1',
-    chips: [
-      { key: 'sched1', label: 'Schedule I',  test: (r) => r.schedule === 'I' },
-      { key: 'sched2', label: 'Schedule II', test: (r) => r.schedule === 'II' },
-      { key: 'cites1', label: 'Appendix I',  test: (r) => r.cites === 'I' },
-      { key: 'cites2', label: 'Appendix II', test: (r) => r.cites === 'II' },
-    ],
-    row: (r, i) =>
-      `<span class="life-row__rank">${i + 1}</span>` +
-      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span>` +
-        `<span class="life-row__sub">${esc(cls(r))} · ${esc(standing(r))}</span></span>` +
-      `<span class="life-row__val"><b>${fmt(r.animals)}</b><span class="life-row__note">on site</span></span>`,
-    empty: 'None on site',
-  })
+function classPie() {
+  const bc = byClass()
+  return panel({ title: 'Animals by class', span: 'with species in each', aria: 'Animals by class: ' + bc.map((r) => `${r.label} ${fmt(r.animals)} animals, ${fmt(r.species)} species`).join('; '),
+    body: pie({ slices: bc.map((r) => ({ label: r.label, n: r.animals, note: `${fmt(r.species)} species` })) }) })
+}
+
+function chipRings() {
+  const bc = byClass(), animals = bc.reduce((n, r) => n + r.animals, 0), chipped = bc.reduce((n, r) => n + r.chipped, 0)
+  return panel({ title: 'Microchipped', span: 'the site, and each class', aria: `Microchipped: ${pct(chipped, animals)}% of the site; ` + bc.map((r) => `${r.label} ${pct(r.chipped, r.animals)}%`).join(', '),
+    body: rings({ big: { value: chipped / (animals || 1), text: `${pct(chipped, animals)}%`, label: 'of the site', note: `${fmt(chipped)} of ${fmt(animals)}` },
+      items: bc.map((r) => ({ value: r.chipped / (r.animals || 1), text: `${pct(r.chipped, r.animals)}%`, label: r.label, note: `${fmt(r.chipped)} of ${fmt(r.animals)}` })) }) })
+}
+
+function rehabFunnel() {
+  const rows = rehab()
+  const step = (k) => rows.find((r) => r.key === k)
+  const note = (r) => r.prev != null ? `${r.note} · ${fmt(r.prev)} last month` : r.note
+  return panel({ title: 'Rescue & rehabilitation', span: 'the pipeline this month', aria: 'Rescue and rehabilitation: ' + rows.map((r) => `${r.label} ${fmt(r.n)}`).join(', '),
+    body: funnel({ steps: ['received', 'quarantine', 'rehab', 'fit', 'released'].map((k) => ({ label: step(k).label, n: step(k).n, note: note(step(k)) })), aside: { label: step('died').label, n: step('died').n, note: note(step('died')) } }) })
+}
+
+function watchTiles() {
+  const rows = [...watch()].sort((a, b) => (b.due ? 1 : 0) - (a.due ? 1 : 0))
+  return panel({ title: 'Watch list', span: 'what an inspector asks for', aria: 'Watch list: ' + rows.map((r) => `${r.label} ${fmt(r.n)}${r.due ? ', needs action' : ''}`).join('; '),
+    body: tileGrid({ items: rows.map((r) => ({ n: r.n, label: r.label, note: r.due ? `${r.note} · needs action` : r.note, due: r.due })) }) })
+}
+
+function protectedCloud() {
+  const rows = protectedRows()
+  const one = (k) => (CLASSES.find((c) => c.key === k) || { one: 'Other' }).one
+  const group = (label, test) => ({ label, items: rows.filter(test).sort((a, b) => b.animals - a.animals).map((r) => ({ name: `${r.species} · ${one(r.klass)}`, n: r.animals })) })
+  return panel({ title: 'Protected species', span: 'by register, with animals held', cls: 'life-card--wide', aria: `Protected species on site: ${fmt(rows.length)}`,
+    body: cloud({ groups: [group('Schedule I', (r) => r.schedule === 'I'), group('Schedule II', (r) => r.schedule === 'II'), group('CITES Appendix I', (r) => r.cites === 'I'), group('CITES Appendix II', (r) => r.cites === 'II')] }) })
 }
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
-  const grid = root.querySelector('.life-grid')
-  grid.appendChild(classCard())
-  grid.appendChild(protectedCard())
-  grid.appendChild(figureList({ title: 'Rescue & rehab', span: 'the pipeline', aria: 'Rescue and rehabilitation pipeline', colHead: ['Stage', 'Animals'], rows: REHAB }))
-  grid.appendChild(figureList({ title: 'Watch list', span: 'compliance', aria: 'Compliance watch list', colHead: ['Item', 'Count'],
-    rows: [...WATCH].sort((a, b) => (b.due ? 1 : 0) - (a.due ? 1 : 0)) }))
+  root.querySelector('.life-grid').append(classPie(), chipRings(), rehabFunnel(), watchTiles(), protectedCloud())
   root.hidden = false
   return root
 }
 
 __x.mount = mount
-/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
-   card shows, the kind of thing one aggregate query serves — and `render()`
-   is the expensive one, run only when the report page is opened. */
 __x.report = { id: 'collection', title: 'Collection', icon: 'd-overview', sub: 'the holdings, rehabilitation, compliance',
-  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Husbandry.js', function (__x, __req) {
 /**
- * HUSBANDRY — the kitchen and the egg room, on V4
+ * HUSBANDRY — the kitchen and the egg room
  * ───────────────────────────────────────────────────────────────────────────
- * The owner's last two asks (18 Sep 2026): the species whose diets changed,
- * and the eggs — laid, in artificial incubation. Four counts over two
- * panels: the diet changes as a list with the reason as chips, and the
- * clutches as a list with the mode as chips, each clutch saying which day
- * of its incubation it is on and when it is due, since "due Tuesday" is
- * what the egg room actually plans around.
+ * Four counts, then the diet changes as a timeline (what changed, day by
+ * day, newest first) and the clutches as progress bars (which day of its
+ * incubation each is on, and when it is due).
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { DIET_CHANGES, DIET_REASONS, CLUTCHES } = __req('js/data/husbandry.js')
-const { esc, fmt, listCard , renderCounts } = __req('js/components/LifePanel.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, timeline, progress } = __req('js/components/LifePanel.js')
 
 const DAY = 86400000
-const dueDate = (c) => new Date(Date.now() + (c.period - c.laid) * DAY)
 const fmtDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' })
-const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
+const agoWord = (n) => (n === 0 ? 'Today' : n === 1 ? 'Yesterday' : `${n} days ago`)
+const clutches = () => scope.scoped(CLUTCHES)
+const diets = () => scope.scoped(DIET_CHANGES)
 
 function tiles() {
-  const open = CLUTCHES.filter((c) => c.hatched == null)
-  const laidWeek = CLUTCHES.filter((c) => c.laid < 7).reduce((n, c) => n + c.eggs, 0)
-  const incubator = open.filter((c) => c.mode === 'artificial').reduce((n, c) => n + c.eggs, 0)
+  const all = clutches(), open = all.filter((c) => c.hatched == null)
   const dueWeek = open.filter((c) => c.period - c.laid <= 7)
-  const hatched = CLUTCHES.filter((c) => c.hatched != null && c.laid - c.period < 30)
-  const tiles = [
-    { key: 'laid',      label: 'Eggs laid',               n: fmt(laidWeek), note: 'last 7 days' },
-    { key: 'incubator', label: 'In artificial incubation', n: fmt(incubator), note: `${open.filter((c) => c.mode === 'artificial').length} clutches in the incubator` },
-    { key: 'due',       label: 'Due to hatch',            n: fmt(dueWeek.reduce((n, c) => n + c.eggs, 0)), note: dueWeek.length ? `${dueWeek.length} clutch${dueWeek.length === 1 ? '' : 'es'} within 7 days` : 'nothing within 7 days' },
-    { key: 'hatched',   label: 'Hatched',                 n: fmt(hatched.reduce((n, c) => n + c.hatched, 0)), note: `of ${fmt(hatched.reduce((n, c) => n + c.eggs, 0))} eggs, last 30 days` },
+  const hatched = all.filter((c) => c.hatched != null && c.laid - c.period < 30)
+  return [
+    { key: 'laid',      label: 'Eggs laid',                n: all.filter((c) => c.laid < 7).reduce((n, c) => n + c.eggs, 0), note: 'last 7 days' },
+    { key: 'incubator', label: 'In artificial incubation', n: open.filter((c) => c.mode === 'artificial').reduce((n, c) => n + c.eggs, 0), note: `${open.filter((c) => c.mode === 'artificial').length} clutches in the incubator` },
+    { key: 'due',       label: 'Due to hatch',             n: dueWeek.reduce((n, c) => n + c.eggs, 0), note: dueWeek.length ? `${dueWeek.length} clutch${dueWeek.length === 1 ? '' : 'es'} within 7 days` : 'nothing within 7 days' },
+    { key: 'hatched',   label: 'Hatched',                  n: hatched.reduce((n, c) => n + c.hatched, 0), note: `of ${fmt(hatched.reduce((n, c) => n + c.eggs, 0))} eggs, last 30 days` },
   ]
-  return tiles
+}
+
+function actionables() {
+  const due = clutches().filter((c) => c.hatched == null && c.period - c.laid <= 7)
+  const today = diets().filter((d) => d.ago === 0)
+  return [
+    { text: 'Clutches due to hatch within 7 days', n: due.length, due: true, roles: ['keeper', 'biologist'] },
+    { text: 'Diet changes made today to carry out', n: today.length, due: true, roles: ['keeper', 'horti'] },
+    { text: 'Browse and produce changes this week', n: diets().filter((d) => d.ago < 7 && /browse|fruit|greens|honey/i.test(d.change)).length, due: false, roles: ['horti', 'keeper'] },
+  ]
 }
 
 function dietCard() {
-  const rows = [...DIET_CHANGES].sort((a, b) => a.ago - b.ago)
+  const rows = [...diets()].sort((a, b) => a.ago - b.ago)
   const reason = (k) => (DIET_REASONS.find((r) => r.key === k) || {}).label || k
-  return listCard({
-    title: 'Diet changes', span: 'by species', aria: 'Diet changes by species',
-    colHead: ['Species', 'When'], rows, open: 'all',
-    chips: [{ key: 'all', label: 'All', test: () => true },
-      ...DIET_REASONS.map((r) => ({ key: r.key, label: r.label, test: (x) => x.reason === r.key }))],
-    row: (r, i) =>
-      `<span class="life-row__rank">${i + 1}</span>` +
-      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span>` +
-        `<span class="life-row__sub">${esc(r.change)} · ${esc(reason(r.reason))} · ${esc(r.by)}</span></span>` +
-      `<span class="life-row__val"><b>${r.ago === 0 ? 'Today' : r.ago === 1 ? '1 day' : `${r.ago} days`}</b>` +
-        `<span class="life-row__note">${r.ago === 0 ? esc(r.enclosure) : 'ago'}</span></span>`,
-    empty: 'No diet changes',
+  const days = [...new Set(rows.map((r) => r.ago))]
+  return panel({
+    title: 'Diet changes', span: 'by day, newest first', aria: `Diet changes: ${fmt(rows.length)} in the last ${Math.max(0, ...rows.map((r) => r.ago))} days`,
+    body: rows.length ? timeline({ groups: days.map((d) => ({ when: agoWord(d), items: rows.filter((r) => r.ago === d).map((r) => ({ title: r.species, text: r.change, sub: `${reason(r.reason)} · ${r.enclosure} · ${r.by}` })) })) })
+      : `<p class="life-row--none">No diet changes</p>`,
   })
 }
 
 function eggsCard() {
-  const rows = [...CLUTCHES].sort((a, b) => (a.hatched != null) - (b.hatched != null) || (a.period - a.laid) - (b.period - b.laid))
-  return listCard({
-    title: 'Eggs', span: 'clutches', aria: 'Clutches laid, incubating and hatched',
-    colHead: ['Clutch', 'Eggs'], rows, open: 'artificial',
-    chips: [
-      { key: 'artificial', label: 'Incubator', test: (c) => c.hatched == null && c.mode === 'artificial' },
-      { key: 'natural',    label: 'Under the bird', test: (c) => c.hatched == null && c.mode === 'natural' },
-      { key: 'hatched',    label: 'Hatched', test: (c) => c.hatched != null },
-    ],
-    row: (c, i) => {
-      const done = c.hatched != null
-      const left = c.period - c.laid
-      const sub = done
-        ? `${esc(c.enclosure)} · hatched ${agoWord(c.laid - c.period)}`
-        : `${esc(c.enclosure)} · day ${c.laid} of ${c.period} · ${left <= 0 ? 'overdue' : `due ${fmtDate.format(dueDate(c))}`}`
-      return `<span class="life-row__rank">${i + 1}</span>` +
-        `<span class="life-row__who"><span class="life-row__name">${esc(c.species)}</span>` +
-          `<span class="life-row__sub">${sub}</span></span>` +
-        `<span class="life-row__val"><b>${done ? `${c.hatched}/${c.eggs}` : fmt(c.eggs)}</b>` +
-          `<span class="life-row__note">${done ? 'hatched' : left <= 0 ? 'due now' : `${left} day${left === 1 ? '' : 's'} to go`}</span></span>`
-    },
-    empty: 'No clutches',
+  const rows = [...clutches()].sort((a, b) => (a.hatched != null) - (b.hatched != null) || (a.period - a.laid) - (b.period - b.laid))
+  return panel({
+    title: 'Eggs', span: 'clutches, by days to hatch', aria: `Eggs: ${fmt(rows.filter((c) => c.hatched == null).length)} clutches incubating`,
+    body: progress({ rows: rows.map((c) => {
+      const done = c.hatched != null, left = c.period - c.laid
+      return { label: c.species, sub: `${c.enclosure} · ${c.mode === 'artificial' ? 'incubator' : 'under the bird'}`, done: Math.min(c.laid, c.period), total: c.period, complete: done, late: !done && left < 0,
+        text: done ? `${c.hatched}/${c.eggs} hatched` : `${fmt(c.eggs)} eggs`, note: done ? `hatched ${agoWord(c.laid - c.period).toLowerCase()}` : left <= 0 ? 'due now' : `day ${c.laid} of ${c.period} · due ${fmtDate.format(new Date(Date.now() + left * DAY))}` }
+    }) }),
   })
 }
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
-  const grid = root.querySelector('.life-grid')
-  grid.appendChild(dietCard())
-  grid.appendChild(eggsCard())
+  root.querySelector('.life-grid').append(dietCard(), eggsCard())
   root.hidden = false
   return root
 }
 
 __x.mount = mount
-/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
-   card shows, the kind of thing one aggregate query serves — and `render()`
-   is the expensive one, run only when the report page is opened. */
 __x.report = { id: 'husbandry', title: 'Husbandry', icon: 'd-husbandry', sub: 'diets and the egg room',
-  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Operations.js', function (__x, __req) {
 /**
- * OPERATIONS — transfers, the lab, and the enclosure climate, on V4
+ * OPERATIONS — transfers, the lab, and the enclosure climate
  * ───────────────────────────────────────────────────────────────────────────
- * Three asks in one band (owner, 18 Sep 2026), each a list and a table:
- *
- *   TRANSFERS   every movement in the last 30 days, the chips splitting
- *               within-site from between-sites, and beside it the split by
- *               the specialist who signed — which is how the owner asked
- *               for it ("intra-site and inter-site breakup with specialist").
- *   LAB         the open requests by discipline, each saying which day of
- *               its target turnaround it is on and coral once past it, and
- *               beside it the turnaround table: open, late, done in 30 days,
- *               average days against target.
- *   CLIMATE     every monitored enclosure's temperature and humidity now
- *               against its range, the out-of-range ones first and coral,
- *               and beside it the last 24 hours' extremes.
- *
- * Four counts over the lot. Everything is counted from js/data/operations.js.
+ * Four counts, then: transfers as flows (from → to, the animals as a bar)
+ * with the specialists' within/between split as full-width shares; the
+ * lab's open requests as bullets (days open against the target) and the
+ * disciplines' turnaround the same way; the climate as range strips (the
+ * target band, the day's reach, the reading now).
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
-const { esc, fmt, listCard, matrixTable , renderCounts } = __req('js/components/LifePanel.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, flow, shares, bullets, strips, dots, tiles: tileGrid } = __req('js/components/LifePanel.js')
 
 const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
 const disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k)
 const outOfRange = (c) => c.temp < c.tempRange[0] || c.temp > c.tempRange[1] || c.rh < c.rhRange[0] || c.rh > c.rhRange[1]
+const transfers = () => scope.scoped(TRANSFERS)
+const lab = () => scope.scoped(LAB)
+const climate = () => scope.scoped(CLIMATE)
 
 function tiles() {
-  const moved = TRANSFERS.reduce((n, t) => n + t.animals, 0)
-  const open = LAB.filter((r) => r.done == null)
-  const late = open.filter((r) => r.ago > disc(r.discipline).target)
-  const out = CLIMATE.filter(outOfRange)
-  const tiles = [
-    { key: 'transfers', label: 'Transfers',           n: TRANSFERS.length, note: `${fmt(moved)} animals moved, last 30 days` },
-    { key: 'lab',       label: 'Lab requests open',   n: open.length,      note: `${late.length} past turnaround` },
-    { key: 'late',      label: 'Lab reports late',    n: late.length,      note: late.length ? 'oldest ' + agoWord(Math.max(...late.map((r) => r.ago))) : 'all within target' },
-    { key: 'climate',   label: 'Enclosures out of range', n: out.length,   note: out.length ? out.map((c) => c.enclosure).slice(0, 2).join(', ') + (out.length > 2 ? '…' : '') : 'all within range' },
+  const open = lab().filter((r) => r.done == null), late = open.filter((r) => r.ago > disc(r.discipline).target), out = climate().filter(outOfRange)
+  return [
+    { key: 'transfers', label: 'Transfers',               n: transfers().length, note: `${fmt(transfers().reduce((n, t) => n + t.animals, 0))} animals moved, 30 days` },
+    { key: 'lab',       label: 'Lab requests open',       n: open.length, note: `${late.length} past turnaround` },
+    { key: 'late',      label: 'Lab reports late',        n: late.length, note: late.length ? 'oldest ' + agoWord(Math.max(...late.map((r) => r.ago))) : 'all within target' },
+    { key: 'climate',   label: 'Enclosures out of range', n: out.length,  note: out.length ? out.map((c) => c.enclosure).slice(0, 2).join(', ') : 'all within range' },
   ]
-  return tiles
+}
+
+function actionables() {
+  const open = lab().filter((r) => r.done == null), late = open.filter((r) => r.ago > disc(r.discipline).target), out = climate().filter(outOfRange)
+  return [
+    { text: 'Lab reports past their turnaround', n: late.length, due: true, roles: ['vet', 'paravet'] },
+    { text: 'Enclosures out of climate range', n: out.length, due: true, roles: ['keeper', 'curator', 'admin'], note: out.map((c) => c.enclosure).join(', ') },
+    { text: 'Transfers today to log and settle', n: transfers().filter((t) => t.ago === 0).length, due: false, roles: ['curator', 'keeper', 'admin'] },
+  ]
 }
 
 function transfersCard() {
-  const rows = [...TRANSFERS].sort((a, b) => a.ago - b.ago)
-  return listCard({
-    title: 'Transfers', span: 'last 30 days', aria: 'Transfers, last 30 days',
-    colHead: ['Movement', 'Animals'], rows, open: 'all',
-    chips: [
-      { key: 'all',   label: 'All',           test: () => true },
-      { key: 'intra', label: 'Within site',   test: (t) => t.within },
-      { key: 'inter', label: 'Between sites', test: (t) => !t.within },
-    ],
-    row: (t, i) =>
-      `<span class="life-row__rank">${i + 1}</span>` +
-      `<span class="life-row__who"><span class="life-row__name">${esc(t.species)}</span>` +
-        `<span class="life-row__sub">${esc(t.from)} → ${esc(t.to)} · ${esc(t.specialist)} · ${agoWord(t.ago)}</span></span>` +
-      `<span class="life-row__val"><b>${fmt(t.animals)}</b><span class="life-row__note">${t.within ? 'within site' : 'between sites'}</span></span>`,
-    empty: 'No transfers',
+  const rows = [...transfers()].sort((a, b) => a.ago - b.ago)
+  return panel({
+    title: 'Transfers', span: 'last 30 days, newest first', aria: `Transfers: ${fmt(rows.length)} movements, ${fmt(rows.filter((t) => !t.within).length)} between sites`,
+    body: flow({ rows: rows.map((t) => ({ from: t.from, to: t.to, n: t.animals, across: !t.within, note: `${t.species} · ${t.specialist} · ${agoWord(t.ago)}` })) }),
   })
 }
 
-function transfersBySpecialist() {
-  const names = [...new Set(TRANSFERS.map((t) => t.specialist))]
-  const tally = (test) => {
-    const n = { intra: 0, inter: 0, all: 0, animals: 0 }
-    for (const t of TRANSFERS) if (test(t)) { n[t.within ? 'intra' : 'inter'] += 1; n.all += 1; n.animals += t.animals }
-    return n
-  }
-  const rows = names.map((name) => ({ head: name, n: tally((t) => t.specialist === name) })).sort((a, b) => b.n.all - a.n.all)
-  return matrixTable({
-    title: 'By specialist', span: 'transfers signed', aria: 'Transfers by specialist',
-    corner: 'Specialist',
-    cols: [{ key: 'intra', label: 'Within' }, { key: 'inter', label: 'Between' }, { key: 'all', label: 'All' }, { key: 'animals', label: 'Animals' }],
-    rows, foot: { head: 'Total', n: tally(() => true) },
+function specialistCard() {
+  const names = [...new Set(transfers().map((t) => t.specialist))]
+  const rows = names.map((name) => { const mine = transfers().filter((t) => t.specialist === name); return { label: name, n: { intra: mine.filter((t) => t.within).length, inter: mine.filter((t) => !t.within).length } } })
+    .sort((a, b) => (b.n.intra + b.n.inter) - (a.n.intra + a.n.inter))
+  const across = transfers().filter((t) => !t.within)
+  const partner = (t) => (t.from.includes(' · ') ? t.from : t.to).split(' · ')[0]
+  const partners = [...new Set(across.map(partner))].map((name) => { const mine = across.filter((t) => partner(t) === name)
+    return { label: name, n: mine.length, note: `${fmt(mine.reduce((n, t) => n + t.animals, 0))} animals · ${mine.filter((t) => t.to.startsWith(name)).length} out, ${mine.filter((t) => t.from.startsWith(name)).length} in` } })
+  return panel({
+    title: 'By specialist', span: 'within the site against between sites', aria: 'Transfers by specialist: ' + rows.map((r) => `${r.label} ${r.n.intra} within, ${r.n.inter} between`).join('; '),
+    body: shares({ rows, segs: [{ key: 'intra', label: 'Within site' }, { key: 'inter', label: 'Between sites' }] }) +
+      `<h4 class="life-card__sub">Between sites, by partner</h4>` +
+      tileGrid({ items: partners.map((p) => ({ n: p.n, label: p.label, note: p.note })) }),
   })
 }
 
 function labCard() {
-  const rows = LAB.filter((r) => r.done == null).sort((a, b) => (b.ago - disc(b.discipline).target) - (a.ago - disc(a.discipline).target))
-  return listCard({
-    title: 'Lab requests', span: 'open', aria: 'Lab requests open',
-    colHead: ['Request', 'Day'], rows, open: 'all',
-    chips: [{ key: 'all', label: 'All', test: () => true },
-      ...LAB_DISCIPLINES.map((d) => ({ key: d.key, label: d.label, test: (r) => r.discipline === d.key }))],
-    row: (r, i) => {
-      const d = disc(r.discipline)
-      const late = r.ago > d.target
-      return `<span class="life-row__rank">${i + 1}</span>` +
-        `<span class="life-row__who"><span class="life-row__name">${esc(r.test)}</span>` +
-          `<span class="life-row__sub">${esc(d.label)} · ${esc(r.species)} · ${esc(r.by)}</span></span>` +
-        `<span class="life-row__val${late ? ' is-late' : ''}"><b>${r.ago} of ${d.target}</b>` +
-          `<span class="life-row__note">${late ? `${r.ago - d.target} day${r.ago - d.target === 1 ? '' : 's'} late` : 'within target'}</span></span>`
-    },
-    empty: 'Nothing open',
+  const rows = lab().filter((r) => r.done == null).sort((a, b) => (b.ago - disc(b.discipline).target) - (a.ago - disc(a.discipline).target))
+  return panel({
+    title: 'Lab requests', span: 'days open against target', aria: `Lab requests open: ${fmt(rows.length)}`,
+    body: bullets({ rows: rows.map((r) => { const d = disc(r.discipline), late = r.ago > d.target
+      return { label: r.test, sub: `${d.label} · ${r.species} · ${r.by}`, value: r.ago, target: d.target, late, text: `${r.ago} d`, note: late ? `${r.ago - d.target} d late` : `target ${d.target} d` } }) }),
   })
 }
 
-function labTurnaround() {
-  const rows = LAB_DISCIPLINES.map((d) => {
-    const mine = LAB.filter((r) => r.discipline === d.key)
-    const open = mine.filter((r) => r.done == null)
-    const done = mine.filter((r) => r.done != null)
-    const avg = done.length ? done.reduce((n, r) => n + r.done, 0) / done.length : null
-    return { head: d.label, n: { open: open.length, late: open.filter((r) => r.ago > d.target).length, done: done.length, avg, target: d.target } }
-  })
-  const days = (v) => `${Number.isInteger(v) ? v : v.toFixed(1)} d`
-  return matrixTable({
-    title: 'Turnaround', span: 'by discipline', aria: 'Lab turnaround by discipline',
-    corner: 'Discipline',
-    cols: [
-      { key: 'open',   label: 'Open' },
-      { key: 'late',   label: 'Late', flag: (v) => v > 0 },
-      { key: 'done',   label: 'Done', short: 'Done' },
-      { key: 'avg',    label: 'Average days', short: 'Avg', fmt: days },
-      { key: 'target', label: 'Target days',  short: 'Target', fmt: days },
-    ],
-    rows,
-  })
+function turnaroundCard() {
+  const all = lab(), max = Math.max(10, ...all.map((r) => r.done == null ? r.ago : r.done)) + 1
+  const rows = LAB_DISCIPLINES.map((d) => { const mine = all.filter((r) => r.discipline === d.key), done = mine.filter((r) => r.done != null), open = mine.filter((r) => r.done == null)
+    const avg = done.length ? done.reduce((n, r) => n + r.done, 0) / done.length : 0
+    return { label: d.label, sub: `${done.length} done · ${open.length} open`, target: d.target, mean: avg,
+      points: [...done.map((r) => ({ at: r.done, label: `${r.test}, ${r.species}: ${r.done} d`, late: r.done > d.target })), ...open.map((r) => ({ at: r.ago, open: true, label: `${r.test}, ${r.species}: open ${r.ago} d`, late: r.ago > d.target }))],
+      text: avg ? `${avg.toFixed(1)} d` : '–', note: `target ${d.target} d` } })
+  return panel({ title: 'Turnaround', span: 'every request in 30 days, days against target', cls: 'life-card--wide',
+    aria: 'Lab turnaround by discipline: ' + rows.map((r) => `${r.label} average ${r.text}, target ${r.target} days`).join('; '),
+    body: dots({ rows, max, unit: 'd' }) })
 }
 
-function climateCard() {
-  const rows = [...CLIMATE].sort((a, b) => outOfRange(b) - outOfRange(a) || a.enclosure.localeCompare(b.enclosure))
-  const range = (r) => `${r[0]}–${r[1]}`
-  return listCard({
-    title: 'Climate', span: 'now', aria: 'Enclosure climate now',
-    colHead: ['Enclosure', 'Now'], rows, open: 'all',
-    chips: [
-      { key: 'all', label: 'All',          test: () => true },
-      { key: 'out', label: 'Out of range', test: outOfRange },
-      { key: 'in',  label: 'In range',     test: (c) => !outOfRange(c) },
-    ],
-    row: (c, i) => {
-      const out = outOfRange(c)
-      return `<span class="life-row__rank">${i + 1}</span>` +
-        `<span class="life-row__who"><span class="life-row__name">${esc(c.enclosure)}</span>` +
-          `<span class="life-row__sub">${esc(c.species)} · target ${range(c.tempRange)}°C · ${range(c.rhRange)}% RH</span></span>` +
-        `<span class="life-row__val${out ? ' is-late' : ''}"><b>${c.temp.toFixed(1)}°C</b>` +
-          `<span class="life-row__note">${c.rh}% RH${out ? ' · out of range' : ''}</span></span>`
-    },
-    empty: 'No sensors reporting',
+function climateCards() {
+  const rows = [...climate()].sort((a, b) => outOfRange(b) - outOfRange(a) || a.enclosure.localeCompare(b.enclosure))
+  const temp = panel({
+    title: 'Temperature', span: 'now, against the target band and the day', cls: '',
+    aria: 'Enclosure temperature: ' + rows.map((c) => `${c.enclosure} ${c.temp.toFixed(1)}°C`).join(', '),
+    body: strips({ unit: '°C', rows: rows.map((c) => ({ label: c.enclosure, sub: c.species, lo: c.tempRange[0], hi: c.tempRange[1], min: c.min[0], max: c.min[1], now: c.temp, text: `${c.temp.toFixed(1)}°C`, out: c.temp < c.tempRange[0] || c.temp > c.tempRange[1] })) }),
   })
-}
-
-function climateExtremes() {
-  const rows = CLIMATE.map((c) => ({ head: c.enclosure, n: { tmin: c.min[0], tmax: c.min[1], hmin: c.rhMin[0], hmax: c.rhMin[1] },
-    _out: c.min[0] < c.tempRange[0] || c.min[1] > c.tempRange[1] || c.rhMin[0] < c.rhRange[0] || c.rhMin[1] > c.rhRange[1] }))
-  return matrixTable({
-    title: 'Climate', span: 'last 24 hours', aria: 'Enclosure climate extremes, last 24 hours',
-    corner: 'Enclosure',
-    cols: [
-      { key: 'tmin', label: 'Minimum °C', short: 'Min °C', fmt: (v) => v.toFixed(1) },
-      { key: 'tmax', label: 'Maximum °C', short: 'Max °C', fmt: (v) => v.toFixed(1) },
-      { key: 'hmin', label: 'Minimum humidity', short: 'Min %', fmt: (v) => String(v) },
-      { key: 'hmax', label: 'Maximum humidity', short: 'Max %', fmt: (v) => String(v) },
-    ],
-    rows,
+  const rh = panel({
+    title: 'Humidity', span: 'now, against the target band and the day',
+    aria: 'Enclosure humidity: ' + rows.map((c) => `${c.enclosure} ${c.rh}%`).join(', '),
+    body: strips({ unit: '%', rows: rows.map((c) => ({ label: c.enclosure, sub: c.species, lo: c.rhRange[0], hi: c.rhRange[1], min: c.rhMin[0], max: c.rhMin[1], now: c.rh, text: `${c.rh}%`, out: c.rh < c.rhRange[0] || c.rh > c.rhRange[1] })) }),
   })
+  return [temp, rh]
 }
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
-  const grid = root.querySelector('.life-grid')
-  grid.appendChild(transfersCard())
-  grid.appendChild(transfersBySpecialist())
-  grid.appendChild(labCard())
-  grid.appendChild(labTurnaround())
-  grid.appendChild(climateCard())
-  grid.appendChild(climateExtremes())
+  root.querySelector('.life-grid').append(transfersCard(), specialistCard(), labCard(), turnaroundCard(), ...climateCards())
   root.hidden = false
   return root
 }
 
 __x.mount = mount
-/* THE REPORT CONTRACT. `summary()` is the cheap call — four figures the home
-   card shows, the kind of thing one aggregate query serves — and `render()`
-   is the expensive one, run only when the report page is opened. */
 __x.report = { id: 'operations', title: 'Operations', icon: 'd-work', sub: 'transfers, the lab, the climate',
-  summary: () => tiles().slice(0, 4), render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Favourites.js', function (__x, __req) {
@@ -32423,6 +32714,9 @@ function mount({ root, reports, page } = {}) {
   picker.innerHTML = scope.options().map((o) => `<option value="${o.id}"${o.id === scope.get() ? ' selected' : ''}>${esc(o.label)}</option>`).join('')
   picker.addEventListener('change', () => scope.set(picker.value))
 
+  /* the list shows the first few; a role's full list is one press away */
+  const SHOW = 8
+  let showAll = false
   function drawToday() {
     const items = reports.flatMap((r) => (r.actionables ? r.actionables() : []).map((a) => ({ ...a, report: r })))
       .filter((a) => a.n > 0 && (role === 'all' || (a.roles || []).includes(role)))
@@ -32433,12 +32727,13 @@ function mount({ root, reports, page } = {}) {
           ROLES.map((r) => `<button type="button" class="life-chip" data-role="${r.key}" aria-pressed="${r.key === role}">${r.label}</button>`).join('') +
         `</div></div>` +
       (items.length
-        ? `<ol class="today__list">` + items.map((a) =>
+        ? `<ol class="today__list${items.length > SHOW && !showAll ? ' is-cut' : ''}">` + items.map((a) =>
             `<li><button type="button" class="today__row${a.due ? ' is-due' : ''}" data-report="${a.report.id}">` +
               `<b class="today__n">${fmt(a.n)}</b>` +
               `<span class="today__text">${esc(a.text)}<small>${esc(a.report.title)}${a.note ? ' · ' + esc(a.note) : ''}</small></span>` +
               `<span class="today__go" aria-hidden="true">${icon('chev-right')}</span>` +
-            `</button></li>`).join('') + `</ol>`
+            `</button></li>`).join('') + `</ol>` +
+          (items.length > SHOW ? `<button type="button" class="today__more" data-more>${showAll ? 'Show fewer' : `Show all ${fmt(items.length)}`}</button>` : '')
         : `<p class="today__none">Nothing needs ${role === 'all' ? 'anyone' : 'this role'} today.</p>`)
   }
   function drawCards() {
@@ -32454,7 +32749,8 @@ function mount({ root, reports, page } = {}) {
   const draw = () => { drawToday(); drawCards() }
   root.addEventListener('click', (e) => {
     const chip = e.target.closest('.life-chip[data-role]')
-    if (chip) { role = chip.dataset.role; drawToday(); return }
+    if (chip) { role = chip.dataset.role; showAll = false; drawToday(); return }
+    if (e.target.closest('[data-more]')) { showAll = !showAll; drawToday(); return }
     const btn = e.target.closest('[data-report]')
     if (!btn) return
     const report = reports.find((r) => r.id === btn.dataset.report)
@@ -35416,9 +35712,12 @@ const PHARMACY_BINS = [
    the trend compares this week with the one before it. */
 const ENRICHMENT = [2, 1, 3, 0, 2, 1, 1,   3, 4, 2, 5, 3, 4, 6];
 
+const scope = __req('js/state/reportScope.js');
+const inCare = () => scope.scoped(IN_CARE);
+
 function counts() {
-  const n = (k) => IN_CARE.filter((r) => r[k]).length;
-  const today = (k) => IN_CARE.filter((r) => r[k] && r.since === 0).length;
+  const n = (k) => inCare().filter((r) => r[k]).length;
+  const today = (k) => inCare().filter((r) => r[k] && r.since === 0).length;
   return {
     hospital:   { n: n('hospital'),   today: today('hospital') },
     medication: { n: n('medication'), today: today('medication') },
@@ -35434,7 +35733,7 @@ function casesByClass() {
   const zero = () => ({ aves: 0, mammal: 0, reptile: 0, other: 0, all: 0 })
   const tally = (test) => {
     const n = zero()
-    for (const r of IN_CARE) if (test(r)) { n[r.klass] += 1; n.all += 1 }
+    for (const r of inCare()) if (test(r)) { n[r.klass] += 1; n.all += 1 }
     return n
   }
   return {
@@ -35841,13 +36140,17 @@ const INCIDENTS = [
   { kind: 'escape',   species: 'parakeet',   ago: 22, count: 2 },
 ];
 function incidents(kind, days) {
-  return INCIDENTS.filter((e) => e.kind === kind && e.ago < days).reduce((n, e) => n + e.count, 0)
+  return INCIDENTS.filter((e) => scope.inScope(e) && e.kind === kind && e.ago < days).reduce((n, e) => n + e.count, 0)
 }
 
 /* Today is `ago === 0`; every other window is the last N days INCLUDING today,
    which is what "last 7 days" means to the person reading it. */
+const scope = __req('js/state/reportScope.js');
+/* every reader of the seed sees only the scope's rows — see reportScope.js */
+const visible = () => EVENTS.filter((e) => scope.inScope(e));
+
 function summarise(kind, days) {
-  const within = EVENTS.filter(e => e.kind === kind && (days === 0 ? e.ago === 0 : e.ago < days));
+  const within = visible().filter(e => e.kind === kind && (days === 0 ? e.ago === 0 : e.ago < days));
   const bySpecies = new Map();
   for (const e of within) bySpecies.set(e.species, (bySpecies.get(e.species) || 0) + e.count);
   /* today's share of each species, so a listing can say "2 today" beside the
@@ -35868,7 +36171,7 @@ function summarise(kind, days) {
 function daily(kind, days) {
   const out = []
   for (let ago = days - 1; ago >= 0; ago--) {
-    out.push({ ago, count: EVENTS.filter((e) => e.kind === kind && e.ago === ago).reduce((n, e) => n + e.count, 0) })
+    out.push({ ago, count: visible().filter((e) => e.kind === kind && e.ago === ago).reduce((n, e) => n + e.count, 0) })
   }
   return out
 }
