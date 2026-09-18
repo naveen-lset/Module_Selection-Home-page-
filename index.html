@@ -187,6 +187,23 @@
                     rgb(251, 128, 102) 74.4%,
                     rgb(251, 128, 102) 84.2%,
                     rgb(251, 128, 102) 94.0%);
+  /* NOT FROM FIGMA. Natality has no tile on the artboard, so this ramp is
+     built in the same shape as the others — same angle, same ten stops — and
+     cut from the theme's own teal: it runs from a tint of MD3_Antz/Secondary
+     (#00D6C9, the brand's accent) down towards SecondaryDark (#00ABAB, the
+     greeting's colour), so the tile is the page's colour and not a green
+     beside Medical's. A mint was tried first and read as a second Medical. */
+  --g-natality:      linear-gradient(127.96481deg,
+                    rgb(92, 214, 206) 6.0%,
+                    rgb(84, 210, 202) 15.8%,
+                    rgb(76, 206, 198) 25.6%,
+                    rgb(68, 202, 194) 35.3%,
+                    rgb(60, 198, 190) 45.1%,
+                    rgb(52, 194, 186) 54.9%,
+                    rgb(44, 190, 182) 64.7%,
+                    rgb(36, 186, 178) 74.4%,
+                    rgb(36, 186, 178) 84.2%,
+                    rgb(36, 186, 178) 94.0%);
   --g-security:      linear-gradient(127.96481deg,
                     rgb(149, 158, 152) 6.0%,
                     rgb(142, 152, 147) 15.8%,
@@ -1262,6 +1279,45 @@ button { font: inherit; color: inherit; }
   color: var(--c-on-secondary-ctr);
 }
 .greeting__wave { display: inline-block; margin-left: .12em; }
+
+/* ── the clock ───────────────────────────────────────────────────────────
+   The greeting keeps the voice; the clock answers in a quieter one. A hairline
+   divides the two rather than a gap, so the pair reads as one block set against
+   the actions instead of as a third thing adrift between them. The figures are
+   DM Sans, the face the big counts use, and tabular, so the minute ticking over
+   never shifts the column beside it. */
+.clock {
+  flex: none;
+  display: none;             /* V4 shows it, below */
+  flex-direction: column;
+  gap: 2px;
+  margin-left: auto;      /* travels with the actions, not with the greeting */
+  padding-left: var(--s6);
+  /* Not a token: the artboard has no divider anywhere, so this is the ink at
+     the lightest weight that still separates against the planting behind it. */
+  border-left: 1px solid rgba(31, 65, 91, .14);
+}
+.clock__time {
+  font-family: var(--font-num);
+  font-size: var(--fs-metric);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.clock__date {
+  font-size: var(--fs-label);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+:root[data-page-version='4'] .clock { display: flex; }
+/* A phone-width viewport has no room for it, and the greeting matters more. */
+@media (max-width: 767px) {
+  :root[data-page-version='4'] .clock { display: none; }
+}
 
 /* ── 4 · header icons · Figma gap 20px ───────────────────────────────────*/
 /* GAP 12, NOT 20 — node 135:4442 is 88 wide for two 38px controls, which
@@ -2909,6 +2965,112 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 }
 
 
+/* ── 7c′ · CIRCLE OF LIFE ── V4, three white panels under the rail
+   ═══════════════════════════════════════════════════════════════════════════
+   The panels are drawn after the compliance dashboard's cards (image from
+   the owner, 18 Sep 2026): white, 20px corners like `.obs`, a 20px title,
+   then the content. NOT FROM FIGMA — every number below is read off that
+   screenshot and this page's tokens, not off a node. The band reuses
+   `.obs-head` for its title row so the two section heads match to the
+   pixel. Three panels across on a wide page, the table under the two lists
+   on a tablet, one column on a phone. */
+.life-band { margin: 6px 0 44px; }
+.life-band[hidden] { display: none; }
+.life-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  /* the same 8px the rail spends above its cards, so the heads line up */
+  padding-top: 8px;
+}
+.life-card {
+  display: flex; flex-direction: column;
+  min-width: 0;
+  padding: 22px 24px 18px;
+  border-radius: 20px;
+  background: var(--c-white);
+  box-shadow: var(--shadow-card);
+}
+.life-card__title {
+  margin: 0 0 14px;
+  font-size: 20px; font-weight: 600; line-height: 24px; letter-spacing: -.01em;
+  color: var(--ink);
+}
+.life-card__span { font-weight: 500; color: var(--ink-mute); }
+
+/* the chips: a filled pill for the pressed one, a quiet grey pill otherwise,
+   both carrying their count; a class with nothing in it is greyed and inert */
+.life-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.life-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 10px; border: 0; border-radius: var(--r-pill);
+  background: #F0F3F1; color: var(--ink-head);
+  font: inherit; font-size: var(--fs-micro); font-weight: 500; line-height: 1;
+  cursor: pointer;
+}
+.life-chip b { font-weight: 600; color: inherit; font-family: var(--font-num); }
+.life-chip[aria-pressed='true'] { background: var(--c-action-ink); color: var(--c-white); }
+.life-chip:disabled { opacity: .45; cursor: default; }
+.life-chip:focus-visible { outline: 2px solid var(--c-action-ink); outline-offset: 2px; }
+
+.life-cols {
+  display: flex; justify-content: space-between;
+  padding: 0 0 8px 34px;
+  border-bottom: 1px solid rgba(31, 65, 91, .10);
+  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.life-list {
+  list-style: none; margin: 0; padding: 0;
+  /* six rows show; the rest scroll inside the panel, as the dashboard's do */
+  max-height: 372px; overflow-y: auto; overscroll-behavior: contain;
+}
+.life-row {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 62px; padding: 8px 0;
+  border-bottom: 1px solid rgba(31, 65, 91, .08);
+}
+.life-row:last-child { border-bottom: 0; }
+.life-row__rank { flex: none; width: 22px; text-align: center; font-family: var(--font-num); font-weight: 600; color: var(--ink-mute); }
+.life-row__who { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.life-row__name { font-size: var(--fs-body); font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.life-row__sub { font-size: var(--fs-micro); color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.life-row__val { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.life-row__val b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1; color: var(--ink); }
+.life-row__note { font-size: var(--fs-micro); color: var(--ink-mute); }
+.life-row--none { justify-content: center; color: var(--ink-mute); font-size: var(--fs-label); }
+
+/* the table: class heads in the classes' own colours, as the dashboard
+   colours them — NOT FROM FIGMA — and every figure right-aligned in the
+   numeral face; a zero is greyed so the eye skips it, a net gain is signed */
+.life-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body); }
+.life-table th, .life-table td { padding: 14px 0; text-align: right; font-weight: 400; }
+.life-table th:first-child, .life-table td:first-child { text-align: left; }
+.life-table thead th {
+  padding-top: 4px; padding-bottom: 8px;
+  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.life-table thead th abbr { text-decoration: none; }
+.life-table thead th.is-aves    { color: #3FA9D8; }
+.life-table thead th.is-mammal  { color: var(--c-primary); }
+.life-table thead th.is-reptile { color: var(--c-tertiary); }
+.life-table tbody th { color: var(--ink-head); }
+.life-table td { font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink); }
+.life-table td.is-zero { color: var(--ink-mute); }
+.life-table tfoot tr { border-top: 1px solid rgba(31, 65, 91, .12); }
+.life-table tfoot th, .life-table tfoot td { font-weight: 700; color: var(--ink); }
+
+@media (max-width: 1023px) {
+  .life-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .life-card--table { grid-column: 1 / -1; }
+}
+@media (max-width: 743px) {
+  .life-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .life-band { margin-bottom: 36px; }
+  .life-card { padding: 18px 18px 14px; }
+}
+
 /* ── 7d · THE TWO PAGE VERSIONS ── V1 as built, V2 = NODE 236:6669
    ═══════════════════════════════════════════════════════════════════════════
    `?v=2` selects the second composition. The switch is stamped on <html>
@@ -3376,6 +3538,11 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
    74. Hidden rather than overridden, because there is nothing here for it to
    degrade into. */
 :root[data-page-version='3'] .foliage { display: none; }
+/* V4 · the same ruling as V3's on the planting, and the wave goes with it:
+   it is an emoji, which is two glyphs a tablet without the font draws as
+   two boxes, and it was the only one in the product. */
+:root[data-page-version='4'] .foliage { display: none; }
+:root[data-page-version='4'] .greeting__wave { display: none; }
 
 
 /* ── THE HEADER'S CONTROLS ARE WHITE AT 10%, AT RADIUS 12 ────────────────
@@ -5458,6 +5625,31 @@ body.is-editing .pager-dwell { animation-play-state: paused; }
 
 /* ── 1x1 · SPARK · a number over the run behind it ──────────────────────── */
 .l-spark { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; justify-content: space-between; min-height: 0; }
+/* ── WEEK · seven days with the count on the bar ────────────────────────── */
+.l-week { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; min-height: 0; }
+.l-week .c-head { margin-bottom: 2px; }
+.l-week__today { font-size: var(--fs-label); opacity: .85; }
+.l-week__today b { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-right: 3px; }
+.l-week__plot { flex: 1 1 auto; display: flex; align-items: stretch; gap: 3px; min-height: 52px; margin-top: var(--s2); }
+.l-week__col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; }
+.l-week__n { font-family: var(--font-num); font-weight: 600; font-size: var(--fs-micro); line-height: 1; font-variant-numeric: tabular-nums; opacity: .8; }
+.l-week__bar { display: block; width: 100%; min-height: 3px; border-radius: 2px 2px 0 0; background: rgba(255, 255, 255, .5); }
+.l-week__day { font-size: var(--fs-micro); line-height: 1; opacity: .6; margin-top: 2px; }
+.l-week__col[data-last] .l-week__bar { background: #fff; }
+.l-week__col[data-last] .l-week__n, .l-week__col[data-last] .l-week__day { opacity: 1; font-weight: 700; }
+/* the line — the SVG stretches to the card, so the marks are told not to:
+   `vector-effect` keeps the stroke and the points round under `none` */
+.l-week__plot--line { flex-direction: column; align-items: stretch; gap: 0; }
+.l-week__plot--line svg { display: block; flex: 1 1 auto; width: 100%; min-height: 0; overflow: visible; }
+.l-week__base { stroke: rgba(255, 255, 255, .3); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.l-week__line { fill: none; stroke: rgba(255, 255, 255, .85); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.l-week__pt { fill: var(--card-bg-solid, #3CC6BE); stroke: #fff; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.l-week__pt[data-last] { fill: #fff; }
+.l-week__pt-n { fill: #fff; font-family: var(--font-num); font-weight: 600; font-size: 6.5px; opacity: .9; }
+.l-week__days { display: flex; margin-top: 2px; font-size: var(--fs-micro); line-height: 1; opacity: .6; text-align: center; }
+.l-week__days span { flex: 1 1 0; }
+.l-week__days span[data-last] { opacity: 1; font-weight: 700; }
+
 .l-spark__value { font-family: var(--font-num); font-weight: 700; font-size: var(--fs-metric); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 .l-spark__plot { flex: none; display: flex; align-items: flex-end; gap: 2px; height: 42px; }
 .l-spark__bar { flex: 1 1 0; min-width: 2px; min-height: 2px; border-radius: 2px 2px 0 0; background: rgba(255, 255, 255, .5); }
@@ -10542,7 +10734,7 @@ body.is-editing .qa-chat { display: none; }
        what an unknown value or a stale link should answer with. Kept as an
        explicit list rather than a range check so that adding a version is a
        visible edit in both of the two places `?v=` is read. */
-    if (q === '2' || q === '3') v = q;
+    if (q === '2' || q === '3' || q === '4') v = q;
   } catch (e) { /* no URLSearchParams, no version: V1 is the default anyway */ }
   document.documentElement.dataset.pageVersion = v;
 })();
@@ -10587,6 +10779,14 @@ body.is-editing .qa-chat { display: none; }
     <div class="greeting">
       <p class="greeting__word" id="greetWord">Good Morning,</p>
       <h1 class="greeting__name">Sourav Tambe <span class="greeting__wave" aria-hidden="true">👋🏻</span></h1>
+    </div>
+
+    <!-- ══ clock · V4 ══════════════════════════════════════════════════
+         Empty and hidden on every other page; js/components/Clock.js fills
+         it, and the stylesheet shows it, on V4 alone. -->
+    <div class="clock">
+      <time class="clock__time" id="clockTime"></time>
+      <time class="clock__date" id="clockDate"></time>
     </div>
     <div class="header-actions">
       <!-- THE APPEARANCE BUTTON IS GONE. Node 135:4442 is 88px wide and holds
@@ -10723,6 +10923,20 @@ body.is-editing .qa-chat { display: none; }
         </button>
       </div>
       <div class="obs-rail" id="obsRail" role="list"></div>
+    </section>
+
+    <!-- ══ circle of life (V4) ═══════════════════════════════════════════
+         Births and deaths over the last ten days, in three white panels
+         drawn after the compliance dashboard's cards: two ranked species
+         lists with class chips, and a class-by-kind table. Rendered by
+         js/components/CircleOfLife.js from js/data/lifecycle.js — the same
+         events the week tiles in All Modules read, so the two never
+         disagree. Empty and hidden on every version but 4. -->
+    <section class="life-band" id="circleOfLife" aria-labelledby="lifeTitle" hidden>
+      <div class="obs-head">
+        <h2 class="obs-head__title" id="lifeTitle">Circle of Life</h2>
+      </div>
+      <div class="life-grid"></div>
     </section>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
@@ -11688,6 +11902,9 @@ const DOORS = [
   ['diet',          ['small', 'medium'], 'secondary'],
   ['followup',      ['small', 'medium'], 'secondary'],
   ['mortality',     ['small', 'medium'], 'primary'],
+  /* `secondary`, NOT `primary`: it is seeded on V4 alone, and checkDefaults()
+     reads `primary` as "on the V1 page", which this is not. */
+  ['natality',      ['small', 'medium'], 'secondary'],
   ['fetal',         ['small', 'medium'], 'secondary'],
   ['eggs',          ['small', 'medium'], 'primary'],
   ['administer',    ['small', 'medium'], 'primary'],
@@ -13405,6 +13622,31 @@ const VARIANTS = [
     },
   },
 
+  /* ══ NATALITY · MORTALITY — THE WEEK ═══════════════════════════════════
+     The same card twice, one per module, each on its module's own colour:
+     today's count, then seven days of bars with the count printed on every
+     bar there is. They were one card once — births up from a baseline,
+     deaths down from it, on a white plate — and it was replaced because a
+     plate beside two coloured doors read as a third thing rather than as
+     those two modules speaking. Nothing here is static: the layout reads
+     js/data/lifecycle.js at render, which is why `data` names only which
+     series to read. Passive, because a reading has nowhere to open. */
+  {
+    id: 'natality.week', moduleId: 'natality', name: 'This Week',
+    layout: 'week', purpose: 'UNDERSTAND', passive: true,
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    /* `line`, where Mortality keeps the bars: births are the trend to watch
+       rise and a line reads as movement, deaths are a tally and bars read
+       as one. Same layout, same figures, one drawing each. */
+    data: { title: 'Natality', series: 'natality', unit: 'births', line: true },
+  },
+  {
+    id: 'mortality.week', moduleId: 'mortality', name: 'This Week',
+    layout: 'week', purpose: 'UNDERSTAND', passive: true,
+    supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
+    data: { title: 'Mortality', series: 'mortality', unit: 'deaths' },
+  },
+
 ]
 
 /** Fill in what every variation has in common so the catalogue states only
@@ -13554,7 +13796,7 @@ __def('js/lib/pageVersion.js', function (__x, __req) {
 const PAGE_VERSION = (() => {
   try {
     const q = new URLSearchParams(location.search).get('v')
-    return q === '2' || q === '3' ? q : '1'
+    return q === '2' || q === '3' || q === '4' ? q : '1'
   } catch {
     return '1'
   }
@@ -13562,6 +13804,12 @@ const PAGE_VERSION = (() => {
 
 const isV2 = () => PAGE_VERSION === '2'
 const isV3 = () => PAGE_VERSION === '3'
+/* V4 IS V1 WITH THIS SESSION'S CHANGES ON IT (18 Sep 2026) — a live clock in
+   the header, no planting, no wave, today's births and deaths on their doors.
+   It exists so that all of that can be reviewed and merged without touching
+   the three pages already in use: nothing checks `isV4()` except the things
+   V4 adds, so everywhere else it is V1. */
+const isV4 = () => PAGE_VERSION === '4'
 
 /**
  * SWITCH THE PAGE — A NAVIGATION, AND IT CANNOT BE ANYTHING ELSE.
@@ -13592,7 +13840,7 @@ function setPageVersion(v) {
   try {
     const url = new URL(location.href)
     const want = String(v)
-    if (want === '2' || want === '3') url.searchParams.set('v', want)
+    if (want === '2' || want === '3' || want === '4') url.searchParams.set('v', want)
     else url.searchParams.delete('v')
     if (url.href === location.href) return false
     location.assign(url.href)
@@ -13606,6 +13854,7 @@ function setPageVersion(v) {
   __x.PAGE_VERSION = PAGE_VERSION;
   __x.isV2 = isV2;
   __x.isV3 = isV3;
+  __x.isV4 = isV4;
   __x.setPageVersion = setPageVersion;
 });
 
@@ -13630,7 +13879,7 @@ __def('js/state/layoutStore.js', function (__x, __req) {
 const { createStore } = __req('js/state/store.js');
 const { getVariant } = __req('js/data/cardVariants.js');
 const { normalise } = __req('js/lib/pack.js');
-const { isV2, isV3 } = __req('js/lib/pageVersion.js');
+const { isV2, isV3, isV4 } = __req('js/lib/pageVersion.js');
 
 /**
  * ONE KEY PER PAGE VERSION, and not one key with a version field in it.
@@ -13641,7 +13890,7 @@ const { isV2, isV3 } = __req('js/lib/pageVersion.js');
  * working: a saved V2 layout cannot be read as a V1 one and repaired into
  * something neither version drew.
  */
-const KEY = isV2() ? 'antz.home.layout.v2' : 'antz.home.layout'
+const KEY = isV4() ? 'antz.home.layout.v4' : isV2() ? 'antz.home.layout.v2' : 'antz.home.layout'
 
 /**
  * VERSION 4 — every card is a composition now rather than a stack of blocks,
@@ -13708,6 +13957,11 @@ const KEY = isV2() ? 'antz.home.layout.v2' : 'antz.home.layout'
    nothing would put it on the page; and the two doors' new cells are an ORDER
    change, which is the kind repair() cannot see — every id resolves, every
    size is supported, and the page draws yesterday's arrangement in silence. */
+/* NOT 13 FOR VERSION 4 (18 Sep 2026). V4 seeds a card no other page has —
+   Natality's door — which is the case every bump above was made for. It is
+   not made here because V4 reads a key of its own, `antz.home.layout.v4`,
+   that no browser has ever written: there is no stale document to drop, and
+   a bump would drop everyone's hand-arranged V1 for nothing. */
 const VERSION = 12
 
 /**
@@ -13979,6 +14233,20 @@ const V3_LAYOUT = [
   { variantId: 'communication.unread', size: 'medium' },
 ]
 
+/* V4 · V1's page, with the week's births and deaths in the first row beside
+   Medical — one card per module, on the module's colour — and Natality's door
+   beside Mortality's further down. Derived rather than copied so that the
+   fifteen V1 cards cannot drift from DEFAULT_LAYOUT: the one thing this list
+   states is what is added and where. */
+const V4_LAYOUT = (() => {
+  const at = DEFAULT_LAYOUT.findIndex((e) => e.variantId === 'medical.default') + 1
+  return DEFAULT_LAYOUT.flatMap((e, i) => [
+    ...(i === at ? [{ variantId: 'natality.week', size: 'medium' }, { variantId: 'mortality.week', size: 'medium' }] : []),
+    e,
+    ...(e.variantId === 'mortality.default' ? [{ variantId: 'natality.default', size: 'small' }] : []),
+  ])
+})()
+
 /**
  * Cards the user is not allowed to remove.
  *
@@ -14056,7 +14324,7 @@ function seed() {
      survived repair() but never made it out of the default. */
   /* EACH PAGE SEEDS ITS OWN SET. V3's is node 506:10213's, row by row — see
      V3_LAYOUT above for how the frame's geometry was read into grid cells. */
-  const layout = isV3() ? V3_LAYOUT : isV2() ? V2_LAYOUT : DEFAULT_LAYOUT
+  const layout = isV4() ? V4_LAYOUT : isV3() ? V3_LAYOUT : isV2() ? V2_LAYOUT : DEFAULT_LAYOUT
   return layout.map((d) => ({ ...d, uid: newUid() }))
 }
 
@@ -14186,6 +14454,7 @@ function resetLayout() {
 }
   __x.DEFAULT_LAYOUT = DEFAULT_LAYOUT;
   __x.V2_LAYOUT = V2_LAYOUT;
+  __x.V4_LAYOUT = V4_LAYOUT;
   __x.VERSION = VERSION;
   __x.CORE_VARIANTS = CORE_VARIANTS;
   __x.isCore = isCore;
@@ -14335,6 +14604,21 @@ const MODULES = [
     category: 'animal',
     keywords: ['death', 'necropsy', 'loss', 'post mortem'],
     blurb: 'Deaths, necropsy records and mortality trend.',
+  },
+  /* NOT ON THE ARTBOARD. Natality is Mortality's opposite number and the
+     product had no tile for it; it is added for V4 so today's births have a
+     door to sit on, the way today's deaths sit on Mortality's. The glyph is
+     drawn for it — a paw with a smaller paw inside — in the strokes and the
+     40pt box the exported glyphs use, so it sits with them. */
+  {
+    id: 'natality',
+    icon: 'm-natality.svg',
+    iconSize: 44,
+    gradient: '--g-natality',
+    name: 'Natality',
+    category: 'animal',
+    keywords: ['births', 'born', 'newborn', 'neonate', 'breeding'],
+    blurb: 'Births, neonates and natality trend.',
   },
   {
     id: 'fetal',
@@ -23159,6 +23443,7 @@ __def('js/components/ModuleCard.js', function (__x, __req) {
  */
 
 const { getModule } = __req('js/data/modules.js');
+const { summarise, daily } = __req('js/data/lifecycle.js');
 const { icon } = __req('js/icons.js');
 
 const { createCarousel, CAROUSEL_MAX } = __req('js/lib/carousel.js');
@@ -23328,6 +23613,44 @@ const BEHAVIOUR = {
 
 /* What a screen reader reads: the module, the card, then its actual content,
    so nobody has to open Pharmacy to learn that 42 requests are waiting. */
+/* THE LINE · one SVG, the days spaced evenly, every day a point — a line
+   cannot skip a day the way the bars skip one, so an empty day sits on the
+   baseline rather than leaving a gap the eye would read as missing data.
+   The count sits above each point that has one; today's point is filled and
+   the rest are hollow, which is the line's version of the bars' full-strength
+   last column. The letters are HTML below the drawing, not text in the SVG,
+   so they set in the page's own face at the page's own size. */
+function weekLine(days, max, fmt) {
+  const W = 140, H = 44, PAD = 6, TOP = 8
+  const n = days.length
+  const x = (i) => (PAD + (i * (W - PAD * 2)) / (n - 1))
+  const y = (c) => (H - PAD - (c / max) * (H - PAD - TOP))
+  const pts = days.map((d, i) => [x(i), y(d.count), d.count])
+  const path = pts.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(1)} ${py.toFixed(1)}`).join(' ')
+  const marks = pts.map(([px, py, c], i) => {
+    const last = i === n - 1
+    return (c ? `<text class="l-week__pt-n" x="${px.toFixed(1)}" y="${(py - 4.5).toFixed(1)}" text-anchor="middle">${c}</text>` : '') +
+      `<circle class="l-week__pt"${last ? ' data-last' : ''} cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${last ? 2.6 : 2}"/>`
+  }).join('')
+  const letters = days.map((d, i) =>
+    `<span${i === n - 1 ? ' data-last' : ''}>${esc(fmt.format(new Date(Date.now() - d.ago * 86400000)))}</span>`).join('')
+  return `<span class="l-week__plot l-week__plot--line">` +
+    `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" focusable="false">` +
+      `<line class="l-week__base" x1="${PAD}" y1="${H - PAD}" x2="${W - PAD}" y2="${H - PAD}"/>` +
+      `<path class="l-week__line" d="${path}"/>${marks}` +
+    `</svg>` +
+    `<span class="l-week__days">${letters}</span>` +
+  `</span>`
+}
+
+/* What a week card says aloud — today's figure and the week's, since the
+   bars are hidden from assistive technology and the title alone is a riddle. */
+function weekSpoken(data) {
+  const days = daily(data.series, 7)
+  const week = days.reduce((n, d) => n + d.count, 0)
+  return `${days[days.length - 1].count} ${data.unit} today, ${week} this week`
+}
+
 function spokenName(mod, variant, data) {
   /* An empty card reads as its title and the reason it is empty. Falling
      through to the content branches below would announce a card's name and
@@ -23336,6 +23659,7 @@ function spokenName(mod, variant, data) {
     return [mod?.name, variant.name, variant.empty.note].filter(Boolean).join('. ')
   }
   const bits = [data.label || mod?.name]
+  if (variant.layout === 'week') bits.push(weekSpoken(data))
   if (variant.layout !== 'door' && variant.layout !== 'compact') bits.push(variant.name)
   if (data.value) bits.push(`${data.value}${data.of ? ' of ' + data.of : ''} ${data.label || ''}`)
   if (data.sub) bits.push(data.sub)
@@ -23841,6 +24165,29 @@ const LAYOUTS = {
             `${esc(s.value)}</span>` +
           `<span class="l-flow__label">${esc(s.label)}</span></span>`).join('') +
       `</span></span>`
+  },
+
+  /* WEEK · today's figure, then seven days of it. The count sits on every
+     bar that has one and nowhere else: a zero over an empty day is a label
+     for nothing. Today is the last column and the only one at full strength,
+     as in `spark`. */
+  week: (mod, variant, data) => {
+    const days = daily(data.series, 7)
+    const max = Math.max(1, ...days.map((d) => d.count))
+    const fmt = new Intl.DateTimeFormat(undefined, { weekday: 'narrow' })
+    const cols = days.map((d, i) => {
+      const last = i === days.length - 1 ? ' data-last' : ''
+      return `<span class="l-week__col"${last}>` +
+        (d.count ? `<span class="l-week__n">${d.count}</span>` : '') +
+        (d.count ? `<i class="l-week__bar" style="height:${((d.count / max) * 100).toFixed(1)}%"></i>` : '') +
+        `<span class="l-week__day">${esc(fmt.format(new Date(Date.now() - d.ago * 86400000)))}</span>` +
+      `</span>`
+    }).join('')
+    const today = days[days.length - 1].count
+    return `<span class="l-week">${head(mod, variant, data)}` +
+      `<span class="l-week__today"><b>${today}</b> ${esc(data.unit)} today</span>` +
+      (data.line ? weekLine(days, max, fmt) : `<span class="l-week__plot">${cols}</span>`) +
+    `</span>`
   },
 
   /* ATTENTION · one count that is the reason the card is on the page, then
@@ -30484,6 +30831,128 @@ const OBSERVATIONS = [
   __x.OBSERVATIONS = OBSERVATIONS;
 });
 
+__def('js/components/CircleOfLife.js', function (__x, __req) {
+/**
+ * CIRCLE OF LIFE — births and deaths, the last ten days, by species and class
+ * ───────────────────────────────────────────────────────────────────────────
+ * Three white panels under the Recent Observations rail, on V4 only. The
+ * shapes are the compliance dashboard's (WorkbookDashboard.tsx): its
+ * "Top 10 scheduled species" card gives the two lists — class chips over a
+ * ranked list, the figure bold on the right with a note under it — and its
+ * "Appendix, by class" card gives the table. They were asked for by their
+ * names, so they are drawn to match rather than reinvented.
+ *
+ * The lists are LAST 10 DAYS, the figure is the ten-day count and the note
+ * is today's share of it, so the person reading sees both the trend and the
+ * morning. A chip narrows a list to one class and the "All" chip widens it
+ * back; the chips carry their own counts so a class with nothing in it says
+ * so before it is tapped, and a tapped chip is `aria-pressed`, so the state
+ * is spoken and not only coloured.
+ *
+ * The table's rows are the two kinds and its foot is the NET — births less
+ * deaths — because that is the one figure a total of births and deaths could
+ * never be. The compliance table foots a sum; this one does not, and says so.
+ *
+ * Nothing here is a link: there is no natality or mortality page in this
+ * build, so the panels are regions and not anchors to nowhere.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { CLASSES, summarise, byClass } = __req('js/data/lifecycle.js')
+
+const DAYS = 10
+const KINDS = [
+  { kind: 'natality',  title: 'Natality',  unit: 'births', head: 'Births' },
+  { kind: 'mortality', title: 'Mortality', unit: 'deaths', head: 'Deaths' },
+]
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+const fmt = (n) => n.toLocaleString('en-IN')
+
+/* "Schedule I" for a scheduled species, "Not scheduled" otherwise — the flag
+   asked for in place of a scientific name */
+function standing(row) {
+  const klass = CLASSES.find((c) => c.key === row.klass)
+  const cls = klass ? klass.one : 'Other'
+  return `${cls} · ${row.schedule ? `Schedule ${row.schedule}` : 'Not scheduled'}`
+}
+
+function listCard(spec) {
+  const { rows, total } = summarise(spec.kind, DAYS)
+  const counts = { all: total }
+  for (const c of CLASSES) counts[c.key] = rows.filter((r) => r.klass === c.key).reduce((n, r) => n + r.count, 0)
+
+  const el = document.createElement('section')
+  el.className = 'life-card'
+  el.setAttribute('aria-label', `${spec.title}, last ${DAYS} days`)
+  el.innerHTML =
+    `<h3 class="life-card__title">${spec.title} <span class="life-card__span">· last ${DAYS} days</span></h3>` +
+    `<div class="life-chips" role="group" aria-label="Filter by class">` +
+      [{ key: 'all', label: 'All' }, ...CLASSES].map((c) =>
+        `<button type="button" class="life-chip" data-key="${c.key}" aria-pressed="${c.key === 'all'}"` +
+        `${counts[c.key] ? '' : ' disabled'}>${c.label} <b>${fmt(counts[c.key])}</b></button>`).join('') +
+    `</div>` +
+    `<div class="life-cols" aria-hidden="true"><span>Species</span><span>${spec.head}</span></div>` +
+    `<ol class="life-list"></ol>`
+
+  const list = el.querySelector('.life-list')
+  const draw = (key) => {
+    const shown = key === 'all' ? rows : rows.filter((r) => r.klass === key)
+    list.innerHTML = shown.length ? shown.map((r, i) =>
+      `<li class="life-row">` +
+        `<span class="life-row__rank">${i + 1}</span>` +
+        `<span class="life-row__who"><span class="life-row__name">${esc(r.common)}</span>` +
+          `<span class="life-row__sub">${esc(standing(r))}</span></span>` +
+        `<span class="life-row__val"><b>${fmt(r.count)}</b>` +
+          `<span class="life-row__note">${r.today ? `${fmt(r.today)} today` : '– today'}</span></span>` +
+      `</li>`).join('')
+      : `<li class="life-row life-row--none">No ${spec.unit} in the last ${DAYS} days</li>`
+  }
+  draw('all')
+  el.querySelector('.life-chips').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.life-chip')
+    if (!btn || btn.disabled) return
+    for (const b of el.querySelectorAll('.life-chip')) b.setAttribute('aria-pressed', String(b === btn))
+    draw(btn.dataset.key)
+  })
+  return el
+}
+
+function tableCard() {
+  const rows = KINDS.map((k) => ({ ...k, n: byClass(k.kind, DAYS) }))
+  const net = { all: rows[0].n.all - rows[1].n.all }
+  for (const c of CLASSES) net[c.key] = rows[0].n[c.key] - rows[1].n[c.key]
+  const cell = (v, cls = '') => `<td class="${cls}${v === 0 ? ' is-zero' : ''}">${v > 0 && cls === 'is-net' ? '+' : ''}${fmt(v)}</td>`
+
+  const el = document.createElement('section')
+  el.className = 'life-card life-card--table'
+  el.setAttribute('aria-label', `By class, last ${DAYS} days`)
+  el.innerHTML =
+    `<h3 class="life-card__title">By class <span class="life-card__span">· last ${DAYS} days</span></h3>` +
+    `<table class="life-table"><thead><tr><th scope="col">Kind</th>` +
+      CLASSES.map((c) => `<th scope="col" class="is-${c.key}"><abbr title="${c.label}">${c.short}</abbr></th>`).join('') +
+      `<th scope="col">All</th></tr></thead><tbody>` +
+      rows.map((r) => `<tr><th scope="row">${r.head}</th>` +
+        CLASSES.map((c) => cell(r.n[c.key])).join('') + cell(r.n.all) + `</tr>`).join('') +
+    `</tbody><tfoot><tr><th scope="row">Net</th>` +
+      CLASSES.map((c) => cell(net[c.key], 'is-net')).join('') + cell(net.all, 'is-net') +
+    `</tr></tfoot></table>`
+  return el
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  const grid = root.querySelector('.life-grid')
+  for (const k of KINDS) grid.appendChild(listCard(k))
+  grid.appendChild(tableCard())
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+});
+
 __def('js/components/RecentObservations.js', function (__x, __req) {
 /**
  * THE RECENT OBSERVATIONS RAIL — the rail is node 196:7243, the card is
@@ -31311,18 +31780,24 @@ mountIconSprite()
    would mean two more `?v=` branches in the HTML for no gain: V1 needs them,
    V2's CSS drops them before they paint, and an empty `.hero-stage` in the DOM
    of a page that never displays it costs nothing. */
-const { PAGE_VERSION, isV2, isV3, setPageVersion } = __req('js/lib/pageVersion.js')
+const { PAGE_VERSION, isV2, isV3, setPageVersion, isV4 } = __req('js/lib/pageVersion.js')
 /* `=== '1'`, NOT `!== '2'`. The deck and the rail are V1's alone, and the
    negative form meant "anything that is not V2" — which was the same thing
    right up until V3 existed, and would then have mounted V1's two bands into
    the black page and left a 6-second dwell timer running behind them. */
-if (PAGE_VERSION === '1') {
+/* AND V4, which is V1's page — the one place V4 has to say so, because the
+   positive form above is exactly right and would otherwise leave V4 with an
+   empty stage and an empty rail where V1 draws both. */
+if (PAGE_VERSION === '1' || isV4()) {
   const { createHeroBanners } = __req('js/components/HeroBanners.js')
   createHeroBanners({ root: document.getElementById('heroStage') })
 
   /* the rail between the announcements and the modules, node 196:7243 */
   const { createRecentObservations } = __req('js/components/RecentObservations.js')
   createRecentObservations({ root: document.getElementById('recentObs') })
+
+  /* V4's births-and-deaths band under the rail; mounts to nothing on V1 */
+  __req('js/components/CircleOfLife.js').mount({ root: document.getElementById('circleOfLife') })
 }
 
 /* ── quick actions ──────────────────────────────────────────────────────
@@ -31600,6 +32075,8 @@ const profileMenu = createProfileMenu({
           note: 'Search, then straight into the modules' },
         { id: 'ver:3', label: 'Version 3', checked: isV3(),
           note: 'The black page — node 506:10213' },
+        { id: 'ver:4', label: 'Version 4', checked: isV4(),
+          note: 'Live clock, no planting, today\u2019s births and deaths' },
 
         null,
         { id: 'reset', icon: 'refresh', label: 'Reset Home Page',
@@ -32766,7 +33243,7 @@ Object.assign(window, {
      */
     checkDefaults() {
       const { primaryVariants, getVariant } = __req('js/data/cardVariants.js')
-      const { DEFAULT_LAYOUT, V2_LAYOUT } = __req('js/state/layoutStore.js')
+      const { DEFAULT_LAYOUT, V2_LAYOUT, V4_LAYOUT } = __req('js/state/layoutStore.js')
 
       const seeded = new Set(DEFAULT_LAYOUT.map((d) => d.variantId))
       const problems = []
@@ -32795,6 +33272,15 @@ Object.assign(window, {
         if (!v) { problems.push(`seeded on V2 but not in the catalogue: ${d.variantId}`); continue }
         if (!v.supportedSizes.includes(d.size)) {
           problems.push(`seeded on V2 at a size it does not support: ${d.variantId} @ ${d.size}`)
+        }
+      }
+      /* V4 is derived from the default list, so the one card it can get wrong
+         is the one it adds — checked the way V2's are, for the same reason. */
+      for (const d of V4_LAYOUT) {
+        const v = getVariant(d.variantId)
+        if (!v) { problems.push(`seeded on V4 but not in the catalogue: ${d.variantId}`); continue }
+        if (!v.supportedSizes.includes(d.size)) {
+          problems.push(`seeded on V4 at a size it does not support: ${d.variantId} @ ${d.size}`)
         }
       }
 
@@ -33284,7 +33770,189 @@ Object.assign(window, {
 
 });
 
+__def('js/data/lifecycle.js', function (__x, __req) {
+/**
+ * VITALS — births and deaths
+ * ───────────────────────────────────────────────────────────────────────────
+ * There is no registry service in this prototype, so this is the seed the doors
+ * read until there is one, and it is written as a LIST OF EVENTS rather than
+ * as ready-made totals. The doors read Today; a wider window is a filter on
+ * the same rows, so whatever reads 7 or 30 days next reads it from here. Totals
+ * hardcoded per window cannot be made to agree with one another, and a seed
+ * that disagrees with itself is worse than no seed. Aggregating real events
+ * means every window is arithmetic on the same rows.
+ *
+ * `cites` is the CITES appendix and `schedule` the Wild Life (Protection) Act
+ * schedule, carried on each species because a listing that names a species
+ * will want them. They are seed values and should come from the species
+ * registry when it exists;
+ * the Act's 2022 amendment also renumbered its schedules, which is one more
+ * reason not to treat these as authoritative.
+ */
+/* `klass` is the taxonomic class the compliance dashboard groups by — aves,
+   mammal, reptile, and `other` for everything else — so the Circle of Life
+   band can filter and total the same way that dashboard does. */
+const SPECIES = {
+  blackbuck:  { common: 'Blackbuck',              klass: 'mammal',  cites: 'III', schedule: 'I'   },
+  nilgai:     { common: 'Nilgai',                 klass: 'mammal',  cites: null,  schedule: 'III' },
+  chital:     { common: 'Chital',                 klass: 'mammal',  cites: null,  schedule: 'III' },
+  sambar:     { common: 'Sambar',                 klass: 'mammal',  cites: null,  schedule: 'III' },
+  peafowl:    { common: 'Indian peafowl',         klass: 'aves',    cites: 'III', schedule: 'I'   },
+  barasingha: { common: 'Barasingha',             klass: 'mammal',  cites: 'I',   schedule: 'I'   },
+  vulture:    { common: 'Cinereous vulture',      klass: 'aves',    cites: 'II',  schedule: 'I'   },
+  lion:       { common: 'Asiatic lion',           klass: 'mammal',  cites: 'I',   schedule: 'I'   },
+  macaque:    { common: 'Bonnet macaque',         klass: 'mammal',  cites: 'II',  schedule: 'II'  },
+  tortoise:   { common: 'Indian star tortoise',   klass: 'reptile', cites: 'I',   schedule: 'I'   },
+  python:     { common: 'Indian rock python',     klass: 'reptile', cites: 'II',  schedule: 'I'   },
+  parakeet:   { common: 'Rose-ringed parakeet',   klass: 'aves',    cites: null,  schedule: null  },
+  scorpion:   { common: 'Giant forest scorpion',  klass: 'other',   cites: null,  schedule: null  },
+};
+
+const CLASSES = [
+  /* `one` is the word for a single animal of the class — "Aves" has no
+     singular a keeper would say, so a bird is a bird */
+  { key: 'aves',    label: 'Aves',     short: 'Aves', one: 'Bird'    },
+  { key: 'mammal',  label: 'Mammals',  short: 'Mam',  one: 'Mammal'  },
+  { key: 'reptile', label: 'Reptiles', short: 'Rep',  one: 'Reptile' },
+  { key: 'other',   label: 'Others',   short: 'Oth',  one: 'Other'   },
+];
+
+/* `ago` is whole days back from today, so the seed does not go stale: it is
+   resolved against the clock at read time rather than against a fixed date. */
+const EVENTS = [
+  { kind: 'natality',  species: 'blackbuck',  ago: 0,  count: 2 },
+  { kind: 'natality',  species: 'chital',     ago: 0,  count: 3 },
+  { kind: 'natality',  species: 'nilgai',     ago: 0,  count: 1 },
+  { kind: 'natality',  species: 'peafowl',    ago: 0,  count: 1 },
+  { kind: 'mortality', species: 'sambar',     ago: 0,  count: 1 },
+  { kind: 'mortality', species: 'blackbuck',  ago: 0,  count: 1 },
+  { kind: 'mortality', species: 'peafowl',    ago: 0,  count: 1 },
+
+  { kind: 'natality',  species: 'macaque',    ago: 2,  count: 2 },
+  { kind: 'natality',  species: 'chital',     ago: 3,  count: 4 },
+  { kind: 'mortality', species: 'vulture',    ago: 4,  count: 1 },
+  { kind: 'natality',  species: 'blackbuck',  ago: 5,  count: 3 },
+  { kind: 'mortality', species: 'chital',     ago: 6,  count: 2 },
+
+  { kind: 'natality',  species: 'tortoise',   ago: 1,  count: 4 },
+  { kind: 'natality',  species: 'parakeet',   ago: 2,  count: 2 },
+  { kind: 'mortality', species: 'python',     ago: 3,  count: 1 },
+  { kind: 'natality',  species: 'scorpion',   ago: 7,  count: 6 },
+  { kind: 'natality',  species: 'sambar',     ago: 8,  count: 1 },
+  { kind: 'mortality', species: 'nilgai',     ago: 9,  count: 1 },
+  { kind: 'mortality', species: 'tortoise',   ago: 9,  count: 1 },
+
+  { kind: 'natality',  species: 'barasingha', ago: 12, count: 1 },
+  { kind: 'natality',  species: 'nilgai',     ago: 15, count: 5 },
+  { kind: 'mortality', species: 'macaque',    ago: 18, count: 1 },
+  { kind: 'natality',  species: 'peafowl',    ago: 21, count: 6 },
+  { kind: 'mortality', species: 'lion',       ago: 24, count: 1 },
+  { kind: 'natality',  species: 'chital',     ago: 27, count: 2 },
+];
+
+/* Today is `ago === 0`; every other window is the last N days INCLUDING today,
+   which is what "last 7 days" means to the person reading it. */
+function summarise(kind, days) {
+  const within = EVENTS.filter(e => e.kind === kind && (days === 0 ? e.ago === 0 : e.ago < days));
+  const bySpecies = new Map();
+  for (const e of within) bySpecies.set(e.species, (bySpecies.get(e.species) || 0) + e.count);
+  /* today's share of each species, so a listing can say "2 today" beside the
+     window's figure without a second pass over the rows */
+  const today = new Map();
+  for (const e of within) if (e.ago === 0) today.set(e.species, (today.get(e.species) || 0) + e.count);
+
+  const rows = [...bySpecies].map(([key, count]) => ({ key, count, today: today.get(key) || 0, ...SPECIES[key] }))
+    /* heaviest first — on a thirty-day window the tail is long and the species
+       that moved the number should not need scrolling to */
+    .sort((a, b) => b.count - a.count || a.common.localeCompare(b.common));
+
+  return { total: rows.reduce((n, r) => n + r.count, 0), rows };
+}
+
+/* One count per day, oldest first, for the last `days` — the shape a chart
+   wants, where summarise() gives the shape a figure wants. */
+function daily(kind, days) {
+  const out = []
+  for (let ago = days - 1; ago >= 0; ago--) {
+    out.push({ ago, count: EVENTS.filter((e) => e.kind === kind && e.ago === ago).reduce((n, e) => n + e.count, 0) })
+  }
+  return out
+}
+
+/* The window's figure split by class — one row of the "by class" table. */
+function byClass(kind, days) {
+  const out = { all: 0 };
+  for (const c of CLASSES) out[c.key] = 0;
+  for (const r of summarise(kind, days).rows) { out[r.klass] += r.count; out.all += r.count; }
+  return out;
+}
+
+__x.SPECIES = SPECIES;
+__x.CLASSES = CLASSES;
+__x.summarise = summarise;
+__x.byClass = byClass;
+__x.daily = daily;
+});
+
+__def('js/components/Clock.js', function (__x, __req) {
+/**
+ * CLOCK
+ * ───────────────────────────────────────────────────────────────────────────
+ * V4 ONLY. The header's clock, and the reason the greeting can stop lying: "Good
+ * Morning," was a hardcoded string that stayed morning at midnight. Both it and
+ * the figures beside it now come from the same tick.
+ *
+ * The tick is aligned to the minute rather than set loose on an interval, so
+ * the display changes when the minute does instead of drifting a second further
+ * from it every hour the tab stays open.
+ */
+
+const { isV4 } = __req('js/lib/pageVersion.js');
+
+const fmtTime = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+const fmtDate = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+
+/* Split where a keeper would split it rather than where the clock would: the
+   small hours are still night to whoever is reading this on a foaling watch. */
+function greetingFor(hour) {
+  if (hour >= 5  && hour < 12) return 'Good Morning,';
+  if (hour >= 12 && hour < 17) return 'Good Afternoon,';
+  if (hour >= 17 && hour < 21) return 'Good Evening,';
+  return 'Good Night,';
+}
+
+const iso = d => {
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+       + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+};
+
+function mount() {
+  if (!isV4()) return
+  const time = document.getElementById('clockTime');
+  const date = document.getElementById('clockDate');
+  const word = document.getElementById('greetWord');
+  if (!time || !date) return;
+
+  function paint() {
+    const now = new Date();
+    time.textContent = fmtTime.format(now);
+    time.setAttribute('datetime', iso(now));
+    date.textContent = fmtDate.format(now);
+    date.setAttribute('datetime', iso(now).slice(0, 10));
+    if (word) word.textContent = greetingFor(now.getHours());
+  }
+
+  paint();
+  const tick = () => { paint(); setTimeout(tick, 60000 - (Date.now() % 60000) + 20); };
+  setTimeout(tick, 60000 - (Date.now() % 60000) + 20);
+}
+
+__x.mount = mount;
+});
+
 __req('js/app.js');
+__req('js/components/Clock.js').mount();
 })();
 </script>
 <script>
