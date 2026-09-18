@@ -11,6 +11,7 @@
 - [x] search-best-practices — ranked matching (prefix/word/typo/accents), bold matched letters, ⌘K, real names in the hint — V4 only
 - [x] v4-reports-redesign — home shows Today + one card per report; detail on its own page; one teal palette, one drawing per data set; site scope select (commits ceeb19e, 5624b2a, next)
 - [x] v4-new-sections — Necropsy, Assessment (biologist's scatter), People (roster pictogram, zone cover), Tasks (board, mine, given) with actionables and role chips
+- [x] v4-report-tiles — report cards as All-Modules-style mosaic tiles (five sizes, module fills and photos) each with a white mini-drawing
 - [ ] v4-product-md — WAITING: owner to confirm PRODUCT.md draft (register: product)
 - [ ] v4-mortality-icon — redraw the Mortality glyph for V4 to match Natality's
 - [ ] push — never push unless the owner says so

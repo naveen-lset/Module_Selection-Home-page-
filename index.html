@@ -3567,7 +3567,83 @@ body.is-report { overflow: hidden; }
 .today__list.is-cut > li:nth-child(n + 9) { display: none; }
 .today__more { display: block; margin: 8px 0 4px; padding: 6px 0; border: 0; background: none; color: var(--c-action-ink); font: inherit; font-size: var(--fs-label); font-weight: 600; cursor: pointer; }
 .today__more:hover { text-decoration: underline; }
-.report-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.report-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: var(--grid-row); grid-auto-flow: dense; gap: var(--grid-gap); }
+.report-cards > .card[data-w='2'] { grid-column: span 2; }
+.report-cards > .card[data-h='2'] { grid-row: span 2; }
+.report-cards > .card[data-size='small'] { padding: var(--s4); }
+/* a tile holds a head, a drawing and its figures, so its row has a floor
+   the module grid's row does not need: taller rows where the columns get
+   narrow, and on a phone every tile is two rows deep (the 2×2 three) */
+@media (max-width: 1100px) and (min-width: 744px) { .report-cards { grid-auto-rows: 188px; } }
+@media (max-width: 743px) {
+  .report-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 100px; }
+  .report-cards > .card { grid-row: span 2; }
+  .report-cards > .card[data-h='2'] { grid-row: span 3; }
+}
+
+/* the report tile's body: head at the top, the drawing in the middle, the
+   figures at the foot; everything white on the module fill */
+.l-rep { position: relative; z-index: 2; display: flex; flex: 1 0 0; flex-direction: column; gap: var(--s2); min-height: 0; width: 100%; color: var(--on-dark); }
+.l-rep__head { display: flex; align-items: center; gap: 10px; }
+.l-rep__head .card__icon { width: 28px; height: 28px; }
+.l-rep__name { font-size: var(--fs-card); font-weight: 500; line-height: 1.18; }
+.card[data-size='small'] .l-rep__name { font-size: var(--fs-label); }
+.l-rep__viz { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; }
+.l-rep__figs { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); margin-top: auto; }
+.l-rep__fig { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.l-rep__fig b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1.05; }
+.card[data-size='large'] .l-rep__fig b { font-size: var(--fs-metric); }
+.l-rep__fig small { font-size: var(--fs-micro); opacity: .85; white-space: nowrap; }
+.l-rep__fig.is-alert b { color: #FFD7CC; }
+.card[data-fill='image'] .l-rep__fig.is-alert b { color: #FFB9A6; }
+.card[data-size='large'] .l-rep__figs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s5); }
+.card[data-size='tall'] .l-rep__figs { flex-direction: column; gap: var(--s2); }
+
+/* the mini drawings */
+.mv-dv { display: block; width: 100%; max-width: 260px; height: auto; max-height: 110px; }
+.mv-bars { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.mv-bars__row { display: grid; grid-template-columns: 58px 1fr 16px; align-items: center; gap: 6px; font-style: normal; }
+.mv-bars__row small, .mv-pg__row small, .mv-bl__row small { font-size: 10px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-bars__row b { display: block; height: 7px; border-radius: 4px; background: #fff; min-width: 4px; }
+.mv-bars__row em, .mv-pg__row em, .mv-bl__row em { font-style: normal; font-family: var(--font-num); font-size: 10px; font-weight: 700; text-align: right; }
+.mv-wf { display: grid; grid-template-columns: repeat(var(--per), 1fr); gap: 3px; width: 100%; max-width: 150px; }
+.mv-wf i { display: block; aspect-ratio: 1; border-radius: 3px; background: #fff; }
+.mv-wf i.is-hollow { background: none; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .8); }
+.mv-stack { display: flex; flex-direction: column; gap: 3px; width: 100%; height: 100%; }
+.mv-stack__seg { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 26px; padding: 0 10px; border-radius: 8px; background: #fff; color: var(--ink); font-style: normal; }
+.mv-stack__seg:first-child b { color: var(--c-tertiary); }
+.mv-stack__seg b { font-family: var(--font-num); font-size: var(--fs-label); font-weight: 700; }
+.mv-stack__seg small { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.mv-marks { display: flex; flex-wrap: wrap; gap: 3px; width: 100%; align-content: center; }
+.mv-marks i { display: block; width: 9px; height: 12px; border-radius: 5px 5px 3px 3px; background: #fff; }
+.mv-marks i.is-hollow { background: none; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .8); }
+.mv-rings { display: flex; gap: var(--s4); width: 100%; justify-content: space-around; }
+.mv-ring { position: relative; display: inline-flex; flex-direction: column; align-items: center; width: 64px; --d: 64px; }
+.card[data-h='1'] .mv-ring { --d: 50px; width: 50px; }
+.mv-ring svg { width: var(--d); height: var(--d); transform: rotate(-90deg); }
+.mv-ring__track { fill: none; stroke: rgba(255, 255, 255, .3); stroke-width: 6; }
+.mv-ring__arc { fill: none; stroke: #fff; stroke-width: 6; stroke-linecap: round; }
+.mv-ring b { position: absolute; top: calc(var(--d) / 2); left: 0; right: 0; transform: translateY(-50%); text-align: center; font-family: var(--font-num); font-size: 13px; font-weight: 700; }
+.mv-ring small { margin-top: 2px; font-size: 10px; opacity: .85; white-space: nowrap; }
+.card[data-h='1'] .mv-ring b { font-size: 11px; }
+.card[data-h='1'] .mv-rings { justify-content: flex-start; gap: var(--s5); }
+.mv-strip { position: relative; display: block; width: 100%; height: 44px; border-radius: 6px; background: rgba(255, 255, 255, .14); }
+.mv-strip u { position: absolute; top: 0; bottom: 0; border-left: 2px dashed rgba(255, 255, 255, .8); }
+.mv-strip s { position: absolute; top: 0; bottom: 0; border-left: 1px solid rgba(255, 255, 255, .45); text-decoration: none; }
+.mv-strip i { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; }
+.mv-strip i.is-flag { background: #FFB9A6; box-shadow: 0 0 0 2px rgba(255, 255, 255, .6); }
+.mv-pg { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+.mv-pg__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) 30px; align-items: center; gap: 8px; font-style: normal; }
+.mv-pg__row b { display: block; height: 7px; border-radius: 4px; background: rgba(255, 255, 255, .3); overflow: hidden; }
+.mv-pg__row b u { display: block; height: 100%; background: #fff; border-radius: 4px; }
+.mv-bl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; width: 100%; }
+.card[data-w='1'] .mv-bl { grid-template-columns: 1fr; }
+.mv-bl__row { display: grid; grid-template-columns: 80px 1fr 30px; align-items: center; gap: 8px; font-style: normal; }
+.mv-bl__row b { position: relative; display: block; height: 7px; border-radius: 4px; background: rgba(255, 255, 255, .25); }
+.mv-bl__row b u { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #fff; }
+.mv-bl__row b s { position: absolute; top: -3px; bottom: -3px; border-left: 2px solid #fff; text-decoration: none; }
+.mv-bl__row.is-over b u { background: #FFB9A6; }
+@media (max-width: 743px) { .mv-bars__row { grid-template-columns: 50px 1fr 16px; } .mv-bl__row { grid-template-columns: 64px 1fr 26px; } }
 .report-card {
   display: flex; flex-direction: column; gap: 14px; min-height: 180px; padding: 18px 20px 14px;
   border: 0; border-radius: 20px; background: var(--c-white); box-shadow: var(--shadow-card);
@@ -31709,12 +31785,12 @@ __def('js/components/CircleOfLife.js', function (__x, __req) {
  * (js/data/lifecycle.js), which answers only for the scope.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
-const { CLASSES, summarise, byClass, incidents } = __req('js/data/lifecycle.js')
+const { CLASSES, summarise, daily, byClass, incidents } = __req('js/data/lifecycle.js')
 const { BY_CLASS } = __req('js/data/collection.js')
 const scope = __req('js/state/reportScope.js')
 const { getVariant } = __req('js/data/cardVariants.js')
 const { renderCard } = __req('js/components/ModuleCard.js')
-const { esc, fmt, renderCounts, panel, listCard, pie, diverging } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, pie, diverging, mv } = __req('js/components/LifePanel.js')
 
 const DAYS = 10
 const one = (klass) => (CLASSES.find((c) => c.key === klass) || { one: 'Other' }).one
@@ -31798,8 +31874,15 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+function tile() {
+  const t = tiles()
+  const up = daily('natality', 7).map((d) => d.count), down = daily('mortality', 7).map((d) => d.count)
+  return { w: 2, h: 2, size: 'large', image: 'hero-leopard.jpg', imagePosition: '50% 30%', wash: 'linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55))',
+    viz: mv.diverge(up, down), vizNote: 'births up, deaths down, seven days',
+    figures: t.slice(0, 4).map((x) => ({ value: x.n, label: x.label, tone: x.key === 'deaths' && x.n ? 'alert' : '' })) }
+}
 __x.report = { id: 'circleOfLife', title: 'Circle of Life', icon: 'd-animal', sub: 'births, deaths and what is counted beside them',
-  summary: () => tiles().slice(0, 4), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles().slice(0, 4), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/LifePanel.js', function (__x, __req) {
@@ -32188,6 +32271,42 @@ function board({ columns }) {
     `</div>`).join('') + `</div>`
 }
 
+
+/* ═══ THE TILE KIT ══════════════════════════════════════════════════════
+   Small white drawings for the home's report tiles — the same eight ideas
+   as the page drawings, reduced to what fits beside a figure on a coloured
+   or photographed tile. All white: strength says the state, not hue. */
+const mv = {
+  /* columns up for one series, down for the other, seven days */
+  diverge: (up, down) => { const max = Math.max(1, ...up, ...down), n = up.length, W = 160, H = 72, mid = 40, bw = 12, step = W / n
+    const bars = up.map((u, i) => { const x = (i * step + (step - bw) / 2).toFixed(1), hu = ((u / max) * (mid - 4)).toFixed(1), hd = ((down[i] / max) * (H - mid - 4)).toFixed(1)
+      return (u ? `<rect x="${x}" y="${(mid - 2 - hu).toFixed(1)}" width="${bw}" height="${hu}" rx="2" fill="#fff"/>` : '') +
+        (down[i] ? `<rect x="${x}" y="${mid + 2}" width="${bw}" height="${hd}" rx="2" fill="#fff" fill-opacity=".55"/>` : '') }).join('')
+    return `<svg class="mv-dv" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="#fff" stroke-opacity=".6" stroke-width="1"/>${bars}</svg>` },
+  /* horizontal bars with a caption each */
+  bars: (rows) => { const max = Math.max(1, ...rows.map((r) => r.n))
+    return `<span class="mv-bars">` + rows.map((r) => `<i class="mv-bars__row"><small>${esc(r.label)}</small><b style="width:${Math.round((r.n / max) * 100)}%"></b><em>${fmt(r.n)}</em></i>`).join('') + `</span>` },
+  /* one square each; hollow ones are the undone */
+  waffle: (n, hollow, per = 9) => `<span class="mv-wf" style="--per:${per}">` + Array.from({ length: n }, (_, i) => `<i${i >= n - hollow ? ' class="is-hollow"' : ''}></i>`).join('') + `</span>`,
+  /* a vertical stack of segments with their counts */
+  stack: (segs) => { const total = segs.reduce((n, sg) => n + sg.n, 0) || 1
+    return `<span class="mv-stack">` + segs.map((sg, i) => `<i class="mv-stack__seg" style="flex:${sg.n || .15};opacity:${1 - i * .28}"><b>${fmt(sg.n)}</b><small>${esc(sg.label)}</small></i>`).join('') + `</span>` },
+  /* one mark a person, filled when in */
+  marks: (total, present) => `<span class="mv-marks">` + Array.from({ length: total }, (_, i) => `<i${i >= present ? ' class="is-hollow"' : ''}></i>`).join('') + `</span>`,
+  /* a ring for a share, its figure inside */
+  ring: (value, text, label) => { const r = 26, c = 2 * Math.PI * r
+    return `<span class="mv-ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="mv-ring__track" cx="32" cy="32" r="${r}"/><circle class="mv-ring__arc" cx="32" cy="32" r="${r}" stroke-dasharray="${(c * Math.min(1, value)).toFixed(1)} ${c.toFixed(1)}"/></svg><b>${esc(text)}</b><small>${esc(label)}</small></span>` },
+  /* dots along one axis, the ones past the line hollow */
+  strip: (values, min, max, line) => `<span class="mv-strip"><u style="left:${(((line - min) / (max - min)) * 100).toFixed(1)}%"></u><s style="left:${(((0 - min) / (max - min)) * 100).toFixed(1)}%"></s>` +
+    values.map((v, i) => `<i class="${v <= line ? 'is-flag' : ''}" style="left:${(((Math.min(max, Math.max(min, v)) - min) / (max - min)) * 100).toFixed(1)}%;top:${30 + ((i * 37) % 40)}%"></i>`).join('') + `</span>`,
+  /* progress rows filling toward their end */
+  progress: (rows) => `<span class="mv-pg">` + rows.map((r) => `<i class="mv-pg__row"><small>${esc(r.label)}</small><b><u style="width:${Math.min(100, Math.round((r.done / (r.total || 1)) * 100))}%"></u></b><em>${esc(r.text)}</em></i>`).join('') + `</span>`,
+  /* a bar against a target tick */
+  bullets: (rows) => `<span class="mv-bl">` + rows.map((r) => { const max = Math.max(r.n, r.target) * 1.2 || 1
+    return `<i class="mv-bl__row${r.n > r.target ? ' is-over' : ''}"><small>${esc(r.label)}</small><b><u style="width:${Math.round((r.n / max) * 100)}%"></u><s style="left:${Math.round((r.target / max) * 100)}%"></s></b><em>${esc(r.text)}</em></i>` }).join('') + `</span>`,
+}
+__x.mv = mv
+
 __x.waffle = waffle
 __x.heatStrip = heatStrip
 __x.scatter = scatter
@@ -32238,7 +32357,7 @@ const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { OVERDUE, CARE_KINDS, DUE_AHEAD, AHEAD_WINDOWS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts, casesByClass } = __req('js/data/care.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, stacked, runway, ageing, columns } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, stacked, runway, ageing, columns, mv } = __req('js/components/LifePanel.js')
 
 const kindLabel = (k) => CARE_KINDS.find((x) => x.key === k).label
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
@@ -32340,8 +32459,14 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+function tile() {
+  const c = counts(), od = overdue().length
+  return { w: 1, h: 1, size: 'small', gradient: '--g-medical',
+    viz: mv.bars([{ label: 'Hospital', n: c.hospital.n }, { label: 'Medication', n: c.medication.n }, { label: 'Maternity', n: c.maternity.n }, { label: 'Serious', n: c.serious.n }]),
+    figures: [{ value: c.hospital.n, label: 'in hospital' }, { value: od, label: 'care overdue', tone: od ? 'alert' : '' }] }
+}
 __x.report = { id: 'animalCare', title: 'Animal Care', icon: 'd-veterinary', sub: 'in care, overdue, pharmacy, enrichment',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Collection.js', function (__x, __req) {
@@ -32358,7 +32483,7 @@ const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { BY_CLASS, REHAB, WATCH, PROTECTED } = __req('js/data/collection.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, pie, rings, funnel, tiles: tileGrid, cloud } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, pie, rings, funnel, tiles: tileGrid, cloud, mv } = __req('js/components/LifePanel.js')
 
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
 /* the aggregate seeds scaled to the scope; a mock, see reportScope.js */
@@ -32432,8 +32557,15 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+function tile() {
+  const bc = byClass(), animals = bc.reduce((n, r) => n + r.animals, 0), chipped = bc.reduce((n, r) => n + r.chipped, 0), species = bc.reduce((n, r) => n + r.species, 0)
+  const stage = (k) => rehab().find((r) => r.key === k).n
+  return { w: 2, h: 1, size: 'medium', image: 'species.jpg', wash: 'linear-gradient(90deg, rgba(0,0,0,.5), rgba(0,0,0,.3))',
+    viz: `<span class="mv-rings">${mv.ring(chipped / (animals || 1), `${pct(chipped, animals)}%`, 'chipped')}${mv.ring(stage('released') / (stage('received') || 1), fmt(stage('released')), 'released')}${mv.ring(stage('rehab') / (stage('received') || 1), fmt(stage('rehab')), 'in rehab')}</span>`,
+    figures: [{ value: species, label: 'species' }, { value: animals, label: 'animals' }, { value: watch().find((r) => r.key === 'permits').n, label: 'permits expiring', tone: 'alert' }] }
+}
 __x.report = { id: 'collection', title: 'Collection', icon: 'd-overview', sub: 'the holdings, rehabilitation, compliance',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Husbandry.js', function (__x, __req) {
@@ -32447,7 +32579,7 @@ __def('js/components/Husbandry.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { DIET_CHANGES, DIET_REASONS, CLUTCHES } = __req('js/data/husbandry.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, timeline, progress } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, timeline, progress, mv } = __req('js/components/LifePanel.js')
 
 const DAY = 86400000
 const fmtDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' })
@@ -32509,8 +32641,15 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+function tile() {
+  const t = tiles()
+  const soon = clutches().filter((c) => c.hatched == null).sort((a, b) => (a.period - a.laid) - (b.period - b.laid)).slice(0, 3)
+  return { w: 2, h: 1, size: 'medium', image: 'diet-kitchen.jpg', wash: 'linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.25))',
+    viz: mv.progress(soon.map((c) => ({ label: c.species, done: c.laid, total: c.period, text: `${Math.max(0, c.period - c.laid)} d` }))), vizNote: 'the three clutches nearest to hatching',
+    figures: [{ value: t[1].n, label: 'eggs incubating' }, { value: t[2].n, label: 'due to hatch' }, { value: diets().filter((d) => d.ago < 7).length, label: 'diet changes, 7 days' }] }
+}
 __x.report = { id: 'husbandry', title: 'Husbandry', icon: 'd-husbandry', sub: 'diets and the egg room',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Operations.js', function (__x, __req) {
@@ -32526,7 +32665,7 @@ __def('js/components/Operations.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, flow, shares, bullets, strips, dots, tiles: tileGrid } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, flow, shares, bullets, strips, dots, tiles: tileGrid, mv } = __req('js/components/LifePanel.js')
 
 const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
 const disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k)
@@ -32623,8 +32762,16 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
+function tile() {
+  const open = lab().filter((r) => r.done == null), late = open.filter((r) => r.ago > disc(r.discipline).target), out = climate().filter(outOfRange)
+  const rows = LAB_DISCIPLINES.map((d) => { const mine = open.filter((r) => r.discipline === d.key); const worst = Math.max(0, ...mine.map((r) => r.ago))
+    return { label: d.label, n: worst, target: d.target, text: mine.length ? `${worst} d` : '\u2013' } })
+  return { w: 2, h: 1, size: 'medium', gradient: '--g-lab',
+    viz: mv.bullets(rows), vizNote: 'the oldest open lab request per discipline, against its target',
+    figures: [{ value: late.length, label: 'lab reports late', tone: late.length ? 'alert' : '' }, { value: out.length, label: 'enclosures out of range', tone: out.length ? 'alert' : '' }, { value: transfers().length, label: 'transfers, 30 days' }] }
+}
 __x.report = { id: 'operations', title: 'Operations', icon: 'd-work', sub: 'transfers, the lab, the climate',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Favourites.js', function (__x, __req) {
@@ -32726,7 +32873,7 @@ const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { CAUSES, NECROPSY } = __req('js/data/necropsy.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, waffle, heatStrip, cloud } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, waffle, heatStrip, cloud, mv } = __req('js/components/LifePanel.js')
 
 const rows = () => scope.scoped(NECROPSY)
 const within = (d) => rows().filter((r) => r.ago < d)
@@ -32795,8 +32942,14 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
+function tile() {
+  const month = within(30), pending = rows().filter((r) => !r.reported)
+  return { w: 1, h: 1, size: 'small', gradient: '--g-mortality',
+    viz: mv.waffle(month.length, pending.length, 9), vizNote: 'one square an examination, hollow when its report is pending',
+    figures: [{ value: month.length, label: 'in 30 days' }, { value: pending.length, label: 'reports pending', tone: pending.length ? 'alert' : '' }] }
+}
 __x.report = { id: 'necropsy', title: 'Necropsy', icon: 'd-condition', sub: 'post-mortems and what they found',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Assessment.js', function (__x, __req) {
@@ -32810,7 +32963,7 @@ __def('js/components/Assessment.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { ROUND, DRASTIC, ASSESSMENT, change } = __req('js/data/assessment.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, scatter, histogram } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, scatter, histogram, mv } = __req('js/components/LifePanel.js')
 
 const rows = () => scope.scoped(ASSESSMENT).map((r) => ({ ...r, delta: change(r) }))
 const weighed = () => rows().filter((r) => r.kg != null && r.ago <= ROUND)
@@ -32882,8 +33035,14 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
+function tile() {
+  const w = weighed(), lost = w.filter((r) => r.delta <= DRASTIC)
+  return { w: 1, h: 1, size: 'small', gradient: '--g-species',
+    viz: mv.strip(w.map((r) => r.delta), -20, 15, DRASTIC), vizNote: 'each animal by weight change, the line at minus ten per cent',
+    figures: [{ value: lost.length, label: 'lost drastically', tone: lost.length ? 'alert' : '' }, { value: pending().length, label: 'pending' }] }
+}
 __x.report = { id: 'assessment', title: 'Assessment', icon: 'd-assessment', sub: 'weights and body scores',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/People.js', function (__x, __req) {
@@ -32897,7 +33056,7 @@ __def('js/components/People.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { ROLE_KINDS, STATES, ROSTER, COVER } = __req('js/data/people.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, pictogram, matrixTable } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, pictogram, matrixTable, mv } = __req('js/components/LifePanel.js')
 
 const roster = () => scope.scoped(ROSTER)
 const cover = () => scope.scoped(COVER)
@@ -32954,8 +33113,14 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
+function tile() {
+  const all = roster(), present = all.filter((p) => p.state === 'in').length, short = cover().filter((z) => z.have < z.need).length
+  return { w: 1, h: 1, size: 'small', gradient: '--g-users-wash',
+    viz: mv.marks(all.length, present), vizNote: 'one mark a person, filled when in',
+    figures: [{ value: present, label: `of ${fmt(all.length)} in today` }, { value: short, label: 'zones short', tone: short ? 'alert' : '' }] }
+}
 __x.report = { id: 'people', title: 'People', icon: 'd-people', sub: 'the roster, and who is in today',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Tasks.js', function (__x, __req) {
@@ -32969,7 +33134,7 @@ __def('js/components/Tasks.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { ME, MODULES, TASKS } = __req('js/data/tasks.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, board, cloud } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, board, cloud, mv } = __req('js/components/LifePanel.js')
 
 const tasks = () => scope.scoped(TASKS)
 const open = () => tasks().filter((t) => !t.done)
@@ -33041,8 +33206,14 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
+function tile() {
+  const o = open()
+  return { w: 1, h: 2, size: 'tall', gradient: '--g-pharmacy',
+    viz: mv.stack([{ label: 'overdue', n: o.filter((t) => t.due < 0).length }, { label: 'today', n: o.filter((t) => t.due === 0).length }, { label: 'this week', n: o.filter((t) => t.due > 0 && t.due <= 7).length }]),
+    figures: [{ value: o.filter((t) => t.to === ME).length, label: 'assigned to me' }, { value: o.filter((t) => t.by === ME).length, label: 'assigned by me' }] }
+}
 __x.report = { id: 'tasks', title: 'Tasks', icon: 'd-schedule', sub: 'due today, mine, and the ones I gave',
-  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
 });
 
 __def('js/components/ReportPage.js', function (__x, __req) {
@@ -33192,15 +33363,28 @@ function mount({ root, reports, page } = {}) {
           (items.length > SHOW ? `<button type="button" class="today__more" data-more>${showAll ? 'Show fewer' : `Show all ${fmt(items.length)}`}</button>` : '')
         : `<p class="today__none">Nothing needs ${role === 'all' ? 'anyone' : 'this role'} today.</p>`)
   }
+  /* THE TILES. One per report, in the mosaic's own language — the module
+     tile's fill, glyph and name — at five sizes, each carrying a small white
+     drawing of its own beside its figures (owner, 18 Sep 2026: "like All
+     Modules… each card a different size… different elements within the
+     card, not just text"). The order is the packing order for four columns:
+     2×2, 1×1, 1×2, 1×1, then 1×1, 2×1, 1×1, then 2×1, 2×1. */
+  const ORDER = ['circleOfLife', 'animalCare', 'tasks', 'necropsy', 'people', 'collection', 'assessment', 'husbandry', 'operations']
+  function tileHtml(r) {
+    const t = r.tile()
+    const fig = (f) => `<span class="l-rep__fig${f.tone === 'alert' ? ' is-alert' : ''}"><b>${typeof f.value === 'number' ? fmt(f.value) : esc(String(f.value))}</b><small>${esc(f.label)}</small></span>`
+    const spoken = `Open ${r.title} report. ` + t.figures.map((f) => `${f.value} ${f.label}`).join(', ') + (t.vizNote ? `. ${t.vizNote}` : '')
+    return `<button type="button" class="card" data-report="${r.id}" data-fill="${t.image ? 'image' : 'solid'}" data-size="${t.size}" data-w="${t.w}" data-h="${t.h}"` +
+        (t.gradient ? ` style="--card-bg:var(${t.gradient})"` : '') + ` aria-label="${esc(spoken)}">` +
+      (t.image ? `<img class="card__media" src="assets/img/${esc(t.image)}"${t.imagePosition ? ` style="object-position:${esc(t.imagePosition)}"` : ''} alt="" aria-hidden="true"><span class="card__wash" style="background:${esc(t.wash || 'rgba(0,0,0,.3)')}"></span>` : '') +
+      `<span class="l-rep">` +
+        `<span class="l-rep__head"><span class="card__icon card__icon--sprite">${icon(r.icon, 'glyph')}</span><span class="l-rep__name">${esc(r.title)}</span></span>` +
+        `<span class="l-rep__viz" aria-hidden="true">${t.viz}</span>` +
+        `<span class="l-rep__figs">${t.figures.map(fig).join('')}</span>` +
+      `</span></button>`
+  }
   function drawCards() {
-    cards.innerHTML = reports.map((r) =>
-      `<button type="button" class="report-card" data-report="${r.id}" aria-label="Open ${esc(r.title)} report">` +
-        `<span class="report-card__head">${icon(r.icon)}<span class="report-card__title">${esc(r.title)}</span></span>` +
-        `<span class="report-card__figs">` + r.summary().map((t) =>
-          `<span class="report-card__fig"><b>${typeof t.n === 'number' ? fmt(t.n) : esc(String(t.n))}</b><small>${esc(t.label)}</small></span>`).join('') +
-        `</span>` +
-        `<span class="report-card__foot">${esc(r.sub)}<span class="report-card__go">${icon('chev-right')}</span></span>` +
-      `</button>`).join('')
+    cards.innerHTML = ORDER.map((id) => reports.find((r) => r.id === id)).filter(Boolean).map(tileHtml).join('')
   }
   const draw = () => { drawToday(); drawCards() }
   root.addEventListener('click', (e) => {
