@@ -3567,19 +3567,12 @@ body.is-report { overflow: hidden; }
 .today__list.is-cut > li:nth-child(n + 9) { display: none; }
 .today__more { display: block; margin: 8px 0 4px; padding: 6px 0; border: 0; background: none; color: var(--c-action-ink); font: inherit; font-size: var(--fs-label); font-weight: 600; cursor: pointer; }
 .today__more:hover { text-decoration: underline; }
-.report-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: var(--grid-row); grid-auto-flow: dense; gap: var(--grid-gap); }
-.report-cards > .card[data-w='2'] { grid-column: span 2; }
-.report-cards > .card[data-h='2'] { grid-row: span 2; }
-.report-cards > .card[data-size='small'] { padding: var(--s4); }
-/* a tile holds a head, a drawing and its figures, so its row has a floor
-   the module grid's row does not need: taller rows where the columns get
-   narrow, and on a phone every tile is two rows deep (the 2×2 three) */
-@media (max-width: 1100px) and (min-width: 744px) { .report-cards { grid-auto-rows: 188px; } }
-@media (max-width: 743px) {
-  .report-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 100px; }
-  .report-cards > .card { grid-row: span 2; }
-  .report-cards > .card[data-h='2'] { grid-row: span 3; }
-}
+.card[data-layout='report'][data-size='small'] { padding: var(--s4); }
+/* V4's All Modules row is taller than V1's: a tile carries a head, a drawing
+   and its figures, and 164px holds two of the three. Every width. */
+:root[data-page-version='4'] #moduleGrid { --grid-row: 196px; }
+.card[data-layout='report'][data-fill='image'] { padding: var(--s4); }
+.l-rep__wash { background: linear-gradient(180deg, rgba(0, 0, 0, .25), rgba(0, 0, 0, .6)); }
 
 /* the report tile's body: head at the top, the drawing in the middle, the
    figures at the foot; everything white on the module fill */
@@ -3588,7 +3581,8 @@ body.is-report { overflow: hidden; }
 .l-rep__head .card__icon { width: 28px; height: 28px; }
 .l-rep__name { font-size: var(--fs-card); font-weight: 500; line-height: 1.18; }
 .card[data-size='small'] .l-rep__name { font-size: var(--fs-label); }
-.l-rep__viz { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; }
+.l-rep__viz { flex: 1 1 auto; min-height: 0; display: flex; align-items: flex-start; overflow: hidden; }
+.l-rep__viz > * { max-height: 100%; }
 .l-rep__figs { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); margin-top: auto; }
 .l-rep__fig { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .l-rep__fig b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1.05; }
@@ -3598,11 +3592,34 @@ body.is-report { overflow: hidden; }
 .card[data-fill='image'] .l-rep__fig.is-alert b { color: #FFB9A6; }
 .card[data-size='large'] .l-rep__figs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s5); }
 .card[data-size='tall'] .l-rep__figs { flex-direction: column; gap: var(--s2); }
+/* a one-column tile keeps its two figures on one line, the labels wrapping */
+.card[data-layout='report'][data-w='1'] .l-rep__figs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); }
+.card[data-layout='report'][data-w='1'] .l-rep__fig small { white-space: normal; line-height: 1.2; }
+.l-rep__head .card__icon--fish, .l-rep__head .card__icon--fish img { width: 28px; height: 28px; margin: 0; transform: none; position: static; }
+
+/* the listing on the 2×2 births and deaths tiles */
+.mv-list { display: flex; flex-direction: column; width: 100%; }
+.mv-list__row { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 3px 0; border-top: 1px solid rgba(255, 255, 255, .18); font-style: normal; min-height: 28px; }
+.mv-list__row:first-child { border-top: 0; }
+.mv-list__row small { font-family: var(--font-num); font-size: 10px; opacity: .7; }
+.mv-list__row b { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-label); font-weight: 600; line-height: 1.15; }
+.mv-list__row b em, .mv-list__row strong em { font-style: normal; font-weight: 400; font-size: 10px; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-list__row strong { display: flex; flex-direction: column; align-items: flex-end; font-family: var(--font-num); font-size: var(--fs-label); font-weight: 700; line-height: 1.1; }
+.mv-list__more { display: block; padding-top: 4px; font-style: normal; font-size: 10px; opacity: .8; }
+.card[data-size='small'] .mv-list__row { min-height: 24px; padding: 2px 0; }
+/* a segmented bar */
+.mv-seg { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.mv-seg__bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 2px; }
+.mv-seg__bar i { display: grid; place-items: center; background: #fff; min-width: 14px; }
+.mv-seg__bar i b { font-family: var(--font-num); font-size: 9px; font-weight: 700; color: var(--ink); }
+.mv-seg__key { display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.mv-seg__key small { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; opacity: .9; white-space: nowrap; }
+.mv-seg__key i { width: 8px; height: 8px; border-radius: 2px; background: #fff; }
 
 /* the mini drawings */
 .mv-dv { display: block; width: 100%; max-width: 260px; height: auto; max-height: 110px; }
 .mv-bars { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-.mv-bars__row { display: grid; grid-template-columns: 58px 1fr 16px; align-items: center; gap: 6px; font-style: normal; }
+.mv-bars__row { display: grid; grid-template-columns: 58px 1fr 30px; align-items: center; gap: 6px; font-style: normal; }
 .mv-bars__row small, .mv-pg__row small, .mv-bl__row small { font-size: 10px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mv-bars__row b { display: block; height: 7px; border-radius: 4px; background: #fff; min-width: 4px; }
 .mv-bars__row em, .mv-pg__row em, .mv-bl__row em { font-style: normal; font-family: var(--font-num); font-size: 10px; font-weight: 700; text-align: right; }
@@ -3610,7 +3627,7 @@ body.is-report { overflow: hidden; }
 .mv-wf i { display: block; aspect-ratio: 1; border-radius: 3px; background: #fff; }
 .mv-wf i.is-hollow { background: none; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .8); }
 .mv-stack { display: flex; flex-direction: column; gap: 3px; width: 100%; height: 100%; }
-.mv-stack__seg { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 26px; padding: 0 10px; border-radius: 8px; background: #fff; color: var(--ink); font-style: normal; }
+.mv-stack__seg { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 22px; padding: 0 10px; border-radius: 8px; background: #fff; color: var(--ink); font-style: normal; }
 .mv-stack__seg:first-child b { color: var(--c-tertiary); }
 .mv-stack__seg b { font-family: var(--font-num); font-size: var(--fs-label); font-weight: 700; }
 .mv-stack__seg small { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
@@ -11675,7 +11692,6 @@ body.is-editing .qa-chat { display: none; }
         <label class="scope-wrap"><span class="sr-only">Site</span><select class="scope" aria-label="Site the reports speak for"></select></label>
       </div>
       <div class="today"></div>
-      <div class="report-cards"></div>
     </section>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
@@ -12482,6 +12498,7 @@ function moveItem(cards, from, to) {
 });
 
 __def('js/data/cardVariants.js', function (__x, __req) {
+const { isV4 } = __req('js/lib/pageVersion.js')
 /**
  * CARD VARIATIONS
  * ───────────────────────────────────────────────────────────────────────────
@@ -12644,6 +12661,8 @@ const DOORS = [
   /* `secondary`, NOT `primary`: it is seeded on V4 alone, and checkDefaults()
      reads `primary` as "on the V1 page", which this is not. */
   ['natality',      ['small', 'medium'], 'secondary'],
+  ['necropsy',      ['small', 'medium'], 'secondary'],
+  ['assessment',    ['small', 'medium'], 'secondary'],
   ['fetal',         ['small', 'medium'], 'secondary'],
   ['eggs',          ['small', 'medium'], 'primary'],
   ['administer',    ['small', 'medium'], 'primary'],
@@ -14382,6 +14401,16 @@ const VARIANTS = [
     supportedSizes: ['medium', 'large'], defaultSize: 'medium', priority: 'secondary',
     data: { title: 'Mortality', series: 'mortality', unit: 'deaths' },
   },
+  /* THE LISTS · V4's home carries births and deaths as two 2×2 tiles with
+     the ten-day species listing on them (owner, 18 Sep 2026: "natality and
+     mortality as a separate card with the listing itself on the homepage").
+     `door` is only the fallback layout: on V4 ModuleTiles.js draws them. */
+  ...(isV4() ? [
+    { id: 'mortality.list', moduleId: 'mortality', name: 'Ten-day listing', layout: 'door', purpose: 'UNDERSTAND',
+      supportedSizes: ['large', 'tall'], defaultSize: 'large', priority: 'secondary', data: {} },
+    { id: 'natality.list', moduleId: 'natality', name: 'Ten-day listing', layout: 'door', purpose: 'UNDERSTAND',
+      supportedSizes: ['large', 'tall'], defaultSize: 'large', priority: 'secondary', data: {} },
+  ] : []),
 
 ]
 
@@ -14978,11 +15007,18 @@ const V3_LAYOUT = [
    tiles sat in this grid for a day (18 Sep 2026) and were moved by the owner
    to the head of the Circle of Life band, where the lists they summarise
    are; `RETIRED_V4` is how a layout saved that day loses them. */
-const V4_LAYOUT = DEFAULT_LAYOUT.flatMap((e) => [
-  e,
-  ...(e.variantId === 'mortality.default' ? [{ variantId: 'natality.default', size: 'small' }] : []),
-])
-const RETIRED_V4 = new Set(['natality.week', 'mortality.week'])
+const V4_LAYOUT = [
+  ...DEFAULT_LAYOUT.flatMap((e) => (
+    e.variantId === 'mortality.default'
+      ? [{ variantId: 'mortality.list', size: 'large' }, { variantId: 'natality.list', size: 'large' }]
+      : [e])),
+  { variantId: 'necropsy.default', size: 'small' },
+  { variantId: 'assessment.default', size: 'small' },
+]
+const RETIRED_V4 = new Set(['natality.week', 'mortality.week', 'mortality.default', 'natality.default'])
+/* what a V4 layout saved before these existed is missing; load() adds them
+   at the seed's size rather than resetting the person's arrangement */
+const REQUIRED_V4 = V4_LAYOUT.filter((e) => ['mortality.list', 'natality.list', 'necropsy.default', 'assessment.default'].includes(e.variantId))
 
 /**
  * Cards the user is not allowed to remove.
@@ -15079,7 +15115,10 @@ function load() {
       if (parsed && parsed.version === VERSION) raw = parsed.cards
       /* a V4 layout saved while the week tiles were doors drops them here,
          rather than by a schema bump that would reset every version's grid */
-      if (raw && isV4()) raw = raw.filter((c) => !RETIRED_V4.has(c.variantId))
+      if (raw && isV4()) {
+        raw = raw.filter((c) => !RETIRED_V4.has(c.variantId))
+        for (const e of REQUIRED_V4) if (!raw.some((c) => c.variantId === e.variantId)) raw.push({ ...e })
+      }
     }
   } catch {
     /* private mode, a full quota, a hand-edited value — none of them are worth
@@ -15359,6 +15398,31 @@ const MODULES = [
     category: 'animal',
     keywords: ['births', 'born', 'newborn', 'neonate', 'breeding'],
     blurb: 'Births, neonates and natality trend.',
+  },
+  /* NECROPSY AND ASSESSMENT · added 18 Sep 2026 on the owner's ruling
+     ("we can have new cards created like necropsy") for the two reports
+     that had no module tile to sit on. Sprite glyphs, since there is no
+     Figma export for either; the fills are two ramps the catalogue already
+     carried and nothing else was using on the home page. Seeded on V4 only. */
+  {
+    id: 'necropsy',
+    sprite: 'd-condition',
+    iconSize: 36,
+    gradient: '--g-fetal',
+    name: 'Necropsy',
+    category: 'medical',
+    keywords: ['post mortem', 'necropsy', 'cause of death', 'pathology'],
+    blurb: 'Post-mortems, causes and the reports still pending.',
+  },
+  {
+    id: 'assessment',
+    sprite: 'd-assessment',
+    iconSize: 36,
+    gradient: '--g-insights',
+    name: 'Assessment',
+    category: 'animal',
+    keywords: ['weight', 'body score', 'condition', 'biologist'],
+    blurb: 'Weights and body condition scores, round by round.',
   },
   {
     id: 'fetal',
@@ -24283,6 +24347,7 @@ __def('js/components/ModuleCard.js', function (__x, __req) {
  */
 
 const { getModule } = __req('js/data/modules.js');
+const { isV4 } = __req('js/lib/pageVersion.js');
 const { summarise, daily } = __req('js/data/lifecycle.js');
 const { icon } = __req('js/icons.js');
 
@@ -24317,7 +24382,11 @@ function renderCard(variant, opts = {}) {
    * most screen readers, and this one has a name worth keeping.
    */
   const isPassive = !!variant.passive
-  const isLink = !isStatic && !isPassive && !!mod?.href
+  /* V4: a module tile carries its report — the drawing and figures from
+     ModuleTiles.js — and opens the report page, so it is a button, not the
+     module's link. Lazy, so the catalogue never depends on the reports. */
+  const rt = isV4() && !isStatic ? __req('js/components/ModuleTiles.js').tileFor(variant) : null
+  const isLink = !isStatic && !isPassive && !rt && !!mod?.href
   const el = document.createElement(isStatic || isPassive ? 'div' : isLink ? 'a' : 'button')
   el.className = 'card'
   if (isLink) {
@@ -24401,7 +24470,17 @@ function renderCard(variant, opts = {}) {
    * belongs to the surface, which is what the press and hover states are for.
    */
   const build = LAYOUTS[variant.layout] || LAYOUTS.door
-  el.innerHTML = build(mod, variant, data)
+  if (rt) {
+    el.dataset.layout = 'report'
+    el.setAttribute('aria-label', rt.spoken)
+    el.innerHTML = media(variant) + (variant.image ? `<span class="card__wash l-rep__wash"></span>` : '') +
+      `<span class="l-rep"><span class="l-rep__head">${glyph(mod, variant)}<span class="l-rep__name">${esc(rt.title || mod?.name || '')}</span></span>` +
+        `<span class="l-rep__viz" aria-hidden="true">${rt.viz}</span>` +
+        `<span class="l-rep__figs">${rt.figures.map((f) => `<span class="l-rep__fig${f.tone === 'alert' ? ' is-alert' : ''}"><b>${esc(String(f.value))}</b><small>${esc(f.label)}</small></span>`).join('')}</span>` +
+      `</span>`
+  } else {
+    el.innerHTML = build(mod, variant, data)
+  }
 
   /**
    * TWO LAYOUTS ARE ALSO A BEHAVIOUR, and this is where it attaches.
@@ -31785,12 +31864,12 @@ __def('js/components/CircleOfLife.js', function (__x, __req) {
  * (js/data/lifecycle.js), which answers only for the scope.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
-const { CLASSES, summarise, daily, byClass, incidents } = __req('js/data/lifecycle.js')
+const { CLASSES, summarise, byClass, incidents } = __req('js/data/lifecycle.js')
 const { BY_CLASS } = __req('js/data/collection.js')
 const scope = __req('js/state/reportScope.js')
 const { getVariant } = __req('js/data/cardVariants.js')
 const { renderCard } = __req('js/components/ModuleCard.js')
-const { esc, fmt, renderCounts, panel, listCard, pie, diverging, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, pie, diverging } = __req('js/components/LifePanel.js')
 
 const DAYS = 10
 const one = (klass) => (CLASSES.find((c) => c.key === klass) || { one: 'Other' }).one
@@ -31874,15 +31953,8 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
-function tile() {
-  const t = tiles()
-  const up = daily('natality', 7).map((d) => d.count), down = daily('mortality', 7).map((d) => d.count)
-  return { w: 2, h: 2, size: 'large', image: 'hero-leopard.jpg', imagePosition: '50% 30%', wash: 'linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55))',
-    viz: mv.diverge(up, down), vizNote: 'births up, deaths down, seven days',
-    figures: t.slice(0, 4).map((x) => ({ value: x.n, label: x.label, tone: x.key === 'deaths' && x.n ? 'alert' : '' })) }
-}
 __x.report = { id: 'circleOfLife', title: 'Circle of Life', icon: 'd-animal', sub: 'births, deaths and what is counted beside them',
-  summary: () => tiles().slice(0, 4), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles().slice(0, 4), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/LifePanel.js', function (__x, __req) {
@@ -32285,7 +32357,7 @@ const mv = {
     return `<svg class="mv-dv" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="#fff" stroke-opacity=".6" stroke-width="1"/>${bars}</svg>` },
   /* horizontal bars with a caption each */
   bars: (rows) => { const max = Math.max(1, ...rows.map((r) => r.n))
-    return `<span class="mv-bars">` + rows.map((r) => `<i class="mv-bars__row"><small>${esc(r.label)}</small><b style="width:${Math.round((r.n / max) * 100)}%"></b><em>${fmt(r.n)}</em></i>`).join('') + `</span>` },
+    return `<span class="mv-bars">` + rows.map((r) => `<i class="mv-bars__row"><small>${esc(r.label)}</small><b style="width:${Math.round((r.n / max) * 100)}%"></b><em>${r.text != null ? esc(r.text) : fmt(r.n)}</em></i>`).join('') + `</span>` },
   /* one square each; hollow ones are the undone */
   waffle: (n, hollow, per = 9) => `<span class="mv-wf" style="--per:${per}">` + Array.from({ length: n }, (_, i) => `<i${i >= n - hollow ? ' class="is-hollow"' : ''}></i>`).join('') + `</span>`,
   /* a vertical stack of segments with their counts */
@@ -32301,6 +32373,14 @@ const mv = {
     values.map((v, i) => `<i class="${v <= line ? 'is-flag' : ''}" style="left:${(((Math.min(max, Math.max(min, v)) - min) / (max - min)) * 100).toFixed(1)}%;top:${30 + ((i * 37) % 40)}%"></i>`).join('') + `</span>`,
   /* progress rows filling toward their end */
   progress: (rows) => `<span class="mv-pg">` + rows.map((r) => `<i class="mv-pg__row"><small>${esc(r.label)}</small><b><u style="width:${Math.min(100, Math.round((r.done / (r.total || 1)) * 100))}%"></u></b><em>${esc(r.text)}</em></i>`).join('') + `</span>`,
+  /* a ranked listing: name and its line, the figure at the right */
+  list: (rows, max) => `<span class="mv-list">` + rows.slice(0, max).map((r, i) =>
+    `<i class="mv-list__row"><small>${i + 1}</small><b>${esc(r.name)}<em>${esc(r.sub)}</em></b><strong>${r.n === '' ? '' : fmt(r.n)}<em>${esc(r.note || '')}</em></strong></i>`).join('') +
+    (rows.length > max ? `<i class="mv-list__more">+ ${fmt(rows.length - max)} more</i>` : '') + `</span>`,
+  /* one bar split into named segments, the strength falling left to right */
+  segments: (segs) => { const total = segs.reduce((n, sg) => n + sg.n, 0) || 1
+    return `<span class="mv-seg"><span class="mv-seg__bar">` + segs.map((sg, i) => sg.n ? `<i style="flex:${sg.n};opacity:${1 - i * .22}"><b>${fmt(sg.n)}</b></i>` : '').join('') + `</span>` +
+      `<span class="mv-seg__key">` + segs.map((sg, i) => `<small><i style="opacity:${1 - i * .22}"></i>${esc(sg.label)} ${Math.round((sg.n / total) * 100)}%</small>`).join('') + `</span></span>` },
   /* a bar against a target tick */
   bullets: (rows) => `<span class="mv-bl">` + rows.map((r) => { const max = Math.max(r.n, r.target) * 1.2 || 1
     return `<i class="mv-bl__row${r.n > r.target ? ' is-over' : ''}"><small>${esc(r.label)}</small><b><u style="width:${Math.round((r.n / max) * 100)}%"></u><s style="left:${Math.round((r.target / max) * 100)}%"></s></b><em>${esc(r.text)}</em></i>` }).join('') + `</span>`,
@@ -32357,7 +32437,7 @@ const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { OVERDUE, CARE_KINDS, DUE_AHEAD, AHEAD_WINDOWS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts, casesByClass } = __req('js/data/care.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, stacked, runway, ageing, columns, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, stacked, runway, ageing, columns } = __req('js/components/LifePanel.js')
 
 const kindLabel = (k) => CARE_KINDS.find((x) => x.key === k).label
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
@@ -32459,14 +32539,8 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
-function tile() {
-  const c = counts(), od = overdue().length
-  return { w: 1, h: 1, size: 'small', gradient: '--g-medical',
-    viz: mv.bars([{ label: 'Hospital', n: c.hospital.n }, { label: 'Medication', n: c.medication.n }, { label: 'Maternity', n: c.maternity.n }, { label: 'Serious', n: c.serious.n }]),
-    figures: [{ value: c.hospital.n, label: 'in hospital' }, { value: od, label: 'care overdue', tone: od ? 'alert' : '' }] }
-}
 __x.report = { id: 'animalCare', title: 'Animal Care', icon: 'd-veterinary', sub: 'in care, overdue, pharmacy, enrichment',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Collection.js', function (__x, __req) {
@@ -32483,7 +32557,7 @@ const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { BY_CLASS, REHAB, WATCH, PROTECTED } = __req('js/data/collection.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, pie, rings, funnel, tiles: tileGrid, cloud, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, pie, rings, funnel, tiles: tileGrid, cloud } = __req('js/components/LifePanel.js')
 
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
 /* the aggregate seeds scaled to the scope; a mock, see reportScope.js */
@@ -32557,15 +32631,8 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
-function tile() {
-  const bc = byClass(), animals = bc.reduce((n, r) => n + r.animals, 0), chipped = bc.reduce((n, r) => n + r.chipped, 0), species = bc.reduce((n, r) => n + r.species, 0)
-  const stage = (k) => rehab().find((r) => r.key === k).n
-  return { w: 2, h: 1, size: 'medium', image: 'species.jpg', wash: 'linear-gradient(90deg, rgba(0,0,0,.5), rgba(0,0,0,.3))',
-    viz: `<span class="mv-rings">${mv.ring(chipped / (animals || 1), `${pct(chipped, animals)}%`, 'chipped')}${mv.ring(stage('released') / (stage('received') || 1), fmt(stage('released')), 'released')}${mv.ring(stage('rehab') / (stage('received') || 1), fmt(stage('rehab')), 'in rehab')}</span>`,
-    figures: [{ value: species, label: 'species' }, { value: animals, label: 'animals' }, { value: watch().find((r) => r.key === 'permits').n, label: 'permits expiring', tone: 'alert' }] }
-}
 __x.report = { id: 'collection', title: 'Collection', icon: 'd-overview', sub: 'the holdings, rehabilitation, compliance',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Husbandry.js', function (__x, __req) {
@@ -32579,7 +32646,7 @@ __def('js/components/Husbandry.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { DIET_CHANGES, DIET_REASONS, CLUTCHES } = __req('js/data/husbandry.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, timeline, progress, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, timeline, progress } = __req('js/components/LifePanel.js')
 
 const DAY = 86400000
 const fmtDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' })
@@ -32641,15 +32708,8 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
-function tile() {
-  const t = tiles()
-  const soon = clutches().filter((c) => c.hatched == null).sort((a, b) => (a.period - a.laid) - (b.period - b.laid)).slice(0, 3)
-  return { w: 2, h: 1, size: 'medium', image: 'diet-kitchen.jpg', wash: 'linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.25))',
-    viz: mv.progress(soon.map((c) => ({ label: c.species, done: c.laid, total: c.period, text: `${Math.max(0, c.period - c.laid)} d` }))), vizNote: 'the three clutches nearest to hatching',
-    figures: [{ value: t[1].n, label: 'eggs incubating' }, { value: t[2].n, label: 'due to hatch' }, { value: diets().filter((d) => d.ago < 7).length, label: 'diet changes, 7 days' }] }
-}
 __x.report = { id: 'husbandry', title: 'Husbandry', icon: 'd-husbandry', sub: 'diets and the egg room',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Operations.js', function (__x, __req) {
@@ -32665,7 +32725,7 @@ __def('js/components/Operations.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, flow, shares, bullets, strips, dots, tiles: tileGrid, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, flow, shares, bullets, strips, dots, tiles: tileGrid } = __req('js/components/LifePanel.js')
 
 const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
 const disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k)
@@ -32762,16 +32822,8 @@ function mount({ root } = {}) {
 }
 
 __x.mount = mount
-function tile() {
-  const open = lab().filter((r) => r.done == null), late = open.filter((r) => r.ago > disc(r.discipline).target), out = climate().filter(outOfRange)
-  const rows = LAB_DISCIPLINES.map((d) => { const mine = open.filter((r) => r.discipline === d.key); const worst = Math.max(0, ...mine.map((r) => r.ago))
-    return { label: d.label, n: worst, target: d.target, text: mine.length ? `${worst} d` : '\u2013' } })
-  return { w: 2, h: 1, size: 'medium', gradient: '--g-lab',
-    viz: mv.bullets(rows), vizNote: 'the oldest open lab request per discipline, against its target',
-    figures: [{ value: late.length, label: 'lab reports late', tone: late.length ? 'alert' : '' }, { value: out.length, label: 'enclosures out of range', tone: out.length ? 'alert' : '' }, { value: transfers().length, label: 'transfers, 30 days' }] }
-}
 __x.report = { id: 'operations', title: 'Operations', icon: 'd-work', sub: 'transfers, the lab, the climate',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Favourites.js', function (__x, __req) {
@@ -32873,7 +32925,7 @@ const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
 const { CAUSES, NECROPSY } = __req('js/data/necropsy.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, waffle, heatStrip, cloud, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, waffle, heatStrip, cloud } = __req('js/components/LifePanel.js')
 
 const rows = () => scope.scoped(NECROPSY)
 const within = (d) => rows().filter((r) => r.ago < d)
@@ -32942,14 +32994,8 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
-function tile() {
-  const month = within(30), pending = rows().filter((r) => !r.reported)
-  return { w: 1, h: 1, size: 'small', gradient: '--g-mortality',
-    viz: mv.waffle(month.length, pending.length, 9), vizNote: 'one square an examination, hollow when its report is pending',
-    figures: [{ value: month.length, label: 'in 30 days' }, { value: pending.length, label: 'reports pending', tone: pending.length ? 'alert' : '' }] }
-}
 __x.report = { id: 'necropsy', title: 'Necropsy', icon: 'd-condition', sub: 'post-mortems and what they found',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Assessment.js', function (__x, __req) {
@@ -32963,7 +33009,7 @@ __def('js/components/Assessment.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { ROUND, DRASTIC, ASSESSMENT, change } = __req('js/data/assessment.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, scatter, histogram, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, scatter, histogram } = __req('js/components/LifePanel.js')
 
 const rows = () => scope.scoped(ASSESSMENT).map((r) => ({ ...r, delta: change(r) }))
 const weighed = () => rows().filter((r) => r.kg != null && r.ago <= ROUND)
@@ -33035,14 +33081,8 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
-function tile() {
-  const w = weighed(), lost = w.filter((r) => r.delta <= DRASTIC)
-  return { w: 1, h: 1, size: 'small', gradient: '--g-species',
-    viz: mv.strip(w.map((r) => r.delta), -20, 15, DRASTIC), vizNote: 'each animal by weight change, the line at minus ten per cent',
-    figures: [{ value: lost.length, label: 'lost drastically', tone: lost.length ? 'alert' : '' }, { value: pending().length, label: 'pending' }] }
-}
 __x.report = { id: 'assessment', title: 'Assessment', icon: 'd-assessment', sub: 'weights and body scores',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/People.js', function (__x, __req) {
@@ -33056,7 +33096,7 @@ __def('js/components/People.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { ROLE_KINDS, STATES, ROSTER, COVER } = __req('js/data/people.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, pictogram, matrixTable, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, pictogram, matrixTable } = __req('js/components/LifePanel.js')
 
 const roster = () => scope.scoped(ROSTER)
 const cover = () => scope.scoped(COVER)
@@ -33113,14 +33153,8 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
-function tile() {
-  const all = roster(), present = all.filter((p) => p.state === 'in').length, short = cover().filter((z) => z.have < z.need).length
-  return { w: 1, h: 1, size: 'small', gradient: '--g-users-wash',
-    viz: mv.marks(all.length, present), vizNote: 'one mark a person, filled when in',
-    figures: [{ value: present, label: `of ${fmt(all.length)} in today` }, { value: short, label: 'zones short', tone: short ? 'alert' : '' }] }
-}
 __x.report = { id: 'people', title: 'People', icon: 'd-people', sub: 'the roster, and who is in today',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/Tasks.js', function (__x, __req) {
@@ -33134,7 +33168,7 @@ __def('js/components/Tasks.js', function (__x, __req) {
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { ME, MODULES, TASKS } = __req('js/data/tasks.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, board, cloud, mv } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, listCard, board, cloud } = __req('js/components/LifePanel.js')
 
 const tasks = () => scope.scoped(TASKS)
 const open = () => tasks().filter((t) => !t.done)
@@ -33206,14 +33240,123 @@ function mount({ root } = {}) {
   return root
 }
 __x.mount = mount
-function tile() {
-  const o = open()
-  return { w: 1, h: 2, size: 'tall', gradient: '--g-pharmacy',
-    viz: mv.stack([{ label: 'overdue', n: o.filter((t) => t.due < 0).length }, { label: 'today', n: o.filter((t) => t.due === 0).length }, { label: 'this week', n: o.filter((t) => t.due > 0 && t.due <= 7).length }]),
-    figures: [{ value: o.filter((t) => t.to === ME).length, label: 'assigned to me' }, { value: o.filter((t) => t.by === ME).length, label: 'assigned by me' }] }
-}
 __x.report = { id: 'tasks', title: 'Tasks', icon: 'd-schedule', sub: 'due today, mine, and the ones I gave',
-  summary: () => tiles(), actionables, tile, render: (root) => mount({ root }) }
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+});
+
+__def('js/components/ModuleTiles.js', function (__x, __req) {
+/**
+ * THE MODULE TILES · V4
+ * ───────────────────────────────────────────────────────────────────────────
+ * What each All Modules tile carries on V4: a small white drawing and two
+ * or three figures from the report that belongs to it, and which report
+ * page the tile opens (owner, 18 Sep 2026: "it has to be part of the
+ * existing All Modules… use those and fill up those"). Keyed by the
+ * catalogue variant the tile is, so the layout store, the gallery and the
+ * packer are untouched — the same tile in the same place, drawn fuller.
+ * Administer has no report and stays a plain door.
+ */
+const { CLASSES, summarise, daily, incidents } = __req('js/data/lifecycle.js')
+const care = __req('js/data/care.js')
+const { CLUTCHES, DIET_CHANGES } = __req('js/data/husbandry.js')
+const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
+const { BY_CLASS, REHAB, WATCH, PROTECTED } = __req('js/data/collection.js')
+const { NECROPSY } = __req('js/data/necropsy.js')
+const { ROUND, DRASTIC, ASSESSMENT, change } = __req('js/data/assessment.js')
+const { ROSTER, COVER } = __req('js/data/people.js')
+const { ME, TASKS } = __req('js/data/tasks.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, mv } = __req('js/components/LifePanel.js')
+
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
+const one = (k) => (CLASSES.find((c) => c.key === k) || { one: 'Other' }).one
+const alert = (n) => (n ? 'alert' : '')
+const outOfRange = (c) => c.temp < c.tempRange[0] || c.temp > c.tempRange[1] || c.rh < c.rhRange[0] || c.rh > c.rhRange[1]
+
+/* the ten-day listing, births or deaths, for the 2×2 tiles */
+function listing(kind, unit) {
+  const today = summarise(kind, 0).total, { rows, total } = summarise(kind, 10)
+  return { title: kind === 'natality' ? 'Natality' : 'Mortality', report: 'circleOfLife',
+    viz: mv.list(rows.map((r) => ({ name: r.common, sub: `${one(r.klass)} · ${r.schedule ? `Schedule ${r.schedule}` : 'Not scheduled'}`, n: r.count, note: r.today ? `${r.today} today` : '' })), 6),
+    vizNote: `the species with ${unit} in the last ten days`,
+    figures: [{ value: today, label: `${unit} today`, tone: kind === 'mortality' ? alert(today) : '' }, { value: total, label: 'in 10 days' }] }
+}
+
+const TILES = {
+  'medical.default': () => { const c = care.counts(), od = scope.scoped(care.OVERDUE).length
+    return { report: 'animalCare', viz: mv.bars([{ label: 'Hospital', n: c.hospital.n }, { label: 'Medication', n: c.medication.n }, { label: 'Maternity', n: c.maternity.n }, { label: 'Serious', n: c.serious.n }]),
+      figures: [{ value: c.serious.n, label: 'serious', tone: alert(c.serious.n) }, { value: od, label: 'care overdue', tone: alert(od) }] } },
+  'hospital.photo': () => { const c = care.counts(), { foot } = care.casesByClass()
+    return { report: 'animalCare', viz: mv.segments(CLASSES.map((k) => ({ label: k.label, n: foot.n[k.key] }))), vizNote: 'animals in care by class',
+      figures: [{ value: c.hospital.n, label: 'in hospital' }, { value: c.medication.n, label: 'under medication' }, { value: c.maternity.n, label: 'maternity care' }] } },
+  'species.stats': () => { const bc = BY_CLASS.map((r) => ({ species: scope.scale(r.species), animals: scope.scale(r.animals), chipped: scope.scale(r.chipped) }))
+    const animals = bc.reduce((n, r) => n + r.animals, 0), chipped = bc.reduce((n, r) => n + r.chipped, 0), species = bc.reduce((n, r) => n + r.species, 0)
+    const stage = (k) => scope.scale(REHAB.find((r) => r.key === k).n)
+    return { report: 'collection', viz: `<span class="mv-rings">${mv.ring(chipped / (animals || 1), `${pct(chipped, animals)}%`, 'chipped')}${mv.ring(stage('released') / (stage('received') || 1), fmt(stage('released')), 'released')}${mv.ring(stage('rehab') / (stage('received') || 1), fmt(stage('rehab')), 'in rehab')}</span>`,
+      figures: [{ value: fmt(species), label: 'species' }, { value: fmt(animals), label: 'animals' }] } },
+  'diet.photo': () => { const rows = scope.scoped(DIET_CHANGES).sort((a, b) => a.ago - b.ago)
+    return { report: 'husbandry', viz: mv.list(rows.map((r) => ({ name: r.species, sub: r.change, n: '', note: r.ago === 0 ? 'today' : r.ago === 1 ? 'yesterday' : `${r.ago} d ago` })), 2), vizNote: 'the latest diet changes',
+      figures: [{ value: rows.filter((r) => r.ago < 7).length, label: 'changes, 7 days' }, { value: rows.filter((r) => r.ago === 0).length, label: 'today' }] } },
+  'housing.default': () => { const out = scope.scoped(CLIMATE).filter(outOfRange), moves = scope.scoped(TRANSFERS)
+    return { report: 'operations', viz: mv.bars(out.slice(0, 3).map((c) => ({ label: c.enclosure, n: Math.round(c.temp), text: `${c.temp.toFixed(1)}°` })).concat(out.length ? [] : [{ label: 'All in range', n: 1, text: '' }])),
+      vizNote: 'enclosures out of their climate range', figures: [{ value: out.length, label: 'out of range', tone: alert(out.length) }, { value: moves.length, label: 'transfers, 30 d' }] } },
+  'pharmacy.default': () => { const rows = scope.scoped(care.PHARMACY), bins = care.PHARMACY_BINS.map((b) => ({ label: b.label, n: rows.filter(b.test).length }))
+    return { report: 'animalCare', viz: mv.segments(bins), vizNote: 'indents pending by age',
+      figures: [{ value: rows.length, label: 'indents pending' }, { value: bins[2].n, label: 'older than 15 d', tone: alert(bins[2].n) }] } },
+  'audit.default': () => { const w = WATCH.map((r) => ({ ...r, n: scope.scale(r.n) })), due = w.filter((r) => r.due)
+    return { report: 'collection', viz: mv.bars(due.map((r) => ({ label: r.label.replace('Animals without an ID', 'No ID').replace('Post-mortems pending', 'PM pending').replace('Permits expiring', 'Permits'), n: r.n }))),
+      vizNote: 'what an inspector asks for first', figures: [{ value: due.reduce((n, r) => n + r.n, 0), label: 'items to clear', tone: 'alert' }, { value: w.find((r) => r.key === 'transfer').n, label: 'transfers awaiting approval' }] } },
+  'lab.default': () => { const open = scope.scoped(LAB).filter((r) => r.done == null), disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k), late = open.filter((r) => r.ago > disc(r.discipline).target)
+    const rows = LAB_DISCIPLINES.map((d) => { const mine = open.filter((r) => r.discipline === d.key), worst = Math.max(0, ...mine.map((r) => r.ago)); return { label: d.label, n: worst, target: d.target, text: mine.length ? `${worst} d` : '–' } })
+    return { report: 'operations', viz: mv.bullets(rows), vizNote: 'the oldest open request per discipline against its target',
+      figures: [{ value: late.length, label: 'reports late', tone: alert(late.length) }, { value: open.length, label: 'open' }] } },
+  'approvals.pending': () => { const o = scope.scoped(TASKS).filter((t) => !t.done)
+    return { title: 'Tasks', report: 'tasks', viz: mv.stack([{ label: 'overdue', n: o.filter((t) => t.due < 0).length }, { label: 'today', n: o.filter((t) => t.due === 0).length }, { label: 'this week', n: o.filter((t) => t.due > 0 && t.due <= 7).length }]),
+      figures: [{ value: o.filter((t) => t.to === ME).length, label: 'assigned to me' }, { value: o.filter((t) => t.by === ME).length, label: 'assigned by me' }, { value: o.filter((t) => t.due < 0).length, label: 'overdue', tone: alert(o.filter((t) => t.due < 0).length) }] } },
+  'eggs.default': () => { const all = scope.scoped(CLUTCHES), open = all.filter((c) => c.hatched == null), soon = [...open].sort((a, b) => (a.period - a.laid) - (b.period - b.laid)).slice(0, 2)
+    return { report: 'husbandry', viz: mv.progress(soon.map((c) => ({ label: c.species, done: c.laid, total: c.period, text: `${Math.max(0, c.period - c.laid)} d` }))), vizNote: 'the clutches nearest to hatching',
+      figures: [{ value: open.reduce((n, c) => n + c.eggs, 0), label: 'eggs incubating' }, { value: open.filter((c) => c.period - c.laid <= 7).length, label: 'clutches due, 7 d' }] } },
+  'users.default': () => { const all = scope.scoped(ROSTER), present = all.filter((p) => p.state === 'in').length, short = scope.scoped(COVER).filter((z) => z.have < z.need).length
+    return { title: 'People', report: 'people', viz: mv.marks(all.length, present), vizNote: 'one mark a person, filled when in',
+      figures: [{ value: present, label: `of ${fmt(all.length)} in today` }, { value: short, label: 'zones short', tone: alert(short) }] } },
+  'parivesh.wide': () => { const rows = scope.scoped(PROTECTED), w = WATCH.map((r) => ({ ...r, n: scope.scale(r.n) }))
+    return { report: 'collection', viz: mv.bars([{ label: 'Schedule I', n: rows.filter((r) => r.schedule === 'I').length }, { label: 'Schedule II', n: rows.filter((r) => r.schedule === 'II').length }, { label: 'CITES App. I', n: rows.filter((r) => r.cites === 'I').length }, { label: 'CITES App. II', n: rows.filter((r) => r.cites === 'II').length }]),
+      vizNote: 'protected species on site, by register', figures: [{ value: w.find((r) => r.key === 'permits').n, label: 'permits expiring', tone: 'alert' }, { value: rows.filter((r) => r.cites === 'I').reduce((n, r) => n + r.animals, 0), label: 'Appendix I animals' }] } },
+  'security.default': () => { const n = incidents('escape', 30)
+    return { report: 'circleOfLife', viz: mv.waffle(Math.max(n, 1), n ? 0 : 1, 6), vizNote: 'one square an escape in 30 days',
+      figures: [{ value: n, label: 'escapes, 30 days', tone: alert(n) }, { value: n, label: 'recovered' }] } },
+  'necropsy.default': () => { const rows = scope.scoped(NECROPSY), month = rows.filter((r) => r.ago < 30), pending = rows.filter((r) => !r.reported)
+    return { report: 'necropsy', viz: mv.waffle(month.length, pending.length, 9), vizNote: 'one square an examination, hollow when its report is pending',
+      figures: [{ value: month.length, label: 'in 30 days' }, { value: pending.length, label: 'reports pending', tone: alert(pending.length) }] } },
+  'assessment.default': () => { const rows = scope.scoped(ASSESSMENT).map((r) => ({ ...r, delta: change(r) })), w = rows.filter((r) => r.kg != null && r.ago <= ROUND), lost = w.filter((r) => r.delta <= DRASTIC)
+    return { report: 'assessment', viz: mv.strip(w.map((r) => r.delta), -20, 15, DRASTIC), vizNote: 'each animal by weight change, the line at minus ten per cent',
+      figures: [{ value: lost.length, label: 'lost drastically', tone: alert(lost.length) }, { value: rows.length - w.length, label: 'pending' }] } },
+  'mortality.list': () => listing('mortality', 'deaths'),
+  'natality.list': () => listing('natality', 'births'),
+}
+
+let bound = null
+function tileFor(variant) {
+  const make = variant && TILES[variant.id]
+  if (!make) return null
+  const t = make()
+  const mod = __req('js/data/modules.js').getModule(variant.moduleId)
+  t.spoken = `${t.title || mod?.name || ''}: ` + t.figures.map((f) => `${f.value} ${f.label}`).join(', ') + (t.vizNote ? `. ${t.vizNote}` : '') + '. Opens the report'
+  return t
+}
+/* the reports and the page, given once by app.js; open() answers a tile's tap */
+function bind(v) { bound = v }
+function open(variant, el) {
+  const t = bound && tileFor(variant)
+  if (!t) return false
+  const report = bound.reports.find((r) => r.id === t.report)
+  if (!report) return false
+  bound.page.open(report, el || document.activeElement)
+  return true
+}
+__x.tileFor = tileFor
+__x.bind = bind
+__x.open = open
 });
 
 __def('js/components/ReportPage.js', function (__x, __req) {
@@ -33334,7 +33477,6 @@ const ROLES = [
 function mount({ root, reports, page } = {}) {
   if (!root) return null
   const today = root.querySelector('.today')
-  const cards = root.querySelector('.report-cards')
   const picker = root.querySelector('.scope')
   let role = 'all'
 
@@ -33363,30 +33505,7 @@ function mount({ root, reports, page } = {}) {
           (items.length > SHOW ? `<button type="button" class="today__more" data-more>${showAll ? 'Show fewer' : `Show all ${fmt(items.length)}`}</button>` : '')
         : `<p class="today__none">Nothing needs ${role === 'all' ? 'anyone' : 'this role'} today.</p>`)
   }
-  /* THE TILES. One per report, in the mosaic's own language — the module
-     tile's fill, glyph and name — at five sizes, each carrying a small white
-     drawing of its own beside its figures (owner, 18 Sep 2026: "like All
-     Modules… each card a different size… different elements within the
-     card, not just text"). The order is the packing order for four columns:
-     2×2, 1×1, 1×2, 1×1, then 1×1, 2×1, 1×1, then 2×1, 2×1. */
-  const ORDER = ['circleOfLife', 'animalCare', 'tasks', 'necropsy', 'people', 'collection', 'assessment', 'husbandry', 'operations']
-  function tileHtml(r) {
-    const t = r.tile()
-    const fig = (f) => `<span class="l-rep__fig${f.tone === 'alert' ? ' is-alert' : ''}"><b>${typeof f.value === 'number' ? fmt(f.value) : esc(String(f.value))}</b><small>${esc(f.label)}</small></span>`
-    const spoken = `Open ${r.title} report. ` + t.figures.map((f) => `${f.value} ${f.label}`).join(', ') + (t.vizNote ? `. ${t.vizNote}` : '')
-    return `<button type="button" class="card" data-report="${r.id}" data-fill="${t.image ? 'image' : 'solid'}" data-size="${t.size}" data-w="${t.w}" data-h="${t.h}"` +
-        (t.gradient ? ` style="--card-bg:var(${t.gradient})"` : '') + ` aria-label="${esc(spoken)}">` +
-      (t.image ? `<img class="card__media" src="assets/img/${esc(t.image)}"${t.imagePosition ? ` style="object-position:${esc(t.imagePosition)}"` : ''} alt="" aria-hidden="true"><span class="card__wash" style="background:${esc(t.wash || 'rgba(0,0,0,.3)')}"></span>` : '') +
-      `<span class="l-rep">` +
-        `<span class="l-rep__head"><span class="card__icon card__icon--sprite">${icon(r.icon, 'glyph')}</span><span class="l-rep__name">${esc(r.title)}</span></span>` +
-        `<span class="l-rep__viz" aria-hidden="true">${t.viz}</span>` +
-        `<span class="l-rep__figs">${t.figures.map(fig).join('')}</span>` +
-      `</span></button>`
-  }
-  function drawCards() {
-    cards.innerHTML = ORDER.map((id) => reports.find((r) => r.id === id)).filter(Boolean).map(tileHtml).join('')
-  }
-  const draw = () => { drawToday(); drawCards() }
+  const draw = () => { drawToday() }
   root.addEventListener('click', (e) => {
     const chip = e.target.closest('.life-chip[data-role]')
     if (chip) { role = chip.dataset.role; showAll = false; drawToday(); return }
@@ -34265,6 +34384,12 @@ if (PAGE_VERSION === '1' || isV4()) {
     ].map((m) => __req(`js/components/${m}.js`).report)
     const page = __req('js/components/ReportPage.js').createReportPage()
     __req('js/components/Reports.js').mount({ root: document.getElementById('reports'), reports, page })
+    /* the All Modules tiles carry the reports (ModuleTiles.js): a tap opens
+       the page, and a change of site redraws every tile */
+    __req('js/components/ModuleTiles.js').bind({ reports, page })
+    /* the grid keeps a card's element between paints, so a scope change
+       clears the slots first and every tile is drawn again for the new site */
+    __req('js/state/reportScope.js').subscribe(() => { grid.destroy(); paint({ animate: false }) })
   }
 }
 
@@ -34361,6 +34486,7 @@ const grid = createModuleGrid({
      * a property of the MODULE rather than of one card, the same rule Species
      * Management follows: a fifth Housing card tomorrow is wired by existing.
      */
+    if (isV4() && __req('js/components/ModuleTiles.js').open(variant)) return
     if (variant.moduleId === 'housing') { openHousing(); return }
     /* No router in a prototype — say what would happen and leave it there. */
     edit.announce(`Opening ${variant.name}.`)
