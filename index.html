@@ -3597,6 +3597,35 @@ body.is-report { overflow: hidden; }
 .card[data-layout='report'][data-w='1'] .l-rep__fig small { white-space: normal; line-height: 1.2; }
 .l-rep__head .card__icon--fish, .l-rep__head .card__icon--fish img { width: 28px; height: 28px; margin: 0; transform: none; position: static; }
 
+/* the capped tile: gradient band at the top, white below, ink on it */
+.card[data-fill='cap'] { background: var(--c-white); box-shadow: var(--shadow-card); color: var(--ink); }
+.card[data-fill='cap'] .l-rep { gap: 0; }
+.card[data-fill='cap'] .l-rep__head { margin: calc(var(--pad-card, var(--s5)) * -1) calc(var(--pad-card, var(--s5)) * -1) var(--s3); padding: var(--s4) var(--s5); background: var(--card-bg, var(--g-users)); color: var(--on-dark); align-items: center; }
+.card[data-fill='cap'][data-size='large'] .l-rep__head { margin: calc(var(--s6) * -1) calc(var(--s6) * -1) var(--s3); padding: var(--s4) var(--s6); }
+.l-rep__capfigs { display: flex; gap: var(--s5); margin-left: auto; }
+.l-rep__capfigs span { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.05; }
+.l-rep__capfigs b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; }
+.l-rep__capfigs small { font-size: var(--fs-micro); opacity: .85; white-space: nowrap; }
+.card[data-fill='cap'] .l-rep__figs:empty { display: none; }
+.lt { display: flex; flex-direction: column; width: 100%; height: 100%; color: var(--ink); }
+.lt__rows { display: flex; flex-direction: column; flex: 1 1 auto; }
+.lt__row { display: grid; grid-template-columns: 16px minmax(0, 1.6fr) minmax(0, .9fr) 28px 52px; align-items: center; gap: 8px; padding: 3px 0; border-top: 1px solid rgba(31, 65, 91, .08); font-style: normal; min-height: 30px; }
+.lt__row:first-child { border-top: 0; }
+.lt__row small { font-family: var(--font-num); font-size: 10px; color: var(--ink-mute); }
+.lt__row b { display: block; min-width: 0; font-size: var(--fs-label); font-weight: 600; line-height: 1.15; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lt__row b em { display: block; font-style: normal; font-weight: 400; font-size: 10px; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lt__row u { display: block; height: 8px; border-radius: 4px; background: rgba(31, 65, 91, .06); text-decoration: none; overflow: hidden; }
+.lt__row u s { display: block; height: 100%; border-radius: 4px; background: var(--lt-bar, var(--c-secondary-dark)); text-decoration: none; }
+.card[data-variant='mortality.list'] { --lt-bar: var(--c-tertiary); }
+.lt__row strong { font-family: var(--font-num); font-size: var(--fs-label); font-weight: 700; text-align: right; }
+.lt__row var { font-style: normal; font-family: var(--font-num); font-size: 10px; font-weight: 600; text-align: center; padding: 2px 0; border-radius: 9px; background: color-mix(in srgb, var(--lt-bar, var(--c-secondary-dark)) 14%, #fff); color: var(--ink); }
+.lt__row var:empty { background: none; }
+.lt__foot { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 6px; border-top: 1px solid rgba(31, 65, 91, .08); font-size: 10px; color: var(--ink-mute); }
+.lt__split { display: flex; gap: 12px; }
+.lt__split small { display: inline-flex; align-items: baseline; gap: 4px; font-size: 10px; color: var(--ink-mute); white-space: nowrap; }
+.lt__split b { font-family: var(--font-num); font-size: var(--fs-label); font-weight: 700; color: var(--ink); }
+@media (max-width: 743px) { .lt__row { grid-template-columns: 14px minmax(0, 1.4fr) minmax(0, .8fr) 24px 46px; } .l-rep__capfigs { gap: var(--s3); } }
+
 /* the listing on the 2×2 births and deaths tiles */
 .mv-list { display: flex; flex-direction: column; width: 100%; }
 .mv-list__row { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 3px 0; border-top: 1px solid rgba(255, 255, 255, .18); font-style: normal; min-height: 28px; }
@@ -24472,9 +24501,11 @@ function renderCard(variant, opts = {}) {
   const build = LAYOUTS[variant.layout] || LAYOUTS.door
   if (rt) {
     el.dataset.layout = 'report'
+    if (rt.cap) el.dataset.fill = 'cap'
     el.setAttribute('aria-label', rt.spoken)
+    const capFigs = rt.cap ? `<span class="l-rep__capfigs">${(rt.capFigures || []).map((f) => `<span><b>${esc(String(f.value))}</b><small>${esc(f.label)}</small></span>`).join('')}</span>` : ''
     el.innerHTML = media(variant) + (variant.image ? `<span class="card__wash l-rep__wash"></span>` : '') +
-      `<span class="l-rep"><span class="l-rep__head">${glyph(mod, variant)}<span class="l-rep__name">${esc(rt.title || mod?.name || '')}</span></span>` +
+      `<span class="l-rep"><span class="l-rep__head">${glyph(mod, variant)}<span class="l-rep__name">${esc(rt.title || mod?.name || '')}</span>${capFigs}</span>` +
         `<span class="l-rep__viz" aria-hidden="true">${rt.viz}</span>` +
         `<span class="l-rep__figs">${rt.figures.map((f) => `<span class="l-rep__fig${f.tone === 'alert' ? ' is-alert' : ''}"><b>${esc(String(f.value))}</b><small>${esc(f.label)}</small></span>`).join('')}</span>` +
       `</span>`
@@ -33274,12 +33305,23 @@ const alert = (n) => (n ? 'alert' : '')
 const outOfRange = (c) => c.temp < c.tempRange[0] || c.temp > c.tempRange[1] || c.rh < c.rhRange[0] || c.rh > c.rhRange[1]
 
 /* the ten-day listing, births or deaths, for the 2×2 tiles */
+/* CAP AND WHITE (owner, 18 Sep 2026: "only the header of this block can
+   be in dark colour, the rest could be white"): the module's gradient is a
+   band across the top carrying the glyph, the name and today's figure; the
+   listing sits on white in ink, each species with a bar of its share in the
+   module's own hue, and the class split fills the foot. */
 function listing(kind, unit) {
   const today = summarise(kind, 0).total, { rows, total } = summarise(kind, 10)
-  return { title: kind === 'natality' ? 'Natality' : 'Mortality', report: 'circleOfLife',
-    viz: mv.list(rows.map((r) => ({ name: r.common, sub: `${one(r.klass)} · ${r.schedule ? `Schedule ${r.schedule}` : 'Not scheduled'}`, n: r.count, note: r.today ? `${r.today} today` : '' })), 6),
-    vizNote: `the species with ${unit} in the last ten days`,
-    figures: [{ value: today, label: `${unit} today`, tone: kind === 'mortality' ? alert(today) : '' }, { value: total, label: 'in 10 days' }] }
+  const max = Math.max(1, ...rows.map((r) => r.count)), shown = rows.slice(0, 6)
+  const split = CLASSES.map((c) => ({ label: c.label, n: rows.filter((r) => r.klass === c.key).reduce((n, r) => n + r.count, 0) })).filter((x) => x.n)
+  return { title: kind === 'natality' ? 'Natality' : 'Mortality', report: 'circleOfLife', cap: true,
+    capFigures: [{ value: today, label: `${unit} today` }, { value: total, label: 'in 10 days' }],
+    viz: `<span class="lt"><span class="lt__rows">` + shown.map((r, i) =>
+        `<i class="lt__row"><small>${i + 1}</small><b>${esc(r.common)}<em>${esc(one(r.klass))} \u00b7 ${r.schedule ? `Schedule ${esc(r.schedule)}` : 'Not scheduled'}</em></b>` +
+        `<u><s style="width:${Math.round((r.count / max) * 100)}%"></s></u><strong>${fmt(r.count)}</strong>${r.today ? `<var>${fmt(r.today)} today</var>` : '<var></var>'}</i>`).join('') + `</span>` +
+      `<span class="lt__foot">${rows.length > 6 ? `<small>+ ${fmt(rows.length - 6)} more</small>` : '<small></small>'}<span class="lt__split">` +
+        split.map((x) => `<small><b>${fmt(x.n)}</b>${esc(x.label)}</small>`).join('') + `</span></span></span>`,
+    vizNote: `the species with ${unit} in the last ten days`, figures: [] }
 }
 
 const TILES = {
@@ -33341,7 +33383,7 @@ function tileFor(variant) {
   if (!make) return null
   const t = make()
   const mod = __req('js/data/modules.js').getModule(variant.moduleId)
-  t.spoken = `${t.title || mod?.name || ''}: ` + t.figures.map((f) => `${f.value} ${f.label}`).join(', ') + (t.vizNote ? `. ${t.vizNote}` : '') + '. Opens the report'
+  t.spoken = `${t.title || mod?.name || ''}: ` + [...(t.capFigures || []), ...t.figures].map((f) => `${f.value} ${f.label}`).join(', ') + (t.vizNote ? `. ${t.vizNote}` : '') + '. Opens the report'
   return t
 }
 /* the reports and the page, given once by app.js; open() answers a tile's tap */
