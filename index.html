@@ -2384,6 +2384,10 @@ body.is-searching { overflow: hidden; }
   --peek-2: 10px; --scale-2: .795;
   --ann-h: 264px;
   --ann-media: 365px;    /* the photograph's width */
+  /* the Did You Know card's photograph is narrower than the announcement's,
+     because its statement is set larger and wants the width back. Kept here
+     beside --ann-media so the deck's metrics stay in one place. */
+  --fact-media: 300px;
   position: relative;
   height: var(--ann-h);
   /* 24 under the deck, from the node's Main Frame (gap 24) */
@@ -2612,6 +2616,87 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .hero--slide.no-photo .ann__like:hover { background: rgba(255, 255, 255, .7); }
 .ann__like:active { transform: scale(.96); }
 
+/* ── the Did You Know card ────────────────────────────────────────────────
+   There is no fun-fact frame in Figma to measure, so this is cut from the
+   announcement's own geometry — same 264 card, same 4px inset, same 32/30/28
+   radii, same panel gradient angle and stops — and then changed in the three
+   places that decide what kind of thing a card is.
+
+   WHAT SAYS IT IS NOT AN ANNOUNCEMENT, WITHOUT ASKING ANYONE TO READ A COLOUR.
+   The photograph leads on the LEFT where an announcement's follows on the
+   right, so the card is mirrored before a word of it is read and the peeking
+   sliver behind the front card is panel rather than photograph. The panel is
+   a solid petrol where the announcement's is a 10% wash of its own gradient,
+   which is a value inversion and survives greyscale. And the card has three
+   parts instead of four — a chip, the fact, the species it is about. No
+   author and no date: a fact is not news, and dating it would claim it was.
+
+   THE PETROL IS THE PRODUCT'S OWN, NOT A NEW COLOUR. --petrol-900 → 700 is
+   the ramp the workspace and the picker already sit on, taken here at the
+   announcement panel's angle and stops so the two cards are the same cut at a
+   different depth. White measures 12.6:1 on the deep end and 9.4:1 on the
+   light end; --c-secondary, which the chip and the scientific name take, is
+   6.9:1 and 5.1:1 — so every run of type on this card clears AA wherever the
+   gradient happens to be under it. */
+.hero-stage .hero--fact { color: var(--on-dark); }
+.fact__photo { position: relative; flex: none; width: var(--fact-media); border-radius: 28px 0 0 28px; overflow: hidden; }
+.fact__photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fact__panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: var(--s4) var(--s5);
+  border-radius: 0 30px 30px 0;
+  background: linear-gradient(-72deg, var(--petrol-900) 3.9%, var(--petrol-700) 108%);
+}
+.hero--fact.no-photo .fact__panel { border-radius: 30px; }
+.fact__copy { display: flex; flex-direction: column; gap: var(--s4); min-width: 0; max-width: 560px; }
+/* same reason as the Important announcement above: with no photograph beside
+   it the copy has the whole card and capping it leaves the right third empty */
+.hero--fact.no-photo .fact__copy { max-width: none; flex: 1 1 auto; }
+/* an outline where the announcement's chip is a filled tint, and the stroked
+   sprite glyph rather than an exported file — the sprite takes currentColor,
+   which is the only way one glyph sits on a white panel and a petrol one */
+.fact__chip {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: var(--s2);
+  padding: var(--s1) var(--s3); border-radius: var(--r-pill);
+  border: 1px solid rgba(255, 255, 255, .28);
+  font-size: 12px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase;
+  color: var(--c-secondary);
+}
+.fact__chip .icon { width: 18px; height: 18px; }
+/* the fact IS the headline, so it is set two steps above the announcement's
+   body and carries no gradient — a gradient title is how the reader knows an
+   announcement, and borrowing it here would undo the rest of the card */
+.fact__title {
+  font-size: 26px; line-height: 34px; font-weight: 500; letter-spacing: -.01em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.fact__text { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+/* white held back rather than a second white, the way .hero-site small already
+   does it on the note card — there is no token for white at four fifths */
+.fact__body {
+  font-size: 15px; line-height: 22px; opacity: .82;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* where an announcement signs off "who • when", a fact names its animal. The
+   rule above it is the only hairline on either card and it is what makes the
+   species read as attribution rather than as another line of the fact. */
+.fact__source {
+  display: flex; align-items: baseline; gap: var(--s2); min-width: 0;
+  padding-top: var(--s3); border-top: 1px solid rgba(255, 255, 255, .18);
+  white-space: nowrap; overflow: hidden;
+}
+.fact__species { font-size: 14px; font-weight: 600; letter-spacing: .1px; }
+/* the binomial in the italic serif the note card's site mark already uses, so
+   it is a convention of the page rather than a font introduced for one line */
+.fact__latin {
+  font-family: Georgia, serif; font-style: italic; font-size: 14px;
+  color: var(--c-secondary); overflow: hidden; text-overflow: ellipsis;
+}
+
 /* the two kinds the data no longer carries, kept drawable: see homeBanners.js */
 .hero-slide__media { position: relative; overflow: hidden; min-width: 0; }
 .hero-slide__copy { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 16px 20px; }
@@ -2665,6 +2750,17 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   .ann__title { font-size: 20px; }
   .ann__body { font-size: 14px; line-height: 20px; -webkit-line-clamp: 3; }
   .ann__meta { font-size: 13px; }
+  /* the fact card loses its photograph here too, and the mirror goes with it.
+     What is left to tell the two apart on a phone is the inverted panel, the
+     chip, and the species line — which is why none of those three was allowed
+     to be a colour difference alone. */
+  .fact__photo { display: none; }
+  .fact__panel { border-radius: 30px; padding: 14px; }
+  .fact__copy { gap: var(--s3); }
+  .fact__chip { font-size: 11px; }
+  .fact__title { font-size: 20px; line-height: 26px; }
+  .fact__body { font-size: 13px; line-height: 19px; }
+  .fact__species, .fact__latin { font-size: 13px; }
 }
 
 /* ── 7c · RECENT OBSERVATIONS ── RecentObservationsFinal.html, variant G2
@@ -10960,14 +11056,19 @@ body.is-editing .qa-chat { display: none; }
          every other link should say so, and the only readers who cannot see it
          happen are the ones being told here — the span is visually hidden, so
          the banner is unchanged to the eye. -->
-    <!-- ══ announcements ═══════════════════════════════════════════════
-         A deck of announcement cards above the banner — the front card full
-         size, the next peeking out behind it to the right. The slides are
-         rendered here by js/components/HeroBanners.js from
-         js/data/homeBanners.js. The Command Centre banner used to be the
-         deck's first card; on 3 Sep 2026 it came out to stand on its own, and
-         the ruling that followed put the announcements FIRST, the banner under
-         them ("First Announcements, under Command Centre"). -->
+    <!-- ══ announcements and facts ══════════════════════════════════════
+         A deck above the banner — the front card full size, the next peeking
+         out behind it to the right. The slides are rendered here by
+         js/components/HeroBanners.js from js/data/homeBanners.js. The Command
+         Centre banner used to be the deck's first card; on 3 Sep 2026 it came
+         out to stand on its own, and the ruling that followed put the
+         announcements FIRST, the banner under them ("First Announcements,
+         under Command Centre").
+
+         Two kinds ride in it since 18 Sep 2026 — announcements and Did You
+         Know cards about the animals — so the carousel is named for both. The
+         name is the one a screen reader hears before the per-slide label that
+         HeroBanners.js writes over it on every turn. -->
     <div class="hero-stage" id="heroStage" aria-roledescription="carousel" aria-label="Announcements">
       <div class="hero-stage__deck"></div>
     </div>
@@ -30413,7 +30514,71 @@ const HOME_BANNERS = [
     image: 'assets/img/diet-kitchen.jpg',
   },
 ]
+
+/* ── DID YOU KNOW, ON V4 ──────────────────────────────────────────────────
+   A second kind of card, `fact`: a fun fact about an animal — `title` (the
+   fact), `body` (the line that lands it), `species`, `latin`, and NO `by` and
+   NO `date`, since a fact is not news (see the stylesheet at .hero--fact).
+   Two of V1's announcements were already facts wearing an announcement's
+   clothes — the wild-dog one opened "Did you know…", the orangutan one was
+   titled so — which is what asked for the type.
+
+   V1's DECK IS NOT TOUCHED. `HOME_BANNERS` above is what V1, V2 and V3 have
+   always drawn. V4 draws `HOME_BANNERS_V4`: the same announcements less the
+   two that were facts in disguise, with the three facts placed at 0, 3 and
+   6 so a reader sees the new kind at once and never sits through more than
+   two announcements in a row. Running order, not chronology. */
+const FACTS = [
+  {
+    /* THE PHOTOGRAPH DECIDED THE SPECIES. assets/img/species.jpg is a lioness,
+       and it sat on the African wild dog announcement this card was converted
+       from, where it had always been wrong. A fact card names its animal in
+       the footer, so a photograph that disagrees with the name is no longer a
+       detail nobody reads — it is the card contradicting itself. */
+    id: 'fact-lion', kind: 'fact',
+    title: 'A lion’s roar carries for eight kilometres',
+    body: 'The vocal folds of a big cat are square-edged and fatty, so they turn far less breath ' +
+          'into far more sound than ours can.',
+    species: 'Asiatic lion', latin: 'Panthera leo leo',
+    image: 'assets/img/species.jpg',
+  },
+  {
+    /* the card that asked for the type: its title already said "Did you know?"
+       and the announcement half of it — new enrichment platforms in the
+       Primate House — was a sentence tacked onto a fact to justify it */
+    id: 'fact-orangutan', kind: 'fact',
+    title: 'Orangutans share nearly 97% of our DNA',
+    body: 'Only the two chimpanzees are closer to us, and it shows in the hands — thumb and all, ' +
+          'an orangutan’s grip works the way yours does.',
+    species: 'Sumatran orangutan', latin: 'Pongo abelii',
+  },
+  {
+    /* the only card here that was written rather than converted. Two facts out
+       of seven put both of them in the first half of the deck and nothing in
+       the second, so a reader who arrived late saw one kind; the third is
+       here to close that gap. No photograph — there is no elephant in
+       assets/img, and an elephant fact over some other animal is exactly the
+       mistake the lion card above was converted to fix. */
+    id: 'fact-elephant', kind: 'fact',
+    title: 'An elephant hears through its feet',
+    body: 'A herd’s low rumbles travel through the ground as well as the air, and are read back ' +
+          'through bone — which is how two groups a kilometre apart stay in step.',
+    species: 'Asian elephant', latin: 'Elephas maximus',
+  },
+]
+
+const HOME_BANNERS_V4 = (() => {
+  const disguised = new Set(['ann-wild-dog', 'ann-orangutan'])
+  const deck = HOME_BANNERS.filter((b) => !disguised.has(b.id))
+  const [lion, orangutan, elephant] = FACTS
+  deck.splice(0, 0, lion)
+  deck.splice(Math.min(3, deck.length), 0, orangutan)
+  deck.splice(Math.min(6, deck.length), 0, elephant)
+  return deck
+})()
+
   __x.HOME_BANNERS = HOME_BANNERS;
+  __x.HOME_BANNERS_V4 = HOME_BANNERS_V4;
 });
 
 __def('js/components/HeroBanners.js', function (__x, __req) {
@@ -30447,12 +30612,22 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 }
 
+/* WHAT A SLIDE IS CALLED WHEN IT IS NOT ON SCREEN. The kind of card is drawn
+   as a chip, which a reader sees and a screen reader reaches only after it has
+   entered the group — but the stage renames itself on every turn and that
+   rename is all a screen reader gets when the deck advances on its own. So the
+   name carries the kind for the one type where the chip is the only thing
+   saying it. An announcement keeps its bare title: it is the deck's default
+   and prefixing all seven with a word would make the difference harder to
+   hear, not easier. */
+const slideName = (item) => (item.kind === 'fact' ? `Did you know: ${item.title}` : item.title)
+
 function renderSlide(item) {
   const el = document.createElement('article')
   el.className = `hero hero--slide hero--${item.kind}`
   el.setAttribute('role', 'group')
   el.setAttribute('aria-roledescription', 'slide')
-  el.setAttribute('aria-label', item.title)
+  el.setAttribute('aria-label', slideName(item))
   const meta = (withAvatar) =>
     `<span class="hero-slide__meta">${withAvatar ? '<span class="hero-slide__avatar"></span>' : ''}` +
     `<b>${esc(item.by)}</b></span>`
@@ -30478,6 +30653,33 @@ function renderSlide(item) {
         : '') +
       /* on the card, not in the photograph: the node draws it on both variants */
       `<button type="button" class="ann__like" aria-pressed="false" aria-label="Like this announcement">` +
+        `<img src="assets/icon/ann-like.svg" alt=""></button>`
+  } else if (item.kind === 'fact') {
+    /* see the stylesheet at .hero--fact. The photograph is written FIRST here
+       and that is the whole trick: the same flex row the announcement uses,
+       read the other way round. */
+    if (!item.image) el.classList.add('no-photo')
+    el.innerHTML =
+      (item.image
+        ? `<div class="fact__photo">` +
+            `<img src="${esc(item.image)}" alt="" decoding="async"${item.imagePos ? ` style="object-position:${esc(item.imagePos)}"` : ''}>` +
+          `</div>`
+        : '') +
+      `<div class="fact__panel"><div class="fact__copy">` +
+        `<span class="fact__chip">${icon('d-animal')}Did you know</span>` +
+        `<div class="fact__text">` +
+          `<h2 class="fact__title">${esc(item.title)}</h2>` +
+          `<p class="fact__body">${esc(item.body)}</p>` +
+        `</div>` +
+        `<div class="fact__source"><span class="fact__species">${esc(item.species)}</span>` +
+          (item.latin ? `<i class="fact__latin">${esc(item.latin)}</i>` : '') +
+        `</div>` +
+      `</div></div>` +
+      /* .ann__like, on a card that is not an announcement, on purpose. It is
+         the deck's one reaction gesture and there is one button that draws it;
+         a fact__like would be a second class, a second rule and a second arm
+         in the delegated handler below, all for the same press. */
+      `<button type="button" class="ann__like" aria-pressed="false" aria-label="Like this fact">` +
         `<img src="assets/icon/ann-like.svg" alt=""></button>`
   } else if (item.kind === 'insight') {
     el.innerHTML =
@@ -30508,6 +30710,7 @@ function renderSlide(item) {
 }
 
 function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
+  const deckName = items.some((i) => i.kind === 'fact') ? 'Announcements and facts' : 'Announcements'
   if (!root) return null
   const deck = root.querySelector('.hero-stage__deck')
   /* every slide is rendered from data. The estate banner was the deck's front
@@ -30546,7 +30749,8 @@ function createHeroBanners({ root, items = HOME_BANNERS } = {}) {
   /* a new slide is in front: arrange, name it, and start its dwell */
   function place() {
     arrange()
-    root.setAttribute('aria-label', `Announcements, ${active + 1} of ${n}: ${items[active].title}`)
+    /* named for what it holds: V4's deck carries facts, V1's does not */
+    root.setAttribute('aria-label', `${deckName}, ${active + 1} of ${n}: ${slideName(items[active])}`)
     restartDwell()
   }
 
@@ -32120,7 +32324,9 @@ const { PAGE_VERSION, isV2, isV3, setPageVersion, isV4 } = __req('js/lib/pageVer
    empty stage and an empty rail where V1 draws both. */
 if (PAGE_VERSION === '1' || isV4()) {
   const { createHeroBanners } = __req('js/components/HeroBanners.js')
-  createHeroBanners({ root: document.getElementById('heroStage') })
+  const { HOME_BANNERS, HOME_BANNERS_V4 } = __req('js/data/homeBanners.js')
+  /* V4's deck carries the Did You Know cards; V1's is the deck as it was */
+  createHeroBanners({ root: document.getElementById('heroStage'), items: isV4() ? HOME_BANNERS_V4 : HOME_BANNERS })
 
   /* the rail between the announcements and the modules, node 196:7243 */
   const { createRecentObservations } = __req('js/components/RecentObservations.js')
