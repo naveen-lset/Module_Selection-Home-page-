@@ -33521,10 +33521,11 @@ const TILES = {
   'hospital.photo': () => { const c = care.counts(), { foot } = care.casesByClass()
     return { report: 'animalCare', viz: mv.segments(CLASSES.map((k) => ({ label: k.label, n: foot.n[k.key] }))), vizNote: 'animals in care by class',
       figures: [{ value: c.hospital.n, label: 'in hospital' }, { value: c.medication.n, label: 'under medication' }, { value: c.maternity.n, label: 'maternity care' }] } },
-  'species.stats': () => { const bc = BY_CLASS.map((r) => ({ species: scope.scale(r.species), animals: scope.scale(r.animals), chipped: scope.scale(r.chipped) }))
-    const animals = bc.reduce((n, r) => n + r.animals, 0), chipped = bc.reduce((n, r) => n + r.chipped, 0), species = bc.reduce((n, r) => n + r.species, 0)
-    const stage = (k) => scope.scale(REHAB.find((r) => r.key === k).n)
-    return { report: 'collection', viz: `<span class="mv-rings">${mv.ring(chipped / (animals || 1), `${pct(chipped, animals)}%`, 'chipped')}${mv.ring(stage('released') / (stage('received') || 1), fmt(stage('released')), 'released')}${mv.ring(stage('rehab') / (stage('received') || 1), fmt(stage('rehab')), 'in rehab')}</span>`,
+  /* two rings, sexed and chipped (owner, 18 Sep 2026: "let's not have
+     released and in rehab; let's have sexed and chipped only") */
+  'species.stats': () => { const bc = BY_CLASS.map((r) => ({ species: scope.scale(r.species), animals: scope.scale(r.animals), chipped: scope.scale(r.chipped), sexed: scope.scale(r.sexed) }))
+    const sum = (k) => bc.reduce((n, r) => n + r[k], 0), animals = sum('animals'), chipped = sum('chipped'), sexed = sum('sexed'), species = sum('species')
+    return { report: 'collection', viz: `<span class="mv-rings">${mv.ring(sexed / (animals || 1), `${pct(sexed, animals)}%`, 'sexed')}${mv.ring(chipped / (animals || 1), `${pct(chipped, animals)}%`, 'chipped')}</span>`, vizNote: 'of the animals held',
       figures: [{ value: fmt(species), label: 'species' }, { value: fmt(animals), label: 'animals' }] } },
   'diet.photo': () => { const rows = scope.scoped(DIET_CHANGES).sort((a, b) => a.ago - b.ago)
     return { report: 'husbandry', viz: mv.list(rows.map((r) => ({ name: r.species, sub: r.change, n: '', note: r.ago === 0 ? 'today' : r.ago === 1 ? 'yesterday' : `${r.ago} d ago` })), 2), vizNote: 'the latest diet changes',
@@ -36786,14 +36787,16 @@ __def('js/data/collection.js', function (__x, __req) {
  * agree. `BY_CLASS` is species and animals held, and how many animals carry
  * a microchip — birds and reptiles are chipped less because many are ringed
  * or too small, which is why the rate is shown per class and not as one
- * number. `REHAB` is the rescue pipeline as stages, `WATCH` the compliance
+ * number — and how many have their sex on record (`sexed`: monomorphic
+ * birds and young reptiles wait on DNA or endoscopy, so those classes trail).
+ * `REHAB` is the rescue pipeline as stages, `WATCH` the compliance
  * and record-keeping figures that make a site look bad in an inspection.
  */
 const BY_CLASS = [
-  { key: 'aves',    label: 'Aves',     species: 48, animals: 1497, chipped: 812  },
-  { key: 'mammal',  label: 'Mammals',  species: 31, animals: 2138, chipped: 1843 },
-  { key: 'reptile', label: 'Reptiles', species: 22, animals: 201,  chipped: 156  },
-  { key: 'other',   label: 'Others',   species: 6,  animals: 61,   chipped: 4    },
+  { key: 'aves',    label: 'Aves',     species: 48, animals: 1497, chipped: 812,  sexed: 1010 },
+  { key: 'mammal',  label: 'Mammals',  species: 31, animals: 2138, chipped: 1843, sexed: 2076 },
+  { key: 'reptile', label: 'Reptiles', species: 22, animals: 201,  chipped: 156,  sexed: 133  },
+  { key: 'other',   label: 'Others',   species: 6,  animals: 61,   chipped: 4,    sexed: 12   },
 ];
 
 /* the rescue and rehabilitation pipeline, this month; `prev` is last month
