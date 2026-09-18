@@ -12693,6 +12693,7 @@ const DOORS = [
   ['natality',      ['small', 'medium'], 'secondary'],
   ['necropsy',      ['small', 'medium'], 'secondary'],
   ['preventive',    ['small', 'medium'], 'secondary'],
+  ['sites',         ['small', 'medium'], 'secondary'],
   ['assessment',    ['small', 'medium'], 'secondary'],
   ['fetal',         ['small', 'medium'], 'secondary'],
   ['eggs',          ['small', 'medium'], 'primary'],
@@ -15044,7 +15045,9 @@ const V3_LAYOUT = [
    to the head of the Circle of Life band, where the lists they summarise
    are; `RETIRED_V4` is how a layout saved that day loses them. */
 const V4_LAYOUT = [
-  ...DEFAULT_LAYOUT.filter((e) => e.variantId !== 'mortality.default' && e.variantId !== 'security.default'),
+  ...DEFAULT_LAYOUT.filter((e) => e.variantId !== 'mortality.default' && e.variantId !== 'security.default')
+    /* owner, 18 Sep 2026: "a 2 blocks wide card, number of sites and enclosure count" */
+    .flatMap((e) => (e.variantId === 'species.stats' ? [e, { variantId: 'sites.default', size: 'medium' }] : [e])),
   { variantId: 'necropsy.default', size: 'small' },
   { variantId: 'assessment.default', size: 'small' },
   /* 18 Sep 2026: "all the major focus areas should have a small card" */
@@ -15069,11 +15072,11 @@ const V4_LAYOUT = [
    was saved from this seed; an older one falls back to the seed, since the
    Circle of Life row is an ORDER, and REQUIRED_V4 can only append. Bumping
    VERSION would have reset V1 to V3 as well, which this does not. */
-const V4_SEED = 2
+const V4_SEED = 3
 const RETIRED_V4 = new Set(['natality.week', 'mortality.week', 'mortality.default', 'natality.default'])
 /* what a V4 layout saved before these existed is missing; load() adds them
    at the seed's size rather than resetting the person's arrangement */
-const REQUIRED_V4 = V4_LAYOUT.filter((e) => ['mortality.list', 'natality.list', 'necropsy.default', 'assessment.default', 'preventive.default', 'fetal.default', 'followup.default', 'mortality.neonatal', 'housing.enclosures'].includes(e.variantId))
+const REQUIRED_V4 = V4_LAYOUT.filter((e) => ['mortality.list', 'natality.list', 'necropsy.default', 'assessment.default', 'preventive.default', 'fetal.default', 'followup.default', 'mortality.neonatal', 'housing.enclosures', 'sites.default'].includes(e.variantId))
 
 /**
  * Cards the user is not allowed to remove.
@@ -15460,6 +15463,16 @@ const MODULES = [
      that had no module tile to sit on. Sprite glyphs, since there is no
      Figma export for either; the fills are two ramps the catalogue already
      carried and nothing else was using on the home page. Seeded on V4 only. */
+  {
+    id: 'sites',
+    sprite: 'd-overview',
+    iconSize: 36,
+    gradient: '--g-users',
+    name: 'Sites & Enclosures',
+    category: 'operations',
+    keywords: ['site', 'enclosure', 'section', 'estate'],
+    blurb: 'How many sites the estate runs, and how many enclosures they hold.',
+  },
   {
     id: 'preventive',
     sprite: 'd-safety',
@@ -33574,6 +33587,9 @@ const TILES = {
     const open = scope.scoped(TASKS).filter((x) => !x.done), t = open.filter((x) => x.due >= 0 && x.due <= 7), late = open.filter((x) => x.due < 0).length + scope.scoped(care.OVERDUE).length
     return { report: 'tasks', viz: mv.stack([{ label: 'care', n: c.length }, { label: 'clutches', n: e.length }, { label: 'tasks', n: t.length }]), vizNote: 'what falls due in the next seven days',
       figures: [{ value: c.length + e.length + t.length, label: 'due, 7 days' }, { value: late, label: 'already late', tone: alert(late) }] } },
+  'sites.default': () => { const site = scope.get(), sites = site === 'all' ? SITES : SITES.filter((x) => x.id === site), enc = sites.reduce((n, x) => n + x.counts.enclosures, 0)
+    return { report: 'collection', viz: mv.waffle(Math.ceil(enc / 5), 0, 14), vizNote: 'one square, five enclosures',
+      figures: [{ value: sites.length, label: sites.length === 1 ? 'site' : 'sites' }, { value: enc, label: 'enclosures' }] } },
   'mortality.neonatal': () => { const rows = INCIDENTS.filter((e) => e.kind === 'neonatal' && e.ago < 30 && scope.inScope(e)).sort((a, b) => a.ago - b.ago)
     const sp = (k) => SPECIES[k] || { common: k, klass: 'other' }, n = incidents('neonatal', 30)
     return { title: 'Neonatal deaths', report: 'circleOfLife', viz: mv.list(rows.map((r) => ({ name: sp(r.species).common, sub: one(sp(r.species).klass), n: '', note: r.ago === 0 ? 'today' : r.ago === 1 ? 'yesterday' : `${r.ago} d ago` })), 2), vizNote: 'under 30 days old, the latest first',
