@@ -12691,6 +12691,7 @@ const DOORS = [
      reads `primary` as "on the V1 page", which this is not. */
   ['natality',      ['small', 'medium'], 'secondary'],
   ['necropsy',      ['small', 'medium'], 'secondary'],
+  ['preventive',    ['small', 'medium'], 'secondary'],
   ['assessment',    ['small', 'medium'], 'secondary'],
   ['fetal',         ['small', 'medium'], 'secondary'],
   ['eggs',          ['small', 'medium'], 'primary'],
@@ -15043,11 +15044,15 @@ const V4_LAYOUT = [
       : [e])),
   { variantId: 'necropsy.default', size: 'small' },
   { variantId: 'assessment.default', size: 'small' },
+  /* 18 Sep 2026: "all the major focus areas should have a small card" */
+  { variantId: 'preventive.default', size: 'small' },
+  { variantId: 'fetal.default', size: 'small' },
+  { variantId: 'followup.default', size: 'small' },
 ]
 const RETIRED_V4 = new Set(['natality.week', 'mortality.week', 'mortality.default', 'natality.default'])
 /* what a V4 layout saved before these existed is missing; load() adds them
    at the seed's size rather than resetting the person's arrangement */
-const REQUIRED_V4 = V4_LAYOUT.filter((e) => ['mortality.list', 'natality.list', 'necropsy.default', 'assessment.default'].includes(e.variantId))
+const REQUIRED_V4 = V4_LAYOUT.filter((e) => ['mortality.list', 'natality.list', 'necropsy.default', 'assessment.default', 'preventive.default', 'fetal.default', 'followup.default'].includes(e.variantId))
 
 /**
  * Cards the user is not allowed to remove.
@@ -15433,6 +15438,16 @@ const MODULES = [
      that had no module tile to sit on. Sprite glyphs, since there is no
      Figma export for either; the fills are two ramps the catalogue already
      carried and nothing else was using on the home page. Seeded on V4 only. */
+  {
+    id: 'preventive',
+    sprite: 'd-safety',
+    iconSize: 36,
+    gradient: '--g-hospital',
+    name: 'Preventive Care',
+    category: 'medical',
+    keywords: ['vaccination', 'deworming', 'supplement', 'prophylaxis', 'overdue'],
+    blurb: 'Vaccination, deworming and supplements, and who is overdue.',
+  },
   {
     id: 'necropsy',
     sprite: 'd-condition',
@@ -32458,23 +32473,21 @@ __def('js/components/AnimalCare.js', function (__x, __req) {
 /**
  * ANIMAL CARE — the medical side of the morning
  * ───────────────────────────────────────────────────────────────────────────
- * Four counts, then five drawings, each its own kind: the cases as stacked
- * bars (state by class), the care overdue as a ranked list (it is the
- * work list), the care due ahead as a runway of the next 45 days by
- * medicine, the pharmacy's debt as an ageing bar with the oldest indents
- * named, and enrichment tickets as columns, this week against last.
+ * Four counts, then three drawings, each its own kind: the cases as stacked
+ * bars (state by class), the pharmacy's debt as an ageing bar with the
+ * oldest indents named, and enrichment tickets as columns, this week
+ * against last. The care overdue and the care due ahead moved out to
+ * PreventiveCare.js on 18 Sep 2026 (owner: "don't club the irrelevant
+ * ones").
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
 const { CLASSES } = __req('js/data/lifecycle.js')
-const { OVERDUE, CARE_KINDS, DUE_AHEAD, AHEAD_WINDOWS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts, casesByClass } = __req('js/data/care.js')
+const { PHARMACY, PHARMACY_BINS, ENRICHMENT, counts, casesByClass } = __req('js/data/care.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, listCard, stacked, runway, ageing, columns } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, stacked, ageing, columns } = __req('js/components/LifePanel.js')
 
-const kindLabel = (k) => CARE_KINDS.find((x) => x.key === k).label
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
-const overdue = () => scope.scoped(OVERDUE)
 const pharmacy = () => scope.scoped(PHARMACY)
-const ahead = () => scope.scoped(DUE_AHEAD)
 
 function tiles() {
   const c = counts()
@@ -32487,14 +32500,10 @@ function tiles() {
 }
 
 function actionables() {
-  const od = overdue()
   const old = pharmacy().filter((r) => r.ago > 15)
-  const soon = ahead().filter((r) => r.due <= 15)
   return [
-    { text: 'Animals overdue for care', n: od.length, due: true, roles: ['vet', 'paravet', 'keeper'], note: od.length ? `worst ${Math.max(...od.map((r) => r.overdue))} days late` : '' },
     { text: 'Serious cases to review', n: counts().serious.n, due: true, roles: ['vet', 'curator'] },
     { text: 'Pharmacy indents older than 15 days to chase', n: old.length, due: true, roles: ['vet', 'admin'] },
-    { text: 'Medicines to indent for the next 15 days', n: soon.length, due: false, roles: ['vet', 'paravet', 'admin'] },
   ]
 }
 
@@ -32505,30 +32514,6 @@ function casesCard() {
     body: stacked({ rows: rows.map((r) => ({ label: r.head, total: r.n.all, n: r.n })), segs: CLASSES }) +
       `<div class="ag__bins" style="margin-top:16px"><span><b>${fmt(foot.n.all)}</b>Animals in care<small>each counted once</small></span>` +
         CLASSES.map((c) => `<span><b>${fmt(foot.n[c.key])}</b>${esc(c.label)}<small>${pct(foot.n[c.key], foot.n.all)}% of cases</small></span>`).join('') + `</div>`,
-  })
-}
-
-function overdueCard() {
-  const rows = [...overdue()].sort((a, b) => b.overdue - a.overdue)
-  return listCard({
-    title: 'Care overdue', span: 'by animal', aria: `Care overdue: ${fmt(rows.length)} animals`,
-    colHead: ['Animal', 'Overdue'], rows, open: 'all',
-    chips: [{ key: 'all', label: 'All', test: () => true }, ...CARE_KINDS.map((k) => ({ key: k.key, label: k.label, test: (r) => r.kind === k.key }))],
-    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
-      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span><span class="life-row__sub">${esc(kindLabel(r.kind))} · ${esc(r.enclosure)} · ${esc(r.code)}</span></span>` +
-      `<span class="life-row__val is-late"><b>${r.overdue}</b><span class="life-row__note">${r.overdue === 1 ? 'day' : 'days'} late</span></span>`,
-    empty: 'Nothing overdue',
-  })
-}
-
-function aheadCard() {
-  const rows = ahead()
-  const short = (m) => { const w = m.replace(/\s*\(.*\)/, '').split(' '); return w[0] === 'Vitamin' ? w.slice(0, 2).join(' ') : w[0] }
-  const lanes = CARE_KINDS.map((k) => ({ label: k.label, items: rows.filter((r) => r.kind === k.key).map((r) => ({ at: r.due, tag: short(r.medicine), label: r.medicine, note: `${fmt(r.animals)} animals · ${r.qty}`, soon: r.due <= 15 })) }))
-  return panel({
-    title: 'Care due ahead', span: 'medicine required, next 45 days', cls: 'life-card--wide',
-    aria: 'Care due ahead: ' + AHEAD_WINDOWS.map((w) => `${rows.filter((r) => r.due <= w.days).length} medicines within ${w.days} days`).join(', '),
-    body: runway({ lanes, span: 45, ticks: AHEAD_WINDOWS.map((w) => w.days) }),
   })
 }
 
@@ -32564,13 +32549,122 @@ function enrichmentCard() {
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
-  root.querySelector('.life-grid').append(casesCard(), overdueCard(), aheadCard(), pharmacyCard(), enrichmentCard())
+  root.querySelector('.life-grid').append(casesCard(), pharmacyCard(), enrichmentCard())
   root.hidden = false
   return root
 }
 
 __x.mount = mount
-__x.report = { id: 'animalCare', title: 'Animal Care', icon: 'd-veterinary', sub: 'in care, overdue, pharmacy, enrichment',
+__x.report = { id: 'animalCare', title: 'Animal Care', icon: 'd-veterinary', sub: 'in care, pharmacy, enrichment',
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+});
+
+__def('js/components/PreventiveCare.js', function (__x, __req) {
+/**
+ * PREVENTIVE CARE — vaccination, deworming and supplements
+ * ───────────────────────────────────────────────────────────────────────────
+ * Its own report since 18 Sep 2026 (owner: "preventive care as one of the
+ * blocks in the main screen"; "don't club the irrelevant ones"). Four
+ * counts, then the overdue by kind as stacked bars (how late, in bands),
+ * the animals overdue as a ranked list (the work list the owner pointed
+ * at), the enclosures carrying the overdue as bullets against a week's
+ * grace, and the medicines the next 45 days need as a runway. Animal Care
+ * keeps the cases, the pharmacy and enrichment.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { OVERDUE, CARE_KINDS, DUE_AHEAD, AHEAD_WINDOWS } = __req('js/data/care.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, listCard, stacked, runway, bullets } = __req('js/components/LifePanel.js')
+
+const kindLabel = (k) => CARE_KINDS.find((x) => x.key === k).label
+const overdue = () => scope.scoped(OVERDUE)
+const ahead = () => scope.scoped(DUE_AHEAD)
+const worst = (rows) => (rows.length ? Math.max(...rows.map((r) => r.overdue)) : 0)
+const GRACE = 7
+const LATENESS = [
+  { key: 'week',      label: 'Up to 7 days', test: (r) => r.overdue <= 7 },
+  { key: 'fortnight', label: '8 to 14 days', test: (r) => r.overdue > 7 && r.overdue <= 14 },
+  { key: 'more',      label: 'Over 14 days', test: (r) => r.overdue > 14 },
+]
+
+function tiles() {
+  const od = overdue(), soon = ahead().filter((r) => r.due <= 15), month = ahead().filter((r) => r.due <= 45)
+  const places = new Set(od.map((r) => r.enclosure)).size
+  return [
+    { key: 'overdue',    label: 'Animals overdue',         n: od.length,     note: od.length ? `worst ${worst(od)} days late` : 'nothing overdue' },
+    { key: 'enclosures', label: 'Enclosures affected',     n: places,        note: places ? `${fmt(od.filter((r) => r.overdue > GRACE).length)} animals past a week` : 'none' },
+    { key: 'soon',       label: 'Medicines, next 15 days', n: soon.length,   note: `${fmt(soon.reduce((n, r) => n + r.animals, 0))} animals to treat` },
+    { key: 'month',      label: 'Medicines, next 45 days', n: month.length,  note: `${fmt(month.reduce((n, r) => n + r.animals, 0))} animals to treat` },
+  ]
+}
+
+function actionables() {
+  const od = overdue(), soon = ahead().filter((r) => r.due <= 15)
+  return [
+    { text: 'Animals overdue for care', n: od.length, due: true, roles: ['vet', 'paravet', 'keeper'], note: od.length ? `worst ${worst(od)} days late` : '' },
+    { text: 'Overdue by more than a fortnight', n: od.filter((r) => r.overdue > 14).length, due: true, roles: ['vet', 'curator'] },
+    { text: 'Medicines to indent for the next 15 days', n: soon.length, due: false, roles: ['vet', 'paravet', 'admin'] },
+  ]
+}
+
+function kindCard() {
+  const od = overdue()
+  const rows = CARE_KINDS.map((k) => { const mine = od.filter((r) => r.kind === k.key), n = {}
+    LATENESS.forEach((b) => { n[b.key] = mine.filter(b.test).length })
+    return { label: k.label, total: mine.length, n } })
+  return panel({
+    title: 'Overdue by kind', span: 'and how late, in bands', aria: 'Care overdue by kind: ' + rows.map((r) => `${r.label} ${fmt(r.total)}`).join(', '),
+    body: stacked({ rows, segs: LATENESS }) +
+      `<div class="ag__bins" style="margin-top:16px"><span><b>${fmt(od.length)}</b>overdue<small>an animal once per kind</small></span>` +
+        CARE_KINDS.map((k) => `<span><b>${fmt(worst(od.filter((r) => r.kind === k.key)))}</b>${esc(k.label)}<small>days late, the worst</small></span>`).join('') + `</div>`,
+  })
+}
+
+function overdueCard() {
+  const rows = [...overdue()].sort((a, b) => b.overdue - a.overdue)
+  return listCard({
+    title: 'Care overdue', span: 'by animal', aria: `Care overdue: ${fmt(rows.length)} animals`,
+    colHead: ['Animal', 'Overdue'], rows, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true }, ...CARE_KINDS.map((k) => ({ key: k.key, label: k.label, test: (r) => r.kind === k.key }))],
+    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span><span class="life-row__sub">${esc(kindLabel(r.kind))} · ${esc(r.enclosure)} · ${esc(r.code)}</span></span>` +
+      `<span class="life-row__val is-late"><b>${r.overdue}</b><span class="life-row__note">${r.overdue === 1 ? 'day' : 'days'} late</span></span>`,
+    empty: 'Nothing overdue',
+  })
+}
+
+function aheadCard() {
+  const rows = ahead()
+  const short = (m) => { const w = m.replace(/\s*\(.*\)/, '').split(' '); return w[0] === 'Vitamin' ? w.slice(0, 2).join(' ') : w[0] }
+  const lanes = CARE_KINDS.map((k) => ({ label: k.label, items: rows.filter((r) => r.kind === k.key).map((r) => ({ at: r.due, tag: short(r.medicine), label: r.medicine, note: `${fmt(r.animals)} animals · ${r.qty}`, soon: r.due <= 15 })) }))
+  return panel({
+    title: 'Care due ahead', span: 'medicine required, next 45 days', cls: 'life-card--wide',
+    aria: 'Care due ahead: ' + AHEAD_WINDOWS.map((w) => `${rows.filter((r) => r.due <= w.days).length} medicines within ${w.days} days`).join(', '),
+    body: runway({ lanes, span: 45, ticks: AHEAD_WINDOWS.map((w) => w.days) }),
+  })
+}
+
+function enclosuresCard() {
+  const od = overdue()
+  const rows = [...new Set(od.map((r) => r.enclosure))].map((e) => { const mine = od.filter((r) => r.enclosure === e), w = worst(mine)
+    return { label: e, sub: [...new Set(mine.map((r) => kindLabel(r.kind)))].join(', '), value: w, target: GRACE, late: w > GRACE, text: `${w} d`, note: `${fmt(mine.length)} ${mine.length === 1 ? 'animal' : 'animals'}` } })
+    .sort((a, b) => b.value - a.value)
+  return panel({
+    title: 'By enclosure', span: `the most overdue animal, against a week's grace`, aria: 'Care overdue by enclosure: ' + rows.map((r) => `${r.label} ${r.text}`).join(', '),
+    body: bullets({ rows }),
+  })
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
+  root.querySelector('.life-grid').append(kindCard(), overdueCard(), enclosuresCard(), aheadCard())
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+__x.report = { id: 'preventive', title: 'Preventive Care', icon: 'd-safety', sub: 'vaccination, deworming, supplements',
   summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
@@ -32745,40 +32839,37 @@ __x.report = { id: 'husbandry', title: 'Husbandry', icon: 'd-husbandry', sub: 'd
 
 __def('js/components/Operations.js', function (__x, __req) {
 /**
- * OPERATIONS — transfers, the lab, and the enclosure climate
+ * OPERATIONS — transfers and the enclosure climate
  * ───────────────────────────────────────────────────────────────────────────
  * Four counts, then: transfers as flows (from → to, the animals as a bar)
- * with the specialists' within/between split as full-width shares; the
- * lab's open requests as bullets (days open against the target) and the
- * disciplines' turnaround the same way; the climate as range strips (the
- * target band, the day's reach, the reading now).
+ * with the specialists' within/between split as full-width shares, and the
+ * climate as range strips (the target band, the day's reach, the reading
+ * now). The lab moved out to Lab.js on 18 Sep 2026 (owner: "keep lab and
+ * operations separate").
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
-const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
+const { TRANSFERS, CLIMATE } = __req('js/data/operations.js')
 const scope = __req('js/state/reportScope.js')
-const { esc, fmt, renderCounts, panel, flow, shares, bullets, strips, dots, tiles: tileGrid } = __req('js/components/LifePanel.js')
+const { esc, fmt, renderCounts, panel, flow, shares, strips, tiles: tileGrid } = __req('js/components/LifePanel.js')
 
 const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
-const disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k)
 const outOfRange = (c) => c.temp < c.tempRange[0] || c.temp > c.tempRange[1] || c.rh < c.rhRange[0] || c.rh > c.rhRange[1]
 const transfers = () => scope.scoped(TRANSFERS)
-const lab = () => scope.scoped(LAB)
 const climate = () => scope.scoped(CLIMATE)
 
 function tiles() {
-  const open = lab().filter((r) => r.done == null), late = open.filter((r) => r.ago > disc(r.discipline).target), out = climate().filter(outOfRange)
+  const moves = transfers(), out = climate().filter(outOfRange), today = moves.filter((t) => t.ago === 0)
   return [
-    { key: 'transfers', label: 'Transfers',               n: transfers().length, note: `${fmt(transfers().reduce((n, t) => n + t.animals, 0))} animals moved, 30 days` },
-    { key: 'lab',       label: 'Lab requests open',       n: open.length, note: `${late.length} past turnaround` },
-    { key: 'late',      label: 'Lab reports late',        n: late.length, note: late.length ? 'oldest ' + agoWord(Math.max(...late.map((r) => r.ago))) : 'all within target' },
+    { key: 'transfers', label: 'Transfers',               n: moves.length, note: `${fmt(moves.reduce((n, t) => n + t.animals, 0))} animals moved, 30 days` },
+    { key: 'between',   label: 'Between sites',           n: moves.filter((t) => !t.within).length, note: `${fmt(moves.filter((t) => t.within).length)} within the site` },
+    { key: 'today',     label: 'Transfers today',         n: today.length, note: today.length ? `${fmt(today.reduce((n, t) => n + t.animals, 0))} animals to log and settle` : 'none to settle' },
     { key: 'climate',   label: 'Enclosures out of range', n: out.length,  note: out.length ? out.map((c) => c.enclosure).slice(0, 2).join(', ') : 'all within range' },
   ]
 }
 
 function actionables() {
-  const open = lab().filter((r) => r.done == null), late = open.filter((r) => r.ago > disc(r.discipline).target), out = climate().filter(outOfRange)
+  const out = climate().filter(outOfRange)
   return [
-    { text: 'Lab reports past their turnaround', n: late.length, due: true, roles: ['vet', 'paravet'] },
     { text: 'Enclosures out of climate range', n: out.length, due: true, roles: ['keeper', 'curator', 'admin'], note: out.map((c) => c.enclosure).join(', ') },
     { text: 'Transfers today to log and settle', n: transfers().filter((t) => t.ago === 0).length, due: false, roles: ['curator', 'keeper', 'admin'] },
   ]
@@ -32808,6 +32899,76 @@ function specialistCard() {
   })
 }
 
+function climateCards() {
+  const rows = [...climate()].sort((a, b) => outOfRange(b) - outOfRange(a) || a.enclosure.localeCompare(b.enclosure))
+  const temp = panel({
+    title: 'Temperature', span: 'now, against the target band and the day', cls: '',
+    aria: 'Enclosure temperature: ' + rows.map((c) => `${c.enclosure} ${c.temp.toFixed(1)}°C`).join(', '),
+    body: strips({ unit: '°C', rows: rows.map((c) => ({ label: c.enclosure, sub: c.species, lo: c.tempRange[0], hi: c.tempRange[1], min: c.min[0], max: c.min[1], now: c.temp, text: `${c.temp.toFixed(1)}°C`, out: c.temp < c.tempRange[0] || c.temp > c.tempRange[1] })) }),
+  })
+  const rh = panel({
+    title: 'Humidity', span: 'now, against the target band and the day',
+    aria: 'Enclosure humidity: ' + rows.map((c) => `${c.enclosure} ${c.rh}%`).join(', '),
+    body: strips({ unit: '%', rows: rows.map((c) => ({ label: c.enclosure, sub: c.species, lo: c.rhRange[0], hi: c.rhRange[1], min: c.rhMin[0], max: c.rhMin[1], now: c.rh, text: `${c.rh}%`, out: c.rh < c.rhRange[0] || c.rh > c.rhRange[1] })) }),
+  })
+  return [temp, rh]
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
+  root.querySelector('.life-grid').append(transfersCard(), specialistCard(), ...climateCards())
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+__x.report = { id: 'operations', title: 'Operations', icon: 'd-work', sub: 'transfers and the climate',
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+});
+
+__def('js/components/Lab.js', function (__x, __req) {
+/**
+ * LAB — the requests, their turnaround, the register
+ * ───────────────────────────────────────────────────────────────────────────
+ * Its own report since 18 Sep 2026 (owner: "keep lab and operations
+ * separate; don't club the irrelevant ones"). Four counts, then the open
+ * requests as bullets (days open against the discipline's target), every
+ * request of the month as a strip plot by discipline, the load by
+ * discipline as shares (reported against open), and the register as a
+ * ranked list with discipline chips.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { LAB_DISCIPLINES, LAB } = __req('js/data/operations.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, listCard, bullets, dots, shares } = __req('js/components/LifePanel.js')
+
+const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
+const disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k)
+const lab = () => scope.scoped(LAB)
+const isOpen = (r) => r.done == null
+const isLate = (r) => (isOpen(r) ? r.ago : r.done) > disc(r.discipline).target
+
+function tiles() {
+  const all = lab(), open = all.filter(isOpen), late = open.filter(isLate), done = all.filter((r) => !isOpen(r))
+  const avg = done.length ? done.reduce((n, r) => n + r.done, 0) / done.length : 0
+  return [
+    { key: 'open',     label: 'Requests open',    n: open.length, note: `${fmt(late.length)} past turnaround` },
+    { key: 'late',     label: 'Reports late',     n: late.length, note: late.length ? 'oldest ' + agoWord(Math.max(...late.map((r) => r.ago))) : 'all within target' },
+    { key: 'reported', label: 'Reported, 30 days', n: done.length, note: `${fmt(done.filter(isLate).length)} of them past target` },
+    { key: 'mean',     label: 'Average turnaround', n: avg ? `${avg.toFixed(1)} d` : '–', note: done.length ? 'across every report of the month' : 'nothing reported yet' },
+  ]
+}
+
+function actionables() {
+  const all = lab(), open = all.filter(isOpen)
+  return [
+    { text: 'Lab reports past their turnaround', n: open.filter(isLate).length, due: true, roles: ['vet', 'paravet'] },
+    { text: 'Results back today to read', n: all.filter((r) => !isOpen(r) && r.ago - r.done === 0).length, due: true, roles: ['vet'] },
+    { text: 'Requests open over a week', n: open.filter((r) => r.ago > 7).length, due: false, roles: ['paravet', 'admin'] },
+  ]
+}
+
 function labCard() {
   const rows = lab().filter((r) => r.done == null).sort((a, b) => (b.ago - disc(b.discipline).target) - (a.ago - disc(a.discipline).target))
   return panel({
@@ -32829,31 +32990,36 @@ function turnaroundCard() {
     body: dots({ rows, max, unit: 'd' }) })
 }
 
-function climateCards() {
-  const rows = [...climate()].sort((a, b) => outOfRange(b) - outOfRange(a) || a.enclosure.localeCompare(b.enclosure))
-  const temp = panel({
-    title: 'Temperature', span: 'now, against the target band and the day', cls: '',
-    aria: 'Enclosure temperature: ' + rows.map((c) => `${c.enclosure} ${c.temp.toFixed(1)}°C`).join(', '),
-    body: strips({ unit: '°C', rows: rows.map((c) => ({ label: c.enclosure, sub: c.species, lo: c.tempRange[0], hi: c.tempRange[1], min: c.min[0], max: c.min[1], now: c.temp, text: `${c.temp.toFixed(1)}°C`, out: c.temp < c.tempRange[0] || c.temp > c.tempRange[1] })) }),
+function disciplineCard() {
+  const all = lab()
+  const rows = LAB_DISCIPLINES.map((d) => { const mine = all.filter((r) => r.discipline === d.key)
+    return { label: d.label, n: { done: mine.filter((r) => !isOpen(r)).length, open: mine.filter(isOpen).length } } })
+  return panel({
+    title: 'By discipline', span: 'the month, reported against open', aria: 'Lab load by discipline: ' + rows.map((r) => `${r.label} ${fmt(r.n.done)} reported, ${fmt(r.n.open)} open`).join('; '),
+    body: shares({ rows, segs: [{ key: 'done', label: 'Reported' }, { key: 'open', label: 'Open' }] }),
   })
-  const rh = panel({
-    title: 'Humidity', span: 'now, against the target band and the day',
-    aria: 'Enclosure humidity: ' + rows.map((c) => `${c.enclosure} ${c.rh}%`).join(', '),
-    body: strips({ unit: '%', rows: rows.map((c) => ({ label: c.enclosure, sub: c.species, lo: c.rhRange[0], hi: c.rhRange[1], min: c.rhMin[0], max: c.rhMin[1], now: c.rh, text: `${c.rh}%`, out: c.rh < c.rhRange[0] || c.rh > c.rhRange[1] })) }),
-  })
-  return [temp, rh]
+}
+function registerCard() {
+  const list = [...lab()].sort((a, b) => a.ago - b.ago)
+  return listCard({ title: 'Register', span: 'newest first', aria: `Lab register: ${fmt(list.length)} requests`,
+    colHead: ['Request', 'Turnaround'], rows: list, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true }, { key: 'late', label: 'Past target', test: isLate }, ...LAB_DISCIPLINES.map((d) => ({ key: d.key, label: d.label, test: (r) => r.discipline === d.key }))],
+    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.test)}</span><span class="life-row__sub">${esc(disc(r.discipline).label)} · ${esc(r.species)} · ${esc(r.by)} · ${esc(agoWord(r.ago))}</span></span>` +
+      `<span class="life-row__val${isLate(r) ? ' is-late' : ''}"><b>${isOpen(r) ? r.ago : r.done}</b><span class="life-row__note">${isOpen(r) ? 'days open' : 'days, reported'}</span></span>`,
+    empty: 'No requests in the window' })
 }
 
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
-  root.querySelector('.life-grid').append(transfersCard(), specialistCard(), labCard(), turnaroundCard(), ...climateCards())
+  root.querySelector('.life-grid').append(labCard(), turnaroundCard(), disciplineCard(), registerCard())
   root.hidden = false
   return root
 }
 
 __x.mount = mount
-__x.report = { id: 'operations', title: 'Operations', icon: 'd-work', sub: 'transfers, the lab, the climate',
+__x.report = { id: 'lab', title: 'Lab', icon: 'd-insights', sub: 'requests, turnaround, the register',
   summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
@@ -33350,7 +33516,7 @@ const TILES = {
       vizNote: 'what an inspector asks for first', figures: [{ value: due.reduce((n, r) => n + r.n, 0), label: 'items to clear', tone: 'alert' }, { value: w.find((r) => r.key === 'transfer').n, label: 'transfers awaiting approval' }] } },
   'lab.default': () => { const open = scope.scoped(LAB).filter((r) => r.done == null), disc = (k) => LAB_DISCIPLINES.find((d) => d.key === k), late = open.filter((r) => r.ago > disc(r.discipline).target)
     const rows = LAB_DISCIPLINES.map((d) => { const mine = open.filter((r) => r.discipline === d.key), worst = Math.max(0, ...mine.map((r) => r.ago)); return { label: d.label, n: worst, target: d.target, text: mine.length ? `${worst} d` : '–' } })
-    return { report: 'operations', viz: mv.bullets(rows), vizNote: 'the oldest open request per discipline against its target',
+    return { report: 'lab', viz: mv.bullets(rows), vizNote: 'the oldest open request per discipline against its target',
       figures: [{ value: late.length, label: 'reports late', tone: alert(late.length) }, { value: open.length, label: 'open' }] } },
   'approvals.pending': () => { const o = scope.scoped(TASKS).filter((t) => !t.done)
     return { title: 'Tasks', report: 'tasks', viz: mv.stack([{ label: 'overdue', n: o.filter((t) => t.due < 0).length }, { label: 'today', n: o.filter((t) => t.due === 0).length }, { label: 'this week', n: o.filter((t) => t.due > 0 && t.due <= 7).length }]),
@@ -33373,6 +33539,16 @@ const TILES = {
   'assessment.default': () => { const rows = scope.scoped(ASSESSMENT).map((r) => ({ ...r, delta: change(r) })), w = rows.filter((r) => r.kg != null && r.ago <= ROUND), lost = w.filter((r) => r.delta <= DRASTIC)
     return { report: 'assessment', viz: mv.strip(w.map((r) => r.delta), -20, 15, DRASTIC), vizNote: 'each animal by weight change, the line at minus ten per cent',
       figures: [{ value: lost.length, label: 'lost drastically', tone: alert(lost.length) }, { value: rows.length - w.length, label: 'pending' }] } },
+  'preventive.default': () => { const od = scope.scoped(care.OVERDUE), worst = od.length ? Math.max(...od.map((r) => r.overdue)) : 0
+    return { report: 'preventive', viz: mv.bars(care.CARE_KINDS.map((k) => ({ label: k.label, n: od.filter((r) => r.kind === k.key).length }))), vizNote: 'animals overdue by kind of care',
+      figures: [{ value: od.length, label: 'overdue', tone: alert(od.length) }, { value: `${worst} d`, label: 'the worst' }] } },
+  'fetal.default': () => { const n = incidents('fetal', 30), week = incidents('fetal', 7)
+    return { report: 'circleOfLife', viz: mv.waffle(Math.max(n, 1), n ? 0 : 1, 6), vizNote: 'one square a stillbirth or abortion in 30 days',
+      figures: [{ value: n, label: 'in 30 days', tone: alert(n) }, { value: week, label: 'this week' }] } },
+  'followup.default': () => { const c = scope.scoped(care.DUE_AHEAD).filter((r) => r.due <= 7), e = scope.scoped(CLUTCHES).filter((x) => x.hatched == null && x.period - x.laid <= 7)
+    const open = scope.scoped(TASKS).filter((x) => !x.done), t = open.filter((x) => x.due >= 0 && x.due <= 7), late = open.filter((x) => x.due < 0).length + scope.scoped(care.OVERDUE).length
+    return { report: 'tasks', viz: mv.stack([{ label: 'care', n: c.length }, { label: 'clutches', n: e.length }, { label: 'tasks', n: t.length }]), vizNote: 'what falls due in the next seven days',
+      figures: [{ value: c.length + e.length + t.length, label: 'due, 7 days' }, { value: late, label: 'already late', tone: alert(late) }] } },
   'mortality.list': () => listing('mortality', 'deaths'),
   'natality.list': () => listing('natality', 'births'),
 }
@@ -34421,7 +34597,7 @@ if (PAGE_VERSION === '1' || isV4()) {
   /* V4's reports: the cards and Today on the home, the pages on demand */
   if (isV4()) {
     const reports = [
-      'CircleOfLife', 'AnimalCare', 'Husbandry', 'Operations', 'Collection',
+      'CircleOfLife', 'AnimalCare', 'PreventiveCare', 'Husbandry', 'Operations', 'Lab', 'Collection',
       'Necropsy', 'Assessment', 'People', 'Tasks',
     ].map((m) => __req(`js/components/${m}.js`).report)
     const page = __req('js/components/ReportPage.js').createReportPage()

@@ -15,3 +15,4 @@
 - [ ] v4-product-md — WAITING: owner to confirm PRODUCT.md draft (register: product)
 - [ ] v4-mortality-icon — redraw the Mortality glyph for V4 to match Natality's
 - [ ] push — never push unless the owner says so
+- [x] v4-focus-tiles — Preventive Care report + tile, Lab split from Operations, Fetal Death and Follow Up small tiles
