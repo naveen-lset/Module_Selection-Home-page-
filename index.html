@@ -3171,9 +3171,6 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   color: var(--ink-mute);
 }
 .life-table thead th abbr { text-decoration: none; }
-.life-table thead th.is-aves    { color: #3FA9D8; }
-.life-table thead th.is-mammal  { color: var(--c-primary); }
-.life-table thead th.is-reptile { color: var(--c-tertiary); }
 .life-table tbody th { color: var(--ink-head); }
 .life-table td { font-family: var(--font-num); font-variant-numeric: tabular-nums; color: var(--ink); }
 .life-table td.is-zero { color: var(--ink-mute); }
@@ -3612,9 +3609,8 @@ body.is-report { overflow: hidden; }
   background: var(--c-white); box-shadow: var(--shadow-card);
   font: inherit; font-size: var(--fs-label); font-weight: 500; color: var(--ink); cursor: pointer;
 }
-.fav__chip.is-aves    { --col: #3FA9D8; }
-.fav__chip.is-mammal  { --col: var(--c-primary); }
-.fav__chip.is-reptile { --col: var(--c-tertiary); }
+/* one colour for every species — the owner: no class colours (18 Sep 2026) */
+.fav__chip { --col: var(--viz-700); }
 .fav__dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--col); color: #fff; font-size: 12px; font-weight: 700; }
 .fav__chip[aria-pressed='false'] { opacity: .55; box-shadow: none; background: rgba(255, 255, 255, .6); }
 .fav__chip[aria-pressed='true'] { outline: 2px solid var(--col); outline-offset: -2px; }
@@ -3680,9 +3676,7 @@ body.is-report { overflow: hidden; }
 .life-legend i.is-pale { opacity: .3; }
 .life-columns { display: flex; align-items: flex-end; gap: 14px; height: 250px; padding: 0 4px; }
 .life-col { --col: var(--ink-mute); flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; text-align: center; }
-.life-col.is-aves    { --col: #3FA9D8; }
-.life-col.is-mammal  { --col: var(--c-primary); }
-.life-col.is-reptile { --col: var(--c-tertiary); }
+.life-col { --col: var(--viz-700); }
 .life-col__total { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1; color: var(--ink); }
 .life-col__stack { width: 100%; max-width: 64px; min-height: 4px; display: flex; flex-direction: column; border-radius: 8px 8px 3px 3px; overflow: hidden; }
 .life-col__stack i { display: flex; align-items: center; justify-content: center; min-height: 0; font-style: normal; }
