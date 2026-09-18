@@ -9,5 +9,8 @@
 - [x] v4-collection — Collection band: by-class species/animals/chipped table, rescue pipeline, watch list; Circle of Life table foots animals held with shares
 - [x] v4-funfacts-fold — Did You Know deck cards merged, V4 deck only (V1 deck untouched)
 - [x] search-best-practices — ranked matching (prefix/word/typo/accents), bold matched letters, ⌘K, real names in the hint — V4 only
+- [x] v4-reports-redesign — home shows Today + one card per report; detail on its own page; one teal palette, one drawing per data set; site scope select (commits ceeb19e, 5624b2a, next)
+- [x] v4-new-sections — Necropsy, Assessment (biologist's scatter), People (roster pictogram, zone cover), Tasks (board, mine, given) with actionables and role chips
+- [ ] v4-product-md — WAITING: owner to confirm PRODUCT.md draft (register: product)
 - [ ] v4-mortality-icon — redraw the Mortality glyph for V4 to match Natality's
 - [ ] push — never push unless the owner says so

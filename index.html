@@ -3203,6 +3203,7 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .viz-700 { background: var(--viz-700); fill: var(--viz-700); }
 .viz-500 { background: var(--viz-500); fill: var(--viz-500); }
 .viz-300 { background: var(--viz-300); fill: var(--viz-300); }
+.viz-ink { background: var(--ink); fill: var(--ink); }
 .life-legend i.viz-900, .life-legend i.viz-700, .life-legend i.viz-500, .life-legend i.viz-300 { opacity: 1; }
 .life-mini { list-style: none; margin: 14px 0 0; padding: 0; }
 .life-mini li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid rgba(31, 65, 91, .08); font-size: var(--fs-label); }
@@ -3364,6 +3365,72 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .dp__k-mean { background: var(--viz-300) !important; height: 4px !important; width: 14px !important; border-radius: 2px !important; opacity: 1 !important; }
 .life-card__sub { margin: 16px 0 8px; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
 @media (max-width: 743px) { .dp__axis, .dp__row { grid-template-columns: 90px 1fr 64px; } }
+
+/* waffle */
+.wf { display: flex; flex-direction: column; gap: 14px; }
+.wf__grid { display: grid; grid-template-columns: repeat(var(--per), 1fr); gap: 4px; }
+.wf__grid i { display: block; aspect-ratio: 1; border-radius: 4px; }
+.wf__grid i.is-due, .wf__legend i.is-due { background: var(--c-tertiary); }
+.wf__legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; }
+
+/* heat strip */
+.hs { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; }
+.hs__cell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.hs__cell b { display: grid; place-items: center; width: 100%; aspect-ratio: 1; border-radius: 4px; background: color-mix(in srgb, var(--viz-900) calc(var(--t) * 100%), var(--viz-100)); color: #fff; font-family: var(--font-num); font-size: var(--fs-micro); font-weight: 700; }
+.hs__cell[style*="--t:0."] b, .hs__cell[style*="--t:0;"] b { color: var(--ink); }
+.hs__cell[style*="--t:0.6"] b, .hs__cell[style*="--t:0.7"] b, .hs__cell[style*="--t:0.8"] b, .hs__cell[style*="--t:0.9"] b { color: #fff; }
+.hs__cell small { font-size: 9px; color: var(--ink-mute); }
+
+/* scatter */
+.sc svg { width: 100%; height: auto; display: block; }
+.sc text { font-family: var(--font-num); font-size: 9px; fill: var(--ink-mute); }
+.sc__grid { stroke: rgba(31, 65, 91, .10); }
+.sc__zero { stroke: var(--ink); stroke-width: 1; }
+.sc__band { fill: rgba(250, 97, 64, .08); }
+.sc__dot { fill: var(--viz-700); fill-opacity: .75; stroke: #fff; stroke-width: 1.5; }
+.sc__dot.is-flag { fill: var(--c-tertiary); fill-opacity: .9; }
+.sc__axes { display: flex; justify-content: space-between; margin-top: 4px; font-size: var(--fs-micro); color: var(--ink-mute); }
+.sc + .life-legend { margin-top: 8px; }
+.sc__k-dot { background: var(--viz-700) !important; border-radius: 50% !important; opacity: 1 !important; }
+.sc__k-flag { background: var(--c-tertiary) !important; border-radius: 50% !important; opacity: 1 !important; }
+.sc__k-band { background: rgba(250, 97, 64, .16) !important; opacity: 1 !important; }
+
+/* histogram */
+.hg { display: flex; align-items: flex-end; gap: 6px; height: 150px; }
+.hg__col { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+.hg__col b { font-family: var(--font-num); font-size: var(--fs-micro); font-weight: 700; color: var(--ink); }
+.hg__col i { display: block; width: 100%; max-width: 30px; min-height: 2px; border-radius: 4px 4px 2px 2px; background: var(--viz-700); }
+.hg__col.is-off i { background: var(--viz-300); }
+.hg__col small { font-family: var(--font-num); font-size: var(--fs-micro); color: var(--ink-mute); }
+
+/* pictogram */
+.pc { display: flex; flex-direction: column; gap: 6px; }
+.pc__row { display: grid; grid-template-columns: 150px 1fr 40px; align-items: center; gap: 12px; min-height: 36px; }
+.pc__label { display: flex; flex-direction: column; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.pc__label small { font-size: var(--fs-micro); font-weight: 400; color: var(--ink-mute); }
+.pc__marks { display: flex; flex-wrap: wrap; gap: 5px; }
+.pc__mark { display: block; width: 18px; height: 22px; border-radius: 9px 9px 5px 5px; background: var(--viz-700); }
+.pc__mark.is-leave { background: none; box-shadow: inset 0 0 0 2px var(--viz-500); }
+.pc__mark.is-off { background: none; box-shadow: inset 0 0 0 2px var(--viz-300); }
+.pc__mark.is-sick { background: none; box-shadow: inset 0 0 0 2px var(--c-tertiary); }
+.life-legend .pc__mark { width: 10px; height: 12px; border-radius: 5px 5px 3px 3px; opacity: 1 !important; }
+.pc__n { font-family: var(--font-num); font-weight: 700; text-align: right; }
+.pc__n.is-short { color: var(--ink-mute); }
+.pc + .life-legend { margin-top: 14px; }
+
+/* board */
+.bd { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.bd__col { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 12px; background: rgba(31, 65, 91, .04); }
+.bd__col.is-due { background: rgba(250, 97, 64, .07); }
+.bd__head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 2px 4px; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.bd__head b { font-family: var(--font-num); color: var(--ink-mute); }
+.bd__col.is-due .bd__head b { color: var(--c-tertiary); }
+.bd__card { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(31, 65, 91, .08); font-size: var(--fs-label); }
+.bd__card b { font-weight: 600; color: var(--ink); }
+.bd__card small { font-size: var(--fs-micro); color: var(--ink-mute); }
+.bd__card.is-done { opacity: .6; }
+.bd__none { padding: 8px 2px; font-size: var(--fs-micro); color: var(--ink-mute); }
+@media (max-width: 743px) { .bd { grid-template-columns: minmax(0, 1fr); } .pc__row { grid-template-columns: 100px 1fr 32px; } .hs { grid-template-columns: repeat(10, 1fr); } }
 
 /* timeline */
 .tl { display: flex; flex-direction: column; gap: 8px; }
@@ -31866,7 +31933,7 @@ function renderCounts(tiles) {
    figures as text beside or inside it, so nothing is read from colour or
    length alone, and every panel has an aria-label that says the same in a
    sentence. */
-const RAMP = ['viz-900', 'viz-700', 'viz-500', 'viz-300']
+const RAMP = ['viz-900', 'viz-700', 'viz-500', 'viz-300', 'viz-ink']
 
 /* a white panel with a title and a body */
 function panel({ title, span, aria, cls = '', body }) {
@@ -32071,6 +32138,68 @@ function cloud({ groups }) {
       g.items.map((it) => `<span class="cc__chip">${esc(it.name)}<b>${fmt(it.n)}</b></span>`).join('') + `</span></div>`).join('') + `</div>`
 }
 
+
+/* WAFFLE — one square per thing, in groups; the eye counts the squares
+   and the legend gives the figures. Groups fill in order, left to right */
+function waffle({ groups, per = 10 }) {
+  const total = groups.reduce((n, g) => n + g.n, 0)
+  const cells = groups.flatMap((g, i) => Array.from({ length: g.n }, () => `<i class="${RAMP[i % RAMP.length]}${g.due ? ' is-due' : ''}" title="${esc(g.label)}"></i>`))
+  return `<div class="wf"><div class="wf__grid" style="--per:${per}">${cells.join('')}</div>` +
+    `<ul class="pie__legend wf__legend">` + groups.map((g, i) => `<li><i class="${RAMP[i % RAMP.length]}${g.due ? ' is-due' : ''}"></i><span>${esc(g.label)}</span><b>${fmt(g.n)}</b><small>${pctOf(g.n, total)}%${g.note ? ' · ' + esc(g.note) : ''}</small></li>`).join('') + `</ul></div>`
+}
+
+/* HEAT STRIP — one cell per day, the count inside, darker as it climbs */
+function heatStrip({ days, labels }) {
+  const max = Math.max(1, ...days)
+  return `<div class="hs">` + days.map((n, i) =>
+    `<span class="hs__cell" style="--t:${(n / max).toFixed(2)}"><b>${n || ''}</b><small>${esc(labels[i])}</small></span>`).join('') + `</div>`
+}
+
+/* SCATTER — dots on two axes with a shaded band for the region that
+   matters; every dot carries its label in a title, the flagged ones coral */
+function scatter({ points, x, y, band }) {
+  const W = 320, H = 200, L = 34, B = 26, T = 10, Rr = 8
+  const X = (v) => L + ((v - x.min) / (x.max - x.min)) * (W - L - Rr)
+  const Y = (v) => T + (1 - (v - y.min) / (y.max - y.min)) * (H - T - B)
+  const xt = x.ticks.map((t) => `<text x="${X(t).toFixed(1)}" y="${H - 8}" text-anchor="middle">${t}</text>`).join('')
+  const yt = y.ticks.map((t) => `<g><line x1="${L}" x2="${W - Rr}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}" class="${t === 0 ? 'sc__zero' : 'sc__grid'}"/><text x="${L - 6}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${t}</text></g>`).join('')
+  const bandRect = band ? `<rect class="sc__band" x="${L}" y="${Y(band.hi).toFixed(1)}" width="${W - L - Rr}" height="${(Y(band.lo) - Y(band.hi)).toFixed(1)}"/>` : ''
+  const dots = points.map((pt) => `<circle class="sc__dot${pt.flag ? ' is-flag' : ''}" cx="${X(Math.min(x.max, Math.max(x.min, pt.x))).toFixed(1)}" cy="${Y(Math.min(y.max, Math.max(y.min, pt.y))).toFixed(1)}" r="${pt.r || 5}"><title>${esc(pt.label)}</title></circle>`).join('')
+  return `<div class="sc"><svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${bandRect}${yt}${xt}${dots}</svg>` +
+    `<div class="sc__axes"><span>${esc(y.label)}</span><span>${esc(x.label)}</span></div></div>`
+}
+
+/* HISTOGRAM — columns over a scale, the count on each, a marked band */
+function histogram({ bins, low, high }) {
+  const max = Math.max(1, ...bins.map((b) => b.n))
+  return `<div class="hg">` + bins.map((b) =>
+    `<span class="hg__col${b.x < low || b.x > high ? ' is-off' : ''}"><b>${b.n || ''}</b><i style="height:${Math.round((b.n / max) * 100)}%"></i><small>${esc(String(b.x))}</small></span>`).join('') + `</div>`
+}
+
+/* PICTOGRAM — one mark per person, filled when they are in, hollow when
+   not; a row per role with the figures beside it */
+function pictogram({ rows }) {
+  return `<div class="pc">` + rows.map((r) =>
+    `<div class="pc__row"><span class="pc__label">${esc(r.label)}<small>${fmt(r.present)} of ${fmt(r.total)} in</small></span>` +
+      `<span class="pc__marks">` + r.marks.map((m) => `<i class="pc__mark is-${m.state}" title="${esc(m.name)} · ${esc(m.stateLabel)}"></i>`).join('') + `</span>` +
+      `<b class="pc__n${r.present < r.total ? ' is-short' : ''}">${fmt(r.present)}</b></div>`).join('') + `</div>`
+}
+
+/* BOARD — columns of cards, a column per state, each card a line */
+function board({ columns }) {
+  return `<div class="bd">` + columns.map((c) =>
+    `<div class="bd__col${c.due ? ' is-due' : ''}"><span class="bd__head">${esc(c.label)}<b>${fmt(c.items.length)}</b></span>` +
+      (c.items.length ? c.items.map((it) => `<span class="bd__card${it.done ? ' is-done' : ''}"><b>${esc(it.title)}</b><small>${esc(it.sub)}</small></span>`).join('') : `<span class="bd__none">${esc(c.empty || 'Nothing')}</span>`) +
+    `</div>`).join('') + `</div>`
+}
+
+__x.waffle = waffle
+__x.heatStrip = heatStrip
+__x.scatter = scatter
+__x.histogram = histogram
+__x.pictogram = pictogram
+__x.board = board
+
 __x.panel = panel
 __x.RAMP = RAMP
 __x.diverging = diverging
@@ -32257,7 +32386,7 @@ function tiles() {
 function actionables() {
   const w = (k) => watch().find((r) => r.key === k).n
   return [
-    { text: 'Post-mortems pending a report', n: w('pm'), due: true, roles: ['vet', 'admin'] },
+    /* the post-mortems pending sit on the Necropsy report's list, not here twice */
     { text: 'Permits expiring within 30 days', n: w('permits'), due: true, roles: ['admin', 'curator'] },
     { text: 'Animals without an ID to chip, ring or tag', n: w('noid'), due: false, roles: ['paravet', 'keeper', 'biologist'] },
     { text: 'Animals fit for release awaiting an order', n: rehab().find((r) => r.key === 'fit').n, due: false, roles: ['curator', 'admin'] },
@@ -32587,6 +32716,338 @@ function mount({ root, onOpen } = {}) {
 }
 
 __x.mount = mount
+});
+
+__def('js/components/Necropsy.js', function (__x, __req) {
+/**
+ * NECROPSY — what the post-mortems of the month found
+ * ───────────────────────────────────────────────────────────────────────────
+ * Four counts, then the findings as a waffle (a square per examination,
+ * grouped by cause), the month as a heat strip (a cell a day), the
+ * register as a list with report-state chips, and the organ systems as a
+ * cloud.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { CLASSES } = __req('js/data/lifecycle.js')
+const { CAUSES, NECROPSY } = __req('js/data/necropsy.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, listCard, waffle, heatStrip, cloud } = __req('js/components/LifePanel.js')
+
+const rows = () => scope.scoped(NECROPSY)
+const within = (d) => rows().filter((r) => r.ago < d)
+const one = (k) => (CLASSES.find((c) => c.key === k) || { one: 'Other' }).one
+const causeLabel = (k) => CAUSES.find((c) => c.key === k).label
+const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
+
+function tiles() {
+  const pending = rows().filter((r) => !r.reported)
+  return [
+    { key: 'month',   label: 'Conducted',       n: within(30).length, note: 'last 30 days' },
+    { key: 'week',    label: 'Last 7 days',     n: within(7).length,  note: `${within(1).length} today` },
+    { key: 'ten',     label: 'Last 10 days',    n: within(10).length, note: `${within(10).filter((r) => r.cause === 'open').length} undetermined` },
+    { key: 'pending', label: 'Reports pending', n: pending.length,    note: pending.length ? pending.map((r) => r.species).join(', ') : 'all written up' },
+  ]
+}
+function actionables() {
+  const pending = rows().filter((r) => !r.reported), open = within(10).filter((r) => r.cause === 'open')
+  return [
+    { text: 'Post-mortem reports to write up', n: pending.length, due: true, roles: ['vet', 'admin'] },
+    { text: 'Undetermined causes awaiting histology', n: open.length, due: false, roles: ['vet', 'curator'] },
+    { text: 'Trauma deaths this month, enclosure review', n: within(30).filter((r) => r.cause === 'trauma').length, due: false, roles: ['curator', 'keeper', 'horti'] },
+  ]
+}
+
+function findingsCard() {
+  const all = within(30)
+  const groups = CAUSES.map((c) => ({ label: c.label, n: all.filter((r) => r.cause === c.key).length, due: c.key === 'open' })).filter((g) => g.n)
+  return panel({ title: 'Findings', span: 'cause of death, last 30 days, one square each', aria: 'Findings: ' + groups.map((g) => `${g.label} ${g.n}`).join(', '),
+    body: waffle({ groups, per: 6 }) })
+}
+function monthCard() {
+  const fmtDay = new Intl.DateTimeFormat('en', { day: 'numeric' })
+  const days = Array.from({ length: 30 }, (_, i) => rows().filter((r) => r.ago === 29 - i).length)
+  const labels = days.map((_, i) => fmtDay.format(new Date(Date.now() - (29 - i) * 86400000)))
+  const busiest = days.indexOf(Math.max(...days))
+  return panel({ title: 'By day', span: 'last 30 days, today at the right', aria: `Necropsies by day: ${within(30).length} in 30 days`,
+    body: heatStrip({ days, labels }) +
+      `<div class="ag__bins" style="margin-top:14px"><span><b>${(within(30).length / 30 * 7).toFixed(1)}</b>a week<small>the month's rate</small></span>` +
+        `<span><b>${fmt(days[busiest])}</b>on ${esc(labels[busiest])}<small>the heaviest day</small></span>` +
+        `<span><b>${fmt(within(30).filter((r) => r.cause === 'neonatal').length)}</b>neonatal<small>under 30 days old</small></span></div>` })
+}
+function registerCard() {
+  const list = [...rows()].sort((a, b) => a.ago - b.ago)
+  return listCard({ title: 'Register', span: 'newest first', aria: `Necropsy register: ${fmt(list.length)} examinations`,
+    colHead: ['Animal', 'When'], rows: list, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true }, { key: 'pending', label: 'Report pending', test: (r) => !r.reported }, ...CLASSES.map((c) => ({ key: c.key, label: c.label, test: (r) => r.klass === c.key }))],
+    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span><span class="life-row__sub">${esc(one(r.klass))} · ${esc(causeLabel(r.cause))}, ${esc(r.system.toLowerCase())} · ${esc(r.by)}</span></span>` +
+      `<span class="life-row__val${r.reported ? '' : ' is-late'}"><b>${esc(agoWord(r.ago))}</b><span class="life-row__note">${r.reported ? 'reported' : 'report pending'}</span></span>`,
+    empty: 'No post-mortems in the window' })
+}
+function systemsCard() {
+  const all = within(30)
+  const systems = [...new Set(all.map((r) => r.system))]
+  const byCause = (k) => ({ label: causeLabel(k), items: systems.map((sy) => ({ name: sy, n: all.filter((r) => r.cause === k && r.system === sy).length })).filter((it) => it.n) })
+  return panel({ title: 'Organ systems', span: 'where each cause sat', cls: 'life-card--wide', aria: 'Organ systems by cause',
+    body: cloud({ groups: CAUSES.map((c) => byCause(c.key)).filter((g) => g.items.length) }) })
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
+  root.querySelector('.life-grid').append(findingsCard(), monthCard(), registerCard(), systemsCard())
+  root.hidden = false
+  return root
+}
+__x.mount = mount
+__x.report = { id: 'necropsy', title: 'Necropsy', icon: 'd-condition', sub: 'post-mortems and what they found',
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+});
+
+__def('js/components/Assessment.js', function (__x, __req) {
+/**
+ * ASSESSMENT — weights and body scores, the biologist's view
+ * ───────────────────────────────────────────────────────────────────────────
+ * Four counts, then the animals as a scatter (body score against weight
+ * change, the drastic band shaded), the scores as a histogram, the movers
+ * as a list with gained/lost chips, and the round's pending animals.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { ROUND, DRASTIC, ASSESSMENT, change } = __req('js/data/assessment.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, listCard, scatter, histogram } = __req('js/components/LifePanel.js')
+
+const rows = () => scope.scoped(ASSESSMENT).map((r) => ({ ...r, delta: change(r) }))
+const weighed = () => rows().filter((r) => r.kg != null && r.ago <= ROUND)
+const pending = () => rows().filter((r) => r.kg == null || r.ago > ROUND)
+const agoWord = (n) => (n == null ? 'never weighed' : n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
+const sign = (d) => (d > 0 ? `+${d}%` : `${d}%`)
+
+function tiles() {
+  const w = weighed(), lost = w.filter((r) => r.delta <= DRASTIC)
+  return [
+    { key: 'done',    label: 'Weighed this round', n: w.length, note: `${fmt(w.filter((r) => r.ago === 0).length)} today · body score with each` },
+    { key: 'pending', label: 'Pending',            n: pending().length, note: `${fmt(rows().filter((r) => r.kg == null).length)} never on the scale` },
+    { key: 'gained',  label: 'Gained weight',      n: w.filter((r) => r.delta > 0).length, note: `${fmt(w.filter((r) => r.delta >= 5).length)} by 5% or more` },
+    { key: 'lost',    label: 'Lost drastically',   n: lost.length, note: `${Math.abs(DRASTIC)}% or more since the last round` },
+  ]
+}
+function actionables() {
+  const w = weighed()
+  return [
+    { text: 'Animals that lost a tenth of their weight or more', n: w.filter((r) => r.delta <= DRASTIC).length, due: true, roles: ['biologist', 'vet', 'curator'] },
+    { text: 'Animals past the 30-day weighing round', n: pending().length, due: false, roles: ['biologist', 'keeper'] },
+    { text: 'Animals with a body score of 3 or under', n: w.filter((r) => r.bcs <= 3).length, due: false, roles: ['biologist', 'vet'] },
+  ]
+}
+
+function scatterCard() {
+  const w = weighed()
+  return panel({ title: 'Condition against change', span: 'each animal: body score, and weight against the last round',
+    aria: 'Scatter of body score against weight change: ' + w.map((r) => `${r.species} score ${r.bcs}, ${sign(r.delta)}`).join('; '),
+    /* a touch of spread on x so animals on the same score do not stack */
+    body: scatter({ points: w.map((r, i) => ({ x: r.bcs + ((i % 5) - 2) * .12, y: r.delta, r: 4 + Math.min(6, Math.log10(Math.max(1, r.kg)) * 2), flag: r.delta <= DRASTIC, label: `${r.species} · ${r.code} · ${r.kg} kg, ${sign(r.delta)} · score ${r.bcs}` })),
+      x: { label: 'Body condition score, 1 to 9', min: 1, max: 9, ticks: [1, 3, 5, 7, 9] }, y: { label: 'Weight change, %', min: -20, max: 15, ticks: [-20, -10, 0, 10] }, band: { lo: -20, hi: DRASTIC } }) +
+      `<div class="life-legend"><span><i class="sc__k-dot"></i>An animal, larger when heavier</span><span><i class="sc__k-flag"></i>Lost ${Math.abs(DRASTIC)}% or more</span><span><i class="sc__k-band"></i>The drastic band</span></div>` })
+}
+function scoresCard() {
+  const w = weighed()
+  const bins = Array.from({ length: 9 }, (_, i) => ({ x: i + 1, n: w.filter((r) => r.bcs === i + 1).length }))
+  const mean = w.length ? (w.reduce((n, r) => n + r.bcs, 0) / w.length).toFixed(1) : '–'
+  return panel({ title: 'Body scores', span: 'animals at each score, 4 to 6 is the target', aria: 'Body score histogram: ' + bins.map((b) => `${b.x}: ${b.n}`).join(', '),
+    body: histogram({ bins, low: 4, high: 6 }) +
+      `<div class="ag__bins" style="margin-top:14px"><span><b>${mean}</b>average score</span><span><b>${fmt(w.filter((r) => r.bcs <= 3).length)}</b>thin<small>score 3 or under</small></span><span><b>${fmt(w.filter((r) => r.bcs >= 7).length)}</b>heavy<small>score 7 or over</small></span></div>` })
+}
+function moversCard() {
+  const w = [...weighed()].sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+  return listCard({ title: 'Movers', span: 'biggest change since the last round', aria: 'Weight movers',
+    colHead: ['Animal', 'Change'], rows: w, open: 'lost',
+    chips: [{ key: 'lost', label: 'Lost', test: (r) => r.delta < 0 }, { key: 'gained', label: 'Gained', test: (r) => r.delta > 0 }, { key: 'steady', label: 'Steady', test: (r) => r.delta === 0 }],
+    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span><span class="life-row__sub">${esc(r.code)} · ${esc(r.enclosure)} · score ${r.bcs} · ${esc(agoWord(r.ago))}</span></span>` +
+      `<span class="life-row__val${r.delta <= DRASTIC ? ' is-late' : ''}"><b>${esc(sign(r.delta))}</b><span class="life-row__note">${r.prev} to ${r.kg} kg</span></span>`,
+    empty: 'No animals here' })
+}
+function pendingCard() {
+  const list = [...pending()].sort((a, b) => (b.ago == null ? 999 : b.ago) - (a.ago == null ? 999 : a.ago))
+  return listCard({ title: 'Pending', span: `past the ${ROUND}-day round`, aria: `Pending assessments: ${fmt(list.length)}`,
+    colHead: ['Animal', 'Last weighed'], rows: list, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true }, { key: 'never', label: 'Never weighed', test: (r) => r.kg == null }],
+    row: (r, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span><span class="life-row__sub">${esc(r.code)} · ${esc(r.enclosure)}</span></span>` +
+      `<span class="life-row__val is-late"><b>${r.ago == null ? '–' : `${r.ago} d`}</b><span class="life-row__note">${esc(agoWord(r.ago))}</span></span>`,
+    empty: 'The round is complete' })
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
+  root.querySelector('.life-grid').append(scatterCard(), moversCard(), scoresCard(), pendingCard())
+  root.hidden = false
+  return root
+}
+__x.mount = mount
+__x.report = { id: 'assessment', title: 'Assessment', icon: 'd-assessment', sub: 'weights and body scores',
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+});
+
+__def('js/components/People.js', function (__x, __req) {
+/**
+ * PEOPLE — who is on the site, and who is in today
+ * ───────────────────────────────────────────────────────────────────────────
+ * Four counts, then the roster as a pictogram (a mark a person, filled
+ * when in), the zones' cover as a matrix (needed against present), and
+ * the day's absences as a list.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { ROLE_KINDS, STATES, ROSTER, COVER } = __req('js/data/people.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, listCard, pictogram, matrixTable } = __req('js/components/LifePanel.js')
+
+const roster = () => scope.scoped(ROSTER)
+const cover = () => scope.scoped(COVER)
+const stateLabel = (k) => STATES.find((s) => s.key === k).label
+const roleLabel = (k) => ROLE_KINDS.find((r) => r.key === k).label
+
+function tiles() {
+  const all = roster(), present = all.filter((p) => p.state === 'in'), short = cover().filter((z) => z.have < z.need)
+  return [
+    { key: 'onsite',  label: 'On site',       n: all.length, note: `${ROLE_KINDS.map((r) => all.filter((p) => p.role === r.key).length).filter(Boolean).length} roles` },
+    { key: 'present', label: 'Present today', n: present.length, note: `${Math.round((present.length / (all.length || 1)) * 100)}% of the roster` },
+    { key: 'away',    label: 'Away',          n: all.length - present.length, note: `${fmt(all.filter((p) => p.state === 'leave').length)} leave · ${fmt(all.filter((p) => p.state === 'sick').length)} sick · ${fmt(all.filter((p) => p.state === 'off').length)} off` },
+    { key: 'short',   label: 'Zones short',   n: short.length, note: short.length ? short.map((z) => z.zone).join(', ') : 'every zone covered' },
+  ]
+}
+function actionables() {
+  const short = cover().filter((z) => z.have < z.need)
+  return [
+    { text: 'Zones short of keepers to re-cover', n: short.length, due: true, roles: ['curator', 'admin'], note: short.map((z) => `${z.zone} ${z.have}/${z.need}`).join(', ') },
+    { text: 'Staff off sick today', n: roster().filter((p) => p.state === 'sick').length, due: false, roles: ['admin'] },
+  ]
+}
+
+function rosterCard() {
+  const all = roster()
+  const rows = ROLE_KINDS.map((r) => { const mine = all.filter((p) => p.role === r.key)
+    return { label: r.label, total: mine.length, present: mine.filter((p) => p.state === 'in').length, marks: mine.map((p) => ({ state: p.state, name: p.name, stateLabel: stateLabel(p.state) })) } }).filter((r) => r.total)
+  return panel({ title: 'Roster', span: 'a mark a person, filled when in', cls: 'life-card--wide', aria: 'Roster: ' + rows.map((r) => `${r.label} ${r.present} of ${r.total} in`).join('; '),
+    body: pictogram({ rows }) + `<div class="life-legend">${STATES.map((s) => `<span><i class="pc__mark is-${s.key}"></i>${esc(s.label)}</span>`).join('')}</div>` })
+}
+function coverCard() {
+  const zones = cover()
+  return matrixTable({ title: 'Cover', span: 'keepers a zone needs on the floor, against who is there', aria: 'Zone cover',
+    corner: 'Zone', cols: [{ key: 'need', label: 'Needed' }, { key: 'have', label: 'Present' }, { key: 'gap', label: 'Short', flag: (v) => v > 0 }],
+    rows: zones.map((z) => ({ head: z.zone, n: { need: z.need, have: z.have, gap: Math.max(0, z.need - z.have) } })),
+    foot: { head: 'All zones', n: { need: zones.reduce((n, z) => n + z.need, 0), have: zones.reduce((n, z) => n + z.have, 0), gap: zones.reduce((n, z) => n + Math.max(0, z.need - z.have), 0) } } })
+}
+function awayCard() {
+  const list = roster().filter((p) => p.state !== 'in')
+  return listCard({ title: 'Away today', span: 'by reason', aria: `Away today: ${fmt(list.length)}`,
+    colHead: ['Person', 'Reason'], rows: list, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true }, ...STATES.filter((s) => s.key !== 'in').map((s) => ({ key: s.key, label: s.label, test: (p) => p.state === s.key }))],
+    row: (p, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(p.name)}</span><span class="life-row__sub">${esc(roleLabel(p.role))}</span></span>` +
+      `<span class="life-row__val${p.state === 'sick' ? ' is-late' : ''}"><b>${esc(stateLabel(p.state))}</b></span>`,
+    empty: 'Everyone is in' })
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
+  root.querySelector('.life-grid').append(rosterCard(), coverCard(), awayCard())
+  root.hidden = false
+  return root
+}
+__x.mount = mount
+__x.report = { id: 'people', title: 'People', icon: 'd-people', sub: 'the roster, and who is in today',
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
+});
+
+__def('js/components/Tasks.js', function (__x, __req) {
+/**
+ * TASKS — what has been asked, of me and by me
+ * ───────────────────────────────────────────────────────────────────────────
+ * Four counts, then the open tasks as a board (overdue, today, this week),
+ * mine and the ones I gave as two lists, and the load by module as a
+ * cloud.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { ME, MODULES, TASKS } = __req('js/data/tasks.js')
+const scope = __req('js/state/reportScope.js')
+const { esc, fmt, renderCounts, panel, listCard, board, cloud } = __req('js/components/LifePanel.js')
+
+const tasks = () => scope.scoped(TASKS)
+const open = () => tasks().filter((t) => !t.done)
+const dueWord = (d) => (d === 0 ? 'due today' : d < 0 ? `${-d} ${d === -1 ? 'day' : 'days'} overdue` : `due in ${d} ${d === 1 ? 'day' : 'days'}`)
+
+function tiles() {
+  const o = open()
+  return [
+    { key: 'today',   label: 'Due today',      n: o.filter((t) => t.due === 0).length, note: `${fmt(o.filter((t) => t.due < 0).length)} overdue` },
+    { key: 'overdue', label: 'Overdue',        n: o.filter((t) => t.due < 0).length, note: o.some((t) => t.due < 0) ? `oldest ${-Math.min(...o.map((t) => t.due))} days` : 'nothing late' },
+    { key: 'mine',    label: 'Assigned to me', n: o.filter((t) => t.to === ME).length, note: `${fmt(o.filter((t) => t.to === ME && t.due <= 0).length)} today or late` },
+    { key: 'given',   label: 'Assigned by me', n: o.filter((t) => t.by === ME).length, note: `${fmt(o.filter((t) => t.by === ME && t.due < 0).length)} overdue` },
+  ]
+}
+function actionables() {
+  const o = open()
+  return [
+    { text: 'Tasks overdue', n: o.filter((t) => t.due < 0).length, due: true, roles: ['curator', 'vet', 'paravet', 'keeper', 'biologist', 'horti', 'admin'] },
+    { text: 'Tasks due today', n: o.filter((t) => t.due === 0).length, due: true, roles: ['curator', 'vet', 'paravet', 'keeper', 'biologist', 'horti', 'admin'] },
+    { text: 'Tasks I gave that are overdue, to chase', n: o.filter((t) => t.by === ME && t.due < 0).length, due: false, roles: ['curator'] },
+  ]
+}
+
+function boardCard() {
+  const o = [...open()].sort((a, b) => a.due - b.due)
+  const item = (t) => ({ title: t.title, sub: `${t.module} · ${t.to === ME ? 'me' : t.to} · ${dueWord(t.due)}`, done: t.done })
+  return panel({ title: 'Open tasks', span: 'by when they are due', cls: 'life-card--wide', aria: `Open tasks: ${fmt(o.length)}`,
+    body: board({ columns: [
+      { label: 'Overdue', due: true, items: o.filter((t) => t.due < 0).map(item), empty: 'Nothing overdue' },
+      { label: 'Today', items: o.filter((t) => t.due === 0).map(item), empty: 'Nothing due today' },
+      { label: 'This week', items: o.filter((t) => t.due > 0 && t.due <= 7).map(item), empty: 'Nothing this week' },
+    ] }) })
+}
+function mineCard() {
+  const list = [...tasks()].filter((t) => t.to === ME).sort((a, b) => a.done - b.done || a.due - b.due)
+  return listCard({ title: 'Assigned to me', span: 'soonest first', aria: `Assigned to me: ${fmt(list.filter((t) => !t.done).length)} open`,
+    colHead: ['Task', 'Due'], rows: list, open: 'open',
+    chips: [{ key: 'open', label: 'Open', test: (t) => !t.done }, { key: 'done', label: 'Done', test: (t) => t.done }],
+    row: (t, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(t.title)}</span><span class="life-row__sub">${esc(t.module)} · from ${esc(t.by)}</span></span>` +
+      `<span class="life-row__val${t.due < 0 && !t.done ? ' is-late' : ''}"><b>${t.done ? 'done' : t.due === 0 ? 'today' : t.due < 0 ? `${-t.due} d late` : `${t.due} d`}</b></span>`,
+    empty: 'Nothing here' })
+}
+function givenCard() {
+  const list = [...tasks()].filter((t) => t.by === ME).sort((a, b) => a.done - b.done || a.due - b.due)
+  return listCard({ title: 'Assigned by me', span: 'soonest first', aria: `Assigned by me: ${fmt(list.filter((t) => !t.done).length)} open`,
+    colHead: ['Task', 'Due'], rows: list, open: 'open',
+    chips: [{ key: 'open', label: 'Open', test: (t) => !t.done }, { key: 'done', label: 'Done', test: (t) => t.done }],
+    row: (t, i) => `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(t.title)}</span><span class="life-row__sub">${esc(t.module)} · to ${esc(t.to)}</span></span>` +
+      `<span class="life-row__val${t.due < 0 && !t.done ? ' is-late' : ''}"><b>${t.done ? 'done' : t.due === 0 ? 'today' : t.due < 0 ? `${-t.due} d late` : `${t.due} d`}</b></span>`,
+    empty: 'Nothing here' })
+}
+function loadCard() {
+  const o = open()
+  const people = [...new Set(o.map((t) => t.to))]
+  return panel({ title: 'Load', span: 'open tasks by module, and by person', aria: 'Task load by module and person',
+    body: cloud({ groups: [
+      { label: 'By module', items: MODULES.map((m) => ({ name: m, n: o.filter((t) => t.module === m).length })).filter((it) => it.n).sort((a, b) => b.n - a.n) },
+      { label: 'By person', items: people.map((p) => ({ name: p === ME ? `${p} (me)` : p, n: o.filter((t) => t.to === p).length })).sort((a, b) => b.n - a.n) },
+    ] }) })
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = renderCounts(tiles())
+  root.querySelector('.life-grid').append(boardCard(), mineCard(), loadCard(), givenCard())
+  root.hidden = false
+  return root
+}
+__x.mount = mount
+__x.report = { id: 'tasks', title: 'Tasks', icon: 'd-schedule', sub: 'due today, mine, and the ones I gave',
+  summary: () => tiles(), actionables, render: (root) => mount({ root }) }
 });
 
 __def('js/components/ReportPage.js', function (__x, __req) {
@@ -33621,6 +34082,7 @@ if (PAGE_VERSION === '1' || isV4()) {
   if (isV4()) {
     const reports = [
       'CircleOfLife', 'AnimalCare', 'Husbandry', 'Operations', 'Collection',
+      'Necropsy', 'Assessment', 'People', 'Tasks',
     ].map((m) => __req(`js/components/${m}.js`).report)
     const page = __req('js/components/ReportPage.js').createReportPage()
     __req('js/components/Reports.js').mount({ root: document.getElementById('reports'), reports, page })
@@ -35960,6 +36422,184 @@ __x.TRANSFERS = TRANSFERS;
 __x.LAB_DISCIPLINES = LAB_DISCIPLINES;
 __x.LAB = LAB;
 __x.CLIMATE = CLIMATE;
+});
+
+__def('js/data/necropsy.js', function (__x, __req) {
+/**
+ * NECROPSY — every post-mortem of the last 30 days
+ * ───────────────────────────────────────────────────────────────────────────
+ * One row per examination: when, who, the cause the pathologist gave, the
+ * organ system it sat in, and whether the written report is out. The
+ * windows (7, 10, 30 days) are arithmetic on the same rows. The causes
+ * are a short fixed list so the drawing has stable groups.
+ */
+const CAUSES = [
+  { key: 'infectious', label: 'Infectious' },
+  { key: 'trauma',     label: 'Trauma' },
+  { key: 'age',        label: 'Age-related' },
+  { key: 'nutrition',  label: 'Nutritional' },
+  { key: 'neonatal',   label: 'Neonatal' },
+  { key: 'open',       label: 'Undetermined' },
+]
+const NECROPSY = [
+  { species: 'Chital',              klass: 'mammal',  enclosure: 'Deer Paddock',   ago: 0,  cause: 'trauma',     system: 'Musculoskeletal', by: 'Dr. Arjun Rao',  reported: false },
+  { species: 'Indian peafowl',      klass: 'aves',    enclosure: 'Aviary 3',       ago: 0,  cause: 'open',       system: 'Pending histology', by: 'Dr. Meera Nair', reported: false },
+  { species: 'Blackbuck',           klass: 'mammal',  enclosure: 'Hoofstock Barn', ago: 1,  cause: 'neonatal',   system: 'Respiratory',     by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Rose-ringed parakeet',klass: 'aves',    enclosure: 'Aviary 2',       ago: 2,  cause: 'infectious', system: 'Respiratory',     by: 'Dr. Meera Nair', reported: true },
+  { species: 'Sambar',              klass: 'mammal',  enclosure: 'Deer Paddock',   ago: 3,  cause: 'age',        system: 'Renal',           by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Indian star tortoise',klass: 'reptile', enclosure: 'Reptile House',  ago: 4,  cause: 'nutrition',  system: 'Metabolic',       by: 'Dr. Meera Nair', reported: true },
+  { species: 'Nilgai',              klass: 'mammal',  enclosure: 'Deer Paddock',   ago: 5,  cause: 'trauma',     system: 'Musculoskeletal', by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Chital',              klass: 'mammal',  enclosure: 'Deer Paddock',   ago: 6,  cause: 'neonatal',   system: 'Digestive',       by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Bonnet macaque',      klass: 'mammal',  enclosure: 'Primate Island', ago: 8,  cause: 'infectious', system: 'Digestive',       by: 'Dr. Meera Nair', reported: true },
+  { species: 'Mallard',             klass: 'aves',    enclosure: 'Duck Pond',      ago: 9,  cause: 'infectious', system: 'Hepatic',         by: 'Dr. Meera Nair', reported: true },
+  { species: 'Indian rock python',  klass: 'reptile', enclosure: 'Python Room',    ago: 12, cause: 'infectious', system: 'Respiratory',     by: 'Dr. Meera Nair', reported: true },
+  { species: 'Chital',              klass: 'mammal',  enclosure: 'Deer Paddock',   ago: 14, cause: 'trauma',     system: 'Musculoskeletal', by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Blackbuck',           klass: 'mammal',  enclosure: 'Hoofstock Barn', ago: 16, cause: 'age',        system: 'Cardiac',         by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Hill myna',           klass: 'aves',    enclosure: 'Aviary 3',       ago: 18, cause: 'nutrition',  system: 'Metabolic',       by: 'Dr. Meera Nair', reported: true },
+  { species: 'Sambar',              klass: 'mammal',  enclosure: 'Deer Paddock',   ago: 21, cause: 'neonatal',   system: 'Respiratory',     by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Barn owl',            klass: 'aves',    enclosure: 'Night Aviary',   ago: 23, cause: 'trauma',     system: 'Neurological',    by: 'Dr. Meera Nair', reported: true },
+  { species: 'Chital',              klass: 'mammal',  enclosure: 'Deer Paddock',   ago: 26, cause: 'infectious', system: 'Digestive',       by: 'Dr. Arjun Rao',  reported: true },
+  { species: 'Giant forest scorpion',klass: 'other',  enclosure: 'Reptile House',  ago: 28, cause: 'open',       system: 'No gross lesion', by: 'Dr. Meera Nair', reported: true },
+]
+__x.CAUSES = CAUSES
+__x.NECROPSY = NECROPSY
+});
+
+__def('js/data/assessment.js', function (__x, __req) {
+/**
+ * ASSESSMENT — weights and body scores, the biologist's ledger
+ * ───────────────────────────────────────────────────────────────────────────
+ * One row per animal on the weighing round: the last weight, the one
+ * before it, the body-condition score out of 9, and when it was last done
+ * (`ago` in days; the round is due every 30). `null` for `kg` means the
+ * animal has never been on the scale. Change is derived, never stored.
+ */
+const ROUND = 30
+const ASSESSMENT = [
+  { species: 'Asiatic lion',       code: 'AAID 87546/24', enclosure: 'Lion House 2',   klass: 'mammal',  kg: 148.0, prev: 163.5, bcs: 4, ago: 2 },
+  { species: 'Asiatic lion',       code: 'AAID 87561/24', enclosure: 'Lion House 2',   klass: 'mammal',  kg: 171.2, prev: 168.9, bcs: 6, ago: 2 },
+  { species: 'Sloth bear',         code: 'AAID 22011/19', enclosure: 'Bear Dell',      klass: 'mammal',  kg: 112.4, prev: 104.1, bcs: 7, ago: 5 },
+  { species: 'Blackbuck',          code: 'AAID 10221/23', enclosure: 'Hoofstock Barn', klass: 'mammal',  kg: 31.8,  prev: 35.9,  bcs: 3, ago: 1 },
+  { species: 'Blackbuck',          code: 'AAID 10388/24', enclosure: 'Hoofstock Barn', klass: 'mammal',  kg: 38.2,  prev: 36.4,  bcs: 6, ago: 1 },
+  { species: 'Barasingha',         code: 'AAID 20933/24', enclosure: 'Wetland Paddock',klass: 'mammal',  kg: 158.0, prev: 160.2, bcs: 5, ago: 9 },
+  { species: 'Gaur',               code: 'AAID 33910/25', enclosure: 'Hoofstock Barn', klass: 'mammal',  kg: 412.0, prev: 398.0, bcs: 6, ago: 12 },
+  { species: 'Nilgai',             code: 'AAID 22318/24', enclosure: 'Deer Paddock',   klass: 'mammal',  kg: 176.5, prev: 171.0, bcs: 6, ago: 5 },
+  { species: 'Sambar',             code: 'AAID 18540/23', enclosure: 'Deer Paddock',   klass: 'mammal',  kg: 121.3, prev: 138.8, bcs: 3, ago: 3 },
+  { species: 'Bonnet macaque',     code: 'AAID 61207/25', enclosure: 'Primate Island', klass: 'mammal',  kg: 5.9,   prev: 5.6,   bcs: 5, ago: 4 },
+  { species: 'Bonnet macaque',     code: 'AAID 61230/25', enclosure: 'Primate Island', klass: 'mammal',  kg: 4.1,   prev: 4.7,   bcs: 3, ago: 4 },
+  { species: 'Cinereous vulture',  code: 'AAID 30871/22', enclosure: 'Aviary 1',       klass: 'aves',    kg: 7.4,   prev: 8.6,   bcs: 3, ago: 6 },
+  { species: 'Indian peafowl',     code: 'AAID 44120/25', enclosure: 'Aviary 3',       klass: 'aves',    kg: 4.6,   prev: 4.4,   bcs: 5, ago: 7 },
+  { species: 'Sarus crane',        code: 'AAID 51002/21', enclosure: 'Wetland Aviary', klass: 'aves',    kg: 6.8,   prev: 6.9,   bcs: 5, ago: 15 },
+  { species: 'Hill myna',          code: 'AAID 47733/26', enclosure: 'Aviary 3',       klass: 'aves',    kg: 0.21,  prev: 0.19,  bcs: 5, ago: 8 },
+  { species: 'Indian star tortoise', code: 'AAID 70045/20', enclosure: 'Reptile House', klass: 'reptile', kg: 1.32, prev: 1.35,  bcs: 5, ago: 10 },
+  { species: 'Indian rock python', code: 'AAID 40019/21', enclosure: 'Python Room',    klass: 'reptile', kg: 38.5,  prev: 41.2,  bcs: 4, ago: 11 },
+  { species: 'Indian leopard',     code: 'AAID 90012/26', enclosure: 'Hospital',       klass: 'mammal',  kg: 44.0,  prev: 51.6,  bcs: 3, ago: 0 },
+  { species: 'Bengal tiger',       code: 'AAID 81004/18', enclosure: 'Lion House 2',   klass: 'mammal',  kg: 198.0, prev: 195.5, bcs: 7, ago: 34 },
+  { species: 'Rhesus macaque',     code: 'AAID 61301/24', enclosure: 'Primate Island', klass: 'mammal',  kg: null,  prev: null,  bcs: null, ago: null },
+  { species: 'Sumatran orangutan', code: 'AAID 93001/17', enclosure: 'Primate Island', klass: 'mammal',  kg: 74.2,  prev: 73.8,  bcs: 6, ago: 41 },
+  { species: 'Black kite',         code: 'AAID 30977/23', enclosure: 'Aviary 1',       klass: 'aves',    kg: null,  prev: null,  bcs: null, ago: null },
+  { species: 'Painted stork',      code: 'AAID 52210/22', enclosure: 'Wetland Aviary', klass: 'aves',    kg: 3.1,   prev: 3.0,   bcs: 5, ago: 36 },
+  { species: 'Mallard',            code: 'AAID 55890/25', enclosure: 'Duck Pond',      klass: 'aves',    kg: 1.14,  prev: 1.02,  bcs: 6, ago: 3 },
+]
+/* the change as a share of the weight before, one place */
+const change = (r) => (r.kg == null || !r.prev ? null : Math.round(((r.kg - r.prev) / r.prev) * 1000) / 10)
+/* the biologist's line: a tenth of the body in a round is drastic */
+const DRASTIC = -10
+__x.ROUND = ROUND
+__x.DRASTIC = DRASTIC
+__x.ASSESSMENT = ASSESSMENT
+__x.change = change
+});
+
+__def('js/data/people.js', function (__x, __req) {
+/**
+ * PEOPLE — the site's hands, and who is in today
+ * ───────────────────────────────────────────────────────────────────────────
+ * Two seeds. The ROSTER is one row per post: role, site, name, and today's
+ * state (in, leave, off, sick). The COVER is what each zone needs on the
+ * floor against who is there, the thing a site manager checks at eight.
+ */
+const ROLE_KINDS = [
+  { key: 'manager',  label: 'Site managers' },
+  { key: 'curator',  label: 'Curators' },
+  { key: 'vet',      label: 'Veterinarians' },
+  { key: 'paravet',  label: 'Para-vets' },
+  { key: 'keeper',   label: 'Keepers' },
+  { key: 'biologist',label: 'Biologists' },
+  { key: 'horti',    label: 'Horticulture' },
+  { key: 'admin',    label: 'Admin' },
+]
+const STATES = [
+  { key: 'in',    label: 'Present' },
+  { key: 'leave', label: 'On leave' },
+  { key: 'sick',  label: 'Sick' },
+  { key: 'off',   label: 'Weekly off' },
+]
+const R = (role, site, name, state = 'in') => ({ role, site, name, state })
+const ROSTER = [
+  R('manager', 'bg-safari', 'K. Venkatesh'), R('manager', 'bg-zoo', 'P. Lakshmi'),
+  R('curator', 'bg-safari', 'S. Menon'), R('curator', 'bg-zoo', 'R. Bhat', 'leave'),
+  R('vet', 'bg-safari', 'Dr. Arjun Rao'), R('vet', 'bg-zoo', 'Dr. Meera Nair'), R('vet', 'bg-zoo', 'Dr. T. Joshi', 'off'),
+  R('paravet', 'bg-safari', 'Anita Deshmukh'), R('paravet', 'bg-safari', 'M. Kumar'), R('paravet', 'bg-zoo', 'F. Sheikh'), R('paravet', 'bg-zoo', 'L. Gowda', 'sick'),
+  ...['Ramesh Patil', 'B. Naik', 'S. Reddy', 'G. Murthy', 'H. Das', 'J. Prakash', 'A. Khan', 'V. Shetty', 'N. Rao', 'D. Pillai', 'C. Thomas', 'E. Fernandes'].map((n, i) => R('keeper', 'bg-safari', n, ['in', 'in', 'in', 'off', 'in', 'in', 'leave', 'in', 'in', 'in', 'in', 'sick'][i])),
+  ...['U. Hegde', 'I. Kamath', 'O. Sen', 'Y. Iyer', 'W. Basu', 'Z. Ali', 'Q. Menon', 'X. Roy', 'T. Nambiar', 'K. Suresh'].map((n, i) => R('keeper', 'bg-zoo', n, ['in', 'in', 'off', 'in', 'in', 'in', 'leave', 'in', 'off', 'in'][i])),
+  R('biologist', 'bg-safari', 'S. Iyer'), R('biologist', 'bg-zoo', 'M. D\'Souza'),
+  R('horti', 'bg-safari', 'P. Gowda'), R('horti', 'bg-safari', 'R. Kulkarni'), R('horti', 'bg-zoo', 'A. Bose', 'off'), R('horti', 'bg-zoo', 'N. Sharma'),
+  R('admin', 'bg-safari', 'V. Rao'), R('admin', 'bg-zoo', 'K. Pai'), R('admin', 'bg-zoo', 'J. Mathew', 'leave'),
+]
+const COVER = [
+  { zone: 'Carnivores',     site: 'bg-safari', need: 3, have: 3 },
+  { zone: 'Hoofstock',      site: 'bg-safari', need: 4, have: 3 },
+  { zone: 'Wetland',        site: 'bg-safari', need: 2, have: 2 },
+  { zone: 'Hospital',       site: 'bg-safari', need: 2, have: 2 },
+  { zone: 'Primates',       site: 'bg-zoo',    need: 2, have: 2 },
+  { zone: 'Reptile House',  site: 'bg-zoo',    need: 2, have: 1 },
+  { zone: 'Aviaries',       site: 'bg-zoo',    need: 3, have: 3 },
+  { zone: 'Quarantine',     site: 'bg-zoo',    need: 1, have: 1 },
+]
+__x.ROLE_KINDS = ROLE_KINDS
+__x.STATES = STATES
+__x.ROSTER = ROSTER
+__x.COVER = COVER
+});
+
+__def('js/data/tasks.js', function (__x, __req) {
+/**
+ * TASKS — what has been asked of whom
+ * ───────────────────────────────────────────────────────────────────────────
+ * One row per task: what, which module raised it, who it is for, who asked,
+ * when it is due (days from today, negative is overdue) and whether it is
+ * done. ME is the signed-in person — the mock has no sign-in, so the
+ * curator stands in; the real page reads the session.
+ */
+const ME = 'S. Menon'
+const MODULES = ['Medical', 'Husbandry', 'Housing', 'Pharmacy', 'Lab', 'Admin', 'Horticulture']
+const T = (title, module, to, by, due, done = false, site = 'bg-safari') => ({ title, module, to, by, due, done, site })
+const TASKS = [
+  T('Recheck lion 87546 wound, change dressing',      'Medical',      'Dr. Arjun Rao',  ME,               0),
+  T('Post-mortem report, Chital (today)',             'Medical',      'Dr. Arjun Rao',  'K. Venkatesh',   0),
+  T('Weigh the leopard in hospital',                  'Husbandry',    'S. Iyer',        ME,               0),
+  T('Repair north gate rail, Hoofstock Barn',         'Housing',      'Ramesh Patil',   ME,               -2),
+  T('Chase pharmacy indent, Amoxicillin-clavulanate', 'Pharmacy',     ME,               'Dr. Meera Nair', -1, false, 'bg-zoo'),
+  T('Permit renewal, Barasingha transfer',            'Admin',        ME,               'K. Venkatesh',   1),
+  T('Browse cut for the wetland paddock',             'Horticulture', 'P. Gowda',       ME,               0),
+  T('Serum panel result to the vet, Cinereous vulture','Lab',         'F. Sheikh',      'Dr. Meera Nair', 0, false, 'bg-zoo'),
+  T('Enrichment, scatter feed for Primate Island',    'Husbandry',    'U. Hegde',       'R. Bhat',        2, false, 'bg-zoo'),
+  T('Python Room heater check',                       'Housing',      'I. Kamath',      'P. Lakshmi',     0, false, 'bg-zoo'),
+  T('Incubator 2 humidity log',                       'Husbandry',    'O. Sen',         'M. D\'Souza',    0, true, 'bg-zoo'),
+  T('Sign off the quarterly stock count',             'Admin',        ME,               'V. Rao',         3),
+  T('Deworming round, Deer Paddock',                  'Medical',      'Anita Deshmukh', 'Dr. Arjun Rao',  -3),
+  T('Review the escape drill notes',                  'Admin',        ME,               'K. Venkatesh',   0),
+  T('Fit-for-release exam, 4 rescues',                'Medical',      'Dr. Meera Nair', ME,               1, false, 'bg-zoo'),
+  T('Feed chart update, Sloth bear',                  'Husbandry',    'B. Naik',        ME,               -1, true),
+  T('Order tetanus toxoid, 6 doses',                  'Pharmacy',     'M. Kumar',       ME,               4),
+  T('Night Aviary lamp replacement',                  'Housing',      'N. Sharma',      'P. Lakshmi',     5, false, 'bg-zoo'),
+  T('Label the new Hill myna pair',                   'Husbandry',    'S. Reddy',       ME,               0, true),
+  T('Draft the CZA inspection reply',                 'Admin',        ME,               'K. Venkatesh',   6),
+]
+__x.ME = ME
+__x.MODULES = MODULES
+__x.TASKS = TASKS
 });
 
 __def('js/state/reportScope.js', function (__x, __req) {
