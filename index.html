@@ -3155,7 +3155,7 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-row__name { font-size: var(--fs-body); font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .life-row__sub { font-size: var(--fs-micro); color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .life-row__val { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
-.life-row__val b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1; color: var(--ink); }
+.life-row__val b { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1; color: var(--ink); white-space: nowrap; }
 .life-row__note { font-size: var(--fs-micro); color: var(--ink-mute); }
 .life-row--none { justify-content: center; color: var(--ink-mute); font-size: var(--fs-label); }
 
@@ -3187,6 +3187,20 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-table--share tfoot td { font-size: var(--fs-label); }
 .life-table tfoot th, .life-table tfoot td { font-weight: 700; color: var(--ink); }
 
+/* the two week tiles at the head of Circle of Life: the module grid's own
+   2×1 cell — its row height and its gap — so a tile here is the tile it was
+   in All Modules, to the pixel */
+.life-tiles {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--grid-gap); padding-top: 8px; margin-bottom: 20px;
+}
+.life-tile { height: var(--grid-row); }
+.life-tile .card { cursor: default; }
+/* two across, for the bands with four panels: two rows of two rather than a
+   row of three and one alone */
+.life-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.life-card--wide { grid-column: 1 / -1; }
+.life-card--wide .care-trend__plot { height: 120px; }
 /* ANIMAL CARE: the four count tiles are a row of their own above the grid;
    the trend panel shares the grid's third column with the two lists */
 .care-band { margin-top: 0; }
@@ -3194,6 +3208,7 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px;
   padding-top: 8px; margin-bottom: 20px;
 }
+.life-tiles + .care-counts { padding-top: 0; }
 .care-count {
   display: flex; flex-direction: column; gap: 6px;
   padding: 18px 22px 16px; border-radius: 20px;
@@ -3242,6 +3257,7 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
   .care-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 743px) {
+  .life-tiles { grid-template-columns: minmax(0, 1fr); }
   .life-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .care-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .care-count { padding: 14px 16px 12px; border-radius: 16px; }
@@ -11123,7 +11139,7 @@ body.is-editing .qa-chat { display: none; }
         <h2 class="obs-head__title" id="careTitle">Animal Care</h2>
       </div>
       <div class="care-counts"></div>
-      <div class="life-grid"></div>
+      <div class="life-grid life-grid--2"></div>
     </section>
 
     <!-- ══ collection (V4) ══════════════════════════════════════════════
@@ -11132,12 +11148,25 @@ body.is-editing .qa-chat { display: none; }
          pipeline, and the compliance watch list a director asks about
          first. Rendered by js/components/Collection.js from
          js/data/collection.js. Empty and hidden on every version but 4. -->
+    <!-- ══ husbandry (V4) ═══════════════════════════════════════════════
+         The kitchen and the egg room: diet changes by species, and the
+         clutches laid, incubating and hatched. Rendered by
+         js/components/Husbandry.js from js/data/husbandry.js. Empty and
+         hidden on every version but 4. -->
+    <section class="life-band care-band" id="husbandry" aria-labelledby="husbandryTitle" hidden>
+      <div class="obs-head">
+        <h2 class="obs-head__title" id="husbandryTitle">Husbandry</h2>
+      </div>
+      <div class="care-counts"></div>
+      <div class="life-grid life-grid--2"></div>
+    </section>
+
     <section class="life-band care-band" id="collection" aria-labelledby="collectionTitle" hidden>
       <div class="obs-head">
         <h2 class="obs-head__title" id="collectionTitle">Collection</h2>
       </div>
       <div class="care-counts"></div>
-      <div class="life-grid"></div>
+      <div class="life-grid life-grid--2"></div>
     </section>
 
     <!-- ══ modules ═════════════════════════════════════════════════════
@@ -14436,14 +14465,15 @@ const V3_LAYOUT = [
    beside Mortality's further down. Derived rather than copied so that the
    fifteen V1 cards cannot drift from DEFAULT_LAYOUT: the one thing this list
    states is what is added and where. */
-const V4_LAYOUT = (() => {
-  const at = DEFAULT_LAYOUT.findIndex((e) => e.variantId === 'medical.default') + 1
-  return DEFAULT_LAYOUT.flatMap((e, i) => [
-    ...(i === at ? [{ variantId: 'natality.week', size: 'medium' }, { variantId: 'mortality.week', size: 'medium' }] : []),
-    e,
-    ...(e.variantId === 'mortality.default' ? [{ variantId: 'natality.default', size: 'small' }] : []),
-  ])
-})()
+/* V1's grid with the Natality door beside Mortality's. The two This Week
+   tiles sat in this grid for a day (18 Sep 2026) and were moved by the owner
+   to the head of the Circle of Life band, where the lists they summarise
+   are; `RETIRED_V4` is how a layout saved that day loses them. */
+const V4_LAYOUT = DEFAULT_LAYOUT.flatMap((e) => [
+  e,
+  ...(e.variantId === 'mortality.default' ? [{ variantId: 'natality.default', size: 'small' }] : []),
+])
+const RETIRED_V4 = new Set(['natality.week', 'mortality.week'])
 
 /**
  * Cards the user is not allowed to remove.
@@ -14538,6 +14568,9 @@ function load() {
          version bump would otherwise not have reached anybody who had ever
          dragged a card. */
       if (parsed && parsed.version === VERSION) raw = parsed.cards
+      /* a V4 layout saved while the week tiles were doors drops them here,
+         rather than by a schema bump that would reset every version's grid */
+      if (raw && isV4()) raw = raw.filter((c) => !RETIRED_V4.has(c.variantId))
     }
   } catch {
     /* private mode, a full quota, a hand-edited value — none of them are worth
@@ -31250,8 +31283,10 @@ __def('js/components/CircleOfLife.js', function (__x, __req) {
  * build, so the panels are regions and not anchors to nowhere.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
-const { CLASSES, summarise, byClass } = __req('js/data/lifecycle.js')
+const { CLASSES, summarise, byClass, incidents } = __req('js/data/lifecycle.js')
 const { BY_CLASS } = __req('js/data/collection.js')
+const { getVariant } = __req('js/data/cardVariants.js')
+const { renderCard } = __req('js/components/ModuleCard.js')
 
 const DAYS = 10
 const KINDS = [
@@ -31337,9 +31372,49 @@ function tableCard() {
   return el
 }
 
+/* THE TWO WEEK TILES, drawn by the module card renderer exactly as they were
+   drawn in All Modules — same variant, same size — and placed here at the
+   head of the band (owner, 18 Sep 2026: "natality and mortality cards to be
+   above the list"). They are the same 2×1 cell the grid gave them, so the
+   band's tile row borrows the grid's row height. */
+function weekTiles() {
+  const row = document.createElement('div')
+  row.className = 'life-tiles'
+  for (const id of ['natality.week', 'mortality.week']) {
+    const cell = document.createElement('div')
+    cell.className = 'life-tile'
+    cell.appendChild(renderCard(getVariant(id), { size: 'medium', w: 2, h: 1 }))
+    row.appendChild(cell)
+  }
+  return row
+}
+
+/* the four counts under the tiles: the other things counted beside births
+   and deaths, over 30 days, and the enclosures the site is made of — the
+   latter read off the search index, which already lists every one */
+function countTiles() {
+  const enclosures = __req('js/data/searchIndex.js').index().filter((r) => r.type === 'enclosure').length
+  const tiles = [
+    { key: 'neonatal',   label: 'Neonatal deaths', n: incidents('neonatal', 30), note: 'under 30 days old, last 30 days' },
+    { key: 'fetal',      label: 'Fetal deaths',    n: incidents('fetal', 30),    note: 'stillbirths and abortions, last 30 days' },
+    { key: 'escape',     label: 'Escapes',         n: incidents('escape', 30),   note: 'last 30 days, all recovered' },
+    { key: 'enclosures', label: 'Enclosures',      n: enclosures,                note: 'across the site' },
+  ]
+  const wrap = document.createElement('div')
+  wrap.className = 'care-counts'
+  wrap.innerHTML = tiles.map((t) =>
+    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
+      `<span class="care-count__label">${t.label}</span>` +
+      `<span class="care-count__n">${fmt(t.n)}</span>` +
+      `<span class="care-count__note">${esc(t.note)}</span>` +
+    `</section>`).join('')
+  return wrap
+}
+
 function mount({ root } = {}) {
   if (!root || !isV4()) return null
   const grid = root.querySelector('.life-grid')
+  grid.before(weekTiles(), countTiles())
   for (const k of KINDS) grid.appendChild(listCard(k))
   grid.appendChild(tableCard())
   root.hidden = false
@@ -31349,57 +31424,27 @@ function mount({ root } = {}) {
 __x.mount = mount
 });
 
-__def('js/components/AnimalCare.js', function (__x, __req) {
+__def('js/components/LifePanel.js', function (__x, __req) {
 /**
- * ANIMAL CARE — the medical side of the morning, on V4
+ * THE WHITE PANELS — the pieces the V4 report bands share
  * ───────────────────────────────────────────────────────────────────────────
- * Under Circle of Life, in the same white panels. The owner listed seven
- * things (18 Sep 2026) and left the shape to me; they fall into three:
+ * Circle of Life drew the first of these panels; Animal Care, Collection and
+ * Husbandry draw the same three shapes with different rows, so the shapes
+ * live here once. Each returns an element the band appends to its grid.
  *
- *   COUNTS — how many animals are in hospital, under medication, in
- *   maternity care, and flagged serious. Four tiles across the top, each
- *   a figure with today's change under it, because a count with no
- *   direction is a number nobody acts on.
+ *   listCard    chips over a ranked list, the figure on the right
+ *   figureList  a list with no chips: label, note, figure
+ *   classTable  kinds down the side, the four classes and All across
  *
- *   LISTS — the care that is overdue (vaccination, deworming, supplement)
- *   and the medicines the central pharmacy has not sent. Both are the
- *   Circle of Life list: chips over rows, the figure on the right. The
- *   pharmacy's chips are the three ages the owner asked for; the oldest
- *   bin opens by default, since an indent three weeks old is the one to
- *   chase and a two-day-old one is just the post.
- *
- *   A TREND — enrichment tickets raised per day for two weeks, with this
- *   week against last, drawn as bars because the week tiles are bars.
- *
- * Every figure is counted from js/data/care.js at render, so the tiles,
- * the chip counts and the rows always agree. No links: none of these
- * pages exist in this build.
+ * The styles are the `.life-*` rules in the stylesheet, beside the
+ * observations rail's.
  */
-const { isV4 } = __req('js/lib/pageVersion.js')
-const { OVERDUE, CARE_KINDS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts } = __req('js/data/care.js')
+const { CLASSES } = __req('js/data/lifecycle.js')
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 }
 const fmt = (n) => n.toLocaleString('en-IN')
-const days = (n) => `${n} day${n === 1 ? '' : 's'}`
-
-/* the four tiles: figure, what it counts, and what moved today */
-function countTiles() {
-  const c = counts()
-  const tiles = [
-    { key: 'hospital',   label: 'In hospital',       n: c.hospital.n,   note: c.hospital.today   ? `${c.hospital.today} admitted today`  : 'No admissions today' },
-    { key: 'medication', label: 'Under medication',  n: c.medication.n, note: c.medication.today ? `${c.medication.today} started today`  : 'No new courses today' },
-    { key: 'maternity',  label: 'In maternity care', n: c.maternity.n,  note: c.maternity.today  ? `${c.maternity.today} moved in today`  : 'No new mothers today' },
-    { key: 'serious',    label: 'Serious condition', n: c.serious.n,    note: c.serious.today    ? `${c.serious.today} flagged today`     : 'None flagged today' },
-  ]
-  return tiles.map((t) =>
-    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
-      `<span class="care-count__label">${t.label}</span>` +
-      `<span class="care-count__n">${fmt(t.n)}</span>` +
-      `<span class="care-count__note">${esc(t.note)}</span>` +
-    `</section>`).join('')
-}
 
 /* one chip-filtered list, the Circle of Life's shape: `chips` carry a key,
    a label and a test; `row` draws one item; `open` is the chip that starts
@@ -31434,6 +31479,101 @@ function listCard({ title, span, aria, colHead, rows, chips, row, open, empty })
   return el
 }
 
+/* a list with no chips — label, note, figure; the pipeline and the watch
+   list are both this shape */
+function figureList({ title, span, aria, colHead, rows }) {
+  const el = document.createElement('section')
+  el.className = 'life-card'
+  el.setAttribute('aria-label', aria)
+  el.innerHTML =
+    `<h3 class="life-card__title">${title} <span class="life-card__span">· ${span}</span></h3>` +
+    `<div class="life-cols life-cols--flush" aria-hidden="true"><span>${colHead[0]}</span><span>${colHead[1]}</span></div>` +
+    `<ol class="life-list">${rows.map((r) =>
+      `<li class="life-row${r.due ? ' life-row--due' : ''}">` +
+        `<span class="life-row__who"><span class="life-row__name">${esc(r.label)}</span>` +
+          `<span class="life-row__sub">${esc(r.note)}</span></span>` +
+        `<span class="life-row__val"><b>${fmt(r.n)}</b>` +
+          (r.prev != null ? `<span class="life-row__note">${fmt(r.prev)} last month</span>` : r.due ? `<span class="life-row__note">needs action</span>` : '') +
+        `</span>` +
+      `</li>`).join('')}</ol>`
+  return el
+}
+
+/* kinds down the side, classes across, All at the end; `rows` carry a `head`
+   and an `n` keyed by class plus `all`; `foot` is an optional last row */
+function classTable({ title, span, aria, corner = 'Kind', rows, foot }) {
+  const cell = (v, cls = '') => `<td class="${cls}${v === 0 ? ' is-zero' : ''}">${fmt(v)}</td>`
+  const line = (r, cls = '') => `<tr><th scope="row">${esc(r.head)}</th>` +
+    CLASSES.map((c) => cell(r.n[c.key], cls)).join('') + cell(r.n.all, cls) + `</tr>`
+  const el = document.createElement('section')
+  el.className = 'life-card life-card--table'
+  el.setAttribute('aria-label', aria)
+  el.innerHTML =
+    `<h3 class="life-card__title">${title} <span class="life-card__span">· ${span}</span></h3>` +
+    `<table class="life-table"><thead><tr><th scope="col">${esc(corner)}</th>` +
+      CLASSES.map((c) => `<th scope="col" class="is-${c.key}"><abbr title="${c.label}">${c.short}</abbr></th>`).join('') +
+      `<th scope="col">All</th></tr></thead>` +
+    `<tbody>${rows.map((r) => line(r)).join('')}</tbody>` +
+    (foot ? `<tfoot>${line(foot)}</tfoot>` : '') +
+    `</table>`
+  return el
+}
+
+__x.esc = esc
+__x.fmt = fmt
+__x.listCard = listCard
+__x.figureList = figureList
+__x.classTable = classTable
+});
+
+__def('js/components/AnimalCare.js', function (__x, __req) {
+/**
+ * ANIMAL CARE — the medical side of the morning, on V4
+ * ───────────────────────────────────────────────────────────────────────────
+ * Under Circle of Life, in the same white panels. The owner listed seven
+ * things (18 Sep 2026) and left the shape to me; they fall into three:
+ *
+ *   COUNTS — how many animals are in hospital, under medication, in
+ *   maternity care, and flagged serious. Four tiles across the top, each
+ *   a figure with today's change under it, because a count with no
+ *   direction is a number nobody acts on.
+ *
+ *   LISTS — the care that is overdue (vaccination, deworming, supplement)
+ *   and the medicines the central pharmacy has not sent. Both are the
+ *   Circle of Life list: chips over rows, the figure on the right. The
+ *   pharmacy's chips are the three ages the owner asked for; the oldest
+ *   bin opens by default, since an indent three weeks old is the one to
+ *   chase and a two-day-old one is just the post.
+ *
+ *   A TREND — enrichment tickets raised per day for two weeks, with this
+ *   week against last, drawn as bars because the week tiles are bars.
+ *
+ * Every figure is counted from js/data/care.js at render, so the tiles,
+ * the chip counts and the rows always agree. No links: none of these
+ * pages exist in this build.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { CLASSES } = __req('js/data/lifecycle.js')
+const { OVERDUE, CARE_KINDS, DUE_AHEAD, AHEAD_WINDOWS, PHARMACY, PHARMACY_BINS, ENRICHMENT, counts, casesByClass } = __req('js/data/care.js')
+const { esc, fmt, listCard, classTable } = __req('js/components/LifePanel.js')
+
+/* the four tiles: figure, what it counts, and what moved today */
+function countTiles() {
+  const c = counts()
+  const tiles = [
+    { key: 'hospital',   label: 'In hospital',       n: c.hospital.n,   note: c.hospital.today   ? `${c.hospital.today} admitted today`  : 'No admissions today' },
+    { key: 'medication', label: 'Under medication',  n: c.medication.n, note: c.medication.today ? `${c.medication.today} started today`  : 'No new courses today' },
+    { key: 'maternity',  label: 'In maternity care', n: c.maternity.n,  note: c.maternity.today  ? `${c.maternity.today} moved in today`  : 'No new mothers today' },
+    { key: 'serious',    label: 'Serious condition', n: c.serious.n,    note: c.serious.today    ? `${c.serious.today} flagged today`     : 'None flagged today' },
+  ]
+  return tiles.map((t) =>
+    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
+      `<span class="care-count__label">${t.label}</span>` +
+      `<span class="care-count__n">${fmt(t.n)}</span>` +
+      `<span class="care-count__note">${esc(t.note)}</span>` +
+    `</section>`).join('')
+}
+
 function overdueCard() {
   const rows = [...OVERDUE].sort((a, b) => b.overdue - a.overdue)
   return listCard({
@@ -31447,6 +31587,24 @@ function overdueCard() {
         `<span class="life-row__sub">${esc(CARE_KINDS.find((k) => k.key === r.kind).label)} · ${esc(r.enclosure)} · ${esc(r.code)}</span></span>` +
       `<span class="life-row__val"><b>${r.overdue}</b><span class="life-row__note">${r.overdue === 1 ? 'day' : 'days'} late</span></span>`,
     empty: 'Nothing overdue',
+  })
+}
+
+/* what the next 15, 30 and 45 days will need, by medicine — a window is a
+   chip, and a wider window includes the narrower one; soonest first */
+function dueAheadCard() {
+  const rows = [...DUE_AHEAD].sort((a, b) => a.due - b.due)
+  const kind = (k) => CARE_KINDS.find((x) => x.key === k).label
+  return listCard({
+    title: 'Care due ahead', span: 'medicine required', aria: 'Care due ahead, medicine required',
+    colHead: ['Medicine', 'Required'], rows, open: 'd15',
+    chips: AHEAD_WINDOWS.map((w) => ({ key: w.key, label: w.label, test: (r) => r.due <= w.days })),
+    row: (r, i) =>
+      `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.medicine)}</span>` +
+        `<span class="life-row__sub">${esc(kind(r.kind))} · ${fmt(r.animals)} animals · first due in ${r.due} day${r.due === 1 ? '' : 's'}</span></span>` +
+      `<span class="life-row__val"><b>${esc(r.qty)}</b><span class="life-row__note">to indent</span></span>`,
+    empty: 'Nothing due in this window',
   })
 }
 
@@ -31475,7 +31633,7 @@ function enrichmentCard() {
   const max = Math.max(1, ...d)
   const fmtDay = new Intl.DateTimeFormat('en', { weekday: 'narrow' })
   const el = document.createElement('section')
-  el.className = 'life-card life-card--trend'
+  el.className = 'life-card life-card--trend life-card--wide'
   el.setAttribute('aria-label', `Enrichment tickets: ${thisWeek} this week, ${lastWeek} last week`)
   el.innerHTML =
     `<h3 class="life-card__title">Enrichment <span class="life-card__span">· tickets, 14 days</span></h3>` +
@@ -31501,7 +31659,10 @@ function mount({ root } = {}) {
   if (!root || !isV4()) return null
   root.querySelector('.care-counts').innerHTML = countTiles()
   const grid = root.querySelector('.life-grid')
+  const cases = casesByClass()
+  grid.appendChild(classTable({ title: 'Medical cases', span: 'by class', aria: 'Medical cases by class', corner: 'State', rows: cases.rows, foot: cases.foot }))
   grid.appendChild(overdueCard())
+  grid.appendChild(dueAheadCard())
   grid.appendChild(pharmacyCard())
   grid.appendChild(enrichmentCard())
   root.hidden = false
@@ -31530,12 +31691,9 @@ __def('js/components/Collection.js', function (__x, __req) {
  * Every figure is summed from js/data/collection.js at render.
  */
 const { isV4 } = __req('js/lib/pageVersion.js')
-const { BY_CLASS, REHAB, WATCH } = __req('js/data/collection.js')
-
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
-}
-const fmt = (n) => n.toLocaleString('en-IN')
+const { CLASSES } = __req('js/data/lifecycle.js')
+const { BY_CLASS, REHAB, WATCH, PROTECTED } = __req('js/data/collection.js')
+const { esc, fmt, listCard, figureList } = __req('js/components/LifePanel.js')
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
 
 function countTiles() {
@@ -31574,24 +31732,29 @@ function classCard() {
   return el
 }
 
-/* a list with no chips — label, note, figure; the pipeline and the watch
-   list are both this shape */
-function figureList({ title, span, aria, colHead, rows }) {
-  const el = document.createElement('section')
-  el.className = 'life-card'
-  el.setAttribute('aria-label', aria)
-  el.innerHTML =
-    `<h3 class="life-card__title">${title} <span class="life-card__span">· ${span}</span></h3>` +
-    `<div class="life-cols life-cols--flush" aria-hidden="true"><span>${colHead[0]}</span><span>${colHead[1]}</span></div>` +
-    `<ol class="life-list">${rows.map((r) =>
-      `<li class="life-row${r.due ? ' life-row--due' : ''}">` +
-        `<span class="life-row__who"><span class="life-row__name">${esc(r.label)}</span>` +
-          `<span class="life-row__sub">${esc(r.note)}</span></span>` +
-        `<span class="life-row__val"><b>${fmt(r.n)}</b>` +
-          (r.prev != null ? `<span class="life-row__note">${fmt(r.prev)} last month</span>` : r.due ? `<span class="life-row__note">needs action</span>` : '') +
-        `</span>` +
-      `</li>`).join('')}</ol>`
-  return el
+/* the protected species: one list, the chips choosing the register — the
+   Act's Schedule I and II, and CITES Appendix I and II — heaviest holding
+   first, because the list is read for "how many of these do we have" */
+function protectedCard() {
+  const rows = [...PROTECTED].sort((a, b) => b.animals - a.animals || a.species.localeCompare(b.species))
+  const cls = (r) => { const c = CLASSES.find((x) => x.key === r.klass); return c ? c.one : 'Other' }
+  const standing = (r) => [r.schedule ? `Schedule ${r.schedule}` : null, r.cites ? `CITES ${r.cites}` : null].filter(Boolean).join(' · ')
+  return listCard({
+    title: 'Protected species', span: 'on site', aria: 'Protected species on site',
+    colHead: ['Species', 'Animals'], rows, open: 'sched1',
+    chips: [
+      { key: 'sched1', label: 'Schedule I',  test: (r) => r.schedule === 'I' },
+      { key: 'sched2', label: 'Schedule II', test: (r) => r.schedule === 'II' },
+      { key: 'cites1', label: 'Appendix I',  test: (r) => r.cites === 'I' },
+      { key: 'cites2', label: 'Appendix II', test: (r) => r.cites === 'II' },
+    ],
+    row: (r, i) =>
+      `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span>` +
+        `<span class="life-row__sub">${esc(cls(r))} · ${esc(standing(r))}</span></span>` +
+      `<span class="life-row__val"><b>${fmt(r.animals)}</b><span class="life-row__note">on site</span></span>`,
+    empty: 'None on site',
+  })
 }
 
 function mount({ root } = {}) {
@@ -31599,9 +31762,107 @@ function mount({ root } = {}) {
   root.querySelector('.care-counts').innerHTML = countTiles()
   const grid = root.querySelector('.life-grid')
   grid.appendChild(classCard())
+  grid.appendChild(protectedCard())
   grid.appendChild(figureList({ title: 'Rescue & rehab', span: 'the pipeline', aria: 'Rescue and rehabilitation pipeline', colHead: ['Stage', 'Animals'], rows: REHAB }))
   grid.appendChild(figureList({ title: 'Watch list', span: 'compliance', aria: 'Compliance watch list', colHead: ['Item', 'Count'],
     rows: [...WATCH].sort((a, b) => (b.due ? 1 : 0) - (a.due ? 1 : 0)) }))
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+});
+
+__def('js/components/Husbandry.js', function (__x, __req) {
+/**
+ * HUSBANDRY — the kitchen and the egg room, on V4
+ * ───────────────────────────────────────────────────────────────────────────
+ * The owner's last two asks (18 Sep 2026): the species whose diets changed,
+ * and the eggs — laid, in artificial incubation. Four counts over two
+ * panels: the diet changes as a list with the reason as chips, and the
+ * clutches as a list with the mode as chips, each clutch saying which day
+ * of its incubation it is on and when it is due, since "due Tuesday" is
+ * what the egg room actually plans around.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { DIET_CHANGES, DIET_REASONS, CLUTCHES } = __req('js/data/husbandry.js')
+const { esc, fmt, listCard } = __req('js/components/LifePanel.js')
+
+const DAY = 86400000
+const dueDate = (c) => new Date(Date.now() + (c.period - c.laid) * DAY)
+const fmtDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' })
+const agoWord = (n) => (n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`)
+
+function countTiles() {
+  const open = CLUTCHES.filter((c) => c.hatched == null)
+  const laidWeek = CLUTCHES.filter((c) => c.laid < 7).reduce((n, c) => n + c.eggs, 0)
+  const incubator = open.filter((c) => c.mode === 'artificial').reduce((n, c) => n + c.eggs, 0)
+  const dueWeek = open.filter((c) => c.period - c.laid <= 7)
+  const hatched = CLUTCHES.filter((c) => c.hatched != null && c.laid - c.period < 30)
+  const tiles = [
+    { key: 'laid',      label: 'Eggs laid',               n: fmt(laidWeek), note: 'last 7 days' },
+    { key: 'incubator', label: 'In artificial incubation', n: fmt(incubator), note: `${open.filter((c) => c.mode === 'artificial').length} clutches in the incubator` },
+    { key: 'due',       label: 'Due to hatch',            n: fmt(dueWeek.reduce((n, c) => n + c.eggs, 0)), note: dueWeek.length ? `${dueWeek.length} clutch${dueWeek.length === 1 ? '' : 'es'} within 7 days` : 'nothing within 7 days' },
+    { key: 'hatched',   label: 'Hatched',                 n: fmt(hatched.reduce((n, c) => n + c.hatched, 0)), note: `of ${fmt(hatched.reduce((n, c) => n + c.eggs, 0))} eggs, last 30 days` },
+  ]
+  return tiles.map((t) =>
+    `<section class="care-count care-count--${t.key}" aria-label="${t.label}: ${t.n}">` +
+      `<span class="care-count__label">${t.label}</span>` +
+      `<span class="care-count__n">${t.n}</span>` +
+      `<span class="care-count__note">${esc(t.note)}</span>` +
+    `</section>`).join('')
+}
+
+function dietCard() {
+  const rows = [...DIET_CHANGES].sort((a, b) => a.ago - b.ago)
+  const reason = (k) => (DIET_REASONS.find((r) => r.key === k) || {}).label || k
+  return listCard({
+    title: 'Diet changes', span: 'by species', aria: 'Diet changes by species',
+    colHead: ['Species', 'When'], rows, open: 'all',
+    chips: [{ key: 'all', label: 'All', test: () => true },
+      ...DIET_REASONS.map((r) => ({ key: r.key, label: r.label, test: (x) => x.reason === r.key }))],
+    row: (r, i) =>
+      `<span class="life-row__rank">${i + 1}</span>` +
+      `<span class="life-row__who"><span class="life-row__name">${esc(r.species)}</span>` +
+        `<span class="life-row__sub">${esc(r.change)} · ${esc(reason(r.reason))} · ${esc(r.by)}</span></span>` +
+      `<span class="life-row__val"><b>${r.ago === 0 ? 'Today' : r.ago === 1 ? '1 day' : `${r.ago} days`}</b>` +
+        `<span class="life-row__note">${r.ago === 0 ? esc(r.enclosure) : 'ago'}</span></span>`,
+    empty: 'No diet changes',
+  })
+}
+
+function eggsCard() {
+  const rows = [...CLUTCHES].sort((a, b) => (a.hatched != null) - (b.hatched != null) || (a.period - a.laid) - (b.period - b.laid))
+  return listCard({
+    title: 'Eggs', span: 'clutches', aria: 'Clutches laid, incubating and hatched',
+    colHead: ['Clutch', 'Eggs'], rows, open: 'artificial',
+    chips: [
+      { key: 'artificial', label: 'Incubator', test: (c) => c.hatched == null && c.mode === 'artificial' },
+      { key: 'natural',    label: 'Under the bird', test: (c) => c.hatched == null && c.mode === 'natural' },
+      { key: 'hatched',    label: 'Hatched', test: (c) => c.hatched != null },
+    ],
+    row: (c, i) => {
+      const done = c.hatched != null
+      const left = c.period - c.laid
+      const sub = done
+        ? `${esc(c.enclosure)} · hatched ${agoWord(c.laid - c.period)}`
+        : `${esc(c.enclosure)} · day ${c.laid} of ${c.period} · ${left <= 0 ? 'overdue' : `due ${fmtDate.format(dueDate(c))}`}`
+      return `<span class="life-row__rank">${i + 1}</span>` +
+        `<span class="life-row__who"><span class="life-row__name">${esc(c.species)}</span>` +
+          `<span class="life-row__sub">${sub}</span></span>` +
+        `<span class="life-row__val"><b>${done ? `${c.hatched}/${c.eggs}` : fmt(c.eggs)}</b>` +
+          `<span class="life-row__note">${done ? 'hatched' : left <= 0 ? 'due now' : `${left} day${left === 1 ? '' : 's'} to go`}</span></span>`
+    },
+    empty: 'No clutches',
+  })
+}
+
+function mount({ root } = {}) {
+  if (!root || !isV4()) return null
+  root.querySelector('.care-counts').innerHTML = countTiles()
+  const grid = root.querySelector('.life-grid')
+  grid.appendChild(dietCard())
+  grid.appendChild(eggsCard())
   root.hidden = false
   return root
 }
@@ -32457,6 +32718,7 @@ if (PAGE_VERSION === '1' || isV4()) {
   /* V4's births-and-deaths band under the rail; mounts to nothing on V1 */
   __req('js/components/CircleOfLife.js').mount({ root: document.getElementById('circleOfLife') })
   __req('js/components/AnimalCare.js').mount({ root: document.getElementById('animalCare') })
+  __req('js/components/Husbandry.js').mount({ root: document.getElementById('husbandry') })
   __req('js/components/Collection.js').mount({ root: document.getElementById('collection') })
 }
 
@@ -34457,18 +34719,19 @@ __def('js/data/care.js', function (__x, __req) {
    in the hospital under medication counts on both tiles, which is what a
    keeper would expect. `serious` is the vet's flag, not derived. */
 const IN_CARE = [
-  { species: 'Asiatic lion',        code: 'AAID 87546/24', hospital: true,  medication: true,  maternity: false, serious: true,  since: 3 },
-  { species: 'Blackbuck',           code: 'AAID 10221/23', hospital: true,  medication: true,  maternity: false, serious: false, since: 1 },
-  { species: 'Cinereous vulture',   code: 'AAID 30871/22', hospital: true,  medication: true,  maternity: false, serious: true,  since: 6 },
-  { species: 'Chital',              code: 'AAID 55102/25', hospital: true,  medication: false, maternity: false, serious: false, since: 0 },
-  { species: 'Indian rock python',  code: 'AAID 40019/21', hospital: true,  medication: true,  maternity: false, serious: false, since: 2 },
-  { species: 'Barasingha',          code: 'AAID 20933/24', hospital: false, medication: true,  maternity: false, serious: false, since: 9 },
-  { species: 'Bonnet macaque',      code: 'AAID 61207/25', hospital: false, medication: true,  maternity: false, serious: false, since: 4 },
-  { species: 'Sambar',              code: 'AAID 18540/23', hospital: false, medication: true,  maternity: false, serious: false, since: 12 },
-  { species: 'Nilgai',              code: 'AAID 22318/24', hospital: false, medication: false, maternity: true,  serious: false, since: 5 },
-  { species: 'Blackbuck',           code: 'AAID 10388/24', hospital: false, medication: false, maternity: true,  serious: false, since: 2 },
-  { species: 'Indian star tortoise',code: 'AAID 70045/20', hospital: false, medication: false, maternity: true,  serious: false, since: 14 },
-  { species: 'Indian peafowl',      code: 'AAID 33910/25', hospital: false, medication: true,  maternity: false, serious: true,  since: 1 },
+  { species: 'Asiatic lion',        klass: 'mammal',  code: 'AAID 87546/24', hospital: true,  medication: true,  maternity: false, serious: true,  since: 3 },
+  { species: 'Blackbuck',           klass: 'mammal',  code: 'AAID 10221/23', hospital: true,  medication: true,  maternity: false, serious: false, since: 1 },
+  { species: 'Cinereous vulture',   klass: 'aves',    code: 'AAID 30871/22', hospital: true,  medication: true,  maternity: false, serious: true,  since: 6 },
+  { species: 'Chital',              klass: 'mammal',  code: 'AAID 55102/25', hospital: true,  medication: false, maternity: false, serious: false, since: 0 },
+  { species: 'Indian rock python',  klass: 'reptile', code: 'AAID 40019/21', hospital: true,  medication: true,  maternity: false, serious: false, since: 2 },
+  { species: 'Barasingha',          klass: 'mammal',  code: 'AAID 20933/24', hospital: false, medication: true,  maternity: false, serious: false, since: 9 },
+  { species: 'Bonnet macaque',      klass: 'mammal',  code: 'AAID 61207/25', hospital: false, medication: true,  maternity: false, serious: false, since: 4 },
+  { species: 'Sambar',              klass: 'mammal',  code: 'AAID 18540/23', hospital: false, medication: true,  maternity: false, serious: false, since: 12 },
+  { species: 'Nilgai',              klass: 'mammal',  code: 'AAID 22318/24', hospital: false, medication: false, maternity: true,  serious: false, since: 5 },
+  { species: 'Blackbuck',           klass: 'mammal',  code: 'AAID 10388/24', hospital: false, medication: false, maternity: true,  serious: false, since: 2 },
+  { species: 'Indian star tortoise',klass: 'reptile', code: 'AAID 70045/20', hospital: false, medication: false, maternity: true,  serious: false, since: 14 },
+  { species: 'Indian peafowl',      klass: 'aves',    code: 'AAID 33910/25', hospital: false, medication: true,  maternity: false, serious: true,  since: 1 },
+  { species: 'Giant forest scorpion',klass: 'other',  code: 'AAID 90012/26', hospital: false, medication: true,  maternity: false, serious: false, since: 2 },
 ];
 
 /* CARE OVERDUE. One row per animal per kind of care, `overdue` in whole days
@@ -34491,6 +34754,31 @@ const CARE_KINDS = [
   { key: 'vaccination', label: 'Vaccination' },
   { key: 'deworming',   label: 'Deworming'   },
   { key: 'supplement',  label: 'Supplement'  },
+];
+
+/* CARE DUE AHEAD, by medicine: what the next 15, 30 and 45 days will need
+   ordered in, so the indent goes to the central pharmacy before the day and
+   not after it. One row per medicine per kind, `due` days from today for the
+   first animal that needs it, `animals` how many do within 45 days, `qty`
+   what that many take. */
+const DUE_AHEAD = [
+  { kind: 'vaccination', medicine: 'Rabies vaccine (inactivated)',   animals: 14, qty: '14 doses',  due: 4  },
+  { kind: 'vaccination', medicine: 'Canine distemper vaccine',        animals: 9,  qty: '9 doses',   due: 11 },
+  { kind: 'vaccination', medicine: 'FMD vaccine (trivalent)',         animals: 62, qty: '62 doses',  due: 19 },
+  { kind: 'vaccination', medicine: 'Tetanus toxoid',                  animals: 6,  qty: '6 doses',   due: 38 },
+  { kind: 'deworming',   medicine: 'Ivermectin 1% inj.',              animals: 48, qty: '24 vials',  due: 2  },
+  { kind: 'deworming',   medicine: 'Fenbendazole 22% granules',       animals: 96, qty: '4.8 kg',    due: 9  },
+  { kind: 'deworming',   medicine: 'Praziquantel tablets',            animals: 21, qty: '84 tabs',   due: 27 },
+  { kind: 'deworming',   medicine: 'Albendazole suspension',          animals: 30, qty: '3 L',       due: 41 },
+  { kind: 'supplement',  medicine: 'Calcium gluconate 10%',           animals: 43, qty: '86 amp.',   due: 1  },
+  { kind: 'supplement',  medicine: 'Vitamin A-D3-E inj.',             animals: 18, qty: '18 vials',  due: 13 },
+  { kind: 'supplement',  medicine: 'Mineral mixture (ruminant)',      animals: 210,qty: '25 kg',     due: 22 },
+  { kind: 'supplement',  medicine: 'Vitamin B-complex inj.',          animals: 12, qty: '12 vials',  due: 33 },
+];
+const AHEAD_WINDOWS = [
+  { key: 'd15', label: 'Next 15 days', days: 15 },
+  { key: 'd30', label: 'Next 30 days', days: 30 },
+  { key: 'd45', label: 'Next 45 days', days: 45 },
 ];
 
 /* THE PHARMACY'S DEBT. One row per indent the central pharmacy has not yet
@@ -34530,9 +34818,33 @@ function counts() {
   };
 }
 
+/* the cases by class: each state counted per class, and the animals in any
+   state counted once for the foot — an animal in hospital under medication
+   is one case, not two */
+function casesByClass() {
+  const zero = () => ({ aves: 0, mammal: 0, reptile: 0, other: 0, all: 0 })
+  const tally = (test) => {
+    const n = zero()
+    for (const r of IN_CARE) if (test(r)) { n[r.klass] += 1; n.all += 1 }
+    return n
+  }
+  return {
+    rows: [
+      { head: 'In hospital',      n: tally((r) => r.hospital) },
+      { head: 'Under medication', n: tally((r) => r.medication) },
+      { head: 'Maternity care',   n: tally((r) => r.maternity) },
+      { head: 'Serious',          n: tally((r) => r.serious) },
+    ],
+    foot: { head: 'Animals in care', n: tally(() => true) },
+  }
+}
+
 __x.IN_CARE = IN_CARE;
+__x.casesByClass = casesByClass;
 __x.OVERDUE = OVERDUE;
 __x.CARE_KINDS = CARE_KINDS;
+__x.DUE_AHEAD = DUE_AHEAD;
+__x.AHEAD_WINDOWS = AHEAD_WINDOWS;
 __x.PHARMACY = PHARMACY;
 __x.PHARMACY_BINS = PHARMACY_BINS;
 __x.ENRICHMENT = ENRICHMENT;
@@ -34580,9 +34892,85 @@ const WATCH = [
   { key: 'transfer', label: 'Transfers awaiting approval', note: 'CZA / CWLW',                 n: 2 },
 ];
 
+/* the protected species on site — the Act's schedule and the CITES appendix
+   on each, with the animals held, for the Schedule and Appendix I lists */
+const PROTECTED = [
+  { species: 'Asiatic lion',          klass: 'mammal',  schedule: 'I',  cites: 'I',   animals: 9  },
+  { species: 'Bengal tiger',          klass: 'mammal',  schedule: 'I',  cites: 'I',   animals: 6  },
+  { species: 'Indian leopard',        klass: 'mammal',  schedule: 'I',  cites: 'I',   animals: 7  },
+  { species: 'Sloth bear',            klass: 'mammal',  schedule: 'I',  cites: 'I',   animals: 11 },
+  { species: 'Barasingha',            klass: 'mammal',  schedule: 'I',  cites: 'I',   animals: 18 },
+  { species: 'Blackbuck',             klass: 'mammal',  schedule: 'I',  cites: 'III', animals: 64 },
+  { species: 'Gaur',                  klass: 'mammal',  schedule: 'I',  cites: 'I',   animals: 12 },
+  { species: 'Indian star tortoise',  klass: 'reptile', schedule: 'I',  cites: 'I',   animals: 43 },
+  { species: 'Indian rock python',    klass: 'reptile', schedule: 'I',  cites: 'II',  animals: 8  },
+  { species: 'Cinereous vulture',     klass: 'aves',    schedule: 'I',  cites: 'II',  animals: 4  },
+  { species: 'Indian peafowl',        klass: 'aves',    schedule: 'I',  cites: 'III', animals: 52 },
+  { species: 'Sarus crane',           klass: 'aves',    schedule: 'I',  cites: 'II',  animals: 6  },
+  { species: 'Bonnet macaque',        klass: 'mammal',  schedule: 'II', cites: 'II',  animals: 27 },
+  { species: 'Rhesus macaque',        klass: 'mammal',  schedule: 'II', cites: 'II',  animals: 31 },
+  { species: 'Nilgai',                klass: 'mammal',  schedule: 'II', cites: null,  animals: 40 },
+  { species: 'Chital',                klass: 'mammal',  schedule: 'II', cites: null,  animals: 96 },
+  { species: 'Sambar',                klass: 'mammal',  schedule: 'II', cites: null,  animals: 38 },
+  { species: 'Black kite',            klass: 'aves',    schedule: 'II', cites: 'II',  animals: 9  },
+  { species: 'Hill myna',             klass: 'aves',    schedule: 'II', cites: 'II',  animals: 14 },
+  { species: 'Sumatran orangutan',    klass: 'mammal',  schedule: null, cites: 'I',   animals: 3  },
+];
+
 __x.BY_CLASS = BY_CLASS;
 __x.REHAB = REHAB;
 __x.WATCH = WATCH;
+__x.PROTECTED = PROTECTED;
+});
+
+__def('js/data/husbandry.js', function (__x, __req) {
+/**
+ * HUSBANDRY — diet changes and the egg room, the seed behind that band
+ * ───────────────────────────────────────────────────────────────────────────
+ * Rows, not totals, as with every other seed on V4. `DIET_CHANGES` is one
+ * row per change to a species' ration, `ago` days back. `CLUTCHES` is one
+ * row per clutch: how many eggs, how many days since they were laid, the
+ * species' incubation period, whether they are under a bird or in the
+ * incubator, and how many hatched once they did — a clutch with `hatched`
+ * set is finished, and its day count says how long ago.
+ */
+const DIET_CHANGES = [
+  { species: 'Asiatic lion',         enclosure: 'Lion House 2',   change: 'Beef ration cut to 4 kg, bone day added',  reason: 'medical',      by: 'Dr. Meera Nair',   ago: 0 },
+  { species: 'Sloth bear',           enclosure: 'Bear Dell',      change: 'Honey and fruit up for the cool season',   reason: 'seasonal',     by: 'S. Iyer (nutrition)', ago: 1 },
+  { species: 'Barasingha',           enclosure: 'Wetland Paddock',change: 'Browse doubled, concentrate halved',       reason: 'condition',    by: 'S. Iyer (nutrition)', ago: 2 },
+  { species: 'Cinereous vulture',    enclosure: 'Aviary 1',       change: 'Whole carcass twice a week',               reason: 'condition',    by: 'Dr. Arjun Rao',    ago: 3 },
+  { species: 'Indian star tortoise', enclosure: 'Reptile House',  change: 'Calcium dusting on all greens',            reason: 'medical',      by: 'Dr. Arjun Rao',    ago: 4 },
+  { species: 'Bonnet macaque',       enclosure: 'Primate Island', change: 'Scatter feed, no bowls',                   reason: 'enrichment',   by: 'Ramesh Patil',     ago: 5 },
+  { species: 'Sarus crane',          enclosure: 'Wetland Aviary', change: 'Fish share raised for the pair',           reason: 'breeding',     by: 'S. Iyer (nutrition)', ago: 6 },
+  { species: 'Gaur',                 enclosure: 'Hoofstock Barn', change: 'Mineral lick replaced',                    reason: 'seasonal',     by: 'Ramesh Patil',     ago: 8 },
+  { species: 'Hill myna',            enclosure: 'Aviary 3',       change: 'Soft-bill pellet trial',                   reason: 'new arrival',  by: 'S. Iyer (nutrition)', ago: 9 },
+];
+const DIET_REASONS = [
+  { key: 'medical',     label: 'Medical'     },
+  { key: 'condition',   label: 'Condition'   },
+  { key: 'seasonal',    label: 'Seasonal'    },
+  { key: 'breeding',    label: 'Breeding'    },
+  { key: 'enrichment',  label: 'Enrichment'  },
+  { key: 'new arrival', label: 'New arrival' },
+];
+
+const CLUTCHES = [
+  { species: 'Sarus crane',          enclosure: 'Wetland Aviary', eggs: 2,  laid: 21, period: 32, mode: 'natural'    },
+  { species: 'Indian peafowl',       enclosure: 'Aviary 3',       eggs: 5,  laid: 24, period: 28, mode: 'artificial' },
+  { species: 'Indian peafowl',       enclosure: 'Aviary 3',       eggs: 4,  laid: 3,  period: 28, mode: 'natural'    },
+  { species: 'Painted stork',        enclosure: 'Wetland Aviary', eggs: 3,  laid: 12, period: 30, mode: 'natural'    },
+  { species: 'Indian star tortoise', enclosure: 'Reptile House',  eggs: 6,  laid: 40, period: 100, mode: 'artificial' },
+  { species: 'Indian rock python',   enclosure: 'Reptile House',  eggs: 18, laid: 33, period: 60, mode: 'artificial' },
+  { species: 'Barn owl',             enclosure: 'Night Aviary',   eggs: 4,  laid: 2,  period: 31, mode: 'artificial' },
+  { species: 'Hill myna',            enclosure: 'Aviary 3',       eggs: 3,  laid: 6,  period: 14, mode: 'artificial' },
+  { species: 'Mallard',              enclosure: 'Duck Pond',      eggs: 8,  laid: 30, period: 28, mode: 'natural',    hatched: 7 },
+  { species: 'Indian peafowl',       enclosure: 'Aviary 3',       eggs: 3,  laid: 36, period: 28, mode: 'artificial', hatched: 2 },
+  { species: 'Black kite',           enclosure: 'Aviary 1',       eggs: 2,  laid: 45, period: 32, mode: 'natural',    hatched: 2 },
+];
+
+__x.DIET_CHANGES = DIET_CHANGES;
+__x.DIET_REASONS = DIET_REASONS;
+__x.CLUTCHES = CLUTCHES;
 });
 
 __def('js/data/lifecycle.js', function (__x, __req) {
@@ -34665,6 +35053,25 @@ const EVENTS = [
   { kind: 'natality',  species: 'chital',     ago: 27, count: 2 },
 ];
 
+/* THE OTHER THREE THINGS A DIRECTOR COUNTS beside births and deaths: deaths
+   of neonates (under 30 days old), fetal deaths (stillbirths and abortions,
+   which are not deaths of animals on the register and so are not in EVENTS),
+   and escapes. Rows like EVENTS; `neonatal` rows are ALSO in EVENTS as
+   mortality, since a neonate that dies is a death — this list marks which. */
+const INCIDENTS = [
+  { kind: 'neonatal', species: 'chital',     ago: 6,  count: 1 },
+  { kind: 'neonatal', species: 'blackbuck',  ago: 0,  count: 1 },
+  { kind: 'neonatal', species: 'macaque',    ago: 18, count: 1 },
+  { kind: 'fetal',    species: 'nilgai',     ago: 2,  count: 1 },
+  { kind: 'fetal',    species: 'sambar',     ago: 14, count: 1 },
+  { kind: 'fetal',    species: 'barasingha', ago: 26, count: 1 },
+  { kind: 'escape',   species: 'macaque',    ago: 4,  count: 1 },
+  { kind: 'escape',   species: 'parakeet',   ago: 22, count: 2 },
+];
+function incidents(kind, days) {
+  return INCIDENTS.filter((e) => e.kind === kind && e.ago < days).reduce((n, e) => n + e.count, 0)
+}
+
 /* Today is `ago === 0`; every other window is the last N days INCLUDING today,
    which is what "last 7 days" means to the person reading it. */
 function summarise(kind, days) {
@@ -34704,6 +35111,7 @@ function byClass(kind, days) {
 
 __x.SPECIES = SPECIES;
 __x.CLASSES = CLASSES;
+__x.incidents = incidents;
 __x.summarise = summarise;
 __x.byClass = byClass;
 __x.daily = daily;
