@@ -3596,6 +3596,9 @@ body.is-report { overflow: hidden; }
 .card[data-layout='report'][data-w='1'] .l-rep__figs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); }
 .card[data-layout='report'][data-w='1'] .l-rep__fig small { white-space: normal; line-height: 1.2; }
 .l-rep__head .card__icon--fish, .l-rep__head .card__icon--fish img { width: 28px; height: 28px; margin: 0; transform: none; position: static; }
+/* a one-column tile's name stays on one line: the fish glyph gives back 4px and the name tightens, so 'Neonatal deaths' fits beside it */
+.card[data-size='small'] .l-rep__head .card__icon--fish, .card[data-size='small'] .l-rep__head .card__icon--fish img { width: 24px; height: 24px; }
+.card[data-size='small'] .l-rep__name { white-space: nowrap; letter-spacing: -0.01em; }
 
 /* the capped tile: gradient band at the top, white below, ink on it */
 .card[data-fill='cap'] { background: var(--c-white); box-shadow: var(--shadow-card); color: var(--ink); }
@@ -14440,6 +14443,11 @@ const VARIANTS = [
       supportedSizes: ['large', 'tall'], defaultSize: 'large', priority: 'secondary', data: {} },
     { id: 'natality.list', moduleId: 'natality', name: 'Ten-day listing', layout: 'door', purpose: 'UNDERSTAND',
       supportedSizes: ['large', 'tall'], defaultSize: 'large', priority: 'secondary', data: {} },
+    /* the Circle of Life's other two counts as tiles (owner, 18 Sep 2026) */
+    { id: 'mortality.neonatal', moduleId: 'mortality', name: 'Neonatal deaths', layout: 'door', purpose: 'UNDERSTAND',
+      supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary', data: {} },
+    { id: 'housing.enclosures', moduleId: 'housing', name: 'Enclosures', layout: 'door', purpose: 'UNDERSTAND',
+      supportedSizes: ['small', 'medium'], defaultSize: 'small', priority: 'secondary', data: {} },
   ] : []),
 
 ]
@@ -15038,21 +15046,36 @@ const V3_LAYOUT = [
    to the head of the Circle of Life band, where the lists they summarise
    are; `RETIRED_V4` is how a layout saved that day loses them. */
 const V4_LAYOUT = [
-  ...DEFAULT_LAYOUT.flatMap((e) => (
-    e.variantId === 'mortality.default'
-      ? [{ variantId: 'mortality.list', size: 'large' }, { variantId: 'natality.list', size: 'large' }]
-      : [e])),
+  ...DEFAULT_LAYOUT.filter((e) => e.variantId !== 'mortality.default' && e.variantId !== 'security.default'),
   { variantId: 'necropsy.default', size: 'small' },
   { variantId: 'assessment.default', size: 'small' },
   /* 18 Sep 2026: "all the major focus areas should have a small card" */
   { variantId: 'preventive.default', size: 'small' },
-  { variantId: 'fetal.default', size: 'small' },
   { variantId: 'followup.default', size: 'small' },
+  /* THE CIRCLE OF LIFE BAND, LAST (owner, 18 Sep 2026, pointing at the
+     report's head: "let us have these blocks, and below these, we can have
+     natality and mortality"): its four counts as small tiles in a row —
+     neonatal deaths, fetal deaths, escapes (the Security tile, moved down
+     here), enclosures — and the two listings directly beneath them. It sits
+     at the end and starts a fresh row, because that is the one place the
+     group holds its shape at every column count: everything before it packs
+     among itself, and nothing after it backfills into it. */
+  { variantId: 'mortality.neonatal', size: 'small', newRow: true },
+  { variantId: 'fetal.default', size: 'small' },
+  { variantId: 'security.default', size: 'small' },
+  { variantId: 'housing.enclosures', size: 'small' },
+  { variantId: 'mortality.list', size: 'large' },
+  { variantId: 'natality.list', size: 'large' },
 ]
+/* THE V4 SEED HAS A NUMBER OF ITS OWN. A saved V4 grid is kept only when it
+   was saved from this seed; an older one falls back to the seed, since the
+   Circle of Life row is an ORDER, and REQUIRED_V4 can only append. Bumping
+   VERSION would have reset V1 to V3 as well, which this does not. */
+const V4_SEED = 2
 const RETIRED_V4 = new Set(['natality.week', 'mortality.week', 'mortality.default', 'natality.default'])
 /* what a V4 layout saved before these existed is missing; load() adds them
    at the seed's size rather than resetting the person's arrangement */
-const REQUIRED_V4 = V4_LAYOUT.filter((e) => ['mortality.list', 'natality.list', 'necropsy.default', 'assessment.default', 'preventive.default', 'fetal.default', 'followup.default'].includes(e.variantId))
+const REQUIRED_V4 = V4_LAYOUT.filter((e) => ['mortality.list', 'natality.list', 'necropsy.default', 'assessment.default', 'preventive.default', 'fetal.default', 'followup.default', 'mortality.neonatal', 'housing.enclosures'].includes(e.variantId))
 
 /**
  * Cards the user is not allowed to remove.
@@ -15149,6 +15172,7 @@ function load() {
       if (parsed && parsed.version === VERSION) raw = parsed.cards
       /* a V4 layout saved while the week tiles were doors drops them here,
          rather than by a schema bump that would reset every version's grid */
+      if (raw && isV4() && parsed.seed !== V4_SEED) raw = null
       if (raw && isV4()) {
         raw = raw.filter((c) => !RETIRED_V4.has(c.variantId))
         for (const e of REQUIRED_V4) if (!raw.some((c) => c.variantId === e.variantId)) raw.push({ ...e })
@@ -15169,7 +15193,7 @@ function load() {
 
 function save(cards) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ version: VERSION, savedAt: Date.now(), cards }))
+    localStorage.setItem(KEY, JSON.stringify({ version: VERSION, seed: isV4() ? V4_SEED : undefined, savedAt: Date.now(), cards }))
     return true
   } catch {
     return false   // the layout still works this session; it just will not persist
@@ -33453,7 +33477,9 @@ __def('js/components/ModuleTiles.js', function (__x, __req) {
  * packer are untouched — the same tile in the same place, drawn fuller.
  * Administer has no report and stays a plain door.
  */
-const { CLASSES, summarise, daily, incidents } = __req('js/data/lifecycle.js')
+const { CLASSES, SPECIES, INCIDENTS, summarise, daily, incidents } = __req('js/data/lifecycle.js')
+const { SITES } = __req('js/data/sites.js')
+const { sectionsForSite } = __req('js/data/sections.js')
 const care = __req('js/data/care.js')
 const { CLUTCHES, DIET_CHANGES } = __req('js/data/husbandry.js')
 const { TRANSFERS, LAB_DISCIPLINES, LAB, CLIMATE } = __req('js/data/operations.js')
@@ -33531,7 +33557,7 @@ const TILES = {
     return { report: 'collection', viz: mv.bars([{ label: 'Schedule I', n: rows.filter((r) => r.schedule === 'I').length }, { label: 'Schedule II', n: rows.filter((r) => r.schedule === 'II').length }, { label: 'CITES App. I', n: rows.filter((r) => r.cites === 'I').length }, { label: 'CITES App. II', n: rows.filter((r) => r.cites === 'II').length }]),
       vizNote: 'protected species on site, by register', figures: [{ value: w.find((r) => r.key === 'permits').n, label: 'permits expiring', tone: 'alert' }, { value: rows.filter((r) => r.cites === 'I').reduce((n, r) => n + r.animals, 0), label: 'Appendix I animals' }] } },
   'security.default': () => { const n = incidents('escape', 30)
-    return { report: 'circleOfLife', viz: mv.waffle(Math.max(n, 1), n ? 0 : 1, 6), vizNote: 'one square an escape in 30 days',
+    return { title: 'Escapes', report: 'circleOfLife', viz: mv.waffle(Math.max(n, 1), n ? 0 : 1, 6), vizNote: 'one square an escape in 30 days',
       figures: [{ value: n, label: 'escapes, 30 days', tone: alert(n) }, { value: n, label: 'recovered' }] } },
   'necropsy.default': () => { const rows = scope.scoped(NECROPSY), month = rows.filter((r) => r.ago < 30), pending = rows.filter((r) => !r.reported)
     return { report: 'necropsy', viz: mv.waffle(month.length, pending.length, 9), vizNote: 'one square an examination, hollow when its report is pending',
@@ -33549,6 +33575,14 @@ const TILES = {
     const open = scope.scoped(TASKS).filter((x) => !x.done), t = open.filter((x) => x.due >= 0 && x.due <= 7), late = open.filter((x) => x.due < 0).length + scope.scoped(care.OVERDUE).length
     return { report: 'tasks', viz: mv.stack([{ label: 'care', n: c.length }, { label: 'clutches', n: e.length }, { label: 'tasks', n: t.length }]), vizNote: 'what falls due in the next seven days',
       figures: [{ value: c.length + e.length + t.length, label: 'due, 7 days' }, { value: late, label: 'already late', tone: alert(late) }] } },
+  'mortality.neonatal': () => { const rows = INCIDENTS.filter((e) => e.kind === 'neonatal' && e.ago < 30 && scope.inScope(e)).sort((a, b) => a.ago - b.ago)
+    const sp = (k) => SPECIES[k] || { common: k, klass: 'other' }, n = incidents('neonatal', 30)
+    return { title: 'Neonatal deaths', report: 'circleOfLife', viz: mv.list(rows.map((r) => ({ name: sp(r.species).common, sub: one(sp(r.species).klass), n: '', note: r.ago === 0 ? 'today' : r.ago === 1 ? 'yesterday' : `${r.ago} d ago` })), 2), vizNote: 'under 30 days old, the latest first',
+      figures: [{ value: n, label: 'in 30 days', tone: alert(n) }, { value: incidents('neonatal', 7), label: 'this week' }] } },
+  'housing.enclosures': () => { const site = scope.get(), sites = site === 'all' ? SITES : SITES.filter((x) => x.id === site)
+    const rows = site === 'all' ? sites.map((x) => ({ label: x.short, n: x.counts.enclosures })) : sectionsForSite(site).map((x) => ({ label: x.name, n: x.counts.enclosures })).sort((a, b) => b.n - a.n).slice(0, 3)
+    return { title: 'Enclosures', report: 'circleOfLife', viz: mv.bars(rows), vizNote: site === 'all' ? 'enclosures by site' : 'the sections with the most enclosures',
+      figures: [{ value: sites.reduce((n, x) => n + x.counts.enclosures, 0), label: site === 'all' ? 'across the sites' : 'on the site' }, { value: sites.reduce((n, x) => n + x.counts.sections, 0), label: 'sections' }] } },
   'mortality.list': () => listing('mortality', 'deaths'),
   'natality.list': () => listing('natality', 'births'),
 }
@@ -37348,6 +37382,7 @@ function byClass(kind, days) {
 }
 
 __x.SPECIES = SPECIES;
+__x.INCIDENTS = INCIDENTS;
 __x.CLASSES = CLASSES;
 __x.incidents = incidents;
 __x.summarise = summarise;
