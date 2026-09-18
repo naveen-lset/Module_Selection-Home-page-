@@ -3192,6 +3192,43 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-table--share tfoot td { font-size: var(--fs-label); }
 .life-table tfoot th, .life-table tfoot td { font-weight: 700; color: var(--ink); }
 
+/* ── MY SPECIES ── V4, the favourites rail under the search
+   A title, a row of chips that scrolls sideways with no scrollbar, and Edit
+   on the right. A chip is a white pill with the species' initial on a disc
+   in its class's colour; in edit mode the pressed ones fill. */
+.fav-band { display: none; }
+:root[data-page-version='4'] .fav-band:not([hidden]) {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0 0;
+}
+.fav__title { flex: none; margin: 0; font-size: var(--fs-label); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-head); }
+.fav__rail {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px 0;
+}
+.fav__rail::-webkit-scrollbar { display: none; }
+.fav-band.is-editing .fav__rail { flex-wrap: wrap; }
+.fav__chip {
+  --col: var(--ink-mute);
+  flex: none; display: inline-flex; align-items: center; gap: 8px;
+  height: 36px; padding: 0 14px 0 6px; border: 0; border-radius: var(--r-pill);
+  background: var(--c-white); box-shadow: var(--shadow-card);
+  font: inherit; font-size: var(--fs-label); font-weight: 500; color: var(--ink); cursor: pointer;
+}
+.fav__chip.is-aves    { --col: #3FA9D8; }
+.fav__chip.is-mammal  { --col: var(--c-primary); }
+.fav__chip.is-reptile { --col: var(--c-tertiary); }
+.fav__dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--col); color: #fff; font-size: 12px; font-weight: 700; }
+.fav__chip[aria-pressed='false'] { opacity: .55; box-shadow: none; background: rgba(255, 255, 255, .6); }
+.fav__chip[aria-pressed='true'] { outline: 2px solid var(--col); outline-offset: -2px; }
+.fav__chip:focus-visible { outline: 2px solid var(--c-action-ink); outline-offset: 2px; }
+.fav__edit { flex: none; height: 28px; padding: 0 12px; border: 0; border-radius: var(--r-pill); background: transparent; font: inherit; font-size: var(--fs-label); font-weight: 500; color: var(--c-action-ink); cursor: pointer; }
+.fav__none { font-size: var(--fs-label); color: var(--ink-mute); }
+@media (max-width: 743px) {
+  :root[data-page-version='4'] .fav-band:not([hidden]) { flex-wrap: wrap; }
+  .fav__rail { order: 3; flex-basis: 100%; }
+}
+
 /* the two week tiles at the head of Circle of Life: the module grid's own
    2×1 cell — its row height and its gap — so a tile here is the tile it was
    in All Modules, to the pixel */
@@ -3231,6 +3268,28 @@ body.is-hidden .hero-dot::after { animation-play-state: paused; }
 .life-row--due .life-row__val b { color: var(--c-tertiary); }
 /* the rate cell: a quiet bar under the percentage, its length the rate, so
    the class that lags is seen at a glance */
+/* the columns chart: four columns in a row, each a stack of two tints of the
+   class's colour, the figure written inside a segment when it has the room */
+.life-legend { display: flex; gap: 16px; margin: -4px 0 10px; font-size: var(--fs-micro); color: var(--ink-mute); }
+.life-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.life-legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--ink-mute); }
+.life-legend i.is-pale { opacity: .3; }
+.life-columns { display: flex; align-items: flex-end; gap: 14px; height: 250px; padding: 0 4px; }
+.life-col { --col: var(--ink-mute); flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; text-align: center; }
+.life-col.is-aves    { --col: #3FA9D8; }
+.life-col.is-mammal  { --col: var(--c-primary); }
+.life-col.is-reptile { --col: var(--c-tertiary); }
+.life-col__total { font-family: var(--font-num); font-size: var(--fs-metric-sm); font-weight: 700; line-height: 1; color: var(--ink); }
+.life-col__stack { width: 100%; max-width: 64px; min-height: 4px; display: flex; flex-direction: column; border-radius: 8px 8px 3px 3px; overflow: hidden; }
+.life-col__stack i { display: flex; align-items: center; justify-content: center; min-height: 0; font-style: normal; }
+.life-col__stack b { font-family: var(--font-num); font-size: var(--fs-micro); font-weight: 600; color: #fff; }
+.life-col__pale  { background: var(--col); opacity: .32; }
+.life-col__pale b { color: var(--ink); }
+.life-col__solid { background: var(--col); }
+.life-col__name { margin-top: 6px; font-size: var(--fs-label); font-weight: 600; color: var(--ink); }
+.life-col__sub, .life-col__rate { font-size: var(--fs-micro); color: var(--ink-mute); line-height: 1.3; }
+.life-col__rate { color: var(--col); font-weight: 600; }
+.life-columns__foot { margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(31, 65, 91, .10); font-size: var(--fs-label); color: var(--ink-mute); }
 .life-table--wide { table-layout: fixed; }
 .life-table--wide th:first-child, .life-table--wide td:first-child { width: 26%; }
 .life-table td.is-rate { padding-left: 12px; }
@@ -11079,6 +11138,17 @@ body.is-editing .qa-chat { display: none; }
          every other link should say so, and the only readers who cannot see it
          happen are the ones being told here — the span is visually hidden, so
          the banner is unchanged to the eye. -->
+    <!-- ══ my species (V4) ══════════════════════════════════════════════
+         A rail of the reader's own species under the search, each a way
+         straight to that species' animals; kept in this browser, edited in
+         place. Rendered by js/components/Favourites.js. Empty and hidden on
+         every version but 4. -->
+    <section class="fav-band" id="favSpecies" aria-labelledby="favTitle" hidden>
+      <h2 class="fav__title" id="favTitle">My species</h2>
+      <div class="fav__rail" role="list"></div>
+      <button type="button" class="fav__edit" aria-pressed="false">Edit</button>
+    </section>
+
     <!-- ══ announcements and facts ══════════════════════════════════════
          A deck above the banner — the front card full size, the next peeking
          out behind it to the right. The slides are rendered here by
@@ -30596,6 +30666,15 @@ function createGlobalSearch({ trigger, input, getScope, onNavigate }) {
     close: hide,
     get isOpen() { return open },
     sync() { if (open) render() },
+    /* open on a query, narrowed to a type — how a favourite species lands on
+       its animals: the same thing choosing a species row does */
+    openWith(q, typeKey) {
+      token = typeKey ? TYPES.find((t) => t.key === typeKey) || null : null
+      picked = []
+      pageInput.value = q || ''
+      show()
+      render()
+    },
   }
 }
 
@@ -31746,20 +31825,39 @@ function countTiles() {
     `</section>`).join('')
 }
 
+/* BY CLASS AS COLUMNS, not a table (owner, 18 Sep 2026: "it looks very
+   boring"). One column per class, its height the animals held, split into
+   the chipped (the class's colour, solid) and the unchipped (the same colour,
+   pale); the total on top, the species count and the chipping rate beneath.
+   The shape is the compliance dashboard's "Appendix I, by class" card. The
+   colour carries the class and the label repeats it, so nothing is colour
+   alone; the split is also written as the rate. */
 function classCard() {
+  const max = Math.max(...BY_CLASS.map((r) => r.animals))
   const tot = BY_CLASS.reduce((a, r) => ({ species: a.species + r.species, animals: a.animals + r.animals, chipped: a.chipped + r.chipped }), { species: 0, animals: 0, chipped: 0 })
-  const rate = (r) => `<td class="is-rate"><span class="life-pct"><i style="width:${pct(r.chipped, r.animals)}%"></i><b>${pct(r.chipped, r.animals)}%</b></span></td>`
-  const row = (r) => `<tr><th scope="row">${r.label}</th>` +
-    `<td>${fmt(r.species)}</td><td>${fmt(r.animals)}</td><td>${fmt(r.chipped)}</td>${rate(r)}</tr>`
   const el = document.createElement('section')
-  el.className = 'life-card life-card--table'
-  el.setAttribute('aria-label', 'Collection by class: species, animals and microchipped')
+  el.className = 'life-card life-card--columns'
+  el.setAttribute('aria-label', `Collection by class: ${fmt(tot.species)} species, ${fmt(tot.animals)} animals, ${pct(tot.chipped, tot.animals)}% microchipped`)
   el.innerHTML =
-    `<h3 class="life-card__title">By class <span class="life-card__span">· species, animals, chipped</span></h3>` +
-    `<table class="life-table life-table--wide"><thead><tr><th scope="col">Class</th><th scope="col">Species</th>` +
-      `<th scope="col">Animals</th><th scope="col">Chipped</th><th scope="col">Rate</th></tr></thead>` +
-    `<tbody>${BY_CLASS.map(row).join('')}</tbody>` +
-    `<tfoot>${row({ label: 'Total', ...tot })}</tfoot></table>`
+    `<h3 class="life-card__title">By class <span class="life-card__span">· animals, microchipped</span></h3>` +
+    `<div class="life-legend" aria-hidden="true"><span><i class="is-solid"></i>Microchipped</span><span><i class="is-pale"></i>Not chipped</span></div>` +
+    `<div class="life-columns" role="list">` +
+      BY_CLASS.map((r) => {
+        const rate = pct(r.chipped, r.animals)
+        const h = Math.round((r.animals / max) * 100)
+        return `<div class="life-col is-${r.key}" role="listitem" aria-label="${r.label}: ${fmt(r.species)} species, ${fmt(r.animals)} animals, ${rate}% microchipped">` +
+          `<span class="life-col__total">${fmt(r.animals)}</span>` +
+          `<span class="life-col__stack" style="height:${h}%">` +
+            `<i class="life-col__pale" style="flex:${r.animals - r.chipped}"><b>${r.animals - r.chipped > max * .08 ? fmt(r.animals - r.chipped) : ''}</b></i>` +
+            `<i class="life-col__solid" style="flex:${r.chipped}"><b>${r.chipped > max * .08 ? fmt(r.chipped) : ''}</b></i>` +
+          `</span>` +
+          `<span class="life-col__name">${r.label}</span>` +
+          `<span class="life-col__sub">${fmt(r.species)} species</span>` +
+          `<span class="life-col__rate">${rate}% chipped</span>` +
+        `</div>`
+      }).join('') +
+    `</div>` +
+    `<div class="life-columns__foot">${fmt(tot.species)} species · ${fmt(tot.animals)} animals · ${pct(tot.chipped, tot.animals)}% microchipped</div>`
   return el
 }
 
@@ -32075,6 +32173,92 @@ function mount({ root } = {}) {
   grid.appendChild(labTurnaround())
   grid.appendChild(climateCard())
   grid.appendChild(climateExtremes())
+  root.hidden = false
+  return root
+}
+
+__x.mount = mount
+});
+
+__def('js/components/Favourites.js', function (__x, __req) {
+/**
+ * MY SPECIES — the reader's own shortlist, on V4
+ * ───────────────────────────────────────────────────────────────────────────
+ * A row of species chips under the search (owner, 18 Sep 2026: "a small
+ * block on top somewhere for a person's favourite species, so he can go
+ * directly to those species"). A chip opens the search on that species'
+ * animals — the nearest thing this build has to a species card. Edit turns
+ * the rail into the whole species list as toggles; Done turns it back.
+ *
+ * KEPT IN THIS BROWSER. There is no account service to hold a favourite,
+ * so the list lives in localStorage under its own key, seeded with four
+ * the first time and never read back by anything else. Storage may be
+ * blocked, so every touch is guarded and the seed is what a blocked
+ * browser sees every time.
+ */
+const { isV4 } = __req('js/lib/pageVersion.js')
+const { SPECIES, CLASSES } = __req('js/data/lifecycle.js')
+const { PROTECTED } = __req('js/data/collection.js')
+const { esc } = __req('js/components/LifePanel.js')
+
+const KEY = 'antz.home.favourites'
+const SEED = ['Asiatic lion', 'Blackbuck', 'Indian star tortoise', 'Sarus crane']
+
+/* every species this build names, with its class, once */
+function catalogue() {
+  const seen = new Map()
+  for (const r of Object.values(SPECIES)) seen.set(r.common, r.klass)
+  for (const r of PROTECTED) if (!seen.has(r.species)) seen.set(r.species, r.klass)
+  return [...seen].map(([name, klass]) => ({ name, klass })).sort((a, b) => a.name.localeCompare(b.name))
+}
+function read() {
+  try {
+    const list = JSON.parse(localStorage.getItem(KEY) || 'null')
+    return Array.isArray(list) ? list.filter((s) => typeof s === 'string') : [...SEED]
+  } catch (_) { return [...SEED] }
+}
+function write(list) { try { localStorage.setItem(KEY, JSON.stringify(list)) } catch (_) {} }
+
+const chip = (sp, { pressed = null } = {}) =>
+  `<button type="button" class="fav__chip is-${sp.klass}" data-name="${esc(sp.name)}"` +
+    (pressed == null ? ` role="listitem"` : ` aria-pressed="${pressed}"`) + `>` +
+    `<span class="fav__dot" aria-hidden="true">${esc(sp.name.charAt(0))}</span>${esc(sp.name)}` +
+  `</button>`
+
+function mount({ root, onOpen } = {}) {
+  if (!root || !isV4()) return null
+  const rail = root.querySelector('.fav__rail')
+  const edit = root.querySelector('.fav__edit')
+  const all = catalogue()
+  let list = read()
+  let editing = false
+
+  const draw = () => {
+    const known = (name) => all.find((s) => s.name === name) || { name, klass: 'other' }
+    if (editing) {
+      rail.setAttribute('role', 'group'); rail.setAttribute('aria-label', 'Choose your species')
+      rail.innerHTML = all.map((sp) => chip(sp, { pressed: list.includes(sp.name) })).join('')
+    } else {
+      rail.setAttribute('role', 'list'); rail.removeAttribute('aria-label')
+      rail.innerHTML = list.length ? list.map((n) => chip(known(n))).join('')
+        : `<span class="fav__none">No species yet — Edit to choose some</span>`
+    }
+    edit.textContent = editing ? 'Done' : 'Edit'
+    edit.setAttribute('aria-pressed', String(editing))
+    root.classList.toggle('is-editing', editing)
+  }
+
+  rail.addEventListener('click', (e) => {
+    const btn = e.target.closest('.fav__chip')
+    if (!btn) return
+    const name = btn.dataset.name
+    if (editing) {
+      list = list.includes(name) ? list.filter((n) => n !== name) : [...list, name]
+      write(list); draw()
+    } else if (onOpen) onOpen(name)
+  })
+  edit.addEventListener('click', () => { editing = !editing; draw() })
+  draw()
   root.hidden = false
   return root
 }
@@ -32926,6 +33110,12 @@ if (PAGE_VERSION === '1' || isV4()) {
   /* the rail between the announcements and the modules, node 196:7243 */
   const { createRecentObservations } = __req('js/components/RecentObservations.js')
   createRecentObservations({ root: document.getElementById('recentObs') })
+
+  /* the reader's own species, under the search, straight to their animals */
+  __req('js/components/Favourites.js').mount({
+    root: document.getElementById('favSpecies'),
+    onOpen: (name) => globalSearch.openWith(name, 'animal'),
+  })
 
   /* V4's births-and-deaths band under the rail; mounts to nothing on V1 */
   __req('js/components/CircleOfLife.js').mount({ root: document.getElementById('circleOfLife') })
